@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/icon">
+        <file>image/search_24px.png</file>
+        <file>image/search_24px.ico</file>
+        <file>image/baidu.svg</file>
+        <file>image/Baidu_96px.png</file>
+        <file>image/zxg.ico</file>
+    </qresource>
+</RCC>
