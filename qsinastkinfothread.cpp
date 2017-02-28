@@ -83,17 +83,23 @@ void QSinaStkInfoThread::setStkList(const QStringList &list)
                 }
             }
             QStringList content = filemgr->value("Dates", dateStre).toStringList();
-            if(content.length())
+            if(content.length() >2)
             {
                 data.totalshare = 0;
-                data.ltshare = 0;
+                data.mutableshare = 0;
                 data.last_money = content[0].toDouble();
+                data.totalCap = content[1].toDouble();
+                data.mutalbleCap = content[2].toDouble();
+                if(data.code.contains("002352"))
+                qDebug()<<"content:"<<content<<" total:"<<data.totalCap<<" mutal:"<<data.mutalbleCap;
 
             } else
             {
                 data.totalshare = 0;
-                data.ltshare = 0;
+                data.mutableshare = 0;
                 data.last_money = 0;
+                data.totalCap = 0;
+                data.mutalbleCap = 0;
             }
         }
         data.last_three_pers = filemgr->value("Chg", "L3").toDouble();
@@ -219,7 +225,7 @@ void QSinaStkInfoThread::RealtimeInfo()
             mDataMap[code].sell = detailList[8].toDouble();
             mDataMap[code].vol = detailList[9].toInt();
             mDataMap[code].time = detailList[detailList.length()-2];
-            qint64 total = mDataMap[code].ltshare;
+            qint64 total = mDataMap[code].mutableshare;
             if(mDataMap[code].cur != 0)
             {
                 mDataMap[code].gxl = mDataMap[code].xjfh / mDataMap[code].cur;

@@ -4,7 +4,7 @@ StockData::StockData()
 {
     qRegisterMetaType<StockDataList>("const StockDataList&");
     totalshare = 0;
-    ltshare = 0;
+    mutableshare = 0;
 }
 
 StockData::~StockData()
@@ -110,4 +110,24 @@ bool StockData::sortByGqdjrDesc(const StockData& d1, const StockData& d2)
 bool StockData::sortByGqdjrAsc(const StockData& d1, const StockData& d2)
 {
     return d1.gqdjr < d2.gqdjr;
+}
+
+bool StockData::sortByTcapDesc(const StockData& d1, const StockData& d2)
+{
+    return d1.totalCap > d2.totalCap;
+}
+
+bool StockData::sortByTcapAsc(const StockData& d1, const StockData& d2)
+{
+    return d1.totalCap < d2.totalCap;
+}
+
+bool StockData::sortByMcapDesc(const StockData& d1, const StockData& d2)
+{
+    return d1.mutalbleCap > d2.mutalbleCap;
+}
+
+bool StockData::sortByMcapAsc(const StockData& d1, const StockData& d2)
+{
+    return d1.mutalbleCap < d2.mutalbleCap;
 }

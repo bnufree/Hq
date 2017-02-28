@@ -244,6 +244,26 @@ void QSinaStkResultMergeThread::run()
                         qSort(wklist.begin(), wklist.end(), StockData::sortByGqdjrAsc);
                     }
                 }
+                else if(mSortType == STK_DISPLAY_SORT_TYPE_TCAP)
+                               {
+                                   if(mSortRule == -1)
+                                   {
+                                       qSort(wklist.begin(), wklist.end(), StockData::sortByTcapDesc);
+                                   } else
+                                   {
+                                       qSort(wklist.begin(), wklist.end(), StockData::sortByTcapAsc);
+                                   }
+                               }
+                else if(mSortType == STK_DISPLAY_SORT_TYPE_MCAP)
+                               {
+                                   if(mSortRule == -1)
+                                   {
+                                       qSort(wklist.begin(), wklist.end(), StockData::sortByMcapDesc);
+                                   } else
+                                   {
+                                       qSort(wklist.begin(), wklist.end(), StockData::sortByMcapAsc);
+                                   }
+                               }
                 if(mActive)emit sendStkDataList(wklist.mid(0, mPageSize));
             }
 

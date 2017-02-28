@@ -34,6 +34,10 @@ public:
     static bool sortBySzzblAsc(const StockData& d1, const StockData& d2);
     static bool sortByGqdjrDesc(const StockData& d1, const StockData& d2);
     static bool sortByGqdjrAsc(const StockData& d1, const StockData& d2);
+    static bool sortByTcapDesc(const StockData& d1, const StockData& d2);
+    static bool sortByTcapAsc(const StockData& d1, const StockData& d2);
+    static bool sortByMcapDesc(const StockData& d1, const StockData& d2);
+    static bool sortByMcapAsc(const StockData& d1, const StockData& d2);
 public:
 //    QString     name;
 //    QString     code;
@@ -56,7 +60,7 @@ public:
     double      open;
     double      last_close;
     qint64      totalshare;
-    qint64      ltshare;
+    qint64      mutableshare;
     double      money_ratio;
     double      mkt;
     //QList<void*> blocklist;
@@ -68,6 +72,8 @@ public:
     double      gxl;
     QString     gqdjr; //股权登记日
     QString     yaggr;
+    double      totalCap;
+    double      mutalbleCap;
 
 };
 

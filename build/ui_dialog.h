@@ -392,11 +392,11 @@ public:
         QTableWidgetItem *___qtablewidgetitem11 = hqtbl->horizontalHeaderItem(9);
         ___qtablewidgetitem11->setText(QApplication::translate("MainDialog", "\351\200\201\350\275\254", 0));
         QTableWidgetItem *___qtablewidgetitem12 = hqtbl->horizontalHeaderItem(10);
-        ___qtablewidgetitem12->setText(QApplication::translate("MainDialog", "\347\231\273\350\256\260\346\227\245", 0));
+        ___qtablewidgetitem12->setText(QApplication::translate("MainDialog", "\346\200\273\345\270\202\345\200\274", 0));
         QTableWidgetItem *___qtablewidgetitem13 = hqtbl->horizontalHeaderItem(11);
-        ___qtablewidgetitem13->setText(QApplication::translate("MainDialog", "\346\234\200\351\253\230", 0));
+        ___qtablewidgetitem13->setText(QApplication::translate("MainDialog", "\346\265\201\351\200\232\345\270\202\345\200\274", 0));
         QTableWidgetItem *___qtablewidgetitem14 = hqtbl->horizontalHeaderItem(12);
-        ___qtablewidgetitem14->setText(QApplication::translate("MainDialog", "\346\234\200\344\275\216", 0));
+        ___qtablewidgetitem14->setText(QApplication::translate("MainDialog", "\347\231\273\350\256\260\346\227\245", 0));
         QTableWidgetItem *___qtablewidgetitem15 = hqtbl->horizontalHeaderItem(13);
         ___qtablewidgetitem15->setText(QApplication::translate("MainDialog", "\345\205\254\345\221\212\346\227\245", 0));
         zxgBtn->setText(QApplication::translate("MainDialog", "\350\207\252\351\200\211\350\202\241", 0));

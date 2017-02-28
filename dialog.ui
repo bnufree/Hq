@@ -361,17 +361,17 @@ QMenu::item { height:24px }</string>
            </column>
            <column>
             <property name="text">
+             <string>总市值</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>流通市值</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
              <string>登记日</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>最高</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>最低</string>
             </property>
            </column>
            <column>

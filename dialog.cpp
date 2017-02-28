@@ -39,9 +39,11 @@ Dialog::Dialog(QWidget *parent) :
 {
     ui->setupUi(this);
     mRestartTimer = new QTimer(this);
-    mRestartTimer->setInterval(1000 * 60 *60);
+    //mRestartTimer->setInterval(1000 * 60 *60);
+    mRestartTimer->setInterval(1000*60);
     connect(mRestartTimer, SIGNAL(timeout()), this, SLOT(slotRestartMyself()));
-    mRestartTimer->start();
+    //mRestartTimer->start();
+#if 1
    // ui->hqtbl->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     //ui->hqtbl->horizontalHeader()->setwid
     ui->hqtbl->horizontalHeader()->setDefaultSectionSize(56);
@@ -119,6 +121,7 @@ Dialog::Dialog(QWidget *parent) :
     QShortcut *shotcut = new QShortcut(QKeySequence("Alt+X"), this);
     connect(shotcut, SIGNAL(activated()), this, SLOT(slotWhetherDisplay()));
     //setHook(this);
+#endif
 }
 
 void Dialog::setDlgShow(QSystemTrayIcon::ActivationReason val)
@@ -201,7 +204,7 @@ Dialog::~Dialog()
 
 void Dialog::setSortType(int index)
 {
-    if(index < 2 || index > 11) return;
+    if(index < 2 || index > 13) return;
 //    if(mStockThread && mStockThread->isActive())
 //    {
 //        mStockThread->setOptType((STK_DISPLAY_TYPE)(index-2));
@@ -432,9 +435,10 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
         }
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f%",data.gxl * 100)));
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f",data.szzbl)));
+        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f",data.totalCap / 100000000.0 ) + QStringLiteral("亿")));
+        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f",data.mutalbleCap/ 100000000.0 )+ QStringLiteral("亿")));
+
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(data.gqdjr));
-        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f",data.high)));
-        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f",data.low)));
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(data.yaggr));
 
 #if 0
