@@ -65,7 +65,7 @@ void QSinaStkResultMergeThread::run()
     }
     //开始取得所有股票代码
     foreach (QString group, Profiles::instance()->getAllSections()) {
-        if(group.left(1) != "2")continue;
+        if(group.left(1) != "2" && group.left(1) != "4")continue;
         mStkCodesList.append(Profiles::instance()->value(group, "codes").toStringList());
     }
 
@@ -137,6 +137,8 @@ void QSinaStkResultMergeThread::run()
                 if(mMidStkDataMapList.contains(key.right(6)))
                 wklist.append(mMidStkDataMapList.value(key.right(6)));
             }
+
+            //qDebug()<<"wklist len"<<wklist.length();
         }
         mListMutex.unlock();
 

@@ -4,6 +4,8 @@ names=1153, 2476, 3501
 [Chg]
 L3=0
 L5=0
+mutable=27000000
+total=108000000
 
 [FHSP]
 Content=@Invalid()

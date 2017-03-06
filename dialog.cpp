@@ -12,6 +12,7 @@
 #include <QProcess>
 
 #define     STK_ZXG_SEC         "0520"
+#define     STK_HSJJ_SEC        "4521"
 #define     STK_ZXG_NAME        "codes"
 
 class HqTableWidgetItem : public QTableWidgetItem
@@ -111,6 +112,7 @@ Dialog::Dialog(QWidget *parent) :
 
     //读取自选
     mFavStkList = Profiles::instance()->value(STK_ZXG_SEC, STK_ZXG_NAME).toStringList();
+    mHSFoundsList = Profiles::instance()->value(STK_HSJJ_SEC, STK_ZXG_NAME).toStringList();
     mMergeThread->setSelfCodesList(mFavStkList);
     mMergeThread->setActive(true);
     mMergeThread->setMktType(MKT_ZXG);
@@ -291,7 +293,16 @@ void Dialog::setStockMarket()
         QAction *act = (QAction*)sender();
         if(act == NULL) return;
         qDebug()<<"mkt_type:"<<act->data().toInt();
-        mMergeThread->setMktType((MktType)(act->data().toInt()));
+        MktType type = (MktType)(act->data().toInt());
+        if(type != MKT_JJ)
+        {
+            mMergeThread->setMktType((MktType)(act->data().toInt()));
+        } else
+        {
+            qDebug()<<mHSFoundsList;
+            mMergeThread->setSelfCodesList(mHSFoundsList);
+            mMergeThread->setMktType(MKT_OTHER);
+        }
     }
 
 }
@@ -392,6 +403,7 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
     ui->hqtbl->setRowCount(pDataList.count());
     int i=0;
     foreach (StockData data, pDataList) {
+        if(data.name.isEmpty()) continue;
         int k =0;
 //        qDebug()<<data.code;
         ui->hqtbl->setRowHeight(i, 20);
@@ -712,13 +724,10 @@ void Dialog::hqMenuOpt()
     QAction *act = (QAction*)sender();
     if(act == NULL) return;
     QString opt = act->data().toString();
-//    if(opt == MENU_OPT_MINUTE)
-//    {
-
-//    } else if(opt == MENU_OPT_DAY)
-//    {
-
-//    }
+    if(opt.length())
+    {
+        displayBlockDetailInfoInTable(mBlockStkList[opt]);
+    }
 }
 
 void Dialog::on_DateMgrBtn_clicked()

@@ -202,8 +202,58 @@ void qeastmoneystockinfothread::run()
         filemgr->setValue("Chg", "L3", l3);
         filemgr->setValue("Chg", "L5", l5);
         //qDebug()<<"code:"<<code<<" L3:"<<l3<<" L5:"<<l5;
-        filemgr->deleteLater();
         reply->deleteLater();
+
+        //开始取得股本数据
+        code = code.right(6);
+        if(code.left(1) == "6" || code.left(1) == "5")
+        {
+            code += "1";
+        } else
+        {
+            code += "2";
+        }
+        wkURL = QString("http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&cmd=P.[(x)]|%1&sty=MPICT&st=z&sr=&p=&ps=&cb=callback&js=&token=aaf32a88de888ea7b0ea63e017ecb049&_=%2")
+                .arg(code).arg(QDateTime::currentMSecsSinceEpoch());
+
+        reply  = mgr->get(QNetworkRequest(wkURL));
+        if(!reply)
+        {
+            continue;
+        }
+        connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+        loop.exec(); // 进入事件循环， 直到reply的finished()信号发出， 这个语句才能退出
+        if(reply->error())
+        {
+
+            reply->deleteLater();
+            continue;
+        }
+        //开始解析数据
+        bytes = reply->readAll();
+        QString result = QString::fromUtf8(bytes.data());
+        int startindex = -1, endindex = -1;
+        startindex = result.indexOf("[[") + 2;
+        endindex = result.indexOf("]]");
+        if(startindex < 0 || endindex < 0) continue;
+        QString hqStr = result.mid(startindex, endindex - startindex);
+        //qDebug()<<"info:"<<hqStr;
+        if( !hqStr.isEmpty() )
+        {
+            QStringList blockInfoList = hqStr.split(QRegExp(","), QString::SkipEmptyParts);
+            //qDebug()<<"sections:"<<blockInfoList[1];
+            if(blockInfoList.length() > 24)
+            {
+                qint64     totalA = blockInfoList[20].toLongLong();
+                qint64     ltA = blockInfoList[22].toLongLong();
+                filemgr->setValue("Chg", "mutable", ltA);
+                filemgr->setValue("Chg", "total", totalA);
+            }
+        }
+
+        reply->deleteLater();
+        filemgr->deleteLater();
+
     }
     qDebug()<<"stk info update finished";
     mgr->deleteLater();

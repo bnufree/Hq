@@ -59,76 +59,85 @@ void QSinaStkInfoThread::setStkList(const QStringList &list)
     foreach (QString wkcode, mStkList) {
         StockData data;
         data.code = wkcode.right(6);
-#if 0
-        data.totalshare = MktCapFile::instance()->value(data.code, "total", 0).toLongLong();
-        data.ltshare = MktCapFile::instance()->value(data.code, "lt", 0).toLongLong();
-        data.last_money = MktCapFile::instance()->value(data.code, "last_money", 0).toDouble();
-#else
-        StkInfoFileManage *filemgr = new StkInfoFileManage(wkcode.right(6));
-        QStringList secs = filemgr->subkeys("Dates");
-        if(secs.length())
+        if(data.code.left(1) == "5" || data.code.left(1) == "1")
         {
-            //取得上次更新的时间
-            secs.sort();
-            QString dateStre = secs.last();
-            QDate date = QDate::fromString(dateStre, "yyyy-MM-dd");
-            if(date == QExchangeDataManage::instance()->GetLatestActiveDay(QDate::currentDate()))
-            {
-                if(secs.length() > 1)
-                {
-                    dateStre = secs.at(secs.length() -2);
-                } else
-                {
-                    dateStre.clear();
-                }
-            }
-            QStringList content = filemgr->value("Dates", dateStre).toStringList();
-            if(content.length() >2)
-            {
-                data.totalshare = 0;
-                data.mutableshare = 0;
-                data.last_money = content[0].toDouble();
-                data.totalCap = content[1].toDouble();
-                data.mutalbleCap = content[2].toDouble();
-                if(data.code.contains("002352"))
-                qDebug()<<"content:"<<content<<" total:"<<data.totalCap<<" mutal:"<<data.mutalbleCap;
-
-            } else
-            {
-                data.totalshare = 0;
-                data.mutableshare = 0;
-                data.last_money = 0;
-                data.totalCap = 0;
-                data.mutalbleCap = 0;
-            }
-        }
-        data.last_three_pers = filemgr->value("Chg", "L3").toDouble();
-        data.last_five_pers = filemgr->value("Chg", "L5").toDouble();
-        data.blocklist = filemgr->value("Block", "names").toStringList();
-        QStringList fhsp = filemgr->value("FHSP", "Content").toStringList();
-        if(fhsp.length() > 4)
-        {
-            data.xjfh = fhsp.at(1).toDouble() / 10;
-            data.gxl = fhsp.at(2).toDouble();
-            data.szzbl = fhsp.at(0).toDouble();
-            QString datestr = fhsp.at(3);
-            data.yaggr = fhsp.at(4);
-            if(datestr.length() > 10)
-            {
-                data.gqdjr = datestr.left(10);
-            } else
-            {
-                data.gqdjr = "-";
-            }
-        } else
-        {
+            data.totalshare = 0;
+            data.mutableshare = 0;
+            data.last_money = 0;
+            data.totalCap = 0;
+            data.mutalbleCap = 0;
             data.gxl = 0;
             data.szzbl = 0;
             data.gqdjr = "-";
             data.xjfh = 0;
-        }
+        } else
+        {
+            StkInfoFileManage *filemgr = new StkInfoFileManage(wkcode.right(6));
+            QStringList secs = filemgr->subkeys("Dates");
+            if(secs.length())
+            {
+                //取得上次更新的时间
+                secs.sort();
+                QString dateStre = secs.last();
+                QDate date = QDate::fromString(dateStre, "yyyy-MM-dd");
+                if(date == QExchangeDataManage::instance()->GetLatestActiveDay(QDate::currentDate()))
+                {
+                    if(secs.length() > 1)
+                    {
+                        dateStre = secs.at(secs.length() -2);
+                    } else
+                    {
+                        dateStre.clear();
+                    }
+                }
+                QStringList content = filemgr->value("Dates", dateStre).toStringList();
+                if(content.length() >2)
+                {
+                    data.totalshare = 0;
+                    data.mutableshare = 0;
+                    data.last_money = content[0].toDouble();
+                    data.totalCap = content[1].toDouble();
+                    data.mutalbleCap = content[2].toDouble();
+                    if(data.code.contains("002352"))
+                        qDebug()<<"content:"<<content<<" total:"<<data.totalCap<<" mutal:"<<data.mutalbleCap;
 
-#endif
+                } else
+                {
+                    data.totalshare = 0;
+                    data.mutableshare = 0;
+                    data.last_money = 0;
+                    data.totalCap = 0;
+                    data.mutalbleCap = 0;
+                }
+            }
+            data.last_three_pers = filemgr->value("Chg", "L3").toDouble();
+            data.last_five_pers = filemgr->value("Chg", "L5").toDouble();
+            data.totalshare = filemgr->value("Chg", "total").toDouble();
+            data.mutableshare = filemgr->value("Chg", "mutable").toDouble();
+            data.blocklist = filemgr->value("Block", "names").toStringList();
+            QStringList fhsp = filemgr->value("FHSP", "Content").toStringList();
+            if(fhsp.length() > 4)
+            {
+                data.xjfh = fhsp.at(1).toDouble() / 10;
+                data.gxl = fhsp.at(2).toDouble();
+                data.szzbl = fhsp.at(0).toDouble();
+                QString datestr = fhsp.at(3);
+                data.yaggr = fhsp.at(4);
+                if(datestr.length() > 10)
+                {
+                    data.gqdjr = datestr.left(10);
+                } else
+                {
+                    data.gqdjr = "-";
+                }
+            } else
+            {
+                data.gxl = 0;
+                data.szzbl = 0;
+                data.gqdjr = "-";
+                data.xjfh = 0;
+            }
+        }
         mDataMap[data.code] = data;
     }
 
@@ -219,6 +228,8 @@ void QSinaStkInfoThread::RealtimeInfo()
             mDataMap[code].open = detailList[2].toDouble();
             mDataMap[code].last_close = detailList[3].toDouble();
             mDataMap[code].cur = detailList[4].toDouble();
+
+            mDataMap[code].cur = detailList[4].toDouble();
             mDataMap[code].high = detailList[5].toDouble();
             mDataMap[code].low = detailList[6].toDouble();
             mDataMap[code].buy = detailList[7].toDouble();
@@ -253,6 +264,8 @@ void QSinaStkInfoThread::RealtimeInfo()
             //if(data.cur == 0 ) continue;
             mDataMap[code].chg = mDataMap[code].cur - mDataMap[code].last_close;
             mDataMap[code].per = mDataMap[code].chg *100 / mDataMap[code].last_close;
+            mDataMap[code].totalCap = mDataMap[code].cur * mDataMap[code].totalshare;
+            mDataMap[code].mutalbleCap = mDataMap[code].cur * mDataMap[code].mutableshare;
 #endif
 
         }

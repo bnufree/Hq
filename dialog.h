@@ -96,6 +96,7 @@ private:
     QMap<QString, QString> mBlockNameMap;
     QMap<QString, QStringList> mBlockStkList;
     QStringList           mFavStkList;
+    QStringList           mHSFoundsList;
     int                   mCurBlockType;
     QTimer                 *mRestartTimer;
 };
