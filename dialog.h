@@ -19,6 +19,13 @@ enum{
     MENU_OPT_DAY,
     MENU_OPT_BLOCK,
 };
+
+typedef enum Display_Mode{
+    E_DISPLAY_ALL = 0,
+    E_DISPLAY_BLOCK = 1,
+    E_DISPLAY_STOCK_FULL,
+    E_DISPLAY_STOCK_MINI,
+}DISPLAY_MODE;
 class Dialog : public QDialog
 {
     Q_OBJECT
@@ -52,6 +59,10 @@ public slots:
     void slotSystemTrayMenuClicked();
     void slotWhetherDisplay();
     void slotRestartMyself();
+    void slotDisplayAll();
+    void slotDisplayBlock();
+    void slotDisplayStockFull();
+    void slotDisplayStockMini();
 
 private slots:
     void on_zxgBtn_clicked();
@@ -84,6 +95,8 @@ private slots:
 
     void on_hqtbl_itemEntered(QTableWidgetItem *item);
 
+    void on_MainDialog_customContextMenuRequested(const QPoint &pos);
+
 private:
     Ui::MainDialog *ui;
     QSystemTrayIcon *systemIcon;
@@ -99,6 +112,9 @@ private:
     QStringList           mHSFoundsList;
     int                   mCurBlockType;
     QTimer                 *mRestartTimer;
+    int                   mDisplayMode;
+    int                   mSecSize;
+    bool                  mInit;
 };
 
 #endif // DIALOG_H

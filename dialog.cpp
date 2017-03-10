@@ -10,6 +10,7 @@
 #include <QShortcut>
 #include "qthook.h"
 #include <QProcess>
+#include <QDesktopWidget>
 
 #define     STK_ZXG_SEC         "0520"
 #define     STK_HSJJ_SEC        "4521"
@@ -39,36 +40,57 @@ Dialog::Dialog(QWidget *parent) :
     ui(new Ui::MainDialog)
 {
     ui->setupUi(this);
+    mSecSize = 90;
+    mDisplayMode = E_DISPLAY_ALL;
+    int wkwidth = 0;
+    //设定标题
+    QStringList blockTitleList;
+    blockTitleList<<QStringLiteral("名称")<<QStringLiteral("涨跌");
+    ui->blocktbl->setColumnCount(blockTitleList.length());
+    ui->blocktbl->setHorizontalHeaderLabels(blockTitleList);
+    ui->blocktbl->horizontalHeader()->setDefaultSectionSize(mSecSize);
+    wkwidth += blockTitleList.length() * mSecSize;
+
+    QStringList hqTitleList;
+    hqTitleList<<QStringLiteral("代码")<<QStringLiteral("名称")<<QStringLiteral("现价")<<QStringLiteral("涨跌")\
+               <<QStringLiteral("成交")<<QStringLiteral("资金比")<<QStringLiteral("3日")<<QStringLiteral("资金流")
+               <<QStringLiteral("股息率")<<QStringLiteral("送转")<<QStringLiteral("总市值")<<QStringLiteral("流通市值")
+               <<QStringLiteral("登记日")<<QStringLiteral("公告日");
+    ui->hqtbl->setColumnCount(hqTitleList.length());
+    ui->hqtbl->setHorizontalHeaderLabels(hqTitleList);
+    ui->hqtbl->horizontalHeader()->setDefaultSectionSize(mSecSize);
+    //开始给各列绑定数据
+    ui->hqtbl->horizontalHeaderItem(0)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_NONE);
+    ui->hqtbl->horizontalHeaderItem(1)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_NONE);
+    ui->hqtbl->horizontalHeaderItem(2)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_PRICE);
+    ui->hqtbl->horizontalHeaderItem(3)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_CHGPER);
+    ui->hqtbl->horizontalHeaderItem(4)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_CJE);
+    ui->hqtbl->horizontalHeaderItem(5)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_MONEYR);
+    ui->hqtbl->horizontalHeaderItem(6)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_LAST3);
+    ui->hqtbl->horizontalHeaderItem(7)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_ZJLX);
+    ui->hqtbl->horizontalHeaderItem(8)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_GXL);
+    ui->hqtbl->horizontalHeaderItem(9)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_SZZBL);
+    ui->hqtbl->horizontalHeaderItem(10)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_TCAP);
+    ui->hqtbl->horizontalHeaderItem(11)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_MCAP);
+    ui->hqtbl->horizontalHeaderItem(12)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_GQDJR);
+    ui->hqtbl->horizontalHeaderItem(13)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_NONE);
+
+    ((QHBoxLayout*) ui->btnframe->layout())->setStretch(0, blockTitleList.length());
+    ((QHBoxLayout*) ui->btnframe->layout())->setStretch(1, hqTitleList.length());
+    wkwidth += hqTitleList.length() * mSecSize;
     mRestartTimer = new QTimer(this);
     //mRestartTimer->setInterval(1000 * 60 *60);
     mRestartTimer->setInterval(1000*60);
     connect(mRestartTimer, SIGNAL(timeout()), this, SLOT(slotRestartMyself()));
-    //mRestartTimer->start();
-#if 1
-   // ui->hqtbl->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    //ui->hqtbl->horizontalHeader()->setwid
-    ui->hqtbl->horizontalHeader()->setDefaultSectionSize(56);
-    ui->hqtbl->setColumnWidth(0, 75);
-    ui->hqtbl->setColumnWidth(1, 60);
-    ui->hqtbl->setColumnWidth(ui->hqtbl->columnCount()-4, 90);
-    ui->hqtbl->setColumnWidth(ui->hqtbl->columnCount()-1, 90);
- //   ui->hqtbl->setColumnHidden(ui->hqtbl->columnCount() -1, true);
-    ui->blocktbl->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    //ui->blocktbl->horizontalHeader()->setDefaultSectionSize(65);
-    //ui->blocktbl->setColumnWidth(0, 75);
     ui->blocktbl->verticalHeader()->setHidden(true);
-    //ui->blocktbl->horizontalHeaderItem(0)->setText(QStringLiteral("行业"));
-    //connect(ui->blocktbl->horizontalHeader(), SIGNAL(sectionHandleDoubleClicked(int))
-//    ui->blocktbl->setColumnCount(4);
-//    ui->blocktbl->setColumnWidth(3, 0);
-    //this->setMinimumSize(QSize(600, 600));
-    //this->setMaximumSize(QSize(600, 600));
-    this->resize(1000, 480);
+    ui->hqtbl->setVisible(true);
+    qDebug()<<"hqtbl visible:"<<ui->hqtbl->isVisible();
+    this->resize(wkwidth, QApplication::desktop()->availableGeometry(QApplication::desktop()->primaryScreen()).height());
 
     ui->closeBtn->setIcon(style()->standardPixmap(QStyle::SP_TitleBarCloseButton));
     ui->minBtn->setIcon(style()->standardIcon(QStyle::SP_TitleBarMinButton));
     //ui->srchBtn->setIcon(style()->standardIcon(QStyle::SP_BrowserReload));
-
+#if 1
     //系统托盘
     QIcon appIcon = QIcon(":/icon/image/Baidu_96px.png");
     if(appIcon.isNull())
@@ -116,14 +138,24 @@ Dialog::Dialog(QWidget *parent) :
     mMergeThread->setSelfCodesList(mFavStkList);
     mMergeThread->setActive(true);
     mMergeThread->setMktType(MKT_ZXG);
+
+#endif
 //    on_zxgBtn_clicked();
     mCurBlockType = BLOCK_INDUSTORY;
 
     //创建快捷事件
-    QShortcut *shotcut = new QShortcut(QKeySequence("Alt+X"), this);
+    QShortcut *shotcut = new QShortcut(QKeySequence("Alt+X"), this);  //隐藏
     connect(shotcut, SIGNAL(activated()), this, SLOT(slotWhetherDisplay()));
+    QShortcut *shotcut1 = new QShortcut(QKeySequence("Alt+A"), this);
+    connect(shotcut1, SIGNAL(activated()), this, SLOT(slotDisplayAll()));
+    QShortcut *shotcut2 = new QShortcut(QKeySequence("Alt+S"), this);
+    connect(shotcut2, SIGNAL(activated()), this, SLOT(slotDisplayBlock()));
+    QShortcut *shotcut3 = new QShortcut(QKeySequence("Alt+D"), this);
+    connect(shotcut3, SIGNAL(activated()), this, SLOT(slotDisplayStockFull()));
+    QShortcut *shotcut4 = new QShortcut(QKeySequence("Alt+F"), this);
+    connect(shotcut4, SIGNAL(activated()), this, SLOT(slotDisplayStockMini()));
     //setHook(this);
-#endif
+    mInit = false;
 }
 
 void Dialog::setDlgShow(QSystemTrayIcon::ActivationReason val)
@@ -325,9 +357,6 @@ void Dialog::on_blkbtn_clicked()
     }
 
     popMenu->addActions(actlist);
-    qDebug()<<"cursor pos:"<<QCursor::pos();
-    qDebug()<<"parent:"<<((QWidget*)(ui->blkbtn->parent()))->geometry();
-    qDebug()<<"pos:"<<ui->blkbtn->pos();
     popMenu->popup(QCursor::pos());
 
 }
@@ -365,26 +394,16 @@ void Dialog::on_minBtn_clicked()
 
 void Dialog::resizeEvent(QResizeEvent *event)
 {
+    qDebug()<<"hqtbl visible:"<<ui->hqtbl->isVisible()<<" block table:"<<ui->blocktbl->isVisible();
+    if(mInit)
+    {
+        ui->topframe->setVisible(ui->hqtbl->isVisible());
+        ui->hqframe->setVisible(ui->hqtbl->isVisible());
+    } else
+    {
+        mInit = true;
+    }
     QDialog::resizeEvent(event);
-//    qDebug()<<"frame width = "<<ui->btnframe->width();
-//    int blockwidth = ui->blocktbl->width();
-//    int hqwidth = ui->hqtbl->width();
-
-//    int blockCnt = ui->blocktbl->columnCount();
-//    int hqCnt = ui->hqtbl->columnCount();
-//    qDebug()<<"block width:"<<blockwidth;
-//    qDebug()<<"hq width:"<<hqwidth;
-
-//    for(int i=0; i<blockCnt; i++)
-//    {
-//        ui->blocktbl->setColumnWidth(i, blockwidth / blockCnt);
-//    }
-
-//    for(int i=0; i<hqCnt; i++)
-//    {
-//        ui->hqtbl->setColumnWidth(i, hqwidth / hqCnt);
-//    }
-    //QDialog::resizeEvent(event);
 }
 
 //void Dialog::HQLISIINFOCBKFUNC(StockDataList& pDataList, void *pUser)
@@ -586,10 +605,10 @@ void Dialog::on_blocktbl_customContextMenuRequested(const QPoint &pos)
     QList<QAction*> actlist;
 
     QStringList poplist;
-    poplist<<QStringLiteral("行业")<<QStringLiteral("概念")<<QStringLiteral("地域");
-    int index = -1;
+    poplist<<QStringLiteral("概念")<<QStringLiteral("行业")<<QStringLiteral("地域");
+    int index = 4;
     foreach (QString name, poplist) {
-        index++;
+        index--;
         QAction *act = new QAction(this);
         act->setText(name);
         act->setData(index);
@@ -801,4 +820,42 @@ void Dialog::slotWhetherDisplay()
 void Dialog::slotRestartMyself()
 {
     QProcess::execute("restart.bat");
+}
+
+void Dialog::on_MainDialog_customContextMenuRequested(const QPoint &pos)
+{
+
+}
+
+void Dialog::slotDisplayAll()
+{
+    mDisplayMode = E_DISPLAY_ALL;
+    ui->hqtbl->setVisible(true);
+    this->resize((ui->blocktbl->horizontalHeader()->count() + ui->hqtbl->horizontalHeader()->count()) * mSecSize, this->height());
+
+}
+
+void Dialog::slotDisplayBlock()
+{
+    mDisplayMode = E_DISPLAY_BLOCK;
+
+    ui->hqtbl->setVisible(false);
+    this->resize(ui->blocktbl->horizontalHeader()->count() * mSecSize, this->height());
+}
+
+void Dialog::slotDisplayStockFull()
+{
+    mDisplayMode = E_DISPLAY_STOCK_FULL;
+}
+
+
+void Dialog::slotDisplayStockMini()
+{
+    if(mDisplayMode != E_DISPLAY_STOCK_MINI)
+    {
+        mDisplayMode = E_DISPLAY_STOCK_MINI;
+    } else
+    {
+        //开始切换
+    }
 }
