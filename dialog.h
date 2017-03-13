@@ -115,6 +115,7 @@ private:
     int                   mDisplayMode;
     int                   mSecSize;
     bool                  mInit;
+    QSize                 mTargetSize;
 };
 
 #endif // DIALOG_H

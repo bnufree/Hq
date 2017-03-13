@@ -11,6 +11,7 @@
 #include "qthook.h"
 #include <QProcess>
 #include <QDesktopWidget>
+#include <QResizeEvent>
 
 #define     STK_ZXG_SEC         "0520"
 #define     STK_HSJJ_SEC        "4521"
@@ -85,7 +86,9 @@ Dialog::Dialog(QWidget *parent) :
     ui->blocktbl->verticalHeader()->setHidden(true);
     ui->hqtbl->setVisible(true);
     qDebug()<<"hqtbl visible:"<<ui->hqtbl->isVisible();
-    this->resize(wkwidth, QApplication::desktop()->availableGeometry(QApplication::desktop()->primaryScreen()).height());
+    mTargetSize.setWidth(wkwidth);
+    mTargetSize.setHeight(QApplication::desktop()->availableGeometry(QApplication::desktop()->primaryScreen()).height());
+    this->resize(mTargetSize );
 
     ui->closeBtn->setIcon(style()->standardPixmap(QStyle::SP_TitleBarCloseButton));
     ui->minBtn->setIcon(style()->standardIcon(QStyle::SP_TitleBarMinButton));
@@ -394,11 +397,11 @@ void Dialog::on_minBtn_clicked()
 
 void Dialog::resizeEvent(QResizeEvent *event)
 {
-    qDebug()<<"hqtbl visible:"<<ui->hqtbl->isVisible()<<" block table:"<<ui->blocktbl->isVisible();
+    qDebug()<<"target size:"<<mTargetSize<<"param size:"<<event->size();
     if(mInit)
     {
-        ui->topframe->setVisible(ui->hqtbl->isVisible());
-        ui->hqframe->setVisible(ui->hqtbl->isVisible());
+        ui->topframe->setVisible(ui->hqtbl->isVisible() && ui->blocktbl->isVisible());
+        ui->hqframe->setVisible(ui->hqtbl->isVisible() && ui->blocktbl->isVisible());
     } else
     {
         mInit = true;
@@ -831,7 +834,9 @@ void Dialog::slotDisplayAll()
 {
     mDisplayMode = E_DISPLAY_ALL;
     ui->hqtbl->setVisible(true);
-    this->resize((ui->blocktbl->horizontalHeader()->count() + ui->hqtbl->horizontalHeader()->count()) * mSecSize, this->height());
+    mTargetSize.setWidth((ui->blocktbl->horizontalHeader()->count() + ui->hqtbl->horizontalHeader()->count()) * mSecSize);
+    mTargetSize.setHeight(this->height());
+    this->resize(mTargetSize);
 
 }
 
@@ -839,8 +844,13 @@ void Dialog::slotDisplayBlock()
 {
     mDisplayMode = E_DISPLAY_BLOCK;
 
-    ui->hqtbl->setVisible(false);
-    this->resize(ui->blocktbl->horizontalHeader()->count() * mSecSize, this->height());
+    ui->blocktbl->setVisible(true);
+    ui->hqtbl->setVisible(false);    
+    int target_w = ui->blocktbl->horizontalHeader()->count() * mSecSize;
+    mTargetSize.setWidth(target_w);
+    mTargetSize.setHeight(this->height());
+    qDebug()<<"count:"<<ui->blocktbl->horizontalHeader()->count()<<" col size:"<<mSecSize<<"target:"<<target_w;
+    this->resize(mTargetSize);
 }
 
 void Dialog::slotDisplayStockFull()
@@ -854,8 +864,16 @@ void Dialog::slotDisplayStockMini()
     if(mDisplayMode != E_DISPLAY_STOCK_MINI)
     {
         mDisplayMode = E_DISPLAY_STOCK_MINI;
-    } else
-    {
-        //开始切换
     }
+
+    ui->blocktbl->setVisible(false);
+    for(int i=0; i<ui->hqtbl->horizontalHeader()->count(); i++)
+    {
+        if(i<=2) continue;
+        ui->hqtbl->setColumnHidden(i, true);
+    }
+    int target_w = 3 * mSecSize;
+    mTargetSize.setWidth(target_w);
+    mTargetSize.setHeight(this->height());
+    this->resize(mTargetSize);
 }
