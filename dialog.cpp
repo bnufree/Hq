@@ -37,11 +37,11 @@ public:
 };
 
 Dialog::Dialog(QWidget *parent) :
-    QDialog(parent),mBlockThread(NULL)/*,mStockThread(NULL)*/,mSearchThread(NULL),
+    QDialog(parent),mBlockThread(NULL)/*,mStockThread(NULL)*/,mSearchThread(NULL),mDisplayCol(0),
     ui(new Ui::MainDialog)
 {
     ui->setupUi(this);
-    mSecSize = 90;
+    mSecSize = 75;
     mDisplayMode = E_DISPLAY_ALL;
     int wkwidth = 0;
     //设定标题
@@ -50,15 +50,14 @@ Dialog::Dialog(QWidget *parent) :
     ui->blocktbl->setColumnCount(blockTitleList.length());
     ui->blocktbl->setHorizontalHeaderLabels(blockTitleList);
     ui->blocktbl->horizontalHeader()->setDefaultSectionSize(mSecSize);
-    wkwidth += blockTitleList.length() * mSecSize;
+    mDisplayCol += blockTitleList.length();
 
-    QStringList hqTitleList;
-    hqTitleList<<QStringLiteral("代码")<<QStringLiteral("名称")<<QStringLiteral("现价")<<QStringLiteral("涨跌")\
+    mHqHeaderList<<QStringLiteral("代码")<<QStringLiteral("名称")<<QStringLiteral("现价")<<QStringLiteral("涨跌")\
                <<QStringLiteral("成交")<<QStringLiteral("资金比")<<QStringLiteral("3日")<<QStringLiteral("资金流")
                <<QStringLiteral("股息率")<<QStringLiteral("送转")<<QStringLiteral("总市值")<<QStringLiteral("流通市值")
                <<QStringLiteral("登记日")<<QStringLiteral("公告日");
-    ui->hqtbl->setColumnCount(hqTitleList.length());
-    ui->hqtbl->setHorizontalHeaderLabels(hqTitleList);
+    ui->hqtbl->setColumnCount(mHqHeaderList.length());
+    ui->hqtbl->setHorizontalHeaderLabels(mHqHeaderList);
     ui->hqtbl->horizontalHeader()->setDefaultSectionSize(mSecSize);
     //开始给各列绑定数据
     ui->hqtbl->horizontalHeaderItem(0)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_NONE);
@@ -76,9 +75,12 @@ Dialog::Dialog(QWidget *parent) :
     ui->hqtbl->horizontalHeaderItem(12)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_GQDJR);
     ui->hqtbl->horizontalHeaderItem(13)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_NONE);
 
-    ((QHBoxLayout*) ui->btnframe->layout())->setStretch(0, blockTitleList.length());
-    ((QHBoxLayout*) ui->btnframe->layout())->setStretch(1, hqTitleList.length());
-    wkwidth += hqTitleList.length() * mSecSize;
+
+    for(int i=3; i<ui->hqtbl->columnCount(); i++)
+    {
+        ui->hqtbl->setColumnHidden(i, true);
+    }
+    mDisplayCol += 3;
     mRestartTimer = new QTimer(this);
     //mRestartTimer->setInterval(1000 * 60 *60);
     mRestartTimer->setInterval(1000*60);
@@ -86,9 +88,9 @@ Dialog::Dialog(QWidget *parent) :
     ui->blocktbl->verticalHeader()->setHidden(true);
     ui->hqtbl->setVisible(true);
     qDebug()<<"hqtbl visible:"<<ui->hqtbl->isVisible();
-    mTargetSize.setWidth(wkwidth);
+    mTargetSize.setWidth(mDisplayCol * mSecSize);
     mTargetSize.setHeight(QApplication::desktop()->availableGeometry(QApplication::desktop()->primaryScreen()).height());
-    this->resize(mTargetSize );
+    setTargetSize(mTargetSize);
 
     ui->closeBtn->setIcon(style()->standardPixmap(QStyle::SP_TitleBarCloseButton));
     ui->minBtn->setIcon(style()->standardIcon(QStyle::SP_TitleBarMinButton));
@@ -154,11 +156,13 @@ Dialog::Dialog(QWidget *parent) :
     QShortcut *shotcut2 = new QShortcut(QKeySequence("Alt+S"), this);
     connect(shotcut2, SIGNAL(activated()), this, SLOT(slotDisplayBlock()));
     QShortcut *shotcut3 = new QShortcut(QKeySequence("Alt+D"), this);
-    connect(shotcut3, SIGNAL(activated()), this, SLOT(slotDisplayStockFull()));
-    QShortcut *shotcut4 = new QShortcut(QKeySequence("Alt+F"), this);
-    connect(shotcut4, SIGNAL(activated()), this, SLOT(slotDisplayStockMini()));
+    connect(shotcut3, SIGNAL(activated()), this, SLOT(slotDisplayStockMini()));
     //setHook(this);
     mInit = false;
+
+    iniHqCenterAction();
+    ((QHBoxLayout*) ui->btnframe->layout())->setStretch(0, /*ui->blocktbl->columnCount()*/2);
+    ((QHBoxLayout*) ui->btnframe->layout())->setStretch(1, /*ui->hqtbl->columnCount()*/3);
 }
 
 void Dialog::setDlgShow(QSystemTrayIcon::ActivationReason val)
@@ -287,18 +291,18 @@ void Dialog::on_zxgBtn_clicked()
 //    }
 }
 
-void Dialog::on_hqcenterBtn_clicked()
+void Dialog::iniHqCenterAction()
 {
-    QMenu *popMenu = new QMenu(this);
+    mHqCenterMenu = new QMenu(QStringLiteral("行情中心"), this);
     QList<QAction*> actlist;
 
     QStringList poplist;
-    poplist<<QStringLiteral("沪深")<<QStringLiteral("沪市")<<QStringLiteral("深市")
+    poplist<<QStringLiteral("自选")<<QStringLiteral("沪深")<<QStringLiteral("沪市")<<QStringLiteral("深市")
           <<QStringLiteral("中小板")<<QStringLiteral("创业板")<<QStringLiteral("沪深基金")
           <<QStringLiteral("恒指")<<QStringLiteral("恒生国企")
           <<QStringLiteral("港股通");
     QList<int> mktlist;
-    mktlist<<MKT_ALL<<MKT_SH<<MKT_SZ<<MKT_ZXB<<MKT_CYB<<MKT_JJ<<MKT_HK_HSZS<<MKT_HK_HSGQ<<MKT_HK_GGT;
+    mktlist<<MKT_ZXG<<MKT_ALL<<MKT_SH<<MKT_SZ<<MKT_ZXB<<MKT_CYB<<MKT_JJ<<MKT_HK_HSZS<<MKT_HK_HSGQ<<MKT_HK_GGT;
     int index = -1;
     foreach (QString name, poplist) {
         index++;
@@ -309,14 +313,48 @@ void Dialog::on_hqcenterBtn_clicked()
         actlist.append(act);
     }
 
-    popMenu->addActions(actlist);
-    qDebug()<<"cursor pos:"<<QCursor::pos();
-    qDebug()<<"parent:"<<((QWidget*)(ui->hqcenterBtn->parent()))->geometry();
-    qDebug()<<"pos:"<<ui->hqcenterBtn->pos();
-    QPoint pos = ((QWidget*)(ui->hqcenterBtn->parent()))->mapToGlobal(ui->hqcenterBtn->geometry().topLeft());
-    pos.setY(pos.y() - popMenu->height() * 7);
-    popMenu->popup(pos);
+    mHqCenterMenu->addActions(actlist);
 
+
+    mHqHeaderMenu = new QMenu(QStringLiteral("列表标题"), this);
+    QList<QAction*> actlist2;
+    for(int i=2; i<mHqHeaderList.length(); i++)
+    {
+        QAction *act = new QAction(this);
+        act->setText(mHqHeaderList[i]);
+        TableColDisplayStatus data;
+        data.mTable = ui->hqtbl;
+        data.mColIndex = i;
+        data.mIsDisplay = true;
+        //act->setData(i);
+        act->setCheckable(true);
+        data.mIsDisplay = i>2? false : true;
+        act->setChecked(data.mIsDisplay);
+        act->setData(QVariant::fromValue(data));
+        connect(act, &QAction::triggered, this, &Dialog::setDisplayCol);
+        actlist2.append(act);
+    }
+
+    mHqHeaderMenu->addActions(actlist2);
+}
+
+void Dialog::setDisplayCol(bool isDisplay)
+{
+    QAction *act = (QAction*)sender();
+    if(act == NULL) return;
+    TableColDisplayStatus sts = act->data().value<TableColDisplayStatus>();
+    int col = sts.mColIndex;
+    if(ui->hqtbl->isColumnHidden(col) && isDisplay)
+    {
+        mDisplayCol++;
+        ui->hqtbl->setColumnHidden(col, false);
+    } else if((!ui->hqtbl->isColumnHidden(col)) && (!isDisplay))
+    {
+        mDisplayCol--;
+        ui->hqtbl->setColumnHidden(col, true);
+    }
+    mTargetSize.setWidth(mDisplayCol * mSecSize);
+    setTargetSize(mTargetSize);
 }
 
 void Dialog::setStockMarket()
@@ -329,13 +367,14 @@ void Dialog::setStockMarket()
         if(act == NULL) return;
         qDebug()<<"mkt_type:"<<act->data().toInt();
         MktType type = (MktType)(act->data().toInt());
-        if(type != MKT_JJ)
+        if(type != MKT_JJ && type != MKT_ZXG)
         {
             mMergeThread->setMktType((MktType)(act->data().toInt()));
         } else
         {
             qDebug()<<mHSFoundsList;
-            mMergeThread->setSelfCodesList(mHSFoundsList);
+            if(type ==MKT_JJ)mMergeThread->setSelfCodesList(mHSFoundsList);
+            else mMergeThread->setSelfCodesList(mFavStkList);
             mMergeThread->setMktType(MKT_OTHER);
         }
     }
@@ -401,7 +440,7 @@ void Dialog::resizeEvent(QResizeEvent *event)
     if(mInit)
     {
         ui->topframe->setVisible(ui->hqtbl->isVisible() && ui->blocktbl->isVisible());
-        ui->hqframe->setVisible(ui->hqtbl->isVisible() && ui->blocktbl->isVisible());
+        ui->hqframe->setVisible(ui->hqtbl->isVisible());
     } else
     {
         mInit = true;
@@ -467,7 +506,7 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
         } else {
             ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f", data.zjlx) + QStringLiteral("万")));
         }
-        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f%",data.gxl * 100)));
+        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f%(%.2f)",data.gxl * 100, data.xjfh)));
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f",data.szzbl)));
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f",data.totalCap / 100000000.0 ) + QStringLiteral("亿")));
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f",data.mutalbleCap/ 100000000.0 )+ QStringLiteral("亿")));
@@ -630,72 +669,46 @@ void Dialog::on_blocktbl_customContextMenuRequested(const QPoint &pos)
 void Dialog::on_hqtbl_customContextMenuRequested(const QPoint &pos)
 {
     QMenu *popMenu = new QMenu(this);
+    popMenu->addMenu(mHqCenterMenu);
+    popMenu->addMenu(mHqHeaderMenu);
+
     //自选股编辑
     QTableWidgetItem *item = ui->hqtbl->itemAt(pos);
     if(item)
-    {
+    {        
+        QList<QAction*> actlist;
         int row = item->row();
         item = ui->hqtbl->item(row, 0);
-
-#if 0
-        if(item)
-        {
+        QStringList poplist;
+        poplist<<QStringLiteral("分时图")<<QStringLiteral("日线图");
+        QList<int> Optlist;
+        Optlist<<MENU_OPT_MINUTE<<MENU_OPT_DAY;
+        int index = -1;
+        foreach (QString name, poplist) {
+            index++;
             QAction *act = new QAction(this);
-            QString code = item->data(Qt::UserRole).toString();
-            if(code.length() != 6) return;
-            if(code.left(1) == "5" || code.left(1) == "6")
-            {
-                code = "sh"+code;
-            } else
-            {
-                code = "sz"+code;
-            }
-            QString name = QStringLiteral("添加到自选股");
-            if(mFavStkList.contains(code))
-            {
-                name = QStringLiteral("删除自选股");
-            }
-
             act->setText(name);
-            act->setData(code);
-            connect(act, &QAction::triggered, this, &Dialog::editFavorite);
-            popMenu->addAction(act);
-
+            act->setData(Optlist[index]);
+            connect(act, &QAction::triggered, this, &Dialog::hqMenuOpt);
+            actlist.append(act);
         }
-#endif
-    }
-    QList<QAction*> actlist;
+        QMenu *submenu = new QMenu(QStringLiteral("所属板块"), this);
+        QStringList blocklist = item->data(Qt::UserRole+1).toStringList();
+        qDebug()<<"blocklist:"<<blocklist<<" code:"<<item->data(Qt::UserRole).toString();
+        foreach (QString name, blocklist) {
+            if(name.trimmed().isEmpty()) continue;
+            if(mBlockNameMap[name].trimmed().isEmpty()) continue;
+            QAction *act = new QAction(this);
+            act->setText(QString("%1:%2%").arg(mBlockNameMap[name]).arg(mBlockMap[name]));
+            qDebug()<<"subtext:"<<act->text();
+            act->setData(name);
+            connect(act, &QAction::triggered, this, &Dialog::hqMenuOpt);
+            submenu->addAction(act);
+        }
 
-    QStringList poplist;
-    poplist<<QStringLiteral("分时图")<<QStringLiteral("日线图");
-    QList<int> Optlist;
-    Optlist<<MENU_OPT_MINUTE<<MENU_OPT_DAY;
-    int index = -1;
-    foreach (QString name, poplist) {
-        index++;
-        QAction *act = new QAction(this);
-        act->setText(name);
-        act->setData(Optlist[index]);
-        connect(act, &QAction::triggered, this, &Dialog::hqMenuOpt);
-        actlist.append(act);
+        popMenu->addActions(actlist);
+        popMenu->addMenu(submenu);
     }
-    QMenu *submenu = new QMenu(QStringLiteral("所属板块"), this);
-    QStringList blocklist = item->data(Qt::UserRole+1).toStringList();
-    qDebug()<<"blocklist:"<<blocklist<<" code:"<<item->data(Qt::UserRole).toString();
-    foreach (QString name, blocklist) {
-        if(name.trimmed().isEmpty()) continue;
-        if(mBlockNameMap[name].trimmed().isEmpty()) continue;
-        QAction *act = new QAction(this);
-        act->setText(QString("%1:%2%").arg(mBlockNameMap[name]).arg(mBlockMap[name]));
-        qDebug()<<"subtext:"<<act->text();
-        act->setData(name);
-        connect(act, &QAction::triggered, this, &Dialog::hqMenuOpt);
-        submenu->addAction(act);
-    }
-
-    popMenu->addActions(actlist);
-    popMenu->addMenu(submenu);
-//    QMenu *submenu = new QMenu(tr("所属板块"));
 
     popMenu->popup(QCursor::pos());
 }
@@ -834,9 +847,15 @@ void Dialog::slotDisplayAll()
 {
     mDisplayMode = E_DISPLAY_ALL;
     ui->hqtbl->setVisible(true);
-    mTargetSize.setWidth((ui->blocktbl->horizontalHeader()->count() + ui->hqtbl->horizontalHeader()->count()) * mSecSize);
-    mTargetSize.setHeight(this->height());
-    this->resize(mTargetSize);
+    ui->blocktbl->setVisible(true);
+    for(int i=0; i<ui->hqtbl->horizontalHeader()->count(); i++)
+    {
+        ui->hqtbl->setColumnHidden(i, false);
+
+    }
+    mDisplayCol = ui->blocktbl->horizontalHeader()->count() + ui->hqtbl->horizontalHeader()->count();
+    mTargetSize.setWidth(mDisplayCol * mSecSize);
+    setTargetSize(mTargetSize);
 
 }
 
@@ -845,12 +864,10 @@ void Dialog::slotDisplayBlock()
     mDisplayMode = E_DISPLAY_BLOCK;
 
     ui->blocktbl->setVisible(true);
-    ui->hqtbl->setVisible(false);    
-    int target_w = ui->blocktbl->horizontalHeader()->count() * mSecSize;
-    mTargetSize.setWidth(target_w);
-    mTargetSize.setHeight(this->height());
-    qDebug()<<"count:"<<ui->blocktbl->horizontalHeader()->count()<<" col size:"<<mSecSize<<"target:"<<target_w;
-    this->resize(mTargetSize);
+    ui->hqtbl->setVisible(false);
+    mDisplayCol = ui->blocktbl->horizontalHeader()->count();
+    mTargetSize.setWidth(mDisplayCol * mSecSize);
+    setTargetSize(mTargetSize);
 }
 
 void Dialog::slotDisplayStockFull()
@@ -865,15 +882,20 @@ void Dialog::slotDisplayStockMini()
     {
         mDisplayMode = E_DISPLAY_STOCK_MINI;
     }
-
     ui->blocktbl->setVisible(false);
-    for(int i=0; i<ui->hqtbl->horizontalHeader()->count(); i++)
+    ui->hqtbl->setVisible(true);
+    mDisplayCol = 0;
+    for(int i=0; i<ui->hqtbl->columnCount(); i++)
     {
-        if(i<=2) continue;
-        ui->hqtbl->setColumnHidden(i, true);
+        if(!ui->hqtbl->isColumnHidden(i)) mDisplayCol++;
     }
-    int target_w = 3 * mSecSize;
-    mTargetSize.setWidth(target_w);
-    mTargetSize.setHeight(this->height());
-    this->resize(mTargetSize);
+    mTargetSize.setWidth(mDisplayCol * mSecSize);
+    setTargetSize(mTargetSize);
+}
+
+void Dialog::setTargetSize(const QSize &size)
+{
+    int screenW =  QApplication::desktop()->availableGeometry(QApplication::desktop()->primaryScreen()).width();
+    int screenH =  QApplication::desktop()->availableGeometry(QApplication::desktop()->primaryScreen()).height();
+    this->setGeometry(screenW-size.width(), screenH - size.height(), size.width(), size.height());
 }

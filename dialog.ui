@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>850</width>
+    <width>852</width>
     <height>300</height>
    </rect>
   </property>
@@ -32,27 +32,12 @@
    <string>Dialog</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QTableView{
-color:black;
+   <string notr="true">*{
+	background-color:transparent;
 }
-
-/*QMenu {
-/*    background-color: white; /* sets background of the menu 设置整个菜单区域的背景色，我用的是白色：white*/
-/*     border: 1px solid white;/*整个菜单区域的边框粗细、样式、颜色*/
-/* }
- 
- QMenu::item {
-     /* sets background of menu item. set this to something non-transparent
-         if you want menu color and menu item color to be different */
-/*     background-color: transparent;
-     padding:8px 8px;/*设置菜单项文字上下和左右的内边距，效果就是菜单中的条目左右上下有了间隔*/
-/*     margin:0px 1px;/*设置菜单项的外边距*/
-/*     border-bottom:1px solid #DBDBDB;/*为菜单项之间添加横线间隔*/
- /*}
- 
-/* QMenu::item:selected { /* when user selects item using mouse or keyboard */
- /*    background-color: #2dabf9;/*这一句是设置菜单项鼠标经过选中的样式*/
- /*}*/
+QTableView{
+color:white;
+}
 
 QMenu { 
 background-color: #1c5388; 
@@ -60,11 +45,16 @@ border: 1px solid #afb2b5;
 color: #FFFFFF; 
 font: 75 10pt \345\276\256\350\275\257\351\233\205\351\273\221; 
  }
+QMenu::item {
+                        padding: 2px 25px 2px 20px;
+                        border: 1px solid transparent; 
+                        }
 QMenu::item:selected { 
 border-color: darkblue; 
 background: #ff8400;   
 } 
-QMenu::item { height:24px }</string>
+QMenu::item { height:24px;margin:2px }
+QMenu::icon:checked { background: gray; border: 1px inset gray; position: absolute; top: 1px; right: 1px; bottom: 1px; left: 1px;}</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -180,20 +170,6 @@ QMenu::item { height:24px }</string>
         </property>
        </spacer>
       </item>
-      <item>
-       <widget class="QPushButton" name="minBtn">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="closeBtn">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
      </layout>
     </widget>
    </item>
@@ -249,7 +225,7 @@ QMenu::item { height:24px }</string>
           <widget class="QTableWidget" name="blocktbl">
            <property name="maximumSize">
             <size>
-             <width>16777215</width>
+             <width>150</width>
              <height>16777215</height>
             </size>
            </property>
@@ -347,54 +323,6 @@ QMenu::item { height:24px }</string>
           <number>0</number>
          </property>
          <item>
-          <widget class="QPushButton" name="zxgBtn">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>30</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>自选股</string>
-           </property>
-           <property name="flat">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="hqcenterBtn">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>30</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>行情中心</string>
-           </property>
-           <property name="flat">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="lhbBtn">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>30</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>龙虎榜</string>
-           </property>
-           <property name="flat">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QPushButton" name="DateMgrBtn">
            <property name="text">
             <string>日期管理</string>
@@ -418,10 +346,24 @@ QMenu::item { height:24px }</string>
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="minBtn">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="closeBtn">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QLabel" name="updatelbl">
            <property name="minimumSize">
             <size>
-             <width>120</width>
+             <width>0</width>
              <height>0</height>
             </size>
            </property>

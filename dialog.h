@@ -10,6 +10,15 @@
 #include "qsinastkresultmergethread.h"
 #include <QTimer>
 
+typedef struct strColDisplay
+{
+    QTableWidget*   mTable;
+    int             mColIndex;
+    bool            mIsDisplay;
+}TableColDisplayStatus;
+
+Q_DECLARE_METATYPE(TableColDisplayStatus)
+
 namespace Ui {
 class MainDialog;
 }
@@ -45,6 +54,8 @@ public slots:
     void setBlockSort(int val);
     void setBlockName();
     void setStockMarket();
+    void setDisplayCol(bool isDisplay);
+    void setTargetSize(const QSize& size);
 
     void updateBlockTable(const BlockDataList& pDataList);
     void displayBlockRealtimeInfo();
@@ -67,7 +78,7 @@ public slots:
 private slots:
     void on_zxgBtn_clicked();
 
-    void on_hqcenterBtn_clicked();
+    void iniHqCenterAction();
 
     void on_blkbtn_clicked();
 
@@ -116,6 +127,11 @@ private:
     int                   mSecSize;
     bool                  mInit;
     QSize                 mTargetSize;
+    QMenu                 *mHqCenterMenu;
+    QMenu                 *mHqHeaderMenu;
+    QStringList           mHqHeaderList;
+    int                   mDisplayCol;
+    QList<TableColDisplayStatus>    mColDisplayStatus;
 };
 
 #endif // DIALOG_H
