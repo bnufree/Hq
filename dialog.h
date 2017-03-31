@@ -48,6 +48,9 @@ public:
 
 protected:
     void resizeEvent(QResizeEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    bool eventFilter(QObject *obj, QEvent *event);
     //void keyPressEvent(QKeyEvent *);
 public slots:
     void setSortType(int index);
@@ -131,7 +134,10 @@ private:
     QMenu                 *mHqHeaderMenu;
     QStringList           mHqHeaderList;
     int                   mDisplayCol;
-    QList<TableColDisplayStatus>    mColDisplayStatus;
+    QList<QAction*>       mHqColActList;
+    QPoint   windowPos;
+    QPoint   mousePos;
+    QPoint   dPos;
 };
 
 #endif // DIALOG_H

@@ -33,11 +33,26 @@
   </property>
   <property name="styleSheet">
    <string notr="true">*{
-	background-color:transparent;
+	background-color:rgb(16,16,16,10);
+	color:black;
+	font-weight:bold;
 }
+
+QHeaderView
+{
+	background:transparent;
+}
+
+QHeaderView::section{
+border：0px solid gray;
+border-bottom：0px solid gray;
+background:skyblue;
+}
+
+/*
 QTableView{
 color:white;
-}
+}*/
 
 QMenu { 
 background-color: #1c5388; 
@@ -54,7 +69,8 @@ border-color: darkblue;
 background: #ff8400;   
 } 
 QMenu::item { height:24px;margin:2px }
-QMenu::icon:checked { background: gray; border: 1px inset gray; position: absolute; top: 1px; right: 1px; bottom: 1px; left: 1px;}</string>
+QMenu::icon:checked { background: gray; border: 1px inset gray; position: absolute; top: 1px; right: 1px; bottom: 1px; left: 1px;}
+</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -72,107 +88,6 @@ QMenu::icon:checked { background: gray; border: 1px inset gray; position: absolu
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item>
-    <widget class="QFrame" name="topframe">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <property name="spacing">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
-       <number>0</number>
-      </property>
-      <item>
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>上证：</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="shlbl">
-        <property name="text">
-         <string>10000.00 +10.00%</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>   深证：</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="szlbl">
-        <property name="text">
-         <string>10000.00 +10.00%</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>   沪深300：</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="hslbl">
-        <property name="text">
-         <string>10000.00 +10.00%</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>  创业板：</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="cyblbl">
-        <property name="text">
-         <string>10000.00 +10.00%</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>   大盘股：</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="dpglbl">
-        <property name="text">
-         <string>10000.00 +10.00%</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </widget>
-   </item>
    <item>
     <widget class="QFrame" name="midframe">
      <property name="frameShape">
@@ -235,6 +150,9 @@ QMenu::icon:checked { background: gray; border: 1px inset gray; position: absolu
            <property name="verticalScrollBarPolicy">
             <enum>Qt::ScrollBarAlwaysOff</enum>
            </property>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
            <property name="editTriggers">
             <set>QAbstractItemView::NoEditTriggers</set>
            </property>
@@ -258,6 +176,9 @@ QMenu::icon:checked { background: gray; border: 1px inset gray; position: absolu
             <enum>Qt::CustomContextMenu</enum>
            </property>
            <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="horizontalScrollBarPolicy">
             <enum>Qt::ScrollBarAlwaysOff</enum>
            </property>
            <property name="editTriggers">
@@ -346,20 +267,6 @@ QMenu::icon:checked { background: gray; border: 1px inset gray; position: absolu
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="minBtn">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="closeBtn">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QLabel" name="updatelbl">
            <property name="minimumSize">
             <size>
@@ -384,6 +291,20 @@ QMenu::icon:checked { background: gray; border: 1px inset gray; position: absolu
             </size>
            </property>
           </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="minBtn">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="closeBtn">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>

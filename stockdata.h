@@ -74,6 +74,7 @@ public:
     QString     yaggr;
     double      totalCap;
     double      mutalbleCap;
+    bool        index;
 
 };
 

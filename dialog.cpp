@@ -40,7 +40,15 @@ Dialog::Dialog(QWidget *parent) :
     QDialog(parent),mBlockThread(NULL)/*,mStockThread(NULL)*/,mSearchThread(NULL),mDisplayCol(0),
     ui(new Ui::MainDialog)
 {
-    ui->setupUi(this);
+    ui->setupUi(this);    
+    this->setWindowFlags(Qt::FramelessWindowHint);
+    this->setAttribute(Qt::WA_TranslucentBackground);
+//    this->installEventFilter(this);
+    ui->hqtbl->installEventFilter(this);
+    ui->hqtbl->horizontalHeader()->setAutoFillBackground(false);
+    this->setMouseTracking(true);
+    ui->blocktbl->setAlternatingRowColors(false);
+    ui->hqtbl->setAlternatingRowColors(false);
     mSecSize = 75;
     mDisplayMode = E_DISPLAY_ALL;
     int wkwidth = 0;
@@ -89,7 +97,7 @@ Dialog::Dialog(QWidget *parent) :
     ui->hqtbl->setVisible(true);
     qDebug()<<"hqtbl visible:"<<ui->hqtbl->isVisible();
     mTargetSize.setWidth(mDisplayCol * mSecSize);
-    mTargetSize.setHeight(QApplication::desktop()->availableGeometry(QApplication::desktop()->primaryScreen()).height());
+    mTargetSize.setHeight(QApplication::desktop()->availableGeometry(QApplication::desktop()->primaryScreen()).height() -30);
     setTargetSize(mTargetSize);
 
     ui->closeBtn->setIcon(style()->standardPixmap(QStyle::SP_TitleBarCloseButton));
@@ -157,7 +165,7 @@ Dialog::Dialog(QWidget *parent) :
     connect(shotcut2, SIGNAL(activated()), this, SLOT(slotDisplayBlock()));
     QShortcut *shotcut3 = new QShortcut(QKeySequence("Alt+D"), this);
     connect(shotcut3, SIGNAL(activated()), this, SLOT(slotDisplayStockMini()));
-    //setHook(this);
+//    setHook(this);
     mInit = false;
 
     iniHqCenterAction();
@@ -317,7 +325,6 @@ void Dialog::iniHqCenterAction()
 
 
     mHqHeaderMenu = new QMenu(QStringLiteral("列表标题"), this);
-    QList<QAction*> actlist2;
     for(int i=2; i<mHqHeaderList.length(); i++)
     {
         QAction *act = new QAction(this);
@@ -332,10 +339,10 @@ void Dialog::iniHqCenterAction()
         act->setChecked(data.mIsDisplay);
         act->setData(QVariant::fromValue(data));
         connect(act, &QAction::triggered, this, &Dialog::setDisplayCol);
-        actlist2.append(act);
+        mHqColActList.append(act);
     }
 
-    mHqHeaderMenu->addActions(actlist2);
+    mHqHeaderMenu->addActions(mHqColActList);
 }
 
 void Dialog::setDisplayCol(bool isDisplay)
@@ -439,7 +446,6 @@ void Dialog::resizeEvent(QResizeEvent *event)
     qDebug()<<"target size:"<<mTargetSize<<"param size:"<<event->size();
     if(mInit)
     {
-        ui->topframe->setVisible(ui->hqtbl->isVisible() && ui->blocktbl->isVisible());
         ui->hqframe->setVisible(ui->hqtbl->isVisible());
     } else
     {
@@ -461,8 +467,8 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
 //    qDebug()<<"input";
     //qDebug()<<"main Thread:"<<QThread::currentThreadId();
     if(pDataList.length() == 0) return;
-    ui->hqtbl->setRowCount(pDataList.count());
-    int i=0;
+    ui->hqtbl->setRowCount(pDataList.count() + 5);
+    int i=5;
     foreach (StockData data, pDataList) {
         if(data.name.isEmpty()) continue;
         int k =0;
@@ -793,25 +799,37 @@ void Dialog::on_hqtbl_itemDoubleClicked(QTableWidgetItem *item)
 
 void Dialog::slotUpdateIndex(const StockDataList &pDataList)
 {
-    //indexlist<<"sh000001"<<"sh000300"<<"sz399001"<<"sh000043"<<"sz399006";
-    foreach (StockData data, pDataList) {
-        if(data.code == "000001")
-        {
-            ui->shlbl->setText(QString("%1 %2%").arg(data.cur).arg(data.per, 0, 'f', 2));
-        } else if(data.code == "399001")
-        {
-            ui->szlbl->setText(QString("%1 %2%").arg(data.cur).arg(data.per, 0, 'f', 2));
-        } else if(data.code == "000300")
-        {
-            ui->hslbl->setText(QString("%1 %2%").arg(data.cur).arg(data.per, 0, 'f', 2));
-        } else if(data.code == "000043")
-        {
-            ui->dpglbl->setText(QString("%1 %2%").arg(data.cur).arg(data.per, 0, 'f', 2));
-        } else if(data.code == "399006")
-        {
-            ui->cyblbl->setText(QString("%1 %2%").arg(data.cur).arg(data.per, 0, 'f', 2));
-        }
+    if(pDataList.length() == 0) return;
+    //更新指数的情况置顶显示
+    if(ui->hqtbl->rowCount() == 0)
+    {
+        ui->hqtbl->setRowCount(pDataList.length());
     }
+    //开始更新
+    int i=0;
+    foreach (StockData data, pDataList) {
+        ui->hqtbl->setRowHeight(i, 20);
+        QString perstr = QString("").sprintf("%.2f%", data.per);
+        QString money = QString("").sprintf("%.2f", data.money / 10000.0) + QStringLiteral("亿");
+        QStringList valist;
+        valist<<data.code<<data.name<<QString::number(data.cur)<<perstr<<money;
+        for(int k=0;k<valist.length(); k++)
+        {
+            QTableWidgetItem *item = ui->hqtbl->item(i, k);
+            if(!item)
+            {
+                item = new HqTableWidgetItem(valist.at(k), k==0? Qt::AlignRight : Qt::AlignCenter);
+                ui->hqtbl->setItem(i, k, item);
+            } else
+            {
+                item->setText(valist.at(k));
+            }
+        }
+        i++;
+
+    }
+
+
 
 }
 
@@ -848,12 +866,13 @@ void Dialog::slotDisplayAll()
     mDisplayMode = E_DISPLAY_ALL;
     ui->hqtbl->setVisible(true);
     ui->blocktbl->setVisible(true);
-    for(int i=0; i<ui->hqtbl->horizontalHeader()->count(); i++)
-    {
-        ui->hqtbl->setColumnHidden(i, false);
-
+    mDisplayCol = 4;
+    foreach (QAction* act, mHqColActList) {
+        if(act->isChecked())
+        {
+            mDisplayCol++;
+        }
     }
-    mDisplayCol = ui->blocktbl->horizontalHeader()->count() + ui->hqtbl->horizontalHeader()->count();
     mTargetSize.setWidth(mDisplayCol * mSecSize);
     setTargetSize(mTargetSize);
 
@@ -897,5 +916,40 @@ void Dialog::setTargetSize(const QSize &size)
 {
     int screenW =  QApplication::desktop()->availableGeometry(QApplication::desktop()->primaryScreen()).width();
     int screenH =  QApplication::desktop()->availableGeometry(QApplication::desktop()->primaryScreen()).height();
-    this->setGeometry(screenW-size.width(), screenH - size.height(), size.width(), size.height());
+    this->setGeometry(screenW-size.width(), screenH - size.height()-20, size.width(), size.height());
+}
+
+void Dialog::mousePressEvent(QMouseEvent *event)
+
+{
+
+     this->windowPos = this->pos();                // 获得部件当前位置
+
+     this->mousePos = event->globalPos();     // 获得鼠标位置
+
+     this->dPos = mousePos - windowPos;       // 移动后部件所在的位置
+
+}
+
+
+
+void Dialog::mouseMoveEvent(QMouseEvent *event)
+
+{
+
+     this->move(event->globalPos() - this->dPos);
+
+}
+
+bool Dialog::eventFilter(QObject *obj, QEvent *event)
+{
+    qDebug()<<obj<<" "<<event;
+    if(obj == ui->hqtbl)
+    {
+        if(event->type() == QEvent::MouseMove)
+        {
+            return false;
+        }
+    }
+    return false;
 }
