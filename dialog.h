@@ -50,7 +50,7 @@ protected:
     void resizeEvent(QResizeEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
-    bool eventFilter(QObject *obj, QEvent *event);
+    //bool eventFilter(QObject *obj, QEvent *event);
     //void keyPressEvent(QKeyEvent *);
 public slots:
     void setSortType(int index);
@@ -110,6 +110,10 @@ private slots:
     void on_hqtbl_itemEntered(QTableWidgetItem *item);
 
     void on_MainDialog_customContextMenuRequested(const QPoint &pos);
+
+    void on_hqtbl_itemClicked(QTableWidgetItem *item);
+
+    void on_blocktbl_itemClicked(QTableWidgetItem *item);
 
 private:
     Ui::MainDialog *ui;

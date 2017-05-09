@@ -42,9 +42,10 @@ Dialog::Dialog(QWidget *parent) :
 {
     ui->setupUi(this);    
     this->setWindowFlags(Qt::FramelessWindowHint);
-    this->setAttribute(Qt::WA_TranslucentBackground);
-//    this->installEventFilter(this);
-    ui->hqtbl->installEventFilter(this);
+    //this->setAttribute(Qt::WA_TranslucentBackground);
+    //this->installEventFilter(this);
+//    ui->hqtbl->installEventFilter(this);
+//    ui->blocktbl->installEventFilter(this);
     ui->hqtbl->horizontalHeader()->setAutoFillBackground(false);
     this->setMouseTracking(true);
     ui->blocktbl->setAlternatingRowColors(false);
@@ -68,8 +69,8 @@ Dialog::Dialog(QWidget *parent) :
     ui->hqtbl->setHorizontalHeaderLabels(mHqHeaderList);
     ui->hqtbl->horizontalHeader()->setDefaultSectionSize(mSecSize);
     //开始给各列绑定数据
-    ui->hqtbl->horizontalHeaderItem(0)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_NONE);
-    ui->hqtbl->horizontalHeaderItem(1)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_NONE);
+    ui->hqtbl->horizontalHeaderItem(0)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_CODE);
+    ui->hqtbl->horizontalHeaderItem(1)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_NAME);
     ui->hqtbl->horizontalHeaderItem(2)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_PRICE);
     ui->hqtbl->horizontalHeaderItem(3)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_CHGPER);
     ui->hqtbl->horizontalHeaderItem(4)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_CJE);
@@ -86,9 +87,9 @@ Dialog::Dialog(QWidget *parent) :
 
     for(int i=3; i<ui->hqtbl->columnCount(); i++)
     {
-        ui->hqtbl->setColumnHidden(i, true);
+        ui->hqtbl->setColumnHidden(i, false);
     }
-    mDisplayCol += 3;
+    mDisplayCol += mHqHeaderList.length();
     mRestartTimer = new QTimer(this);
     //mRestartTimer->setInterval(1000 * 60 *60);
     mRestartTimer->setInterval(1000*60);
@@ -96,6 +97,7 @@ Dialog::Dialog(QWidget *parent) :
     ui->blocktbl->verticalHeader()->setHidden(true);
     ui->hqtbl->setVisible(true);
     qDebug()<<"hqtbl visible:"<<ui->hqtbl->isVisible();
+    windowPos = QPoint(-1, -1);
     mTargetSize.setWidth(mDisplayCol * mSecSize);
     mTargetSize.setHeight(QApplication::desktop()->availableGeometry(QApplication::desktop()->primaryScreen()).height() -30);
     setTargetSize(mTargetSize);
@@ -169,8 +171,8 @@ Dialog::Dialog(QWidget *parent) :
     mInit = false;
 
     iniHqCenterAction();
-    ((QHBoxLayout*) ui->btnframe->layout())->setStretch(0, /*ui->blocktbl->columnCount()*/2);
-    ((QHBoxLayout*) ui->btnframe->layout())->setStretch(1, /*ui->hqtbl->columnCount()*/3);
+    //((QHBoxLayout*) ui->btnframe->layout())->setStretch(0, /*ui->blocktbl->columnCount()*/2);
+    //((QHBoxLayout*) ui->btnframe->layout())->setStretch(1, /*ui->hqtbl->columnCount()*/3);
 }
 
 void Dialog::setDlgShow(QSystemTrayIcon::ActivationReason val)
@@ -325,7 +327,7 @@ void Dialog::iniHqCenterAction()
 
 
     mHqHeaderMenu = new QMenu(QStringLiteral("列表标题"), this);
-    for(int i=2; i<mHqHeaderList.length(); i++)
+    for(int i=0; i<mHqHeaderList.length(); i++)
     {
         QAction *act = new QAction(this);
         act->setText(mHqHeaderList[i]);
@@ -335,7 +337,7 @@ void Dialog::iniHqCenterAction()
         data.mIsDisplay = true;
         //act->setData(i);
         act->setCheckable(true);
-        data.mIsDisplay = i>2? false : true;
+        data.mIsDisplay = true;
         act->setChecked(data.mIsDisplay);
         act->setData(QVariant::fromValue(data));
         connect(act, &QAction::triggered, this, &Dialog::setDisplayCol);
@@ -446,7 +448,7 @@ void Dialog::resizeEvent(QResizeEvent *event)
     qDebug()<<"target size:"<<mTargetSize<<"param size:"<<event->size();
     if(mInit)
     {
-        ui->hqframe->setVisible(ui->hqtbl->isVisible());
+        //ui->hqframe->setVisible(ui->hqtbl->isVisible());
     } else
     {
         mInit = true;
@@ -573,7 +575,8 @@ void Dialog::updateBlockTable(const BlockDataList& pDataList)
     if(pDataList.length() == 0) return;
 
     //ui->blocktbl->clearContents();
-    int totalrow = pDataList.count();
+    int totalrow = pDataList.length();
+
     int i=0;
     foreach (BlockData data, pDataList) {
         mBlockNameMap[data.code] = data.name;
@@ -586,6 +589,8 @@ void Dialog::updateBlockTable(const BlockDataList& pDataList)
             ui->blocktbl->setRowCount(--totalrow );
             continue;
         }
+//        mBlockMap[data.code] = data.changePer;;
+//        if(i > totalrow-1) continue;
         int k =0;
         ui->blocktbl->setRowHeight(i, 20);
         ui->blocktbl->setItem(i, k++, new HqTableWidgetItem(data.name));
@@ -916,12 +921,17 @@ void Dialog::setTargetSize(const QSize &size)
 {
     int screenW =  QApplication::desktop()->availableGeometry(QApplication::desktop()->primaryScreen()).width();
     int screenH =  QApplication::desktop()->availableGeometry(QApplication::desktop()->primaryScreen()).height();
-    this->setGeometry(screenW-size.width(), screenH - size.height()-20, size.width(), size.height());
+    this->resize(size);
+        windowPos = QPoint(screenW-size.width(), screenH - size.height()-20);
+        this->move(windowPos);
+        //this->setGeometry(screenW-size.width(), screenH - size.height()-20, size.width(), size.height());
+
 }
 
 void Dialog::mousePressEvent(QMouseEvent *event)
 
 {
+    qDebug()<<__FUNCTION__<<__LINE__;
 
      this->windowPos = this->pos();                // 获得部件当前位置
 
@@ -936,20 +946,30 @@ void Dialog::mousePressEvent(QMouseEvent *event)
 void Dialog::mouseMoveEvent(QMouseEvent *event)
 
 {
-
-     this->move(event->globalPos() - this->dPos);
+        qDebug()<<__FUNCTION__<<__LINE__;
+     //this->move(event->globalPos() - this->dPos);
 
 }
 
-bool Dialog::eventFilter(QObject *obj, QEvent *event)
+//bool Dialog::eventFilter(QObject *obj, QEvent *event)
+//{
+//    qDebug()<<obj<<" "<<event;
+//    if(obj == ui->hqtbl || obj == ui->blocktbl)
+//    {
+//        if(event->type() == QEvent::DragMove)
+//        {
+//            return false;
+//        }
+//    }
+//    return true;
+//}
+
+void Dialog::on_hqtbl_itemClicked(QTableWidgetItem *item)
 {
-    qDebug()<<obj<<" "<<event;
-    if(obj == ui->hqtbl)
-    {
-        if(event->type() == QEvent::MouseMove)
-        {
-            return false;
-        }
-    }
-    return false;
+    item->tableWidget()->horizontalHeader()->setHighlightSections(false);
+}
+
+void Dialog::on_blocktbl_itemClicked(QTableWidgetItem *item)
+{
+    item->tableWidget()->horizontalHeader()->setHighlightSections(false);
 }

@@ -16,6 +16,8 @@ typedef enum enStockDisplayRule
 
 typedef enum enStockDisplayType
 {
+    STK_DISPLAY_SORT_TYPE_CODE = -3,
+    STK_DISPLAY_SORT_TYPE_NAME = -2,
     STK_DISPLAY_SORT_TYPE_NONE = -1,
     STK_DISPLAY_SORT_TYPE_PRICE = 0,
     STK_DISPLAY_SORT_TYPE_CHGPER,
