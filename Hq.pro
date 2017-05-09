@@ -37,7 +37,11 @@ SOURCES += main.cpp\
     stkinfofilemanage.cpp \
     qexchangedatamanage.cpp \
     qexchangedatemangagedialog.cpp \
-    qglobalapplication.cpp
+    qglobalapplication.cpp \
+    zchxdatachangeservice - 副本.cpp \
+    zchxdatachangeservice - 副本.cpp \
+    zchxdatachangeservice - 副本.cpp \
+    dbservices.cpp
 
 HEADERS  += dialog.h \
     stockdata.h \
@@ -61,7 +65,12 @@ HEADERS  += dialog.h \
     qexchangedatamanage.h \
     qexchangedatemangagedialog.h \
     qglobalapplication.h \
-    qthook.h
+    qthook.h \
+    zchxdatachangeservice - 副本.h \
+    zchxdatachangeservice - 副本.h \
+    zchxdatachangeservice - 副本.h \
+    dbservices.h \
+    hqdatadefines.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui
