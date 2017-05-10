@@ -4,6 +4,11 @@
 #include <QObject>
 #include <QThread>
 #include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlQuery>
+#include "hqdatadefines.h"
+#include <QMap>
+#include <QTimer>
+
 
 #define DATA_SERVICE HqInfoService::instance()
 
@@ -19,12 +24,25 @@ public:
     static HqInfoService* instance();
 
 signals:
-
-private slots:
-
+    void signalRecvRealBlockInfo(const QList<BlockRealInfo>& list);
+    void signalSendBlockInfoList(const QList<BlockRealInfo>& list);
+public slots:
+    void updateBlockInfoList(const QList<BlockRealInfo>& list);
+    void addBlock(const BlockRealInfo& info);
+    void modBlock(const BlockRealInfo& info);
+    void delBlock(int code);
+    void queryBlock(int type = 0, bool init = false);
+    void recvRealBlockInfo(const QList<BlockRealInfo>& list);
 private:
     void initSignalSlot();
     bool initDatabase();
+    bool createHistoryTable(const QString& pTableName);
+    bool isTableExist(const QString& pTable);
+    bool blockExist(int code);
+    bool isActive();
+    void initBlockInfo();
+    void saveDB();
+    QString errMsg();
 
 private:    //本类使用的变量
     static HqInfoService *m_pInstance;
@@ -33,7 +51,6 @@ private:    //本类使用的变量
     public:
         ~CGarbo()
         {
-            //qDebug()<<"delete test obj now";
             if (HqInfoService::m_pInstance)
             {
                 delete HqInfoService::m_pInstance;
@@ -46,6 +63,10 @@ private:    //本类使用的变量
     bool                        mDataBaseInitFlag;
     QSqlDatabase                mDB;
     int                         mCurrentRPLIndex;
+    QSqlQuery                   mSqlQuery;
+    QMap<int, BlockRealInfo>    mBlockInfo;
+    QTimer                      *mUpdateTimer;
+    QStringList                 mNotExchangeDaysList;
 };
 
 #endif // DBSERVICE_H

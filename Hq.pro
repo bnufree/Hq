@@ -38,9 +38,6 @@ SOURCES += main.cpp\
     qexchangedatamanage.cpp \
     qexchangedatemangagedialog.cpp \
     qglobalapplication.cpp \
-    zchxdatachangeservice - 副本.cpp \
-    zchxdatachangeservice - 副本.cpp \
-    zchxdatachangeservice - 副本.cpp \
     dbservices.cpp
 
 HEADERS  += dialog.h \
@@ -66,9 +63,6 @@ HEADERS  += dialog.h \
     qexchangedatemangagedialog.h \
     qglobalapplication.h \
     qthook.h \
-    zchxdatachangeservice - 副本.h \
-    zchxdatachangeservice - 副本.h \
-    zchxdatachangeservice - 副本.h \
     dbservices.h \
     hqdatadefines.h
 
