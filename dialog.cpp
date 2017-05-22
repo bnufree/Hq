@@ -12,6 +12,7 @@
 #include <QProcess>
 #include <QDesktopWidget>
 #include <QResizeEvent>
+#include "qindexwidget.h"
 
 #define     STK_ZXG_SEC         "0520"
 #define     STK_HSJJ_SEC        "4521"
@@ -121,10 +122,12 @@ Dialog::Dialog(QWidget *parent) :
     connect(ui->blocktbl->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(setBlockSort(int)));
 
     //index更新
+    QIndexWidget *indexw = new QIndexWidget(this);
+    ui->verticalLayout->insertWidget(0, indexw);
     QStringList indexlist;
     indexlist<<"sh000001"<<"sh000300"<<"sz399001"<<"sh000043"<<"sz399006";
     mIndexThread = new QSinaStkInfoThread(this);
-    connect(mIndexThread, SIGNAL(sendStkDataList(StockDataList)), this, SLOT(slotUpdateIndex(StockDataList)));
+    connect(mIndexThread, SIGNAL(sendStkDataList(StockDataList)), indexw, SLOT(updateData(StockDataList)));
     mIndexThread->setStkList(indexlist);
     mIndexThread->start();
 
@@ -469,8 +472,8 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
 //    qDebug()<<"input";
     //qDebug()<<"main Thread:"<<QThread::currentThreadId();
     if(pDataList.length() == 0) return;
-    ui->hqtbl->setRowCount(pDataList.count() + 5);
-    int i=5;
+    ui->hqtbl->setRowCount(pDataList.count());
+    int i=0;
     foreach (StockData data, pDataList) {
         if(data.name.isEmpty()) continue;
         int k =0;
@@ -804,6 +807,7 @@ void Dialog::on_hqtbl_itemDoubleClicked(QTableWidgetItem *item)
 
 void Dialog::slotUpdateIndex(const StockDataList &pDataList)
 {
+#if 0
     if(pDataList.length() == 0) return;
     //更新指数的情况置顶显示
     if(ui->hqtbl->rowCount() == 0)
@@ -833,6 +837,8 @@ void Dialog::slotUpdateIndex(const StockDataList &pDataList)
         i++;
 
     }
+
+#endif
 
 
 

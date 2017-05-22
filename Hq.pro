@@ -38,7 +38,10 @@ SOURCES += main.cpp\
     qexchangedatamanage.cpp \
     qexchangedatemangagedialog.cpp \
     qglobalapplication.cpp \
-    dbservices.cpp
+    dbservices.cpp \
+    qeastmoneychinashareexchange.cpp \
+    qindexframe.cpp \
+    qindexwidget.cpp
 
 HEADERS  += dialog.h \
     stockdata.h \
@@ -64,10 +67,14 @@ HEADERS  += dialog.h \
     qglobalapplication.h \
     qthook.h \
     dbservices.h \
-    hqdatadefines.h
+    hqdatadefines.h \
+    qeastmoneychinashareexchange.h \
+    qindexframe.h \
+    qindexwidget.h
 
 FORMS    += dialog.ui \
-    qexchangedatemangagedialog.ui
+    qexchangedatemangagedialog.ui \
+    qindexframe.ui
 
 RESOURCES += \
     image.qrc
