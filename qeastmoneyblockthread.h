@@ -23,44 +23,33 @@ typedef enum enBlockDisplayRule
 
 typedef QList<BlockData>        BlockDataList;
 
-class QEastMoneyBlockThread : public QThread
+class QEastMoneyBlockThread : public QObject
 {
     Q_OBJECT
 public:
-    explicit QEastMoneyBlockThread(QObject *parent = 0);
+    explicit QEastMoneyBlockThread(int pBlockID, QObject *parent = 0);
     ~QEastMoneyBlockThread();
-
-
-protected:
-    void run();
-    void RealtimeBlockInfo();
-    void GetBlockShares();
-    void GetShares(const QString &pBlockCode, QList<QString>& codelist);
-
-signals:
-    void    sendBlockDataList(const BlockDataList& list);
-    void    updateBlockCodesFinished();
-    void    sendStkinfoUpdateProgress(int cur, int total);
-    void    signalUpdateMsg(const QString& msg);
-public slots:
-    void    setOptType(BLOCK_OPT_TYPE type);
     void    setSortRule(BLOCK_DISPLAY_RULE rule);
     void    reverseSortRule();
-    void    SetUpdateBlockCodes(bool pUpdate=false);
-    void    slotWorkThreadFinished();
-    void    slotStkCodeUpdateFinish(int cur, int total);
-    void    slotUpdateFHSPInfo();
+
+signals:
+    void    sendBlockDataList(int type, const BlockDataList& list);
+    void    sendStkinfoUpdateProgress(int cur, int total);
+    void    signalUpdateMsg(const QString& msg);
+    void    start();
+public slots:
+    void    slotUpdateBlockShare();
+    void    slotUpdateBlockInfos();
+    void    slotUpdateBlockShareCodeList(const QString& pBlockCode, const QStringList& pShareCodesList);
+    void    slotBlockShareThreadFinished();
 
 private:
     int         mSortRule;
-    int         mOptType;
+    int         mBlockType;
     QMap<QString,BlockData> mBlockDataList;
-    bool        mUpdateBlockCodes;
     QList<QThread*>     mWorkThreadList;
-    QMap<QString, QStringList>  mShareBlockList;
-    QMap<QString, QStringList>  mShareFHSPList;
-    int     mTotalStkCount;
     QMap<int, BlockDataList> mBlockRealInfo;
+    QThread     mWorkthread;
 };
 
 #endif // QEASTMONEYBLOCKTHREAD_H

@@ -8,6 +8,7 @@
 #include <QMap>
 #include <QMutex>
 #include "qeastmoneyzjlxthread.h"
+#include "qsinastkinfothread.h"
 
 typedef enum MktType
 {
@@ -31,6 +32,7 @@ class QSinaStkResultMergeThread : public QThread
 public:
     explicit QSinaStkResultMergeThread(QObject *parent = 0);
     ~QSinaStkResultMergeThread();
+public:
     bool isActive();
     MktType getMktType();
 signals:
@@ -57,21 +59,23 @@ signals:
     void    sendStkDataList(const StockDataList& list);
     void    sendStkinfoUpdateProgress(int cur, int total);
 private:
-    QStringList         mStkCodesList;
-    int                 mTotalPage;
-    int                 mCurPage;
-    int                 mPageSize;
-    int                 mSortType;
-    int                 mSortRule;
-    MKT_TYPE            mMktType;
-    QList<QThread*>     mThreadList;
-    QList<QStringList>  mSecCodesList;
-    QMutex              mSecCodesLock;
-    QMap<QString, StockData>    mMidStkDataMapList;
-    bool                mActive;
-    QMutex              mListMutex;
-    QStringList         mSelfCodesList;
-    QMap<QString, double> mZjlxMaplist;
+    QStringList                                             mStkCodesList;
+    int                                                     mTotalPage;
+    int                                                     mCurPage;
+    int                                                     mPageSize;
+    int                                                     mSortType;
+    int                                                     mSortRule;
+    MKT_TYPE                                                mMktType;
+    QList<QSinaStkInfoThread*>                              mThreadList;
+    QList<QStringList>                                      mSecCodesList;
+    QMutex                                                  mSecCodesLock;
+    QMap<QString, StockData>                                mMidStkDataMapList;
+    bool                                                    mActive;
+    QMutex                                                  mListMutex;
+    QStringList                                             mSelfCodesList;
+    QMap<QString, double>                                   mZjlxMaplist;
+    int                                                     mStkCntPerTrd;
+    bool                                                    mCodeChangeFlag;
 };
 
 #endif // QSINASTKRESULTMERGETHREAD_H

@@ -9,11 +9,8 @@ class qeastmoneystockinfothread : public QThread
 {
     Q_OBJECT
 public:
-    explicit qeastmoneystockinfothread(QThread *parent = 0);
+    explicit qeastmoneystockinfothread(const QString& code, QObject *parent = 0);
     ~qeastmoneystockinfothread();
-    void    setStockCodeList(const QStringList& codes);
-    bool    isActiveDay(QDate date);
-    QDate   lastActiveDay();
 protected:
     void run();
 
@@ -21,8 +18,9 @@ signals:
     void    sendMktCapInfo(const QString& code, qint64 totala, qint64 lta);
     void    sendUpdateProgress(int cur, int total);
 public slots:
+    void    updateHistoryStkInfo();
 private:
-    QStringList         mStockcodeList;
+    QString         mCode;
 };
 
 #endif // QEASTMONEYSTOCKINFOTHREAD_H

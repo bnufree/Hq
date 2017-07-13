@@ -41,7 +41,12 @@ SOURCES += main.cpp\
     dbservices.cpp \
     qeastmoneychinashareexchange.cpp \
     qindexframe.cpp \
-    qindexwidget.cpp
+    qindexwidget.cpp \
+    qeastmonystockcodesthread.cpp \
+    qeastmoneyblocksharethread.cpp \
+    qeastmoneyblockmangagerthread.cpp \
+    qeastmoneysharefhspthread.cpp \
+    qhttpget.cpp
 
 HEADERS  += dialog.h \
     stockdata.h \
@@ -70,7 +75,12 @@ HEADERS  += dialog.h \
     hqdatadefines.h \
     qeastmoneychinashareexchange.h \
     qindexframe.h \
-    qindexwidget.h
+    qindexwidget.h \
+    qeastmonystockcodesthread.h \
+    qeastmoneyblocksharethread.h \
+    qeastmoneyblockmangagerthread.h \
+    qeastmoneysharefhspthread.h \
+    qhttpget.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

@@ -153,14 +153,12 @@ void QSinaStkInfoThread::setActive(bool act)
 void QSinaStkInfoThread::RealtimeInfo()
 {
     QNetworkAccessManager *mgr = new QNetworkAccessManager;
-    //QString url("http://quote.eastmoney.com/hq2data/bk/data/%1.js?v=%2");
     QString url("http://hq.sinajs.cn/?list=%1");
     while(true)
     {
         if(mStkList.length() == 0) continue;
 
         QString wkURL = url.arg(mStkList.join(","));
-//        qDebug()<<"wkurl:"<<wkURL;
         QNetworkReply *reply  = mgr->get(QNetworkRequest(wkURL));
         if(!reply) continue;
         QEventLoop loop; // 使用事件循环使得网络通讯同步进行
@@ -175,54 +173,13 @@ void QSinaStkInfoThread::RealtimeInfo()
         //开始解析数据
         QByteArray bytes = reply->readAll();
         QString result = QString::fromLocal8Bit(bytes.data());
-        //QStringList resultlist = result.split(QRegExp("[var hq_str_|\"|\"|,|=]"), QString::SkipEmptyParts);
         //先换行
         QStringList resultlist = result.split(QRegExp("[\\n|;]"), QString::SkipEmptyParts);
         //再分割具体的字段
-        StockDataList wklist;
         foreach (QString detail, resultlist) {
             detail.replace(QRegExp("([a-z]{1,} )"), "");
             QStringList detailList = detail.split(QRegExp("[a-z|\"|\"|,|=|_]"), QString::SkipEmptyParts);
-//            qDebug()<<"result:"<<detailList;
             if(detailList.length() < 20) continue;
-#if 0
-            StockData data;
-            data.code = detailList[0];
-            data.name = detailList[1];
-            data.open = detailList[2].toDouble();
-            data.last_close = detailList[3].toDouble();
-            data.cur = detailList[4].toDouble();
-            data.high = detailList[5].toDouble();
-            data.low = detailList[6].toDouble();
-            data.buy = detailList[7].toDouble();
-            data.sell = detailList[8].toDouble();
-            data.vol = detailList[9].toInt();
-            //换手率计算
-//            QString sec = data.code.right(6);
-//            QString key = "lt";
-//            QVariant qtval = MktCapFile::instance()->value(sec, key, 0);
-//            qint64 total = qtval.toLongLong();
-//            qDebug()<<"sec:"<<sec<<"total:"<<total;
-//            if(total > 0)
-//            {
-//                data.hsl = data.vol / (double)total;
-//            } else {
-//                data.hsl = 0.00;
-//            }
-//            MktCapFile::instance()->setValue(sec, key, detailList[10].toDouble());
-            data.money = detailList[10].toDouble() / 10000;
-            int hour = QDateTime::currentDateTime().time().hour();
-            int min = QDateTime::currentDateTime().time().minute();
-            if( hour == 9){
-                if(min>=15 && min<=25){
-                    data.cur = detailList[12].toDouble();
-                }
-            }
-            if(data.cur == 0 ) continue;
-            data.chg = data.cur - data.last_close;
-            data.per = data.chg *100 / data.last_close;
-            wklist.append(data);
-#else
             QString code = detailList[0];
             mDataMap[code].name = detailList[1];
             mDataMap[code].open = detailList[2].toDouble();
@@ -266,49 +223,8 @@ void QSinaStkInfoThread::RealtimeInfo()
             mDataMap[code].per = mDataMap[code].chg *100 / mDataMap[code].last_close;
             mDataMap[code].totalCap = mDataMap[code].cur * mDataMap[code].totalshare;
             mDataMap[code].mutalbleCap = mDataMap[code].cur * mDataMap[code].mutableshare;
-#endif
-
         }
-//        qDebug()<<"list length:"<<mDataMap.values().length();
         emit sendStkDataList(mDataMap.values());
-        if(wklist.length())
-        {
-//            //开始排序
-//            if(mOptType == STK_DISPLAY_SORT_TYPE_CHGPER)
-//            {
-//                if(mSortRule == -1)
-//                {
-//                    qSort(wklist.begin(), wklist.end(), StockData::sortByPerDesc);
-//                } else
-//                {
-//                    qSort(wklist.begin(), wklist.end(), StockData::sortByPerAsc);
-//                }
-//            }
-
-//            else if(mOptType == STK_DISPLAY_SORT_TYPE_CJE)
-//            {
-//                if(mSortRule == -1)
-//                {
-//                    qSort(wklist.begin(), wklist.end(), StockData::sortByMonDesc);
-//                } else
-//                {
-//                    qSort(wklist.begin(), wklist.end(), StockData::sortByMonAsc);
-//                }
-//            }
-
-//            else if(mOptType == STK_DISPLAY_SORT_TYPE_PRICE)
-//            {
-//                if(mSortRule == -1)
-//                {
-//                    qSort(wklist.begin(), wklist.end(), StockData::sortByCurDesc);
-//                } else
-//                {
-//                    qSort(wklist.begin(), wklist.end(), StockData::sortByCurAsc);
-//                }
-//            }
-//            if(mActive)emit sendStkDataList(wklist);
-        }
-
         reply->deleteLater();
         QThread::sleep(1);
     }
@@ -319,6 +235,11 @@ void QSinaStkInfoThread::RealtimeInfo()
 void QSinaStkInfoThread::run()
 {
     RealtimeInfo();
+}
+
+int QSinaStkInfoThread::getStkCount()
+{
+    return mStkList.count();
 }
 
 

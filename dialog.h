@@ -4,7 +4,7 @@
 #include <QDialog>
 #include <QSystemTrayIcon>
 #include <QTableWidget>
-#include "qeastmoneyblockthread.h"
+#include "qeastmoneyblockmangagerthread.h"
 #include "qsinastkinfothread.h"
 #include "qsinasearchthread.h"
 #include "qsinastkresultmergethread.h"
@@ -77,6 +77,7 @@ public slots:
     void slotDisplayBlock();
     void slotDisplayStockFull();
     void slotDisplayStockMini();
+    void slotUpdateStockCodesList(const QStringList& list);
 
 private slots:
     void on_zxgBtn_clicked();
@@ -119,7 +120,7 @@ private:
     Ui::MainDialog *ui;
     QSystemTrayIcon *systemIcon;
     QSinaStkInfoThread            *mIndexThread;
-    QEastMoneyBlockThread         *mBlockThread;
+    QEastMoneyBlockMangagerThread        *mBlockMgr;
     QSinaStkResultMergeThread     *mMergeThread;
     QSinaSearchThread             *mSearchThread;
     QMap<QString, double> mStockMap;

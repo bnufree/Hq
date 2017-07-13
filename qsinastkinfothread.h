@@ -41,6 +41,7 @@ public:
     ~QSinaStkInfoThread();
 
     bool isActive();
+    int  getStkCount();
 protected:
     void run();
     void RealtimeInfo();

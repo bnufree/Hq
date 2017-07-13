@@ -13,6 +13,7 @@
 #include <QDesktopWidget>
 #include <QResizeEvent>
 #include "qindexwidget.h"
+#include "qeastmonystockcodesthread.h"
 
 #define     STK_ZXG_SEC         "0520"
 #define     STK_HSJJ_SEC        "4521"
@@ -38,7 +39,7 @@ public:
 };
 
 Dialog::Dialog(QWidget *parent) :
-    QDialog(parent),mBlockThread(NULL)/*,mStockThread(NULL)*/,mSearchThread(NULL),mDisplayCol(0),
+    QDialog(parent),mBlockMgr(NULL)/*,mStockThread(NULL)*/,mSearchThread(NULL),mDisplayCol(0),mMergeThread(0),
     ui(new Ui::MainDialog)
 {
     ui->setupUi(this);    
@@ -106,7 +107,6 @@ Dialog::Dialog(QWidget *parent) :
     ui->closeBtn->setIcon(style()->standardPixmap(QStyle::SP_TitleBarCloseButton));
     ui->minBtn->setIcon(style()->standardIcon(QStyle::SP_TitleBarMinButton));
     //ui->srchBtn->setIcon(style()->standardIcon(QStyle::SP_BrowserReload));
-#if 1
     //系统托盘
     QIcon appIcon = QIcon(":/icon/image/Baidu_96px.png");
     if(appIcon.isNull())
@@ -131,24 +131,28 @@ Dialog::Dialog(QWidget *parent) :
     mIndexThread->setStkList(indexlist);
     mIndexThread->start();
 
+    //更新所有的代码
+    QEastMonyStockCodesThread * codes = new QEastMonyStockCodesThread();
+    connect(codes, SIGNAL(signalSendCodesList(QStringList)), this, SLOT(slotUpdateStockCodesList(QStringList)));
+    connect(codes, SIGNAL(finished()), codes, SLOT(deleteLater()));
+    codes->start();
+  #if 0
 
-    //行情初始化
-//    mStockThread = new QSinaStkInfoThread;
-//    connect(mStockThread, SIGNAL(sendStkDataList(StockDataList)), this, SLOT(updateHqTable(StockDataList)));
-//    mStockThread->start();
-    mBlockThread = new QEastMoneyBlockThread;
-    connect(mBlockThread, SIGNAL(sendBlockDataList(BlockDataList)), this, SLOT(updateBlockTable(BlockDataList)));
-    connect(mBlockThread, SIGNAL(updateBlockCodesFinished()), this, SLOT(displayBlockRealtimeInfo()));
-    mBlockThread->start();
+    //行情中心初始化开始
+    mMergeThread = new QSinaStkResultMergeThread();
+    connect(mMergeThread, SIGNAL(sendStkDataList(StockDataList)), this, SLOT(updateHqTable(StockDataList)));
+    mMergeThread->setMktType(MKT_ALL);
+    mMergeThread->start();
+    //板块行情初始化
+    mBlockMgr = new QEastMoneyBlockMangagerThread();
+    mBlockMgr->setCurBlockType(2);
+    connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataList)), this, SLOT(updateBlockTable(BlockDataList)));
+    mBlockMgr->start();
     mSearchThread = new QSinaSearchThread;
     connect(mSearchThread, SIGNAL(sendSearchResult(QStringList)), this, SLOT(displayBlockDetailInfoInTable(QStringList)));
     mSearchThread->start();
-    mMergeThread = new QSinaStkResultMergeThread;
-    connect(mMergeThread, SIGNAL(sendStkDataList(StockDataList)), this, SLOT(updateHqTable(StockDataList)));
-    mMergeThread->setMktType(MKT_ZXG);
-    connect(mBlockThread, SIGNAL(sendStkinfoUpdateProgress(int,int)), this, SLOT(slotUpdate(int,int)));
-    connect(mBlockThread, SIGNAL(signalUpdateMsg(QString)), this, SLOT(slotUpdateMsg(QString)));
-//    mMergeThread->start();
+//    connect(mBlockThread, SIGNAL(sendStkinfoUpdateProgress(int,int)), this, SLOT(slotUpdate(int,int)));
+//    connect(mBlockThread, SIGNAL(signalUpdateMsg(QString)), this, SLOT(slotUpdateMsg(QString)));
 
     //读取自选
     mFavStkList = Profiles::instance()->value(STK_ZXG_SEC, STK_ZXG_NAME).toStringList();
@@ -157,8 +161,6 @@ Dialog::Dialog(QWidget *parent) :
     mMergeThread->setActive(true);
     mMergeThread->setMktType(MKT_ZXG);
 
-#endif
-//    on_zxgBtn_clicked();
     mCurBlockType = BLOCK_INDUSTORY;
 
     //创建快捷事件
@@ -174,8 +176,7 @@ Dialog::Dialog(QWidget *parent) :
     mInit = false;
 
     iniHqCenterAction();
-    //((QHBoxLayout*) ui->btnframe->layout())->setStretch(0, /*ui->blocktbl->columnCount()*/2);
-    //((QHBoxLayout*) ui->btnframe->layout())->setStretch(1, /*ui->hqtbl->columnCount()*/3);
+#endif
 }
 
 void Dialog::setDlgShow(QSystemTrayIcon::ActivationReason val)
@@ -232,38 +233,33 @@ void Dialog::displayBlockRealtimeInfo()
 {
     ui->updatelbl->clear();
 //    MktCapFile::instance()->setValue("Update", "time", QDateTime::currentDateTime().toTime_t());
-    if(mMergeThread)
-    {
-        mMergeThread->start();
-        mMergeThread->setActive(true);
-    }
-    if(mBlockThread)
-    {
-        mBlockThread->SetUpdateBlockCodes(false);
-        if(mBlockThread->isFinished())
-        {
-            mBlockThread->start();
-        }
-    }
+//    if(mMergeThread)
+//    {
+//        mMergeThread->start();
+//        mMergeThread->setActive(true);
+//    }
+//    if(mBlockThread)
+//    {
+//        mBlockThread->SetUpdateBlockCodes(false);
+//        if(mBlockThread->isFinished())
+//        {
+//            mBlockThread->start();
+//        }
+//    }
 }
 
 Dialog::~Dialog()
 {
     //unHook();
-    qDebug()<<"close dialog now";
-//    if(mStockThread) mStockThread->deleteLater();
-    if(mBlockThread) mBlockThread->deleteLater();
+//    qDebug()<<"close dialog now";
+////    if(mStockThread) mStockThread->deleteLater();
+//    if(mBlockThread) mBlockThread->deleteLater();
     delete ui;
 }
 
 void Dialog::setSortType(int index)
 {
     if(index < 2 || index > 13) return;
-//    if(mStockThread && mStockThread->isActive())
-//    {
-//        mStockThread->setOptType((STK_DISPLAY_TYPE)(index-2));
-//    }
-
     if(mMergeThread && mMergeThread->isActive())
     {
         mMergeThread->setSortType((STK_DISPLAY_TYPE)(index-2));
@@ -275,28 +271,27 @@ void Dialog::setBlockSort(int val)
 {
     qDebug("click val = %d, total = %d", val, ui->blocktbl->rowCount() -1);
     if(val != 1) return;
-    if(mBlockThread) mBlockThread->reverseSortRule();
+    if(mBlockMgr) mBlockMgr->reverseSortRule();
 }
 
 void Dialog::setBlockName()
 {
-    if(!mBlockThread) return;
     QAction *act = (QAction*)sender();
     if(act == NULL) return;
     int index = act->data().toInt();
     mCurBlockType = index;
-    mBlockThread->setOptType((BLOCK_OPT_TYPE)index);
+    if(mBlockMgr) mBlockMgr->setCurBlockType(mCurBlockType);
     qDebug()<<"act name:"<<act->text();
 
 }
 
 void Dialog::on_zxgBtn_clicked()
 {
-    if(mMergeThread) /*mMergeThread->setActive(false);*/
-    {
-        mMergeThread->setSelfCodesList(mFavStkList);
-        mMergeThread->setMktType(MKT_ZXG);
-    }
+//    if(mMergeThread) /*mMergeThread->setActive(false);*/
+//    {
+//        mMergeThread->setSelfCodesList(mFavStkList);
+//        mMergeThread->setMktType(MKT_ZXG);
+//    }
 //    if(mStockThread)
 //    {
 //        mStockThread->setActive(true);
@@ -575,25 +570,16 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
 void Dialog::updateBlockTable(const BlockDataList& pDataList)
 {
     qDebug()<<"input:"<<pDataList.length();
-    if(pDataList.length() == 0) return;
+//    if(pDataList.length() == 0) return;
 
-    //ui->blocktbl->clearContents();
-    int totalrow = pDataList.length();
+//    //ui->blocktbl->clearContents();
+//    int totalrow = pDataList.length();
+    ui->blocktbl->setRowCount(pDataList.count());
 
     int i=0;
     foreach (BlockData data, pDataList) {
         mBlockNameMap[data.code] = data.name;
         mBlockStkList[data.code] = data.stklist;
-        if((data.code.left(1) == "1" && mCurBlockType != BLOCK_DISTRICT)||
-           (data.code.left(1) == "2" && mCurBlockType != BLOCK_INDUSTORY) ||
-           (data.code.left(1) == "3" && mCurBlockType != BLOCK_CONCEPT))
-        {
-            mBlockMap[data.code] = data.changePer;
-            ui->blocktbl->setRowCount(--totalrow );
-            continue;
-        }
-//        mBlockMap[data.code] = data.changePer;;
-//        if(i > totalrow-1) continue;
         int k =0;
         ui->blocktbl->setRowHeight(i, 20);
         ui->blocktbl->setItem(i, k++, new HqTableWidgetItem(data.name));
@@ -625,7 +611,6 @@ void Dialog::updateBlockTable(const BlockDataList& pDataList)
 
 void Dialog::on_blocktbl_itemDoubleClicked(QTableWidgetItem *item)
 {
-    qDebug()<<"double block";
     if(item == NULL) return;
     QTableWidgetItem *wkItem = item;
     if(wkItem->column() != 0){
@@ -740,7 +725,7 @@ void Dialog::editFavorite()
     {
         mFavStkList.append(code);
     }
-    if(mMergeThread && mMergeThread->getMktType() == MKT_ZXG) mMergeThread->setSelfCodesList(mFavStkList);
+    //if(mMergeThread && mMergeThread->getMktType() == MKT_ZXG) mMergeThread->setSelfCodesList(mFavStkList);
     Profiles::instance()->setValue(STK_ZXG_SEC, STK_ZXG_NAME, mFavStkList);
     qDebug()<<"fav:"<<mFavStkList;
 }
@@ -800,7 +785,7 @@ void Dialog::on_hqtbl_itemDoubleClicked(QTableWidgetItem *item)
     {
         mFavStkList.append(code);
     }
-    if(mMergeThread && mMergeThread->getMktType() == MKT_ZXG) mMergeThread->setSelfCodesList(mFavStkList);
+//    if(mMergeThread && mMergeThread->getMktType() == MKT_ZXG) mMergeThread->setSelfCodesList(mFavStkList);
     Profiles::instance()->setValue(STK_ZXG_SEC, STK_ZXG_NAME, mFavStkList);
     qDebug()<<"fav:"<<mFavStkList;
 }
@@ -978,4 +963,26 @@ void Dialog::on_hqtbl_itemClicked(QTableWidgetItem *item)
 void Dialog::on_blocktbl_itemClicked(QTableWidgetItem *item)
 {
     item->tableWidget()->horizontalHeader()->setHighlightSections(false);
+}
+
+void Dialog::slotUpdateStockCodesList(const QStringList &list)
+{
+    //开始更新历史信息，龙虎榜信息，沪港通信息
+
+    //开启线程，更新股票的相关信息
+    if(mMergeThread)mMergeThread->setStkList(list);
+
+//    mMergeThread = new QSinaStkResultMergeThread;
+//    connect(mMergeThread, SIGNAL(sendStkDataList(StockDataList)), this, SLOT(updateHqTable(StockDataList)));
+//    mMergeThread->setMktType(MKT_ZXG);
+//    connect(mBlockThread, SIGNAL(sendStkinfoUpdateProgress(int,int)), this, SLOT(slotUpdate(int,int)));
+//    connect(mBlockThread, SIGNAL(signalUpdateMsg(QString)), this, SLOT(slotUpdateMsg(QString)));
+////    mMergeThread->start();
+
+//    //读取自选
+//    mFavStkList = Profiles::instance()->value(STK_ZXG_SEC, STK_ZXG_NAME).toStringList();
+//    mHSFoundsList = Profiles::instance()->value(STK_HSJJ_SEC, STK_ZXG_NAME).toStringList();
+//    mMergeThread->setSelfCodesList(mFavStkList);
+//    mMergeThread->setActive(true);
+//    mMergeThread->setMktType(MKT_ZXG);
 }
