@@ -1,11 +1,13 @@
 #include "qindexwidget.h"
 #include <QHBoxLayout>
+#include <QVBoxLayout>
 
 QIndexWidget::QIndexWidget(QWidget *parent) : QWidget(parent)
 {
     mIndexWidgetMap.clear();
-    QHBoxLayout *lay = new QHBoxLayout(this);
+    QVBoxLayout *lay = new QVBoxLayout(this);
     lay->setMargin(0);
+    lay->setSpacing(0);
     this->setLayout(lay);
 
 }
@@ -24,8 +26,19 @@ void QIndexWidget::updateData(const StockDataList &list)
             w = mIndexWidgetMap[data.code];
         } else
         {
+            QHBoxLayout *hlay = 0;
+            if(mIndexWidgetMap.count() % 4 == 0)
+            {
+                hlay = new QHBoxLayout(this);
+                ((QVBoxLayout*) this->layout())->addLayout(hlay);
+            } else
+            {
+                QLayoutItem* item = ((QVBoxLayout*) this->layout())->itemAt(this->layout()->count()-1);
+                if(item) hlay = (QHBoxLayout*)(item->layout());
+            }
             w = new QIndexFrame(data.name, this);
-            this->layout()->addWidget(w);
+            //this->layout()->addWidget(w);
+            if(hlay)   hlay->addWidget(w);
             mIndexWidgetMap[data.code] = w;
         }
         w->updateVal(data.cur, data.chg, data.per);
