@@ -12,6 +12,7 @@ HqInfoService::HqInfoService(QObject *parent) :
     QObject(parent),
     mDataBaseInitFlag(0)
 {
+    qRegisterMetaType<QList<ChinaShareExchange>>("const QList<ChinaShareExchange>&");
     bool sts = initDatabase();
     qDebug()<<"init db status:"<<sts;
     initSignalSlot();
@@ -170,7 +171,7 @@ bool HqInfoService::initDatabase()
     if(mDataBaseInitFlag) return true;
     //初始化本地数据库的连接
     mDB = QSqlDatabase::addDatabase("QSQLITE");//链接数据库
-    mDB.setDatabaseName("sccmms_se");
+    mDB.setDatabaseName("StockData.s3db");
     return mDB.open();
 }
 
@@ -184,4 +185,36 @@ bool HqInfoService::isActive()
     QDateTime cur = QDateTime::currentDateTime();
     if(cur.time().hour() >= 15 || cur.time().hour() <9 ) return false;
     return true;
+}
+
+void HqInfoService::slotRecvTop10ChinaStockInfos(const QString &date)
+{
+    //先从数据库去查询，如果没有，再到网上更新
+
+}
+
+bool HqInfoService::queryTop10ChinaShareInfos(QList<BlockRealInfo> &list, const QString& date)
+{
+//    QString filter = (date.length() != 0 ? tr(" where type = %1").arg(date) : "");
+//    if(!mSqlQuery.exec(tr("select * from Block %1").arg(filter))) return;
+
+//    QList<BlockRealInfo> selist;
+//    while (mSqlQuery.next()) {
+//        BlockRealInfo info;
+//        int index = 0;
+//        info.mCode = mSqlQuery.value(index++).toInt();
+//        info.mName = mSqlQuery.value(index++).toString();
+//        info.mCurPrice = mSqlQuery.value(index++).toDouble();
+//        info.mChange = mSqlQuery.value(index++).toDouble();
+//        info.mChangePercent = mSqlQuery.value(index++).toDouble();
+//        info.mZjlx = mSqlQuery.value(index++).toDouble();
+//        info.mShareCodesList = mSqlQuery.value(index++).toStringList();
+//        info.mType = mSqlQuery.value(index++).toInt();
+//        info.mDate = QDateTime::fromMSecsSinceEpoch(mSqlQuery.value(index++).toLongLong()).date();
+//        if(init) mBlockInfo[info.mCode] = info;
+//        selist.append(info);
+//    }
+
+//    emit signalSendBlockInfoList(selist);
+
 }

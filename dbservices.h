@@ -26,6 +26,8 @@ public:
 signals:
     void signalRecvRealBlockInfo(const QList<BlockRealInfo>& list);
     void signalSendBlockInfoList(const QList<BlockRealInfo>& list);
+    void signalSendTop10ChinaStockInfos(const QList<ChinaShareExchange>& list);
+    void signalRecvTop10ChinaStockInfos(const QString& date);
 public slots:
     void updateBlockInfoList(const QList<BlockRealInfo>& list);
     void addBlock(const BlockRealInfo& info);
@@ -33,6 +35,7 @@ public slots:
     void delBlock(int code);
     void queryBlock(int type = 0, bool init = false);
     void recvRealBlockInfo(const QList<BlockRealInfo>& list);
+    void slotRecvTop10ChinaStockInfos(const QString& date);
 private:
     void initSignalSlot();
     bool initDatabase();
@@ -43,6 +46,8 @@ private:
     void initBlockInfo();
     void saveDB();
     QString errMsg();
+    //数据库查询指定日期的沪深股通的TOP10交易
+    bool queryTop10ChinaShareInfos(QList<BlockRealInfo>& list, const QString& date = QString());
 
 private:    //本类使用的变量
     static HqInfoService *m_pInstance;

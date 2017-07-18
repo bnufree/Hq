@@ -14,6 +14,7 @@
 #include <QResizeEvent>
 #include "qindexwidget.h"
 #include "qeastmonystockcodesthread.h"
+#include "qeastmoneychinashareexchange.h"
 
 #define     STK_ZXG_SEC         "0520"
 #define     STK_HSJJ_SEC        "4521"
@@ -120,6 +121,10 @@ Dialog::Dialog(QWidget *parent) :
     connect(systemIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(setDlgShow(QSystemTrayIcon::ActivationReason)));
     connect(ui->hqtbl->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(setSortType(int)));
     connect(ui->blocktbl->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(setBlockSort(int)));
+
+    QEastMoneyChinaShareExchange *tophk = new QEastMoneyChinaShareExchange(QDate::fromString("2017-07-13", "yyyy-MM-dd"));
+    tophk->start();
+    return;
 
     //index更新
     QIndexWidget *indexw = new QIndexWidget(this);
