@@ -130,7 +130,7 @@ Dialog::Dialog(QWidget *parent) :
     QIndexWidget *indexw = new QIndexWidget(this);
     ui->verticalLayout->insertWidget(0, indexw);
     QStringList indexlist;
-    indexlist<<"sh000001"<<"sh000300"<<"sz399001"<<"sh000043"<<"sz399006";
+    indexlist<<"sh000001"<<"sh000300"<<"sz399001"/*<<"sh000043"*/<<"sz399006"<<"sh000016"<<"sh000010";
     mIndexThread = new QSinaStkInfoThread(this);
     connect(mIndexThread, SIGNAL(sendStkDataList(StockDataList)), indexw, SLOT(updateData(StockDataList)));
     mIndexThread->setStkList(indexlist);
