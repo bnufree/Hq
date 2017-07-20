@@ -218,6 +218,13 @@ QMenu::icon:checked { background: gray; border: 1px inset gray; position: absolu
       </spacer>
      </item>
      <item>
+      <widget class="QPushButton" name="HSGTBTN">
+       <property name="text">
+        <string>沪深港</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="minBtn">
        <property name="text">
         <string/>

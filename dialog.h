@@ -116,6 +116,8 @@ private slots:
 
     void on_blocktbl_itemClicked(QTableWidgetItem *item);
 
+    void on_HSGTBTN_clicked();
+
 private:
     Ui::MainDialog *ui;
     QSystemTrayIcon *systemIcon;

@@ -1,7 +1,11 @@
 #include "qeastmoneychinashareexchange.h"
 #include "qhttpget.h"
-#include <QRegExp>
 #include <QDebug>
+#include "dbservices.h"
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonParseError>
 
 QEastMoneyChinaShareExchange::QEastMoneyChinaShareExchange(const QDate& pDate, QObject *parent) : QThread(parent)
 {
@@ -14,29 +18,83 @@ QEastMoneyChinaShareExchange::~QEastMoneyChinaShareExchange()
 
 }
 
-void QEastMoneyChinaShareExchange::run()
+void QEastMoneyChinaShareExchange::getHGTTop10Share(QList<ChinaShareExchange>& list, const QDate& date)
 {
-    QString url = tr("http://www.hkex.com.hk/chi/csm/DailyStat/data_tab_daily_%1c.js?%2")
-            .arg(mWorkDate.toString("yyyyMMdd"))
-            .arg(QDateTime::currentMSecsSinceEpoch());
-    QString result = QString::fromUtf8(QHttpGet().getContent(url));
-    //qDebug()<<"result:"<<result;
+    QString url = tr("http://dcfm.eastmoney.com//EM_MutiSvcExpandInterface/api/js/get?type=HSGTCJB&"
+                     "token=70f12f2f4f091e459a279469fe49eca5&filter=(DetailDate=^%1^)&js=(x)&sr=1&st=Rank&rt=50014200")
+            .arg(date.toString("yyyy-MM-dd"));
+    QJsonParseError err;
+    QJsonDocument doc = QJsonDocument::fromJson(QHttpGet().getContent(url), &err);
+    if(err.error != QJsonParseError::NoError) return;
+    if(!doc.isArray())  return;
     //开始解析
-    QRegExp reg("\"([0-9]{1,2})\", \"([1-9]{1}[0-9]{0,5})\", \"([\u4E00-\u9FA5]{1,})\", \"(([0-9]{1,},{0,}){1,})\", \"(([0-9]{1,},{0,}){1,})\", \"(([0-9]{1,},{0,}){1,})\"");
-    //QRegExp reg("\"([0-9]{1,2})\", \"([1-9]{1}[0-9]{0,5})\", \"([\u4E00-\u9FA5]{1,})\"");
-
-    int index =0;
-    QList<ChinaShareExchange> wklist;
-    while ((index = reg.indexIn(result, index)) != -1) {
-        index += reg.cap().length();
+    QJsonArray result = doc.array();
+    for(int i=0; i<result.size(); i++)
+    {
+        QJsonObject obj = result.at(i).toObject();
+        int market_type = obj.value("MarketType").toInt();
+        if(market_type == 2 || market_type == 4) continue;
         ChinaShareExchange data;
-        data.code = reg.cap(2).length() == 6 ? reg.cap(2) : QString("").sprintf("%06d", reg.cap(2).toInt());
-        data.name = reg.cap(3).trimmed();
-        data.mTop10Buy = reg.cap(4).replace(",", "") .toDouble();
-        data.mTop10Sell = reg.cap(6).replace(",", "").toDouble();
-        wklist.append(data);
+        data.code = obj.value("Code").toString();
+        data.name = obj.value("Name").toString();
+        data.cur = obj.value("Close").toDouble();
+        data.per = obj.value("ChangePercent").toDouble();
+        if(data.code.left(1) == "6")
+        {
+            //上海
+            data.mTop10Buy = obj.value("HGTMRJE").toDouble();
+            data.mTop10Sell = obj.value("HGTMCJE").toDouble();
+        } else
+        {
+            //深圳
+            data.mTop10Buy = obj.value("SGTMRJE").toDouble();
+            data.mTop10Sell = obj.value("SGTMCJE").toDouble();
+        }
+        data.mDate = date;
+
+        list.append(data);
     }
 
-    emit signalTop10Exchangers(wklist);
+    return;
+
+}
+
+void QEastMoneyChinaShareExchange::run()
+{
+    QDate lastDate = DATA_SERVICE->getLastUpdateDateOfHSGT();
+    QDate wkDate = lastDate;
+    //取得历史信息
+    while(true)
+    {
+        qDebug()<<"date:"<<wkDate;
+        wkDate = wkDate.addDays(1);
+        if(wkDate >= QDate::currentDate()) break;
+        QList<ChinaShareExchange> wklist;
+        getHGTTop10Share(wklist, wkDate);
+        if(wklist.length() > 0)
+        {
+            emit DATA_SERVICE->signalRecvTop10ChinaStockInfos(wklist);
+            lastDate = wkDate;
+        }
+        qDebug()<<"date:"<<wkDate<<" list len:"<<wklist.length();
+    }
+
+    //更新今日的信息
+    if(lastDate == QDate::currentDate()) return;
+    //更新今天的信息
+    while(true)
+    {
+        QThread::sleep(10);
+        QList<ChinaShareExchange> wklist;
+        getHGTTop10Share(wklist, QDate::currentDate());
+        if(wklist.length() > 0)
+        {
+            emit DATA_SERVICE->signalRecvTop10ChinaStockInfos(wklist);
+            emit signalHSGTofTodayTop10Updated();
+            break;
+        }
+    }
+
+    return;
 }
 

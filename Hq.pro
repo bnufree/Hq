@@ -47,7 +47,8 @@ SOURCES += main.cpp\
     qeastmoneyblockmangagerthread.cpp \
     qeastmoneysharefhspthread.cpp \
     qhttpget.cpp \
-    qeastmoneynorthboundthread.cpp
+    qeastmoneynorthboundthread.cpp \
+    qeastmoneyhsgtdialog.cpp
 
 HEADERS  += dialog.h \
     stockdata.h \
@@ -82,11 +83,13 @@ HEADERS  += dialog.h \
     qeastmoneyblockmangagerthread.h \
     qeastmoneysharefhspthread.h \
     qhttpget.h \
-    qeastmoneynorthboundthread.h
+    qeastmoneynorthboundthread.h \
+    qeastmoneyhsgtdialog.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \
-    qindexframe.ui
+    qindexframe.ui \
+    qeastmoneyhsgtdialog.ui
 
 RESOURCES += \
     image.qrc

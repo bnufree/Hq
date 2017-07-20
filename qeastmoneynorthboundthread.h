@@ -9,9 +9,9 @@ class QEastmoneyNorthBoundThread : public QThread
     Q_OBJECT
 public:
     explicit QEastmoneyNorthBoundThread(QObject *parent = 0);
-    ~QEastmoneyNorthBoundThread();
 protected:
     void run();
+    double  changeRMBString(const QString& src);
 signals:
     void signalUpdateNorthBoundList(const StockDataList& list);
 };

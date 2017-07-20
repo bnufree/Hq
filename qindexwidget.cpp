@@ -6,8 +6,8 @@ QIndexWidget::QIndexWidget(QWidget *parent) : QWidget(parent)
 {
     mIndexWidgetMap.clear();
     QVBoxLayout *lay = new QVBoxLayout(this);
-    lay->setMargin(0);
-    lay->setSpacing(0);
+    lay->setMargin(3);
+    lay->setSpacing(3);
     this->setLayout(lay);
 
 }

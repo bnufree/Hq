@@ -15,6 +15,8 @@
 #include "qindexwidget.h"
 #include "qeastmonystockcodesthread.h"
 #include "qeastmoneychinashareexchange.h"
+#include "qeastmoneynorthboundthread.h"
+#include "qeastmoneyhsgtdialog.h"
 
 #define     STK_ZXG_SEC         "0520"
 #define     STK_HSJJ_SEC        "4521"
@@ -124,7 +126,6 @@ Dialog::Dialog(QWidget *parent) :
 
     QEastMoneyChinaShareExchange *tophk = new QEastMoneyChinaShareExchange(QDate::fromString("2017-07-13", "yyyy-MM-dd"));
     tophk->start();
-    return;
 
     //index更新
     QIndexWidget *indexw = new QIndexWidget(this);
@@ -135,6 +136,10 @@ Dialog::Dialog(QWidget *parent) :
     connect(mIndexThread, SIGNAL(sendStkDataList(StockDataList)), indexw, SLOT(updateData(StockDataList)));
     mIndexThread->setStkList(indexlist);
     mIndexThread->start();
+
+    QEastmoneyNorthBoundThread *north = new QEastmoneyNorthBoundThread(this);
+    connect(north, SIGNAL(signalUpdateNorthBoundList(StockDataList)), indexw, SLOT(updateData(StockDataList)));
+    north->start();
 
     //更新所有的代码
     QEastMonyStockCodesThread * codes = new QEastMonyStockCodesThread();
@@ -990,4 +995,12 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
 //    mMergeThread->setSelfCodesList(mFavStkList);
 //    mMergeThread->setActive(true);
 //    mMergeThread->setMktType(MKT_ZXG);
+}
+
+void Dialog::on_HSGTBTN_clicked()
+{
+    QEastMoneyHSGTDialog* dlg = new QEastMoneyHSGTDialog;
+    dlg->setModal(false);
+    dlg->show();
+
 }

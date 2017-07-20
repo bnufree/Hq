@@ -14,11 +14,12 @@ HqInfoService::HqInfoService(QObject *parent) :
 {
     qRegisterMetaType<QList<ChinaShareExchange>>("const QList<ChinaShareExchange>&");
     bool sts = initDatabase();
+    mSqlQuery = QSqlQuery(mDB);
     qDebug()<<"init db status:"<<sts;
-    initSignalSlot();
     //3、开启异步通讯
     moveToThread(&m_threadWork);
-    m_threadWork.start();
+    m_threadWork.start();    
+    initSignalSlot();
 }
 
 HqInfoService::~HqInfoService()
@@ -63,7 +64,10 @@ bool HqInfoService::createHistoryTable(const QString &pTableName)
 
 void HqInfoService::initSignalSlot()
 {
-
+    connect(this, SIGNAL(signalRecvTop10ChinaStockInfos(QList<ChinaShareExchange>)),
+            this, SLOT(slotRecvTop10ChinaStockInfos(QList<ChinaShareExchange>)));
+    connect(this, SIGNAL(signalQueryTop10ChinaStockInfos(QDate,QString,int)),
+            this, SLOT(slotQueryTop10ChinaStockInfos(QDate,QString,int)));
 }
 
 void HqInfoService::recvRealBlockInfo(const QList<BlockRealInfo> &list)
@@ -187,34 +191,85 @@ bool HqInfoService::isActive()
     return true;
 }
 
-void HqInfoService::slotRecvTop10ChinaStockInfos(const QString &date)
+void HqInfoService::slotRecvTop10ChinaStockInfos(const QList<ChinaShareExchange>& list)
 {
-    //先从数据库去查询，如果没有，再到网上更新
-
+    //更新到数据库
+    QSqlDatabase::database().transaction();
+    foreach (ChinaShareExchange info, list) {
+        if(!addTop10ChinaStockInfo(info))
+        {
+            qDebug()<<"error:"<<mSqlQuery.lastError().text();
+        }
+    }
+    QSqlDatabase::database().commit();
 }
 
-bool HqInfoService::queryTop10ChinaShareInfos(QList<BlockRealInfo> &list, const QString& date)
+bool HqInfoService::addTop10ChinaStockInfo(const ChinaShareExchange &info)
 {
-//    QString filter = (date.length() != 0 ? tr(" where type = %1").arg(date) : "");
-//    if(!mSqlQuery.exec(tr("select * from Block %1").arg(filter))) return;
+    mSqlQuery.prepare("insert into hstop10 (id, name, close, change_percent, buy, sell, date) values ("
+                      "?, ?, ?, ?, ?, ?, ?)");
+    mSqlQuery.addBindValue(info.code);
+    mSqlQuery.addBindValue(info.name);
+    mSqlQuery.addBindValue(info.cur);
+    mSqlQuery.addBindValue(info.per);
+    mSqlQuery.addBindValue(info.mTop10Buy);
+    mSqlQuery.addBindValue(info.mTop10Sell);
+    mSqlQuery.addBindValue(info.mDate);
 
-//    QList<BlockRealInfo> selist;
-//    while (mSqlQuery.next()) {
-//        BlockRealInfo info;
-//        int index = 0;
-//        info.mCode = mSqlQuery.value(index++).toInt();
-//        info.mName = mSqlQuery.value(index++).toString();
-//        info.mCurPrice = mSqlQuery.value(index++).toDouble();
-//        info.mChange = mSqlQuery.value(index++).toDouble();
-//        info.mChangePercent = mSqlQuery.value(index++).toDouble();
-//        info.mZjlx = mSqlQuery.value(index++).toDouble();
-//        info.mShareCodesList = mSqlQuery.value(index++).toStringList();
-//        info.mType = mSqlQuery.value(index++).toInt();
-//        info.mDate = QDateTime::fromMSecsSinceEpoch(mSqlQuery.value(index++).toLongLong()).date();
-//        if(init) mBlockInfo[info.mCode] = info;
-//        selist.append(info);
-//    }
+    return mSqlQuery.exec();
+}
 
-//    emit signalSendBlockInfoList(selist);
+QDate HqInfoService::getLastUpdateDateOfTable(const QString &table)
+{
+    QDate date = QDate(2016, 12, 4);
+    if(mSqlQuery.exec(tr("select max(date) from %1").arg(table)))
+    {
+        while (mSqlQuery.next()) {
+            if(!mSqlQuery.value(0).isNull())
+            {
+                date = mSqlQuery.value(0).toDate();
+                break;
+            }
+        }
+    }
+    return date;
+}
 
+QDate HqInfoService::getLastUpdateDateOfHSGT()
+{
+    return getLastUpdateDateOfTable("hstop10");
+}
+
+void HqInfoService::slotQueryTop10ChinaStockInfos(const QDate &date, const QString &share, int market)
+{
+    QList<ChinaShareExchange> list;
+    queryTop10ChinaShareInfos(list,date, share, market);
+    emit signalSendTop10ChinaStockInfos(list);
+}
+
+bool HqInfoService::queryTop10ChinaShareInfos(QList<ChinaShareExchange>& list, const QDate& date, const QString& share, int market)
+{
+    QStringList filterList;
+    if((!date.isNull()) && date.isValid())
+    {
+        filterList.append(tr(" date = '%1' ").arg(date.toString("yyyy-MM-dd")));
+    }
+    if(!share.isEmpty())
+    {
+        filterList.append(tr(" id = '%1' ").arg(share));
+    }
+    if(!mSqlQuery.exec(tr("select * from hstop10 %1").arg(filterList.length() > 0 ? " where " + filterList.join(" and ") : ""))) return false;
+    while (mSqlQuery.next()) {
+        ChinaShareExchange info;
+        info.code = mSqlQuery.value("id").toString();
+        info.name = mSqlQuery.value("name").toString();
+        info.cur = mSqlQuery.value("close").toDouble();
+        info.per = mSqlQuery.value("change_percent").toDouble();
+        info.mTop10Buy = mSqlQuery.value("buy").toDouble();
+        info.mTop10Sell = mSqlQuery.value("sell").toDouble();
+        info.mDate = mSqlQuery.value("date").toDate();
+        list.append(info);
+    }
+
+    return true;
 }
