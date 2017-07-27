@@ -3,22 +3,22 @@
 
 #include <QThread>
 
-class QSinaSearchThread : public QThread
+class QSinaSearchThread : public QObject
 {
     Q_OBJECT
 public:
     explicit QSinaSearchThread(QObject *parent = 0);
     ~QSinaSearchThread();
-    void setSearchString(const QString& text);
-protected:
-    void run();
+private slots:
+    void slotRecvSearchString(const QString& text);
 
 signals:
     void sendSearchResult(const QStringList& list);
+    void signalSetSearchString(const QString& text);
 public slots:
 
 private:
-    QString mSearchText;
+    QThread mWorkThread;
 };
 
 #endif // QSINASEARCHTHREAD_H

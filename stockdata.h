@@ -3,6 +3,7 @@
 
 #include "basedata.h"
 #include <QStringList>
+#include <QDate>
 
 struct zjlxData{
     QString code;
@@ -49,7 +50,7 @@ public:
 //    double      low;
     double      zht;
     double      dit;
-    int         vol;
+    qint64         vol;
     double         money;
     double      hsl;
     double      last_money;
@@ -75,6 +76,7 @@ public:
     double      totalCap;
     double      mutalbleCap;
     bool        index;
+    QDate       date;
 
 };
 

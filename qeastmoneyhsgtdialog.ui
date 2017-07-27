@@ -17,7 +17,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QCheckBox" name="MarketCHK">
        <property name="text">
         <string>市场</string>
        </property>
@@ -43,7 +43,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_2">
+      <widget class="QCheckBox" name="DateCHK">
        <property name="text">
         <string>时间</string>
        </property>
@@ -56,7 +56,7 @@
        </property>
        <property name="minimumTime">
         <time>
-         <hour>12</hour>
+         <hour>0</hour>
          <minute>0</minute>
          <second>0</second>
         </time>
@@ -80,9 +80,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_3">
+      <widget class="QCheckBox" name="CodeCHK">
        <property name="text">
-        <string>名称</string>
+        <string>代码名称</string>
        </property>
       </widget>
      </item>

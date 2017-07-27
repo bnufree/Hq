@@ -1,0 +1,11 @@
+[Block]
+names=1172, 2727, 3668
+
+[Chg]
+L3=0
+L5=0
+mutable=0
+total=207000000
+
+[FHSP]
+Content=@Invalid()

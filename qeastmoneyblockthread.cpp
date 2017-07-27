@@ -5,7 +5,7 @@
 #include <QEventLoop>
 #include "profiles.h"
 #include <QDateTime>
-#include "qeastmoneystockinfothread.h"
+//#include "qeastmoneystockhistoryinfothread.h"
 #include "stkinfofilemanage.h"
 #include <QJsonDocument>
 #include <QJsonObject>

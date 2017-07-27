@@ -35,7 +35,9 @@ HqInfoService::~HqInfoService()
 
 bool HqInfoService::isTableExist(const QString &pTable)
 {
+    qDebug()<<__FUNCTION__<<__LINE__;
     if(!mSqlQuery.exec(tr("SELECT COUNT(*) FROM sqlite_master where type='table' and name='%1'").arg(pTable))) return  false;
+    qDebug()<<__FUNCTION__<<__LINE__;
     while (mSqlQuery.next()) {
         return mSqlQuery.value(0).toBool();
     }
@@ -53,11 +55,12 @@ bool HqInfoService::createHistoryTable(const QString &pTableName)
                   "[low] REAL  NULL,"
                   "[change] REAL  NULL,"
                   "[change_percent] REAL  NULL,"
-                  "[total_vol] NUMERIC  NULL,"
-                  "[total_money] REAL  NULL,"
-                  "[zjlx] REAL  NULL,"
-                  "[ltsz] REAL  NULL,"
-                  "[zsz] REAL  NULL"
+                  "[vol] NUMERIC  NULL,"
+                  "[money] REAL  NULL,"
+                  "[puremoney] REAL  NULL,"
+                  "[marketshare] REAL  NULL,"
+                  "[mutalbleshare] REAL  NULL,"
+                  "[date] DATE  NULL"
                   ")").arg(pTableName);
     return mSqlQuery.exec(sql);
 }
@@ -68,6 +71,8 @@ void HqInfoService::initSignalSlot()
             this, SLOT(slotRecvTop10ChinaStockInfos(QList<ChinaShareExchange>)));
     connect(this, SIGNAL(signalQueryTop10ChinaStockInfos(QDate,QString,int)),
             this, SLOT(slotQueryTop10ChinaStockInfos(QDate,QString,int)));
+    connect(this, SIGNAL(signalRecvShareHistoryInfos(StockDataList)),
+            this, SLOT(slotRecvShareHistoryInfos(StockDataList)));
 }
 
 void HqInfoService::recvRealBlockInfo(const QList<BlockRealInfo> &list)
@@ -240,6 +245,14 @@ QDate HqInfoService::getLastUpdateDateOfHSGT()
     return getLastUpdateDateOfTable("hstop10");
 }
 
+QDate HqInfoService::getLastUpdateDateOfShareHistory(const QString &code)
+{
+    QString table = code.right(6);
+    if(!isTableExist(table)) createHistoryTable(table);
+
+    return getLastUpdateDateOfTable(table);
+}
+
 void HqInfoService::slotQueryTop10ChinaStockInfos(const QDate &date, const QString &share, int market)
 {
     QList<ChinaShareExchange> list;
@@ -256,9 +269,17 @@ bool HqInfoService::queryTop10ChinaShareInfos(QList<ChinaShareExchange>& list, c
     }
     if(!share.isEmpty())
     {
-        filterList.append(tr(" id = '%1' ").arg(share));
+        QRegExp reg("[0-9]{1,6}");
+        if(reg.exactMatch(share))
+        {
+            filterList.append(tr(" id like '%%1%' ").arg(share));
+        } else
+        {
+            filterList.append(tr(" name like '%%1%' ").arg(share));
+        }
     }
-    if(!mSqlQuery.exec(tr("select * from hstop10 %1").arg(filterList.length() > 0 ? " where " + filterList.join(" and ") : ""))) return false;
+    if(!mSqlQuery.exec(tr("select * from hstop10 %1 order by date desc").arg(filterList.length() > 0 ? " where " + filterList.join(" and ") : ""))) return false;
+    qDebug()<<mSqlQuery.lastQuery();
     while (mSqlQuery.next()) {
         ChinaShareExchange info;
         info.code = mSqlQuery.value("id").toString();
@@ -272,4 +293,50 @@ bool HqInfoService::queryTop10ChinaShareInfos(QList<ChinaShareExchange>& list, c
     }
 
     return true;
+}
+
+void HqInfoService::slotRecvShareHistoryInfos(const StockDataList &list)
+{
+    //更新到数据库
+    QSqlDatabase::database().transaction();
+    foreach (StockData info, list) {
+        if(!slotAddHistoryData(info))
+        {
+            qDebug()<<"error:"<<mSqlQuery.lastError().text();
+        }
+    }
+    QSqlDatabase::database().commit();
+}
+
+bool HqInfoService::slotAddHistoryData(const StockData &info)
+{
+    QString tableName = info.code.right(6);
+    if(!isTableExist(tableName))
+    {
+        if(!createHistoryTable(tableName)) return false;
+    }
+    mSqlQuery.prepare(tr("insert into %1 ("
+                         "name, close, open, high, low, "
+                         "change, change_percent, vol, money, puremoney"
+                         "marketshare, mutalbleshare, date) values ("
+                         "?, ?, ?, ?, ?, "
+                         "?, ?, ?, ?, ?, "
+                         "?, ?, ?)"
+                         ).arg(tableName));
+    mSqlQuery.addBindValue(info.name);
+    mSqlQuery.addBindValue(info.cur);
+    mSqlQuery.addBindValue(info.open);
+    mSqlQuery.addBindValue(info.high);
+    mSqlQuery.addBindValue(info.low);
+
+    mSqlQuery.addBindValue(info.chg);
+    mSqlQuery.addBindValue(info.per);
+    mSqlQuery.addBindValue(info.vol);
+    mSqlQuery.addBindValue(info.money);
+    mSqlQuery.addBindValue(info.zjlx);
+
+    mSqlQuery.addBindValue(info.totalshare);
+    mSqlQuery.addBindValue(info.mutableshare);
+    mSqlQuery.addBindValue(info.date);
+    return mSqlQuery.exec();
 }

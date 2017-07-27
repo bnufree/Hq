@@ -20,6 +20,12 @@ private slots:
     void slotRecvTop10Infos(const QList<ChinaShareExchange>& list);
     void on_SearchBTB_clicked();
 
+    void on_MarketCHK_clicked(bool checked);
+
+    void on_DateCHK_clicked(bool checked);
+
+    void on_CodeCHK_clicked(bool checked);
+
 private:
     Ui::QEastMoneyHSGTDialog *ui;
 };

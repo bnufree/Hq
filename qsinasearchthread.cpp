@@ -1,64 +1,39 @@
 #include "qsinasearchthread.h"
 #include <QDateTime>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QEventLoop>
 #include <QDebug>
+#include "qhttpget.h"
 
-QSinaSearchThread::QSinaSearchThread(QObject *parent) : QThread(parent)
+QSinaSearchThread::QSinaSearchThread(QObject *parent) : QObject(parent)
 {
-    mSearchText = "";
+    connect(this ,SIGNAL(signalSetSearchString(QString)), this, SLOT(slotRecvSearchString(QString)));
+    moveToThread(&mWorkThread);
+    mWorkThread.start();
 }
 
 QSinaSearchThread::~QSinaSearchThread()
 {
+    qDebug()<<__FUNCTION__<<__LINE__;
 
 }
 
-void QSinaSearchThread::run()
+void QSinaSearchThread::slotRecvSearchString(const QString& text)
 {
-    QNetworkAccessManager *mgr = new QNetworkAccessManager;
-    while (true) {
-        if(mSearchText.length() == 0) continue;
-        QString wkURL = QString("http://suggest3.sinajs.cn/suggest/type=11&key=%1&name=suggestdata_%2")
-                .arg(mSearchText)
-                .arg(QDateTime::currentDateTime().toMSecsSinceEpoch());
+    QString wkURL = QString("http://suggest3.sinajs.cn/suggest/type=11&key=%1&name=suggestdata_%2")
+            .arg(text)
+            .arg(QDateTime::currentDateTime().toMSecsSinceEpoch());
 
-        QNetworkReply *reply  = mgr->get(QNetworkRequest(wkURL));
-        if(!reply)
-        {
-            mSearchText.clear();
-            continue;
-        }
-
-        QEventLoop loop; // 使用事件循环使得网络通讯同步进行
-        connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-        loop.exec(); // 进入事件循环， 直到reply的finished()信号发出， 这个语句才能退出
-        if(reply->error())
-        {
-            qDebug()<<"err occured:"<<reply->errorString();
-            reply->deleteLater();
-            mgr->deleteLater();
-            return;
-        }
-        //开始解析数据
-        QByteArray bytes = reply->readAll();
-        QString result = QString::fromLocal8Bit(bytes.data());
-        int start = 0;
-        QStringList resultlist;
-        while((start = result.indexOf(QRegExp("[shz]{2}[0-9]{6}"), start))  != -1)
-        {
-            resultlist.append(result.mid(start, 8));
-            start += 1;
-        }
-        //qDebug()<<"search result:"<<resultlist;
-        emit sendSearchResult(resultlist);
-        mSearchText.clear();
+    QByteArray bytes = QHttpGet().getContent(wkURL);
+    QString result = QString::fromLocal8Bit(bytes.data());
+    //qDebug()<<"result:"<<result;
+    int start = 0;
+    QStringList resultlist;
+    QRegExp worker("[shz]{2}[0-9]{6}");
+    while((start = worker.indexIn(result, start)) != -1)
+    {
+        //qDebug()<<"start:"<<start<<"   "<<worker.cap();
+        resultlist.append(worker.cap());
+        start += worker.cap().length();
     }
-
-}
-
-void QSinaSearchThread::setSearchString(const QString &text)
-{
-    mSearchText = text;
+    //qDebug()<<"search result:"<<resultlist;
+    emit sendSearchResult(resultlist);
 }

@@ -6,7 +6,6 @@
 #include "qsinastkinfothread.h"
 #include "profiles.h"
 #include <QDebug>
-#include "qeastmoneystockinfothread.h"
 #include "qexchangedatamanage.h"
 
 QSinaStkResultMergeThread::QSinaStkResultMergeThread(QObject *parent) : QThread(parent)
@@ -252,6 +251,9 @@ void QSinaStkResultMergeThread::run()
                 }
             }
             if(mActive)emit sendStkDataList(wklist.mid(0, mPageSize));
+        } else
+        {
+            emit sendStkDataList(StockDataList());
         }
 
         sleep(1);

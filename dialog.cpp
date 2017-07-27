@@ -17,6 +17,7 @@
 #include "qeastmoneychinashareexchange.h"
 #include "qeastmoneynorthboundthread.h"
 #include "qeastmoneyhsgtdialog.h"
+#include "./history/qsharehistoryinfomgr.h"
 
 #define     STK_ZXG_SEC         "0520"
 #define     STK_HSJJ_SEC        "4521"
@@ -125,6 +126,7 @@ Dialog::Dialog(QWidget *parent) :
     connect(ui->blocktbl->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(setBlockSort(int)));
 
     QEastMoneyChinaShareExchange *tophk = new QEastMoneyChinaShareExchange(QDate::fromString("2017-07-13", "yyyy-MM-dd"));
+    connect(tophk, SIGNAL(signalHSGTofTodayTop10Updated()), this, SLOT(slotTodayHSGUpdated()));
     tophk->start();
 
     //index更新
@@ -146,7 +148,7 @@ Dialog::Dialog(QWidget *parent) :
     connect(codes, SIGNAL(signalSendCodesList(QStringList)), this, SLOT(slotUpdateStockCodesList(QStringList)));
     connect(codes, SIGNAL(finished()), codes, SLOT(deleteLater()));
     codes->start();
-  #if 0
+  #if 1
 
     //行情中心初始化开始
     mMergeThread = new QSinaStkResultMergeThread();
@@ -158,9 +160,8 @@ Dialog::Dialog(QWidget *parent) :
     mBlockMgr->setCurBlockType(2);
     connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataList)), this, SLOT(updateBlockTable(BlockDataList)));
     mBlockMgr->start();
-    mSearchThread = new QSinaSearchThread;
+    mSearchThread = new QSinaSearchThread(this);
     connect(mSearchThread, SIGNAL(sendSearchResult(QStringList)), this, SLOT(displayBlockDetailInfoInTable(QStringList)));
-    mSearchThread->start();
 //    connect(mBlockThread, SIGNAL(sendStkinfoUpdateProgress(int,int)), this, SLOT(slotUpdate(int,int)));
 //    connect(mBlockThread, SIGNAL(signalUpdateMsg(QString)), this, SLOT(slotUpdateMsg(QString)));
 
@@ -476,7 +477,7 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
 {
 //    qDebug()<<"input";
     //qDebug()<<"main Thread:"<<QThread::currentThreadId();
-    if(pDataList.length() == 0) return;
+    //if(pDataList.length() == 0) return;
     ui->hqtbl->setRowCount(pDataList.count());
     int i=0;
     foreach (StockData data, pDataList) {
@@ -494,8 +495,8 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
 //            ui->hqtbl->setItem(i, k++, new QTableWidgetItem(tempStr.sprintf("%.2f%%", data.per)));
 //        } else {
             double val = mStockMap[data.code];
-            QString up = QString::fromLocal8Bit("↑");
-            QString down = QString::fromLocal8Bit("↓");
+            QString up = QStringLiteral("↑");
+            QString down = QStringLiteral("↓");
             if(val > data.per)
             {
                 ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(QString("%1%2%").arg(down).arg(QString::number(data.per, 'f', 2))));
@@ -596,8 +597,8 @@ void Dialog::updateBlockTable(const BlockDataList& pDataList)
 
         //ui->blocktbl->setItem(i, k++, new QTableWidgetItem(QString::number(data.mktkap)));
         QString tempStr = QString("%1%2%");
-        QString up = QString::fromLocal8Bit("↑");
-        QString down = QString::fromLocal8Bit("↓");
+        QString up = QStringLiteral("↑");
+        QString down = QStringLiteral("↓");
         if(mBlockMap[data.code] > data.changePer)
         {
             ui->blocktbl->setItem(i, k++, new HqTableWidgetItem(tempStr.arg(down).arg(QString::number(data.changePer, 'f', 2))));
@@ -744,16 +745,8 @@ void Dialog::on_searchTxt_textChanged(const QString &arg1)
 {
     if(mSearchThread)
     {
-        mSearchThread->setSearchString(arg1);
+        mSearchThread->signalSetSearchString(arg1);
     }
-//    if(mMergeThread)
-//    {
-//        mMergeThread->setActive(false);
-//    }
-//    if(mStockThread)
-//    {
-//        mStockThread->setActive(true);
-//    }
 
 }
 
@@ -978,6 +971,8 @@ void Dialog::on_blocktbl_itemClicked(QTableWidgetItem *item)
 void Dialog::slotUpdateStockCodesList(const QStringList &list)
 {
     //开始更新历史信息，龙虎榜信息，沪港通信息
+    QShareHistoryInfoMgr *mgr = new QShareHistoryInfoMgr(this);
+    mgr->startGetHistoryInfo(list);
 
     //开启线程，更新股票的相关信息
     if(mMergeThread)mMergeThread->setStkList(list);
@@ -999,8 +994,14 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
 
 void Dialog::on_HSGTBTN_clicked()
 {
+    ui->HSGTBTN->setStyleSheet("background-color:transparent");
     QEastMoneyHSGTDialog* dlg = new QEastMoneyHSGTDialog;
     dlg->setModal(false);
     dlg->show();
 
+}
+
+void Dialog::slotTodayHSGUpdated()
+{
+    ui->HSGTBTN->setStyleSheet("background-color:red");
 }

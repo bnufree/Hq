@@ -23,6 +23,7 @@ public:
     friend class CGarbo;
     static HqInfoService* instance();
     QDate  getLastUpdateDateOfHSGT();
+    QDate  getLastUpdateDateOfShareHistory(const QString& code);
 
 signals:
     void signalRecvRealBlockInfo(const QList<BlockRealInfo>& list);
@@ -30,7 +31,11 @@ signals:
     void signalSendTop10ChinaStockInfos(const QList<ChinaShareExchange>& list);
     void signalRecvTop10ChinaStockInfos(const QList<ChinaShareExchange>& list);
     void signalQueryTop10ChinaStockInfos(const QDate& date = QDate(), const QString& share = QString(), int market = 0);
+    //历史数据写入数据库
+    void signalRecvShareHistoryInfos(const StockDataList& list);
 public slots:
+    void slotRecvShareHistoryInfos(const StockDataList& list);
+    bool slotAddHistoryData(const StockData& data);
     void updateBlockInfoList(const QList<BlockRealInfo>& list);
     void addBlock(const BlockRealInfo& info);
     void modBlock(const BlockRealInfo& info);

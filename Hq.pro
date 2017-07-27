@@ -33,7 +33,6 @@ SOURCES += main.cpp\
     qeastmoneylhbthread.cpp \
     qeastmoneyzjlxthread.cpp \
     stkmktcap.cpp \
-    qeastmoneystockinfothread.cpp \
     stkinfofilemanage.cpp \
     qexchangedatamanage.cpp \
     qexchangedatemangagedialog.cpp \
@@ -48,7 +47,9 @@ SOURCES += main.cpp\
     qeastmoneysharefhspthread.cpp \
     qhttpget.cpp \
     qeastmoneynorthboundthread.cpp \
-    qeastmoneyhsgtdialog.cpp
+    qeastmoneyhsgtdialog.cpp \
+    history/qeastmoneystockhistoryinfothread.cpp \
+    history/qsharehistoryinfomgr.cpp
 
 HEADERS  += dialog.h \
     stockdata.h \
@@ -67,7 +68,6 @@ HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
     qeastmoneyzjlxthread.h \
     stkmktcap.h \
-    qeastmoneystockinfothread.h \
     stkinfofilemanage.h \
     qexchangedatamanage.h \
     qexchangedatemangagedialog.h \
@@ -84,7 +84,9 @@ HEADERS  += dialog.h \
     qeastmoneysharefhspthread.h \
     qhttpget.h \
     qeastmoneynorthboundthread.h \
-    qeastmoneyhsgtdialog.h
+    qeastmoneyhsgtdialog.h \
+    history/qeastmoneystockhistoryinfothread.h \
+    history/qsharehistoryinfomgr.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \
