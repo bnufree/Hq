@@ -33,6 +33,8 @@ signals:
     void signalQueryTop10ChinaStockInfos(const QDate& date = QDate(), const QString& share = QString(), int market = 0);
     //历史数据写入数据库
     void signalRecvShareHistoryInfos(const StockDataList& list);
+    void signalQueryShareHistoryLastDate(const QString& code);
+    void signalSendShareHistoryLastDate(const QString& code, const QDate& date);
 public slots:
     void slotRecvShareHistoryInfos(const StockDataList& list);
     bool slotAddHistoryData(const StockData& data);
@@ -44,6 +46,7 @@ public slots:
     void recvRealBlockInfo(const QList<BlockRealInfo>& list);
     void slotRecvTop10ChinaStockInfos(const QList<ChinaShareExchange>& list);
     void slotQueryTop10ChinaStockInfos(const QDate& date = QDate(), const QString& share = QString(), int market = 0);
+    void slotQueryShareHistoryLastDate(const QString& code);
 private:
     void initSignalSlot();
     bool initDatabase();

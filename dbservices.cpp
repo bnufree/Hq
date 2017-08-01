@@ -35,7 +35,7 @@ HqInfoService::~HqInfoService()
 
 bool HqInfoService::isTableExist(const QString &pTable)
 {
-    qDebug()<<__FUNCTION__<<__LINE__;
+    qDebug()<<__FUNCTION__<<__LINE__<<" "<<pTable;
     if(!mSqlQuery.exec(tr("SELECT COUNT(*) FROM sqlite_master where type='table' and name='%1'").arg(pTable))) return  false;
     qDebug()<<__FUNCTION__<<__LINE__;
     while (mSqlQuery.next()) {
@@ -73,6 +73,8 @@ void HqInfoService::initSignalSlot()
             this, SLOT(slotQueryTop10ChinaStockInfos(QDate,QString,int)));
     connect(this, SIGNAL(signalRecvShareHistoryInfos(StockDataList)),
             this, SLOT(slotRecvShareHistoryInfos(StockDataList)));
+    connect(this, SIGNAL(signalQueryShareHistoryLastDate(QString)),
+            this, SLOT(slotQueryShareHistoryLastDate(QString)));
 }
 
 void HqInfoService::recvRealBlockInfo(const QList<BlockRealInfo> &list)
@@ -247,7 +249,7 @@ QDate HqInfoService::getLastUpdateDateOfHSGT()
 
 QDate HqInfoService::getLastUpdateDateOfShareHistory(const QString &code)
 {
-    QString table = code.right(6);
+    QString table = "stk"+ code.right(6);
     if(!isTableExist(table)) createHistoryTable(table);
 
     return getLastUpdateDateOfTable(table);
@@ -302,7 +304,7 @@ void HqInfoService::slotRecvShareHistoryInfos(const StockDataList &list)
     foreach (StockData info, list) {
         if(!slotAddHistoryData(info))
         {
-            qDebug()<<"error:"<<mSqlQuery.lastError().text();
+            qDebug()<<"error:"<<mSqlQuery.lastError().text()<<" "<<mSqlQuery.lastQuery();
         }
     }
     QSqlDatabase::database().commit();
@@ -310,14 +312,14 @@ void HqInfoService::slotRecvShareHistoryInfos(const StockDataList &list)
 
 bool HqInfoService::slotAddHistoryData(const StockData &info)
 {
-    QString tableName = info.code.right(6);
-    if(!isTableExist(tableName))
-    {
-        if(!createHistoryTable(tableName)) return false;
-    }
+    QString tableName = "stk" + info.code.right(6);
+//    if(!isTableExist(tableName))
+//    {
+//        if(!createHistoryTable(tableName)) return false;
+//    }
     mSqlQuery.prepare(tr("insert into %1 ("
                          "name, close, open, high, low, "
-                         "change, change_percent, vol, money, puremoney"
+                         "change, change_percent, vol, money, puremoney, "
                          "marketshare, mutalbleshare, date) values ("
                          "?, ?, ?, ?, ?, "
                          "?, ?, ?, ?, ?, "
@@ -339,4 +341,9 @@ bool HqInfoService::slotAddHistoryData(const StockData &info)
     mSqlQuery.addBindValue(info.mutableshare);
     mSqlQuery.addBindValue(info.date);
     return mSqlQuery.exec();
+}
+
+void HqInfoService::slotQueryShareHistoryLastDate(const QString &code)
+{
+    emit signalSendShareHistoryLastDate(code, getLastUpdateDateOfShareHistory(code));
 }

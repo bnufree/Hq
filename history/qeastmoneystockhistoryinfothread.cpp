@@ -5,13 +5,14 @@
 #include "dbservices.h"
 #include "qhttpget.h"
 
-QEastmoneyStockHistoryInfoThread::QEastmoneyStockHistoryInfoThread(const QString& code, QObject *parent) : mCode(code), QThread(parent)
+QEastmoneyStockHistoryInfoThread::QEastmoneyStockHistoryInfoThread(const QString& code, const QDate& date,  QObject *parent) : mCode(code), QThread(parent)
 {
     mCode = code;
     if(mCode.length() != 6)
     {
         mCode = mCode.right(6);
     }
+    mDate = date;
 }
 
 QEastmoneyStockHistoryInfoThread::~QEastmoneyStockHistoryInfoThread()
@@ -21,12 +22,12 @@ QEastmoneyStockHistoryInfoThread::~QEastmoneyStockHistoryInfoThread()
 
 void QEastmoneyStockHistoryInfoThread::run()
 {
-    QDate lastDate = DATA_SERVICE->getLastUpdateDateOfShareHistory(mCode);
+    //QDate lastDate = DATA_SERVICE->getLastUpdateDateOfShareHistory(mCode);
     //检查是否需要更新
-    if(lastDate >= QDate::currentDate()) return;
+    if(mDate >= QDate::currentDate()) return;
 
     //开始更新
-    QDate start = lastDate.addDays(-11);
+    QDate start = mDate.addDays(1);
     QDate end = QDate::currentDate();
     mCode = mCode.right(6);
     if(mCode.left(1) == "6" || mCode.left(1) == "5")

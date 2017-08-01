@@ -972,7 +972,7 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
 {
     //开始更新历史信息，龙虎榜信息，沪港通信息
     QShareHistoryInfoMgr *mgr = new QShareHistoryInfoMgr(this);
-    mgr->startGetHistoryInfo(list);
+    mgr->slotSetHistoryCodeList(list);
 
     //开启线程，更新股票的相关信息
     if(mMergeThread)mMergeThread->setStkList(list);

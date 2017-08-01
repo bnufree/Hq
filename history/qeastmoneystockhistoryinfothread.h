@@ -3,13 +3,13 @@
 
 #include <QThread>
 #include <QStringList>
-class QDate;
+#include <QDate>
 
 class QEastmoneyStockHistoryInfoThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit QEastmoneyStockHistoryInfoThread(const QString& code, QObject *parent = 0);
+    explicit QEastmoneyStockHistoryInfoThread(const QString& code, const QDate& date, QObject *parent = 0);
     ~QEastmoneyStockHistoryInfoThread();
 protected:
     void run();
@@ -18,6 +18,7 @@ signals:
 public slots:
 private:
     QString         mCode;
+    QDate           mDate;
 };
 
 #endif // QEASTMONEYSTOCKHISTORYINFOTHREAD_H
