@@ -29,6 +29,7 @@ void QEastmoneyStockHistoryInfoThread::run()
     //开始更新
     QDate start = mDate.addDays(1);
     QDate end = QDate::currentDate();
+    if(start == end) return;
     mCode = mCode.right(6);
     if(mCode.left(1) == "6" || mCode.left(1) == "5")
     {

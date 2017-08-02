@@ -35,9 +35,9 @@ HqInfoService::~HqInfoService()
 
 bool HqInfoService::isTableExist(const QString &pTable)
 {
-    qDebug()<<__FUNCTION__<<__LINE__<<" "<<pTable;
+    //qDebug()<<__FUNCTION__<<__LINE__<<" "<<pTable;
     if(!mSqlQuery.exec(tr("SELECT COUNT(*) FROM sqlite_master where type='table' and name='%1'").arg(pTable))) return  false;
-    qDebug()<<__FUNCTION__<<__LINE__;
+    //qDebug()<<__FUNCTION__<<__LINE__;
     while (mSqlQuery.next()) {
         return mSqlQuery.value(0).toBool();
     }
@@ -280,7 +280,7 @@ bool HqInfoService::queryTop10ChinaShareInfos(QList<ChinaShareExchange>& list, c
             filterList.append(tr(" name like '%%1%' ").arg(share));
         }
     }
-    if(!mSqlQuery.exec(tr("select * from hstop10 %1 order by date desc").arg(filterList.length() > 0 ? " where " + filterList.join(" and ") : ""))) return false;
+    if(!mSqlQuery.exec(tr("select * from hstop10 %1 order by date desc, (buy-sell) desc").arg(filterList.length() > 0 ? " where " + filterList.join(" and ") : ""))) return false;
     qDebug()<<mSqlQuery.lastQuery();
     while (mSqlQuery.next()) {
         ChinaShareExchange info;
