@@ -8,6 +8,7 @@
 #include "stkmktcap.h"
 #include "stkinfofilemanage.h"
 #include "qexchangedatamanage.h"
+#include "dbservices.h"
 
 
 QSinaStkInfoThread::QSinaStkInfoThread(QObject *parent) : QThread(parent)
@@ -68,75 +69,20 @@ void QSinaStkInfoThread::setStkList(const QStringList &list)
             data.mutalbleCap = 0;
             data.gxl = 0;
             data.szzbl = 0;
-            data.gqdjr = "-";
             data.xjfh = 0;
         } else
         {
-            StkInfoFileManage *filemgr = new StkInfoFileManage(wkcode.right(6));
-            QStringList secs = filemgr->subkeys("Dates");
-            if(secs.length())
-            {
-                //取得上次更新的时间
-                secs.sort();
-                QString dateStre = secs.last();
-                QDate date = QDate::fromString(dateStre, "yyyy-MM-dd");
-                if(date == QExchangeDataManage::instance()->GetLatestActiveDay(QDate::currentDate()))
-                {
-                    if(secs.length() > 1)
-                    {
-                        dateStre = secs.at(secs.length() -2);
-                    } else
-                    {
-                        dateStre.clear();
-                    }
-                }
-                QStringList content = filemgr->value("Dates", dateStre).toStringList();
-                if(content.length() >2)
-                {
-                    data.totalshare = 0;
-                    data.mutableshare = 0;
-                    data.last_money = content[0].toDouble();
-                    data.totalCap = content[1].toDouble();
-                    data.mutalbleCap = content[2].toDouble();
-                    if(data.code.contains("002352"))
-                        qDebug()<<"content:"<<content<<" total:"<<data.totalCap<<" mutal:"<<data.mutalbleCap;
-
-                } else
-                {
-                    data.totalshare = 0;
-                    data.mutableshare = 0;
-                    data.last_money = 0;
-                    data.totalCap = 0;
-                    data.mutalbleCap = 0;
-                }
-            }
-            data.last_three_pers = filemgr->value("Chg", "L3").toDouble();
-            data.last_five_pers = filemgr->value("Chg", "L5").toDouble();
-            data.totalshare = filemgr->value("Chg", "total").toDouble();
-            data.mutableshare = filemgr->value("Chg", "mutable").toDouble();
-            data.blocklist = filemgr->value("Block", "names").toStringList();
-            QStringList fhsp = filemgr->value("FHSP", "Content").toStringList();
-            if(fhsp.length() > 4)
-            {
-                data.xjfh = fhsp.at(1).toDouble() / 10;
-                data.gxl = fhsp.at(2).toDouble();
-                data.szzbl = fhsp.at(0).toDouble();
-                QString datestr = fhsp.at(3);
-                data.yaggr = fhsp.at(4);
-                if(datestr.length() > 10)
-                {
-                    data.gqdjr = datestr.left(10);
-                } else
-                {
-                    data.gqdjr = "-";
-                }
-            } else
-            {
-                data.gxl = 0;
-                data.szzbl = 0;
-                data.gqdjr = "-";
-                data.xjfh = 0;
-            }
+            StockData basic_data = DATA_SERVICE->getBasicStkData(data.code);
+            data.totalshare = basic_data.totalshare;
+            data.mutableshare = basic_data.mutableshare;
+            data.last_money = basic_data.last_money;
+            data.last_3day_pers = basic_data.last_3day_pers;
+            data.last_5day_pers = basic_data.last_5day_pers;
+            data.last_10day_pers = basic_data.last_10day_pers;
+            data.last_month_pers = basic_data.last_month_pers;
+            data.gxl = 0;
+            data.szzbl = 0;
+            data.xjfh = 0;
         }
         mDataMap[data.code] = data;
     }

@@ -68,7 +68,7 @@ void QSinaStkResultMergeThread::run()
             for(int i=0; i<nthread; i++)
             {
                 QStringList wklist = mStkCodesList.mid(i*100, 100);
-                QSinaStkInfoThread *wkthread = new QSinaStkInfoThread(this);
+                QSinaStkInfoThread *wkthread = new QSinaStkInfoThread();
                 mThreadList.append(wkthread);
                 wkthread->setOptType(STK_DISPLAY_SORT_TYPE_NONE);
                 wkthread->setStkList(wklist);

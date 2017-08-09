@@ -10,6 +10,7 @@ public:
     explicit QHttpGet(const QString& url = QString(), QObject *parent = 0);
     ~QHttpGet();
     QByteArray getContent(const QString& url = QString());
+    static QByteArray getContentOfURL(const QString& url);
 
 signals:
 

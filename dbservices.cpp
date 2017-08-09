@@ -4,18 +4,22 @@
 #include <QDir>
 #include "dbservices.h"
 #include <QtSql/QSqlRecord>
+#include "qexchangedatamanage.h"
 
 HqInfoService* HqInfoService::m_pInstance = 0;
 HqInfoService::CGarbo HqInfoService::s_Garbo;
+QMutex HqInfoService::mutex;
 
 HqInfoService::HqInfoService(QObject *parent) :
     QObject(parent),
     mDataBaseInitFlag(0)
 {
     qRegisterMetaType<QList<ChinaShareExchange>>("const QList<ChinaShareExchange>&");
+    qRegisterMetaType<StockDataList>("const StockDataList&");
     bool sts = initDatabase();
     mSqlQuery = QSqlQuery(mDB);
     qDebug()<<"init db status:"<<sts;
+    initHistoryDates();
     //3、开启异步通讯
     moveToThread(&m_threadWork);
     m_threadWork.start();    
@@ -65,6 +69,15 @@ bool HqInfoService::createHistoryTable(const QString &pTableName)
     return mSqlQuery.exec(sql);
 }
 
+void HqInfoService::initHistoryDates()
+{
+    mLastActiveDate = QExchangeDataManage::instance()->GetLatestActiveDay(QDate::currentDate().addDays(-1));
+    mLast3DaysDate = QExchangeDataManage::instance()->GetLatestActiveDay(QDate::currentDate().addDays(-4));
+    mLast5DaysDate = QExchangeDataManage::instance()->GetLatestActiveDay(QDate::currentDate().addDays(-6));
+    mLast10DaysDate = QExchangeDataManage::instance()->GetLatestActiveDay(QDate::currentDate().addDays(-11));
+    mLast1MonthDate = QExchangeDataManage::instance()->GetLatestActiveDay(QDate::currentDate().addMonths(-1));
+}
+
 void HqInfoService::initSignalSlot()
 {
     connect(this, SIGNAL(signalRecvTop10ChinaStockInfos(QList<ChinaShareExchange>)),
@@ -75,6 +88,15 @@ void HqInfoService::initSignalSlot()
             this, SLOT(slotRecvShareHistoryInfos(StockDataList)));
     connect(this, SIGNAL(signalQueryShareHistoryLastDate(QString)),
             this, SLOT(slotQueryShareHistoryLastDate(QString)));
+    connect(this, SIGNAL(signalQueryAllShareBasicInfo()),
+            this, SLOT(slotQueryAllShareBasicInfo()));
+    connect(this, SIGNAL(signalAddShareBasicInfo(StockData)),
+            this, SLOT(slotAddShareBasicInfo(StockData)));
+    connect(this, SIGNAL(signalAddShareBasicInfoList(StockDataList)),
+            this, SLOT(slotAddShareBasicInfoList(StockDataList)));
+    connect(this, SIGNAL(signalUpdateStkBaseinfoWithHistory(QString)),
+            this, SLOT(slotUpdateStkBaseinfoWithHistory(QString)));
+
 }
 
 void HqInfoService::recvRealBlockInfo(const QList<BlockRealInfo> &list)
@@ -169,9 +191,14 @@ void HqInfoService::initBlockInfo()
 
 HqInfoService *HqInfoService::instance()
 {
-    if(m_pInstance == 0)
+
+    if(m_pInstance == 0)//第一次检测
     {
-        m_pInstance = new HqInfoService();
+        QMutexLocker locker(&mutex);//加互斥锁。
+        if(m_pInstance == 0)
+        {
+            m_pInstance = new HqInfoService();
+        }
     }
     return m_pInstance;
 }
@@ -179,9 +206,16 @@ HqInfoService *HqInfoService::instance()
 
 bool HqInfoService::initDatabase()
 {
+    qDebug()<<__FUNCTION__<<__LINE__;
     if(mDataBaseInitFlag) return true;
     //初始化本地数据库的连接
-    mDB = QSqlDatabase::addDatabase("QSQLITE");//链接数据库
+    qDebug()<<__FUNCTION__<<__LINE__<<"database:"<<QSqlDatabase::database().databaseName();
+    if(QSqlDatabase::contains("qt_sql_default_connection"))
+      mDB = QSqlDatabase::database("qt_sql_default_connection");
+    else
+      mDB = QSqlDatabase::addDatabase("QSQLITE");
+
+    //mDB = QSqlDatabase::addDatabase("QSQLITE");//链接数据库
     mDB.setDatabaseName("StockData.s3db");
     return mDB.open();
 }
@@ -346,4 +380,145 @@ bool HqInfoService::slotAddHistoryData(const StockData &info)
 void HqInfoService::slotQueryShareHistoryLastDate(const QString &code)
 {
     emit signalSendShareHistoryLastDate(code, getLastUpdateDateOfShareHistory(code));
+}
+
+void HqInfoService::slotQueryAllShareBasicInfo()
+{
+    mBasicStkInfo.clear();
+    if(!mSqlQuery.exec(tr("select * from share_basic"))) return ;
+    while (mSqlQuery.next()) {
+        StockData info;
+        info.code = mSqlQuery.value("code").toString();
+        info.name = mSqlQuery.value("name").toString();
+        info.totalshare = mSqlQuery.value("total_share").toLongLong();
+        info.mutableshare = mSqlQuery.value("mutable_share").toLongLong();
+        info.blocklist = mSqlQuery.value("block").toStringList();
+        info.last_money = mSqlQuery.value("last_money").toDouble();
+        info.last_3day_pers = mSqlQuery.value("chg_last_3day").toDouble();
+        info.last_5day_pers = mSqlQuery.value("chg_last_5day").toDouble();
+        info.last_10day_pers = mSqlQuery.value("chg_last_10day").toDouble();
+        info.last_month_pers = mSqlQuery.value("chg_last_month").toDouble();
+        info.xjfh = mSqlQuery.value("cash_10_share").toDouble();
+        info.szzbl = mSqlQuery.value("share_10_share").toDouble();
+        info.yaggr = mSqlQuery.value("announce_date").toDate();
+        info.gqdjr = mSqlQuery.value("register_date").toDate();
+        info.date = mSqlQuery.value("update_date").toDate();
+        mBasicStkInfo[info.code.right(6)] = info;
+    }
+}
+
+bool HqInfoService::slotAddShareBasicInfo(const StockData &data)
+{
+    //先检查是否已经添加，如果已经添加就更新
+    if(!mSqlQuery.exec(tr("delete from share_basic where code = '%1'").arg(data.code.right(6)))) return false;
+    //开始插入
+    mSqlQuery.prepare(tr("insert into share_basic ("
+                         "code, name, total_share, mutable_share, block, "
+                         "last_money, chg_last_3day, chg_last_5day, chg_last_10day, chg_last_month, "
+                         "cash_10_share, share_10_share, announce_date, register_date, update_date) values ("
+                         "?, ?, ?, ?, ?, "
+                         "?, ?, ?, ?, ?, "
+                         "?, ?, ?, ?, ?)"
+                         ));
+    mSqlQuery.addBindValue(data.code.right(6));
+    mSqlQuery.addBindValue(data.name);
+    mSqlQuery.addBindValue(data.totalshare);
+    mSqlQuery.addBindValue(data.mutableshare);
+    mSqlQuery.addBindValue(data.blocklist);
+
+    mSqlQuery.addBindValue(data.last_money);
+    mSqlQuery.addBindValue(data.last_3day_pers);
+    mSqlQuery.addBindValue(data.last_5day_pers);
+    mSqlQuery.addBindValue(data.last_10day_pers);
+    mSqlQuery.addBindValue(data.last_month_pers);
+
+    mSqlQuery.addBindValue(data.xjfh);
+    mSqlQuery.addBindValue(data.szzbl);
+    mSqlQuery.addBindValue(data.yaggr);
+    mSqlQuery.addBindValue(data.gqdjr);
+    mSqlQuery.addBindValue(data.date);
+    return mSqlQuery.exec();
+}
+
+void HqInfoService::slotAddShareBasicInfoList(const StockDataList &list)
+{
+    //更新到数据库
+    QSqlDatabase::database().transaction();
+    foreach (StockData info, list) {
+        if(!slotAddShareBasicInfo(info))
+        {
+            qDebug()<<"error:"<<mSqlQuery.lastError().text()<<" "<<mSqlQuery.lastQuery();
+        }
+    }
+    QSqlDatabase::database().commit();
+}
+
+bool HqInfoService::GetHistoryInfoWithDate(const QString &table, const QDate &date, double &close, double &money, qint64 &total_share, qint64 &mutalble_share)
+{
+//    qDebug()<<__FUNCTION__<<__LINE__<<table<<"  "<<date;
+    if(mSqlQuery.exec(tr("select close, money, marketshare, mutalbleshare from %1 where date = '%2'").arg(table).arg(date.toString("yyyy-MM-dd"))))
+    {
+        while(mSqlQuery.next())
+        {
+            close = mSqlQuery.value("close").toDouble();
+            money = mSqlQuery.value("money").toDouble();
+            total_share = mSqlQuery.value("marketshare").toLongLong();
+            mutalble_share = mSqlQuery.value("mutalbleshare").toLongLong();
+            break;
+        }
+
+        //qDebug()<<__FUNCTION__<<__LINE__<<table<<"  "<<date<<" success";
+    } else
+    {
+        //qDebug()<<__FUNCTION__<<__LINE__<<table<<"  "<<date<<" "<<mSqlQuery.lastError().text();
+    }
+
+    return false;
+}
+
+void HqInfoService::slotUpdateStkBaseinfoWithHistory(const QString &code)
+{
+//    qDebug()<<__FUNCTION__<<" "<<code;
+    QString table = "stk" + code.right(6);
+    double last_money = 0.0, last_close = 0.0;
+    double last_change_3day_close = 0.0 ;
+    double last_change_5day_close = 0.0 ;
+    double last_change_10day_close = 0.0 ;
+    double last_change_1month_close = 0.0 ;
+    qint64 total_share = 0;
+    qint64 mutable_share = 0;
+#if 1
+    //查询昨日的信息
+    GetHistoryInfoWithDate(table, mLast1MonthDate, last_change_1month_close, last_money, total_share, mutable_share);
+    GetHistoryInfoWithDate(table, mLast10DaysDate, last_change_10day_close, last_money, total_share, mutable_share);
+    GetHistoryInfoWithDate(table, mLast5DaysDate, last_change_5day_close, last_money, total_share, mutable_share);
+    GetHistoryInfoWithDate(table, mLast3DaysDate, last_change_3day_close, last_money, total_share, mutable_share);
+    GetHistoryInfoWithDate(table, mLastActiveDate, last_close, last_money, total_share, mutable_share);
+
+    StockData &data = mBasicStkInfo[code.right(6)];
+    data.code = code.right(6);
+    data.totalshare = total_share;
+    data.mutableshare = mutable_share;
+    data.last_money = last_money;
+    data.last_3day_pers = 0.0;
+    data.last_5day_pers = 0.0;
+    data.last_10day_pers = 0.0;
+    data.last_month_pers = 0.0;
+    data.last_close = last_close;
+    if(last_change_3day_close > 0.001) data.last_3day_pers = last_close / last_change_3day_close - 1;
+    if(last_change_5day_close > 0.001) data.last_5day_pers = last_close / last_change_5day_close - 1;
+    if(last_change_10day_close > 0.001) data.last_10day_pers = last_close / last_change_10day_close - 1;
+    if(last_change_1month_close > 0.001) data.last_month_pers = last_close / last_change_1month_close - 1;
+#endif
+    emit signalUpdateStkBaseinfoWithHistoryFinished(code);
+}
+
+void HqInfoService::slotUpdateHistoryChange(const QString &code)
+{
+
+}
+
+StockData& HqInfoService::getBasicStkData(const QString &code)
+{
+    return mBasicStkInfo[code.right(6)];
 }

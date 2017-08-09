@@ -5,15 +5,17 @@
 #include <QStringList>
 #include <QDate>
 
+class QNetworkReply;
+
 class QEastmoneyStockHistoryInfoThread : public QThread
 {
     Q_OBJECT
 public:
     explicit QEastmoneyStockHistoryInfoThread(const QString& code, const QDate& date, QObject *parent = 0);
     ~QEastmoneyStockHistoryInfoThread();
-protected:
+    QString getCode();
+protected:   
     void run();
-
 signals:
 public slots:
 private:

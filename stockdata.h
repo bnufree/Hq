@@ -39,6 +39,12 @@ public:
     static bool sortByTcapAsc(const StockData& d1, const StockData& d2);
     static bool sortByMcapDesc(const StockData& d1, const StockData& d2);
     static bool sortByMcapAsc(const StockData& d1, const StockData& d2);
+
+    bool operator ==(const StockData& data)
+    {
+        return this->code == data.code;
+    }
+
 public:
 //    QString     name;
 //    QString     code;
@@ -56,8 +62,10 @@ public:
     double      last_money;
     int         last_vol;
     double      last_per;
-    double      last_three_pers;
-    double      last_five_pers;
+    double      last_3day_pers;
+    double      last_5day_pers;
+    double      last_10day_pers;
+    double      last_month_pers;
     double      open;
     double      last_close;
     qint64      totalshare;
@@ -68,15 +76,15 @@ public:
     QStringList blocklist;
     QString     time;
     double      zjlx;
-    double      szzbl;
-    double      xjfh;
-    double      gxl;
-    QString     gqdjr; //股权登记日
-    QString     yaggr;
+    double      szzbl; //送转股比例
+    double      xjfh;  //现金分红
+    double      gxl;   //股息率
+    QDate     gqdjr; //股权登记日
+    QDate     yaggr; //预案公告日
     double      totalCap;
     double      mutalbleCap;
     bool        index;
-    QDate       date;
+    QDate       date; //当前的日期
 
 };
 

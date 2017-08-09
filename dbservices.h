@@ -8,6 +8,8 @@
 #include "hqdatadefines.h"
 #include <QMap>
 #include <QTimer>
+#include <QMutex>
+#include <QMutexLocker>
 
 
 #define DATA_SERVICE HqInfoService::instance()
@@ -22,8 +24,10 @@ protected:
 public:
     friend class CGarbo;
     static HqInfoService* instance();
+    StockData& getBasicStkData(const QString& code);
     QDate  getLastUpdateDateOfHSGT();
     QDate  getLastUpdateDateOfShareHistory(const QString& code);
+    bool   GetHistoryInfoWithDate(const QString& table, const QDate& date, double& close, double& money, qint64& total_share, qint64& mutalble_share);
 
 signals:
     void signalRecvRealBlockInfo(const QList<BlockRealInfo>& list);
@@ -35,6 +39,12 @@ signals:
     void signalRecvShareHistoryInfos(const StockDataList& list);
     void signalQueryShareHistoryLastDate(const QString& code);
     void signalSendShareHistoryLastDate(const QString& code, const QDate& date);
+    //基本信息相关的数据库操作
+    void signalQueryAllShareBasicInfo();
+    void signalAddShareBasicInfo(const StockData& data);
+    void signalAddShareBasicInfoList(const StockDataList& list);
+    void signalUpdateStkBaseinfoWithHistory(const QString& code);
+    void signalUpdateStkBaseinfoWithHistoryFinished(const QString &code);
 public slots:
     void slotRecvShareHistoryInfos(const StockDataList& list);
     bool slotAddHistoryData(const StockData& data);
@@ -47,7 +57,14 @@ public slots:
     void slotRecvTop10ChinaStockInfos(const QList<ChinaShareExchange>& list);
     void slotQueryTop10ChinaStockInfos(const QDate& date = QDate(), const QString& share = QString(), int market = 0);
     void slotQueryShareHistoryLastDate(const QString& code);
+    void slotQueryAllShareBasicInfo();
+    bool slotAddShareBasicInfo(const StockData& data);
+    void slotAddShareBasicInfoList(const StockDataList& list);
+    void slotUpdateStkBaseinfoWithHistory(const QString& code);
+    void slotUpdateHistoryChange(const QString& code);
+
 private:
+    void initHistoryDates();
     void initSignalSlot();
     bool initDatabase();
     bool createHistoryTable(const QString& pTableName);
@@ -65,6 +82,9 @@ private:
 
 private:    //本类使用的变量
     static HqInfoService *m_pInstance;
+    static QMutex mutex;//实例互斥锁。
+    //static QAtomicPointer<HqInfoService> m_pInstance;/*!<使用原子指针,默认初始化为0。*/
+
     class CGarbo        // 它的唯一工作就是在析构函数中删除CSingleton的实例
     {
     public:
@@ -84,8 +104,13 @@ private:    //本类使用的变量
     int                         mCurrentRPLIndex;
     QSqlQuery                   mSqlQuery;
     QMap<int, BlockRealInfo>    mBlockInfo;
-    QTimer                      *mUpdateTimer;
     QStringList                 mNotExchangeDaysList;
+    QMap<QString, StockData>    mBasicStkInfo;
+    QDate                       mLast3DaysDate;
+    QDate                       mLast5DaysDate;
+    QDate                       mLast10DaysDate;
+    QDate                       mLast1MonthDate;
+    QDate                       mLastActiveDate;
 };
 
 #endif // DBSERVICE_H

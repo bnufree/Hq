@@ -76,13 +76,13 @@ bool StockData::sortByMonRatioAsc(const StockData& d1, const StockData& d2)
 bool StockData::sortBy3DayChgAsc(const StockData &d1, const StockData &d2)
 {
     if(d1.index ^ d2.index) return !d1.index;
-    return d1.last_three_pers < d2.last_three_pers;
+    return d1.last_3day_pers < d2.last_3day_pers;
 }
 
 bool StockData::sortBy3DayChgDesc(const StockData &d1, const StockData &d2)
 {
     if(d1.index ^ d2.index) return d1.index;
-    return d1.last_three_pers > d2.last_three_pers;
+    return d1.last_3day_pers > d2.last_3day_pers;
 }
 
 bool StockData::sortBy3DayZjlxAsc(const StockData &d1, const StockData &d2)

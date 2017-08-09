@@ -46,7 +46,7 @@ Dialog::Dialog(QWidget *parent) :
     QDialog(parent),mBlockMgr(NULL)/*,mStockThread(NULL)*/,mSearchThread(NULL),mDisplayCol(0),mMergeThread(0),
     ui(new Ui::MainDialog)
 {
-    ui->setupUi(this);    
+    ui->setupUi(this);
     this->setWindowFlags(Qt::FramelessWindowHint);
     //this->setAttribute(Qt::WA_TranslucentBackground);
     //this->installEventFilter(this);
@@ -96,10 +96,6 @@ Dialog::Dialog(QWidget *parent) :
         ui->hqtbl->setColumnHidden(i, false);
     }
     mDisplayCol += mHqHeaderList.length();
-    mRestartTimer = new QTimer(this);
-    //mRestartTimer->setInterval(1000 * 60 *60);
-    mRestartTimer->setInterval(1000*60);
-    connect(mRestartTimer, SIGNAL(timeout()), this, SLOT(slotRestartMyself()));
     ui->blocktbl->verticalHeader()->setHidden(true);
     ui->hqtbl->setVisible(true);
     qDebug()<<"hqtbl visible:"<<ui->hqtbl->isVisible();
@@ -125,54 +121,12 @@ Dialog::Dialog(QWidget *parent) :
     connect(ui->hqtbl->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(setSortType(int)));
     connect(ui->blocktbl->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(setBlockSort(int)));
 
-    QEastMoneyChinaShareExchange *tophk = new QEastMoneyChinaShareExchange(QDate::fromString("2017-07-13", "yyyy-MM-dd"));
-    connect(tophk, SIGNAL(signalHSGTofTodayTop10Updated()), this, SLOT(slotTodayHSGUpdated()));
-    tophk->start();
 
-    //index更新
-    QIndexWidget *indexw = new QIndexWidget(this);
-    ui->verticalLayout->insertWidget(0, indexw);
-    QStringList indexlist;
-    indexlist<<"sh000001"<<"sh000300"<<"sz399001"/*<<"sh000043"*/<<"sz399006"<<"sh000016"<<"sh000010";
-    mIndexThread = new QSinaStkInfoThread(this);
-    connect(mIndexThread, SIGNAL(sendStkDataList(StockDataList)), indexw, SLOT(updateData(StockDataList)));
-    mIndexThread->setStkList(indexlist);
-    mIndexThread->start();
+    //开始更新历史信息，龙虎榜信息，沪港通信息
+    QShareHistoryInfoMgr *mgr = new QShareHistoryInfoMgr();
+    connect(mgr, SIGNAL(signalUpdateProcess(int,int)), this, SLOT(slotUpdate(int,int)));
+    connect(mgr, SIGNAL(signalHistoryDataFinished()), this, SLOT(slotHistoryDataFinish()));
 
-    QEastmoneyNorthBoundThread *north = new QEastmoneyNorthBoundThread(this);
-    connect(north, SIGNAL(signalUpdateNorthBoundList(StockDataList)), indexw, SLOT(updateData(StockDataList)));
-    north->start();
-
-    //更新所有的代码
-    QEastMonyStockCodesThread * codes = new QEastMonyStockCodesThread();
-    connect(codes, SIGNAL(signalSendCodesList(QStringList)), this, SLOT(slotUpdateStockCodesList(QStringList)));
-    connect(codes, SIGNAL(finished()), codes, SLOT(deleteLater()));
-    codes->start();
-  #if 1
-
-    //行情中心初始化开始
-    mMergeThread = new QSinaStkResultMergeThread();
-    connect(mMergeThread, SIGNAL(sendStkDataList(StockDataList)), this, SLOT(updateHqTable(StockDataList)));
-    mMergeThread->setMktType(MKT_ALL);
-    mMergeThread->start();
-    //板块行情初始化
-    mBlockMgr = new QEastMoneyBlockMangagerThread();
-    mBlockMgr->setCurBlockType(2);
-    connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataList)), this, SLOT(updateBlockTable(BlockDataList)));
-    mBlockMgr->start();
-    mSearchThread = new QSinaSearchThread(this);
-    connect(mSearchThread, SIGNAL(sendSearchResult(QStringList)), this, SLOT(displayBlockDetailInfoInTable(QStringList)));
-//    connect(mBlockThread, SIGNAL(sendStkinfoUpdateProgress(int,int)), this, SLOT(slotUpdate(int,int)));
-//    connect(mBlockThread, SIGNAL(signalUpdateMsg(QString)), this, SLOT(slotUpdateMsg(QString)));
-
-    //读取自选
-    mFavStkList = Profiles::instance()->value(STK_ZXG_SEC, STK_ZXG_NAME).toStringList();
-    mHSFoundsList = Profiles::instance()->value(STK_HSJJ_SEC, STK_ZXG_NAME).toStringList();
-    mMergeThread->setSelfCodesList(mFavStkList);
-    mMergeThread->setActive(true);
-    mMergeThread->setMktType(MKT_ZXG);
-
-    mCurBlockType = BLOCK_INDUSTORY;
 
     //创建快捷事件
     QShortcut *shotcut = new QShortcut(QKeySequence("Alt+X"), this);  //隐藏
@@ -187,7 +141,6 @@ Dialog::Dialog(QWidget *parent) :
     mInit = false;
 
     iniHqCenterAction();
-#endif
 }
 
 void Dialog::setDlgShow(QSystemTrayIcon::ActivationReason val)
@@ -517,7 +470,7 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
         }
         //ui->hqtbl->setItem(i, k++, new QTableWidgetItem(QString::number(data.money)));
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f",data.money_ratio)));
-        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f",data.last_three_pers)));
+        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f",data.last_3day_pers)));
         if(fabs(data.zjlx) >= 1000){
             ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f", data.zjlx / 10000.0) + QStringLiteral("亿")));
         } else {
@@ -528,8 +481,8 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f",data.totalCap / 100000000.0 ) + QStringLiteral("亿")));
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f",data.mutalbleCap/ 100000000.0 )+ QStringLiteral("亿")));
 
-        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(data.gqdjr));
-        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(data.yaggr));
+        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(data.gqdjr.toString("yyyy-MM-dd")));
+        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(data.yaggr.toString("yyyy-MM-dd")));
 
 #if 0
         int btnindex = k;
@@ -753,7 +706,7 @@ void Dialog::on_searchTxt_textChanged(const QString &arg1)
 void Dialog::slotUpdate(int cur, int total)
 {
  //   qDebug()<<"cur:"<<cur<<" total:"<<total;
-    ui->updatelbl->setText(QString("%1/%2").arg(cur).arg(total));
+    ui->updatelbl->setText(QString("正在更新日线数据：%1/%2").arg(cur).arg(total));
 }
 
 void Dialog::hqMenuOpt()
@@ -972,24 +925,9 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
 {
     //开始更新历史信息，龙虎榜信息，沪港通信息
     QShareHistoryInfoMgr *mgr = new QShareHistoryInfoMgr();
+    connect(mgr, SIGNAL(signalHistoryDataFinished()), this, SLOT(slotHistoryDataFinish()));
     mgr->slotSetHistoryCodeList(list);
-
-    //开启线程，更新股票的相关信息
-    if(mMergeThread)mMergeThread->setStkList(list);
-
-//    mMergeThread = new QSinaStkResultMergeThread;
-//    connect(mMergeThread, SIGNAL(sendStkDataList(StockDataList)), this, SLOT(updateHqTable(StockDataList)));
-//    mMergeThread->setMktType(MKT_ZXG);
-//    connect(mBlockThread, SIGNAL(sendStkinfoUpdateProgress(int,int)), this, SLOT(slotUpdate(int,int)));
-//    connect(mBlockThread, SIGNAL(signalUpdateMsg(QString)), this, SLOT(slotUpdateMsg(QString)));
-////    mMergeThread->start();
-
-//    //读取自选
-//    mFavStkList = Profiles::instance()->value(STK_ZXG_SEC, STK_ZXG_NAME).toStringList();
-//    mHSFoundsList = Profiles::instance()->value(STK_HSJJ_SEC, STK_ZXG_NAME).toStringList();
-//    mMergeThread->setSelfCodesList(mFavStkList);
-//    mMergeThread->setActive(true);
-//    mMergeThread->setMktType(MKT_ZXG);
+    mAllStkList = list;
 }
 
 void Dialog::on_HSGTBTN_clicked()
@@ -1004,4 +942,56 @@ void Dialog::on_HSGTBTN_clicked()
 void Dialog::slotTodayHSGUpdated()
 {
     ui->HSGTBTN->setStyleSheet("background-color:red");
+}
+
+void Dialog::slotHistoryDataFinish()
+{
+    QShareHistoryInfoMgr *mgr = qobject_cast<QShareHistoryInfoMgr*> (sender());
+    if(mgr)
+    {
+        mAllStkList = mgr->getCodesList();
+        mgr->deleteLater();
+    }
+
+    ui->updatelbl->clear();
+
+
+    QEastMoneyChinaShareExchange *tophk = new QEastMoneyChinaShareExchange(QDate::fromString("2017-07-13", "yyyy-MM-dd"));
+    connect(tophk, SIGNAL(signalHSGTofTodayTop10Updated()), this, SLOT(slotTodayHSGUpdated()));
+    tophk->start();
+
+    //更新指数
+    QIndexWidget *indexw = new QIndexWidget(this);
+    ui->verticalLayout->insertWidget(0, indexw);
+    QStringList indexlist;
+    indexlist<<"sh000001"<<"sh000300"<<"sz399001"/*<<"sh000043"*/<<"sz399006"<<"sh000016"<<"sh000010";
+    mIndexThread = new QSinaStkInfoThread(this);
+    connect(mIndexThread, SIGNAL(sendStkDataList(StockDataList)), indexw, SLOT(updateData(StockDataList)));
+    mIndexThread->setStkList(indexlist);
+    mIndexThread->start();
+    QEastmoneyNorthBoundThread *north = new QEastmoneyNorthBoundThread(this);
+    connect(north, SIGNAL(signalUpdateNorthBoundList(StockDataList)), indexw, SLOT(updateData(StockDataList)));
+    north->start();
+
+    //行情中心初始化开始为自选股
+    //读取自选
+    mFavStkList = Profiles::instance()->value(STK_ZXG_SEC, STK_ZXG_NAME).toStringList();
+    mHSFoundsList = Profiles::instance()->value(STK_HSJJ_SEC, STK_ZXG_NAME).toStringList();
+    mMergeThread = new QSinaStkResultMergeThread();
+    connect(mMergeThread, SIGNAL(sendStkDataList(StockDataList)), this, SLOT(updateHqTable(StockDataList)));
+    mMergeThread->setStkList(mAllStkList);
+    mMergeThread->setSelfCodesList(mFavStkList);
+    mMergeThread->setActive(true);
+    mMergeThread->setMktType(MKT_ZXG);
+    mMergeThread->start();
+    //板块行情初始化
+    mCurBlockType = BLOCK_INDUSTORY;
+    mBlockMgr = new QEastMoneyBlockMangagerThread();
+    mBlockMgr->setCurBlockType(2);
+    connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataList)), this, SLOT(updateBlockTable(BlockDataList)));
+    mBlockMgr->start();
+
+    //查询接口初始化
+    mSearchThread = new QSinaSearchThread(this);
+    connect(mSearchThread, SIGNAL(sendSearchResult(QStringList)), this, SLOT(displayBlockDetailInfoInTable(QStringList)));
 }

@@ -8,7 +8,6 @@
 #include "qsinastkinfothread.h"
 #include "qsinasearchthread.h"
 #include "qsinastkresultmergethread.h"
-#include <QTimer>
 
 typedef struct strColDisplay
 {
@@ -79,6 +78,7 @@ public slots:
     void slotDisplayStockMini();
     void slotUpdateStockCodesList(const QStringList& list);
     void slotTodayHSGUpdated();
+    void slotHistoryDataFinish();
 
 private slots:
     void on_zxgBtn_clicked();
@@ -132,8 +132,8 @@ private:
     QMap<QString, QStringList> mBlockStkList;
     QStringList           mFavStkList;
     QStringList           mHSFoundsList;
+    QStringList           mAllStkList;
     int                   mCurBlockType;
-    QTimer                 *mRestartTimer;
     int                   mDisplayMode;
     int                   mSecSize;
     bool                  mInit;
