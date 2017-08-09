@@ -28,6 +28,7 @@ public:
     QDate  getLastUpdateDateOfHSGT();
     QDate  getLastUpdateDateOfShareHistory(const QString& code);
     bool   GetHistoryInfoWithDate(const QString& table, const QDate& date, double& close, double& money, qint64& total_share, qint64& mutalble_share);
+    double   GetMultiDaysChangePercent(const QString& table, int days);
 
 signals:
     void signalRecvRealBlockInfo(const QList<BlockRealInfo>& list);
