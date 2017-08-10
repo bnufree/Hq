@@ -48,7 +48,7 @@ QByteArray QHttpGet::getContentOfURL(const QString& url)
     QNetworkAccessManager *mgr = new QNetworkAccessManager;
     QNetworkReply *reply = mgr->get(QNetworkRequest(url));
     if(!reply) goto FUNC_END;
-    //qDebug()<<__FUNCTION__<<__LINE__<<QThread::currentThread()<<" url:"<<url;
+    qDebug()<<__FUNCTION__<<__LINE__<<QThread::currentThread()<<" url:"<<url;
 #if 0
     {
         QEventLoop loop; // 使用事件循环使得网络通讯同步进行
@@ -61,16 +61,16 @@ QByteArray QHttpGet::getContentOfURL(const QString& url)
         QTime time;
         time.start();
         while (!reply->isFinished()) {
-            if(time.elapsed() > 3000) break;
+            if(time.elapsed() > 10000) break;
             QThread::msleep(100);
         }
-        if(reply->isFinished())
-        {
+    }
+//        if(reply->isFinished())
+//        {
             //开始解析数据
             res = reply->readAll();
-        }
-    }
-    //qDebug()<<__FUNCTION__<<__LINE__<<QThread::currentThread();
+//        }
+    qDebug()<<__FUNCTION__<<__LINE__<<res;
 
 
 FUNC_END:

@@ -44,7 +44,7 @@ void QShareHistoryInfoMgr::slotSetHistoryCodeList(const QStringList &list)
 
 void QShareHistoryInfoMgr::slotRecvCodeHistoryDate(const QString& code, const QDate& date)
 {
-    //qDebug()<<__FUNCTION__<<"code:"<<code<<" date:"<<date<<" len:"<<mSubThreadList.length();
+    qDebug()<<__FUNCTION__<<"code:"<<code<<" date:"<<date<<" len:"<<mWorkQueueThreadList.length();
     mRecvCodeNum++;
     QEastmoneyStockHistoryInfoThread* thread = new QEastmoneyStockHistoryInfoThread(code, date);
     if(thread)
@@ -62,8 +62,8 @@ void QShareHistoryInfoMgr::slotRecvCodeHistoryDate(const QString& code, const QD
 void QShareHistoryInfoMgr::slotStartGetHistory()
 {
     if(mWorkQueueThreadList.length() == 0) return;
-    int len = 100;
-    if(len > mWorkQueueThreadList.length()) len = mWorkQueueThreadList.length();
+    int len = 10000;
+    if(len != mWorkQueueThreadList.length()) len = mWorkQueueThreadList.length();
     while (len > 0)
     {
         QEastmoneyStockHistoryInfoThread *thread = mWorkQueueThreadList.first();

@@ -139,11 +139,7 @@ void QSinaStkInfoThread::RealtimeInfo()
             mDataMap[code].sell = detailList[8].toDouble();
             mDataMap[code].vol = detailList[9].toInt();
             mDataMap[code].time = detailList[detailList.length()-2];
-            qint64 total = mDataMap[code].mutableshare;
-            if(mDataMap[code].cur != 0)
-            {
-                mDataMap[code].gxl = mDataMap[code].xjfh / mDataMap[code].cur;
-            }
+            qint64 total = mDataMap[code].mutableshare;            
             if(total > 0){
                 mDataMap[code].hsl = mDataMap[code].vol / (double)total * 100;
             } else {
@@ -163,6 +159,14 @@ void QSinaStkInfoThread::RealtimeInfo()
                 if(min>=15 && min<=25){
                     mDataMap[code].cur = detailList[12].toDouble();
                 }
+            }
+            if(mDataMap[code].cur == 0)
+            {
+                mDataMap[code].cur = mDataMap[code].last_close;
+            }
+            if(mDataMap[code].cur != 0)
+            {
+                mDataMap[code].gxl = mDataMap[code].xjfh / mDataMap[code].cur;
             }
             //if(data.cur == 0 ) continue;
             mDataMap[code].chg = mDataMap[code].cur - mDataMap[code].last_close;

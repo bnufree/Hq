@@ -481,18 +481,12 @@ void HqInfoService::slotUpdateStkBaseinfoWithHistory(const QString &code)
 //    qDebug()<<__FUNCTION__<<" "<<code;
     QString table = "stk" + code.right(6);
     double last_money = 0.0, last_close = 0.0;
-    double last_change_3day_close = 0.0 ;
-    double last_change_5day_close = 0.0 ;
-    double last_change_10day_close = 0.0 ;
-    double last_change_1month_close = 0.0 ;
     qint64 total_share = 0;
     qint64 mutable_share = 0;
     //查询昨日的信息
-//    GetHistoryInfoWithDate(table, mLast1MonthDate, last_change_1month_close, last_money, total_share, mutable_share);
-//    GetHistoryInfoWithDate(table, mLast10DaysDate, last_change_10day_close, last_money, total_share, mutable_share);
-//    GetHistoryInfoWithDate(table, mLast5DaysDate, last_change_5day_close, last_money, total_share, mutable_share);
-//    GetHistoryInfoWithDate(table, mLast3DaysDate, last_change_3day_close, last_money, total_share, mutable_share);
     GetHistoryInfoWithDate(table, mLastActiveDate, last_close, last_money, total_share, mutable_share);
+    if(code == "600111")
+        qDebug()<<"total:"<<total_share<<" "<<mutable_share<<" "<<last_close<<" "<<last_money<<" "<<mLastActiveDate;
 
     StockData &data = mBasicStkInfo[code.right(6)];
     data.code = code.right(6);
@@ -504,10 +498,6 @@ void HqInfoService::slotUpdateStkBaseinfoWithHistory(const QString &code)
     data.last_10day_pers = GetMultiDaysChangePercent(table, 10);
     data.last_month_pers = GetMultiDaysChangePercent(table, 22);
     data.last_close = last_close;
-    if(last_change_3day_close > 0.001) data.last_3day_pers = last_close / last_change_3day_close - 1;
-    if(last_change_5day_close > 0.001) data.last_5day_pers = last_close / last_change_5day_close - 1;
-    if(last_change_10day_close > 0.001) data.last_10day_pers = last_close / last_change_10day_close - 1;
-    if(last_change_1month_close > 0.001) data.last_month_pers = last_close / last_change_1month_close - 1;
     emit signalUpdateStkBaseinfoWithHistoryFinished(code);
 }
 
