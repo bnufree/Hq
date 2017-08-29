@@ -1,5 +1,4 @@
 #include "qeastmoneysharefhspthread.h"
-#include <QNetworkAccessManager>
 #include <QEventLoop>
 
 QEastMoneyShareFHSPThread::QEastMoneyShareFHSPThread(QObject *parent) : QObject(parent)

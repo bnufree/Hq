@@ -1,7 +1,5 @@
 #include "qsinastkresultmergethread.h"
 #include <QtConcurrent>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
 #include <QFuture>
 #include "qsinastkinfothread.h"
 #include "profiles.h"
@@ -437,66 +435,7 @@ void QSinaStkResultMergeThread::SortResultList(StockDataList &result, const Stoc
 
 StockDataList QSinaStkResultMergeThread::RealtimeInfo(const QStringList& codes)
 {
-    QNetworkAccessManager *mgr = new QNetworkAccessManager;
-    QString url = QString("http://hq.sinajs.cn/?list=%1").arg(codes.join(","));
-    StockDataList reslist;
-    QNetworkReply *reply = NULL;
 
-    if(codes.length() == 0) goto FUNC1_END;
-    reply  = mgr->get(QNetworkRequest(url));
-    if(!reply) goto FUNC1_END;
-    {
-        QEventLoop loop; // 使用事件循环使得网络通讯同步进行
-        connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-        loop.exec(); // 进入事件循环， 直到reply的finished()信号发出， 这个语句才能退出
-    }
-    if(reply->error())
-    {
-        qDebug()<<"err occured:"<<reply->errorString();
-        goto FUNC1_END;
-    }
-    {
-        //开始解析数据
-        QByteArray bytes = reply->readAll();
-        QString result = QString::fromLocal8Bit(bytes.data());
-        //QStringList resultlist = result.split(QRegExp("[var hq_str_|\"|\"|,|=]"), QString::SkipEmptyParts);
-        //先换行
-        QStringList resultlist = result.split(QRegExp("[\\n|;]"), QString::SkipEmptyParts);
-        //再分割具体的字段
-        foreach (QString detail, resultlist) {
-            detail.replace(QRegExp("([a-z]{1,} )"), "");
-            QStringList detailList = detail.split(QRegExp("[a-z|\"|\"|,|=|_]"), QString::SkipEmptyParts);
-            //qDebug()<<"result:"<<detailList;
-            if(detailList.length() < 20) continue;
-            StockData data;
-            data.code = detailList[0];
-            data.name = detailList[1];
-            data.open = detailList[2].toDouble();
-            data.last_close = detailList[3].toDouble();
-            data.cur = detailList[4].toDouble();
-            data.high = detailList[5].toDouble();
-            data.low = detailList[6].toDouble();
-            data.buy = detailList[7].toDouble();
-            data.sell = detailList[8].toDouble();
-            data.vol = detailList[9].toInt();
-            data.money = detailList[10].toDouble() / 10000;
-            int hour = QDateTime::currentDateTime().time().hour();
-            int min = QDateTime::currentDateTime().time().minute();
-            if( hour == 9){
-                if(min>=15 && min<=25){
-                    data.cur = detailList[12].toDouble();
-                }
-            }
-            if(data.cur == 0 ) continue;
-            data.chg = data.cur - data.last_close;
-            data.per = data.chg *100 / data.last_close;
-            reslist.append(data);
-        }
-    }
-FUNC1_END:
-    reply->deleteLater();
-    mgr->deleteLater();
-    return reslist;
 }
 
 void QSinaStkResultMergeThread::setSelfCodesList(const QStringList &list)

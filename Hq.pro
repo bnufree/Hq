@@ -19,12 +19,8 @@ SOURCES += main.cpp\
         dialog.cpp \
     stockdata.cpp \
     dataexchange.cpp \
-    stockdatathread.cpp \
     blockdata.cpp \
     basedata.cpp \
-    basehttpget.cpp \
-    stockhttpget.cpp \
-    blockhttpget.cpp \
     qeastmoneyblockthread.cpp \
     profiles.cpp \
     qsinastkinfothread.cpp \
@@ -49,17 +45,15 @@ SOURCES += main.cpp\
     qeastmoneynorthboundthread.cpp \
     qeastmoneyhsgtdialog.cpp \
     history/qeastmoneystockhistoryinfothread.cpp \
-    history/qsharehistoryinfomgr.cpp
+    history/qsharehistoryinfomgr.cpp \
+    webfile/weberror.cpp \
+    webfile/webfile.cpp
 
 HEADERS  += dialog.h \
     stockdata.h \
     dataexchange.h \
-    stockdatathread.h \
     blockdata.h \
     basedata.h \
-    basehttpget.h \
-    stockhttpget.h \
-    blockhttpget.h \
     qeastmoneyblockthread.h \
     profiles.h \
     qsinastkinfothread.h \
@@ -86,7 +80,10 @@ HEADERS  += dialog.h \
     qeastmoneynorthboundthread.h \
     qeastmoneyhsgtdialog.h \
     history/qeastmoneystockhistoryinfothread.h \
-    history/qsharehistoryinfomgr.h
+    history/qsharehistoryinfomgr.h \
+    webfile/debugout.h \
+    webfile/weberror.h \
+    webfile/webfile.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

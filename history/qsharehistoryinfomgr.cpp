@@ -62,8 +62,8 @@ void QShareHistoryInfoMgr::slotRecvCodeHistoryDate(const QString& code, const QD
 void QShareHistoryInfoMgr::slotStartGetHistory()
 {
     if(mWorkQueueThreadList.length() == 0) return;
-    int len = 10000;
-    if(len != mWorkQueueThreadList.length()) len = mWorkQueueThreadList.length();
+    int len = 100;
+    if(len > mWorkQueueThreadList.length()) len = mWorkQueueThreadList.length();
     while (len > 0)
     {
         QEastmoneyStockHistoryInfoThread *thread = mWorkQueueThreadList.first();

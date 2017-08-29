@@ -1,14 +1,12 @@
 #include "qsinastkinfothread.h"
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
 #include <QDebug>
-#include <QEventLoop>
 #include "profiles.h"
 #include <QDateTime>
 #include "stkmktcap.h"
 #include "stkinfofilemanage.h"
 #include "qexchangedatamanage.h"
 #include "dbservices.h"
+#include "qhttpget.h"
 
 
 QSinaStkInfoThread::QSinaStkInfoThread(QObject *parent) : QThread(parent)
@@ -98,26 +96,14 @@ void QSinaStkInfoThread::setActive(bool act)
 
 void QSinaStkInfoThread::RealtimeInfo()
 {
-    QNetworkAccessManager *mgr = new QNetworkAccessManager;
     QString url("http://hq.sinajs.cn/?list=%1");
     while(true)
     {
         if(mStkList.length() == 0) continue;
 
         QString wkURL = url.arg(mStkList.join(","));
-        QNetworkReply *reply  = mgr->get(QNetworkRequest(wkURL));
-        if(!reply) continue;
-        QEventLoop loop; // 使用事件循环使得网络通讯同步进行
-        connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-        loop.exec(); // 进入事件循环， 直到reply的finished()信号发出， 这个语句才能退出
-        if(reply->error())
-        {
-            qDebug()<<"err occured:"<<reply->errorString();
-            reply->deleteLater();
-            continue;
-        }
         //开始解析数据
-        QByteArray bytes = reply->readAll();
+        QByteArray bytes = QHttpGet::getContentOfURL(wkURL);
         QString result = QString::fromLocal8Bit(bytes.data());
         //先换行
         QStringList resultlist = result.split(QRegExp("[\\n|;]"), QString::SkipEmptyParts);
@@ -175,11 +161,9 @@ void QSinaStkInfoThread::RealtimeInfo()
             mDataMap[code].mutalbleCap = mDataMap[code].cur * mDataMap[code].mutableshare;
         }
         emit sendStkDataList(mDataMap.values());
-        reply->deleteLater();
         QThread::sleep(1);
     }
 
-    mgr->deleteLater();
 }
 
 void QSinaStkInfoThread::run()

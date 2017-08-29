@@ -1,11 +1,7 @@
 #include "qeastmoneyblockthread.h"
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
 #include <QDebug>
-#include <QEventLoop>
 #include "profiles.h"
 #include <QDateTime>
-//#include "qeastmoneystockhistoryinfothread.h"
 #include "stkinfofilemanage.h"
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -13,6 +9,7 @@
 #include "qexchangedatamanage.h"
 #include <QRegularExpression>
 #include "qeastmoneyblocksharethread.h"
+#include "qhttpget.h"
 
 #define     BLOCK_NMAE          "name"
 #define     BLOCK_CODE          "codes"
@@ -51,30 +48,13 @@ void QEastMoneyBlockThread::reverseSortRule()
 
 void QEastMoneyBlockThread::slotUpdateBlockInfos()
 {
-    QNetworkAccessManager *mgr = new QNetworkAccessManager;
     QString url("http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&cmd=C._BK%1&sty=FCCS&st=c&p=1&ps=100&cb=&token=d0075ac6916d4aa6ec8495db9efe7ede&bklb=%2&jsName=BKtrade&sr=%3&dt=%4");
 
     QString wkURL = url.arg(blockthread[mBlockType]).arg(mBlockType).arg(mSortRule).arg(QDateTime::currentDateTime().toMSecsSinceEpoch());
-    //qDebug()<<"wkURL:"<<wkURL;
-    QNetworkReply *reply  = mgr->get(QNetworkRequest(wkURL));
-    if(!reply)
-    {
-        mgr->deleteLater();
-        return;
-    }
-    QEventLoop loop; // 使用事件循环使得网络通讯同步进行
-    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-    loop.exec(); // 进入事件循环， 直到reply的finished()信号发出， 这个语句才能退出
-    if(reply->error())
-    {
-        qDebug()<<"err occured:"<<reply->errorString();
-        reply->deleteLater();
-        mgr->deleteLater();
-        return;
-    }
+
     //开始解析数据
     BlockDataList list;
-    QByteArray bytes = reply->readAll();
+    QByteArray bytes = QHttpGet::getContentOfURL(wkURL);
     QString result = QString::fromUtf8(bytes.data());
     //qDebug()<<"result:"<<result.split(QRegularExpression("[\(\[|\]\)|\"]"));
     QString replaceStr = (mBlockType == BLOCK_CONCEPT ? "3" : mBlockType == BLOCK_INDUSTORY ? "2" : "1");
@@ -89,10 +69,6 @@ void QEastMoneyBlockThread::slotUpdateBlockInfos()
         index += (rx.matchedLength()+2);
         list.append(data);
     }
-    reply->deleteLater();
-    mgr->deleteLater();
-
-
     //qDebug()<<__FUNCTION__<<__LINE__<<mBlockDataList.values().length();
     emit sendBlockDataList(mBlockType, list);
 
@@ -124,26 +100,11 @@ void QEastMoneyBlockThread::slotBlockShareThreadFinished()
 
 void QEastMoneyBlockThread::slotUpdateBlockShare()
 {
-    QNetworkAccessManager *mgr = new QNetworkAccessManager;
     QString url("http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&cmd=C._BK%1&sty=FCCS&st=c&p=1&ps=100&cb=&js=var%20BKtrade%20={Trade:[[(x)]]}&token=d0075ac6916d4aa6ec8495db9efe7ede&bklb=%2&jsName=BKtrade&sr=%3&dt=%4");
     QString wkURL = url.arg(blockthread[mBlockType]).arg(mBlockType).arg(mSortRule).arg(QDateTime::currentDateTime().toMSecsSinceEpoch());
-    qDebug()<<"wkURL:"<<wkURL;
-    QNetworkReply *reply  = mgr->get(QNetworkRequest(wkURL));
-    if(!reply)
-    {
-        mgr->deleteLater();
-        return;
-    }
-    QEventLoop loop; // 使用事件循环使得网络通讯同步进行
-    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-    loop.exec(); // 进入事件循环， 直到reply的finished()信号发出， 这个语句才能退出
-    if(reply->error())
-    {
-        reply->deleteLater();
-        return;
-    }
+
     //开始解析数据,取得所有板块的代码
-    QByteArray bytes = reply->readAll();
+    QByteArray bytes = QHttpGet::getContentOfURL(wkURL);
     QString result = QString::fromUtf8(bytes.data());
     QString replaceStr = (mBlockType == BLOCK_CONCEPT ? "3" : mBlockType == BLOCK_INDUSTORY ? "2" : "1");
     int index = 0;

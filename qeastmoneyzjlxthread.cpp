@@ -1,9 +1,6 @@
 #include "qeastmoneyzjlxthread.h"
-#include <QNetworkAccessManager>
-
-#include <QNetworkReply>
-#include <QEventLoop>
 #include <QDebug>
+#include "qhttpget.h"
 
 QEastMoneyZjlxThread::QEastMoneyZjlxThread(QObject *parent) : QThread(parent)
 {
@@ -20,26 +17,11 @@ void QEastMoneyZjlxThread::run()
     QString wkURL = QString("http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx/JS.aspx?type=ct&st=(BalFlowMain)&sr=-1&p=1&ps=5000&js=var%20jRmrwiia={pages:(pc),data:[(x)]}&token=894050c76af8597a853f5b408b759f5d&cmd=C._AB&sty=DCFFITA&rt=49490052");
 
     qDebug()<<"zjlx url:"<<wkURL;
-    QNetworkAccessManager *mgr = new QNetworkAccessManager;
     while(true)
     {
-        QNetworkReply *reply  = mgr->get(QNetworkRequest(wkURL));
-        if(!reply)
-        {
-            continue;
-        }
-        QEventLoop loop; // 使用事件循环使得网络通讯同步进行
-        connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-        loop.exec(); // 进入事件循环， 直到reply的finished()信号发出， 这个语句才能退出
-        if(reply->error())
-        {
-
-            reply->deleteLater();
-            continue;
-        }
         //开始解析数据
         int index = -1;
-        QByteArray bytes = reply->readAll();
+        QByteArray bytes = QHttpGet::getContentOfURL(wkURL);
         //qDebug()<<"zjlx bytes"<<bytes;
         QString result = QString::fromLocal8Bit(bytes.data());
 
@@ -67,8 +49,6 @@ void QEastMoneyZjlxThread::run()
             emit sendZjlxDataList(list);
 
         }
-        reply->deleteLater();
-
         sleep(10);
     }
 }

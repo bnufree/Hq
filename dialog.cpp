@@ -953,6 +953,8 @@ void Dialog::slotHistoryDataFinish()
         mgr->deleteLater();
     }
 
+    return;
+
     ui->updatelbl->clear();
 
 

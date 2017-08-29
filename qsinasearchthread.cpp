@@ -22,7 +22,7 @@ void QSinaSearchThread::slotRecvSearchString(const QString& text)
             .arg(text)
             .arg(QDateTime::currentDateTime().toMSecsSinceEpoch());
 
-    QByteArray bytes = QHttpGet().getContent(wkURL);
+    QByteArray bytes = QHttpGet::getContentOfURL(wkURL);
     QString result = QString::fromLocal8Bit(bytes.data());
     //qDebug()<<"result:"<<result;
     int start = 0;

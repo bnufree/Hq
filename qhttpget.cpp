@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QThread>
 #include <QTime>
+#include "webfile/webfile.h"
 
 QHttpGet::QHttpGet(const QString& url, QObject *parent) : QObject(parent)
 {
@@ -42,40 +43,16 @@ QByteArray QHttpGet::getContent(const QString &url)
 
 QByteArray QHttpGet::getContentOfURL(const QString& url)
 {
+    qDebug()<<__FUNCTION__<<__LINE__;
     if(url.length() == 0) return QByteArray();
-
+    webfile file(url);
     QByteArray res;
-    QNetworkAccessManager *mgr = new QNetworkAccessManager;
-    QNetworkReply *reply = mgr->get(QNetworkRequest(url));
-    if(!reply) goto FUNC_END;
-    qDebug()<<__FUNCTION__<<__LINE__<<QThread::currentThread()<<" url:"<<url;
-#if 0
+    if(file.open())
     {
-        QEventLoop loop; // 使用事件循环使得网络通讯同步进行
-        connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-        loop.exec(); // 进入事件循环， 直到reply的finished()信号发出， 这个语句才能退出
-        if(reply->error()) goto FUNC_END;
+        res = file.readAll();
+        file.close();
     }
-#endif
-    {
-        QTime time;
-        time.start();
-        while (!reply->isFinished()) {
-            if(time.elapsed() > 10000) break;
-            QThread::msleep(100);
-        }
-    }
-//        if(reply->isFinished())
-//        {
-            //开始解析数据
-            res = reply->readAll();
-//        }
-    qDebug()<<__FUNCTION__<<__LINE__<<res;
 
-
-FUNC_END:
-    if(reply)reply->deleteLater();
-    mgr->deleteLater();
     return res;
 }
 
