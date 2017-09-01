@@ -1,7 +1,7 @@
 #include "qeastmoneyblocksharethread.h"
 #include <QRegularExpression>
 #include "qhttpget.h"
-
+#include <QDebug>
 QEastMoneyBlockShareThread::QEastMoneyBlockShareThread(const QString& pBlockCode, QObject *parent) : QThread(parent)
 {
     mBlockCode = pBlockCode;
@@ -20,6 +20,7 @@ void QEastMoneyBlockShareThread::run()
     //开始解析数据
     QByteArray bytes = QHttpGet::getContentOfURL(wkURL);
     QString result = QString::fromUtf8(bytes.data());
+
 
     int index = 0;
     while((index = result.indexOf(QRegularExpression(tr("[12]{1},(60[013][0-9]{3}|300[0-9]{3}|00[012][0-9]{3})")), index)) >= 0)

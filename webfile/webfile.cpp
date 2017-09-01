@@ -32,8 +32,8 @@ static char THIS_FILE[] = __FILE__;
 #endif
 #endif
 
-#define DEF_OPENTIMEOUT     8000 /* ms */
-#define DEF_READTIMEOUT     8000 /* ms */
+#define DEF_OPENTIMEOUT     80000000 /* ms */
+#define DEF_READTIMEOUT     80000000 /* ms */
 #define DEF_BUFFERSIZE      (1024*1204) /* = 1 MB */
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0) // Qt 5.0.0
@@ -219,6 +219,9 @@ void webfile::slotOpen(void *pReturnSuccess, void *pLoop, qint64 offset /*= 0*/)
 bool webfile::workerOpen(qint64 offset /*= 0*/)
 {
     //    QDEBUGTS << "start offset" << offset << "bytes at url" << m_url.toString();
+    QTime       t;
+
+    t.start();
 
     clear();
 
@@ -275,7 +278,7 @@ bool webfile::workerOpen(qint64 offset /*= 0*/)
 
     if (!waitForConnect(m_nOpenTimeOutms, manager))
     {
-        QDEBUGTS << "timeout";
+        QDEBUGTS << "connect timeout !!!!!!!!!!!!!!!!!";
         m_NetworkError = QNetworkReply::TimeoutError;
         return false;
     }
@@ -299,7 +302,6 @@ bool webfile::workerOpen(qint64 offset /*= 0*/)
     m_strContentType    = m_pReply->header(QNetworkRequest::ContentTypeHeader).toString();
     m_LastModified      = m_pReply->header(QNetworkRequest::LastModifiedHeader).toDateTime();
     m_nSize             = m_pReply->header(QNetworkRequest::ContentLengthHeader).toULongLong();
-
     m_nResponse         = m_pReply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     m_strResponse       = m_pReply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
 
@@ -315,6 +317,8 @@ bool webfile::workerOpen(qint64 offset /*= 0*/)
     }
 
     m_NetworkError = response2error(m_nResponse);
+
+    QDEBUGTS<<" connect elapsed:"<<t.elapsed();
 
     return (response() == 200 || response() == 206);
 }
@@ -455,8 +459,6 @@ QByteArray webfile::read(qint64 maxlen)
 QByteArray webfile::readAll()
 {
     QByteArray data;
-
-    qDebug()<<"isGuiThread:"<<isGuiThread();
 
     if (isGuiThread())
     {
@@ -632,6 +634,25 @@ void webfile::workerReadArray(QByteArray *data, qint64 maxlen, READMODE eReadMod
 
     try
     {
+        QDEBUGTS<<" initialize size:"<<m_pReply->bytesAvailable()<<" reply size:"<<m_pReply->size()<<" finish:"<<isFinished();
+        if(m_pReply->size())
+        {
+            *data += m_pReply->readAll();
+        }
+        while(!isFinished())
+        {
+            QTime t;
+            t.start();
+            if(!waitForData(m_nReadTimeOutms))
+            {
+                QDEBUGTS<<" read timeout!!!!!!!!!!!!!"<<m_url.url()<<" time cost:"<<t.elapsed();
+                break;
+            }
+
+            *data += m_pReply->readAll();
+        }
+        //QDEBUGTS<<" total size:"<<data->size();
+        return;
         qint64 nSize = 0;
 
         if (m_pReply == NULL)
@@ -687,7 +708,6 @@ void webfile::workerReadArray(QByteArray *data, qint64 maxlen, READMODE eReadMod
         case MODE_READALL:
         {
             *data = m_pReply->readAll();
-            qDebug()<<"data:"<<*data;
             break;
         }
         default:

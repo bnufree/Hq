@@ -18,6 +18,7 @@
 #include "qeastmoneynorthboundthread.h"
 #include "qeastmoneyhsgtdialog.h"
 #include "./history/qsharehistoryinfomgr.h"
+#include "qhttpget.h"
 
 #define     STK_ZXG_SEC         "0520"
 #define     STK_HSJJ_SEC        "4521"
@@ -120,7 +121,6 @@ Dialog::Dialog(QWidget *parent) :
     connect(systemIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(setDlgShow(QSystemTrayIcon::ActivationReason)));
     connect(ui->hqtbl->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(setSortType(int)));
     connect(ui->blocktbl->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(setBlockSort(int)));
-
 
     //开始更新历史信息，龙虎榜信息，沪港通信息
     QShareHistoryInfoMgr *mgr = new QShareHistoryInfoMgr();
@@ -952,8 +952,6 @@ void Dialog::slotHistoryDataFinish()
         mAllStkList = mgr->getCodesList();
         mgr->deleteLater();
     }
-
-    return;
 
     ui->updatelbl->clear();
 

@@ -43,14 +43,13 @@ QByteArray QHttpGet::getContent(const QString &url)
 
 QByteArray QHttpGet::getContentOfURL(const QString& url)
 {
-    qDebug()<<__FUNCTION__<<__LINE__;
     if(url.length() == 0) return QByteArray();
     webfile file(url);
     QByteArray res;
     if(file.open())
     {
         res = file.readAll();
-        file.close();
+        //file.close();
     }
 
     return res;

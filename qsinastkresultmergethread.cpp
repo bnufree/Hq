@@ -62,10 +62,11 @@ void QSinaStkResultMergeThread::run()
         if(mThreadList.length() == 0)
         {
             //还没有初始化行情线程
-            int nthread = (mStkCodesList.length() + 99 ) / 100;
+            int thread_code = 50;
+            int nthread = (mStkCodesList.length() + thread_code-1 ) / thread_code;
             for(int i=0; i<nthread; i++)
             {
-                QStringList wklist = mStkCodesList.mid(i*100, 100);
+                QStringList wklist = mStkCodesList.mid(i*thread_code, thread_code);
                 QSinaStkInfoThread *wkthread = new QSinaStkInfoThread();
                 mThreadList.append(wkthread);
                 wkthread->setOptType(STK_DISPLAY_SORT_TYPE_NONE);

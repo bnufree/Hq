@@ -90,11 +90,13 @@ void QEastMoneyBlockThread::slotBlockShareThreadFinished()
     if(mWorkThreadList.isEmpty())
     {
        qDebug()<<"update share codes finished.............................";
-    }
-
-    while (true) {
-        slotUpdateBlockInfos();
-        QThread::sleep(2);
+        while (true) {
+            slotUpdateBlockInfos();
+            QThread::sleep(2);
+        }
+    } else
+    {
+        qDebug()<<"current block commnad length:"<<mWorkThreadList.length();
     }
 }
 

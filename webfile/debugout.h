@@ -16,6 +16,6 @@
 #include <QDebug>
 #include <QTime>
 
-#define QDEBUGTS    qDebug() << qPrintable(QTime::currentTime().toString("hh:mm:ss.zzz") + " " + QString(__PRETTY_FUNCTION__) + ":")
+#define QDEBUGTS  if(0)    qDebug() << qPrintable(QTime::currentTime().toString("hh:mm:ss.zzz") + " " + QString(__PRETTY_FUNCTION__) + ":")
 
 #endif // DEBUGOUT_H
