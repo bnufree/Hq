@@ -47,7 +47,9 @@ SOURCES += main.cpp\
     history/qeastmoneystockhistoryinfothread.cpp \
     history/qsharehistoryinfomgr.cpp \
     webfile/weberror.cpp \
-    webfile/webfile.cpp
+    webfile/webfile.cpp \
+    exchange/qexchangerecordworker.cpp \
+    exchange/qexchangefiledlg.cpp
 
 HEADERS  += dialog.h \
     stockdata.h \
@@ -83,12 +85,15 @@ HEADERS  += dialog.h \
     history/qsharehistoryinfomgr.h \
     webfile/debugout.h \
     webfile/weberror.h \
-    webfile/webfile.h
+    webfile/webfile.h \
+    exchange/qexchangerecordworker.h \
+    exchange/qexchangefiledlg.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \
     qindexframe.ui \
-    qeastmoneyhsgtdialog.ui
+    qeastmoneyhsgtdialog.ui \
+    exchange/qexchangefiledlg.ui
 
 RESOURCES += \
     image.qrc

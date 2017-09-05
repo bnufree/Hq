@@ -29,6 +29,7 @@ void QEastMoneyBlockShareThread::run()
         code.left(1) == "1"? code.replace(0, 2, "sh"):code.replace(0, 2, "sz");
         index = index+8;
         sharecodeslist.append(code);
+        emit signalUpdateShareBlock(code, mBlockCode);
     }
 
     emit signalUpdateBlockShareCodeList(mBlockCode, sharecodeslist);

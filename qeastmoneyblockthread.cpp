@@ -123,6 +123,7 @@ void QEastMoneyBlockThread::slotUpdateBlockShare()
         mWorkThreadList.append(thread);
         connect(thread, SIGNAL(signalUpdateBlockShareCodeList(QString,QStringList)), this, SLOT(slotUpdateBlockShareCodeList(QString,QStringList)));
         connect(thread, SIGNAL(finished()), this, SLOT(slotBlockShareThreadFinished()));
+        connect(thread, SIGNAL(signalUpdateShareBlock(QString,QString)), this, SIGNAL(signalUpdateShareBlock(QString,QString)));
         thread->start();
     }
 

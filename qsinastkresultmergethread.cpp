@@ -11,7 +11,7 @@ QSinaStkResultMergeThread::QSinaStkResultMergeThread(QObject *parent) : QThread(
     mCodeChangeFlag = false;
     mStkCntPerTrd = 200;
     mTotalPage = -1;
-    mPageSize = 100;
+    mPageSize = 50;
     mCurPage = 1;
     mMktType = MKT_ALL;
     mSortType = STK_DISPLAY_SORT_TYPE_CHGPER;
@@ -124,6 +124,7 @@ void QSinaStkResultMergeThread::run()
             //qDebug()<<"wklist len"<<wklist.length();
         }
         mListMutex.unlock();
+        mTotalPage = (wklist.length() + mPageSize -1) / mPageSize;
 
         if(wklist.length())
         {
@@ -249,7 +250,7 @@ void QSinaStkResultMergeThread::run()
                     qSort(wklist.begin(), wklist.end(), StockData::sortByMcapAsc);
                 }
             }
-            if(mActive)emit sendStkDataList(wklist.mid(0, mPageSize));
+            if(mActive)emit sendStkDataList(wklist.mid((mCurPage - 1) * mPageSize, mPageSize));
         } else
         {
             emit sendStkDataList(StockDataList());
@@ -287,6 +288,7 @@ void QSinaStkResultMergeThread::updateStkInfoList(const QList<QStringList>& pStk
 void QSinaStkResultMergeThread::setMktType(MKT_TYPE type)
 {
     mMktType = type;
+    mCurPage = 1;
     //updateStkCodes(mMktType);
 }
 
@@ -455,5 +457,38 @@ void QSinaStkResultMergeThread::slotRevZjlxData(const QList<zjlxData> &zjlist)
     foreach (zjlxData data, zjlist) {
         mZjlxMaplist[data.code] = data.zjlx;
     }
+}
+
+void QSinaStkResultMergeThread::displayFirst()
+{
+    mCurPage = 1;
+}
+
+void QSinaStkResultMergeThread::displayLast()
+{
+    mCurPage = mTotalPage;
+}
+
+void QSinaStkResultMergeThread::displayPrevious()
+{
+    mCurPage--;
+    if(mCurPage <= 0) mCurPage = 1;
+}
+
+void QSinaStkResultMergeThread::displayNext()
+{
+    mCurPage++;
+    if(mCurPage > mTotalPage) mCurPage = mTotalPage;
+}
+
+void QSinaStkResultMergeThread::setCurPage(int page)
+{
+    mCurPage = page;
+    if(mCurPage >= mTotalPage)
+    {
+        mCurPage = mTotalPage;
+    }
+    if(mCurPage <= 0)
+        mCurPage = 1;
 }
 

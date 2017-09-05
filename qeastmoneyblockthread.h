@@ -41,7 +41,8 @@ public slots:
     void    slotUpdateBlockShare();
     void    slotUpdateBlockInfos();
     void    slotUpdateBlockShareCodeList(const QString& pBlockCode, const QStringList& pShareCodesList);
-    void    slotBlockShareThreadFinished();
+    void    slotBlockShareThreadFinished();    
+    //void    slotUpdateShareBlock(const QString& share, const QString& block);
 
 private:
     int         mSortRule;

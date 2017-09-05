@@ -37,7 +37,6 @@ void QEastMoneyBlockMangagerThread::setCurBlockType(int type)
 
 void QEastMoneyBlockMangagerThread::slotReceiveBlockDataList(int type, const BlockDataList &list)
 {
-    qDebug()<<__FUNCTION__<<__LINE__;
     mBlockDataMapList[type] = list;
 }
 

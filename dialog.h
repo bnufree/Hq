@@ -16,6 +16,7 @@ typedef struct strColDisplay
     bool            mIsDisplay;
 }TableColDisplayStatus;
 
+
 Q_DECLARE_METATYPE(TableColDisplayStatus)
 
 namespace Ui {
@@ -24,7 +25,8 @@ class MainDialog;
 
 enum{
     MENU_OPT_MINUTE,
-    MENU_OPT_DAY,
+    MENU_OPT_DAY,    
+    MENU_OPT_HSGT,
     MENU_OPT_BLOCK,
 };
 
@@ -34,6 +36,16 @@ typedef enum Display_Mode{
     E_DISPLAY_STOCK_FULL,
     E_DISPLAY_STOCK_MINI,
 }DISPLAY_MODE;
+
+struct HqTableMenuData
+{
+    QString mStockCode;
+    QString mBlockCode;
+    int     mMenuCmd;
+};
+
+Q_DECLARE_METATYPE(HqTableMenuData)
+
 class Dialog : public QDialog
 {
     Q_OBJECT
@@ -56,6 +68,7 @@ public slots:
     void setBlockSort(int val);
     void setBlockName();
     void setStockMarket();
+    void setDisplayPage();
     void setDisplayCol(bool isDisplay);
     void setTargetSize(const QSize& size);
 
@@ -140,6 +153,7 @@ private:
     QSize                 mTargetSize;
     QMenu                 *mHqCenterMenu;
     QMenu                 *mHqHeaderMenu;
+    QMenu                 *mHqPageMenu;
     QStringList           mHqHeaderList;
     int                   mDisplayCol;
     QList<QAction*>       mHqColActList;

@@ -35,6 +35,11 @@ public:
 public:
     bool isActive();
     MktType getMktType();
+    void setCurPage(int page);
+    void displayFirst();
+    void displayNext();
+    void displayPrevious();
+    void displayLast();
 signals:
 
 protected:

@@ -307,6 +307,42 @@ void Dialog::iniHqCenterAction()
     }
 
     mHqHeaderMenu->addActions(mHqColActList);
+
+    mHqPageMenu = new QMenu(QStringLiteral("页面控制"), this);
+    poplist.clear();
+    poplist<<QStringLiteral("首页")<<QStringLiteral("前一页")<<QStringLiteral("后一页")<<QStringLiteral("末页");
+    for(int i=0; i<poplist.length(); i++)
+    {
+        QAction *act = new QAction(this);
+        act->setText(poplist[i]);
+        act->setData(i);
+        connect(act, &QAction::triggered, this, &Dialog::setDisplayPage);
+        mHqPageMenu->addAction(act);
+    }
+
+}
+
+void Dialog::setDisplayPage()
+{
+    if(!mMergeThread) return;
+    QAction *act = (QAction*)sender();
+    if(act == NULL) return;
+    int val = act->data().toInt();
+    switch (val) {
+    case 0:
+        mMergeThread->displayFirst();
+        break;
+    case 1:
+        mMergeThread->displayPrevious();
+        break;
+    case 2:
+        mMergeThread->displayNext();
+        break;
+    case 3:
+        mMergeThread->displayLast();
+    default:
+        break;
+    }
 }
 
 void Dialog::setDisplayCol(bool isDisplay)
@@ -634,24 +670,30 @@ void Dialog::on_hqtbl_customContextMenuRequested(const QPoint &pos)
     QMenu *popMenu = new QMenu(this);
     popMenu->addMenu(mHqCenterMenu);
     popMenu->addMenu(mHqHeaderMenu);
+    popMenu->addMenu(mHqPageMenu);
 
     //自选股编辑
     QTableWidgetItem *item = ui->hqtbl->itemAt(pos);
     if(item)
-    {        
+    {
+        item = ui->hqtbl->item(item->row(), 0);
+        QString stkCode = item->data(Qt::UserRole).toString();
         QList<QAction*> actlist;
         int row = item->row();
         item = ui->hqtbl->item(row, 0);
         QStringList poplist;
-        poplist<<QStringLiteral("分时图")<<QStringLiteral("日线图");
+        poplist<<QStringLiteral("分时图")<<QStringLiteral("日线图")<<QStringLiteral("沪深股通");
         QList<int> Optlist;
-        Optlist<<MENU_OPT_MINUTE<<MENU_OPT_DAY;
+        Optlist<<MENU_OPT_MINUTE<<MENU_OPT_DAY<<MENU_OPT_HSGT;
         int index = -1;
         foreach (QString name, poplist) {
             index++;
             QAction *act = new QAction(this);
             act->setText(name);
-            act->setData(Optlist[index]);
+            HqTableMenuData  data;
+            data.mStockCode = stkCode;
+            data.mMenuCmd = Optlist[index];
+            act->setData(QVariant::fromValue(data));
             connect(act, &QAction::triggered, this, &Dialog::hqMenuOpt);
             actlist.append(act);
         }
@@ -664,11 +706,14 @@ void Dialog::on_hqtbl_customContextMenuRequested(const QPoint &pos)
             QAction *act = new QAction(this);
             act->setText(QString("%1:%2%").arg(mBlockNameMap[name]).arg(mBlockMap[name]));
             qDebug()<<"subtext:"<<act->text();
-            act->setData(name);
+            HqTableMenuData data;
+            data.mStockCode = stkCode;
+            data.mBlockCode = name;
+            data.mMenuCmd = MENU_OPT_BLOCK;
+            act->setData(QVariant::fromValue(data));
             connect(act, &QAction::triggered, this, &Dialog::hqMenuOpt);
             submenu->addAction(act);
         }
-
         popMenu->addActions(actlist);
         popMenu->addMenu(submenu);
     }
@@ -713,10 +758,26 @@ void Dialog::hqMenuOpt()
 {
     QAction *act = (QAction*)sender();
     if(act == NULL) return;
-    QString opt = act->data().toString();
-    if(opt.length())
+    HqTableMenuData opt = act->data().value<HqTableMenuData>();
+    qDebug()<<"cmd:"<<opt.mMenuCmd<<" code:"<<opt.mStockCode;
+    switch (opt.mMenuCmd) {
+    case MENU_OPT_MINUTE:
+        break;
+    case MENU_OPT_DAY:
+        break;
+    case MENU_OPT_HSGT:
     {
-        displayBlockDetailInfoInTable(mBlockStkList[opt]);
+        QEastMoneyHSGTDialog *dlg = new QEastMoneyHSGTDialog;
+        emit DATA_SERVICE->signalQueryTop10ChinaStockInfos(QDate(), opt.mStockCode.right(6));
+        dlg->setModal(false);
+        dlg->show();
+    }
+        break;
+    case MENU_OPT_BLOCK:
+        displayBlockDetailInfoInTable(mBlockStkList[opt.mBlockCode]);
+        break;
+    default:
+        break;
     }
 }
 
