@@ -159,6 +159,10 @@ void QSinaStkInfoThread::RealtimeInfo()
             mDataMap[code].per = mDataMap[code].chg *100 / mDataMap[code].last_close;
             mDataMap[code].totalCap = mDataMap[code].cur * mDataMap[code].totalshare;
             mDataMap[code].mutalbleCap = mDataMap[code].cur * mDataMap[code].mutableshare;
+            if(mDataMap[code].profit == 0)
+            {
+                mDataMap[code].profit = DATA_SERVICE->getProfit(code);
+            }
         }
         emit sendStkDataList(mDataMap.values());
         QThread::sleep(1);

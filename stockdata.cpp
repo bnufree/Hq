@@ -6,6 +6,7 @@ StockData::StockData()
     totalshare = 0;
     mutableshare = 0;
     index = false;
+    profit = 0;
 }
 
 StockData::~StockData()
@@ -155,4 +156,16 @@ bool StockData::sortByMcapAsc(const StockData& d1, const StockData& d2)
 {
     if(d1.index ^ d2.index) return !d1.index;
     return d1.mutalbleCap < d2.mutalbleCap;
+}
+
+bool StockData::sortByProfitDesc(const StockData& d1, const StockData& d2)
+{
+    if(d1.index ^ d2.index) return d1.index;
+    return d1.profit > d2.profit;
+}
+
+bool StockData::sortByProfitAsc(const StockData& d1, const StockData& d2)
+{
+    if(d1.index ^ d2.index) return !d1.index;
+    return d1.profit < d2.profit;
 }

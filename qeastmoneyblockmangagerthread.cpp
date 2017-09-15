@@ -19,12 +19,13 @@ void QEastMoneyBlockMangagerThread::run()
     for(int i= 1; i<=3; i++)
     {
         QEastMoneyBlockThread *hy = new QEastMoneyBlockThread(i);
-        connect(hy, SIGNAL(sendBlockDataList(int,BlockDataList)), this, SLOT(slotReceiveBlockDataList(int,BlockDataList)));
+        connect(hy, SIGNAL(sendBlockDataList(int,BlockDataList,QMap<QString,BlockData>)), this, SLOT(slotReceiveBlockDataList(int,BlockDataList,QMap<QString,BlockData>)));
+        connect(hy, SIGNAL(sendShareBlockDataMap(QMap<QString,QStringList>)), this, SIGNAL(sendShareBlockDataMap(QMap<QString,QStringList>)));
         mWorkThreadList.append(hy);
         emit hy->start();
     }
     while (1) {
-        emit signalBlockDataListUpdated(mBlockDataMapList[mCurBlockType]);
+        emit signalBlockDataListUpdated(mBlockDataMapList[mCurBlockType], mBlockDataMap);
         sleep(3);
     }
 
@@ -35,9 +36,12 @@ void QEastMoneyBlockMangagerThread::setCurBlockType(int type)
     mCurBlockType = type;
 }
 
-void QEastMoneyBlockMangagerThread::slotReceiveBlockDataList(int type, const BlockDataList &list)
+void QEastMoneyBlockMangagerThread::slotReceiveBlockDataList(int type, const BlockDataList &list, const QMap<QString, BlockData>& map)
 {
     mBlockDataMapList[type] = list;
+    foreach (QString key, map.keys()) {
+        mBlockDataMap[key] = map[key];
+    }
 }
 
 void QEastMoneyBlockMangagerThread::reverseSortRule()

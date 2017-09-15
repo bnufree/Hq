@@ -48,6 +48,16 @@ bool HqInfoService::isTableExist(const QString &pTable)
     return false;
 }
 
+bool HqInfoService::createProfitTable()
+{
+    QString sql = tr("CREATE TABLE [profit] ("
+                  "[id] INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL,"
+                  "[code] VARCHAR(6)   NOT NULL,"
+                  "[profit] REAL  NULL "
+                  ")");
+    return mSqlQuery.exec(sql);
+}
+
 bool HqInfoService::createHistoryTable(const QString &pTableName)
 {
     QString sql = tr("CREATE TABLE [%1] ("
@@ -96,6 +106,8 @@ void HqInfoService::initSignalSlot()
             this, SLOT(slotAddShareBasicInfoList(StockDataList)));
     connect(this, SIGNAL(signalUpdateStkBaseinfoWithHistory(QString)),
             this, SLOT(slotUpdateStkBaseinfoWithHistory(QString)));
+    connect(this, SIGNAL(signalUpdateStkProfitList(StockDataList)),
+            this, SLOT(slotUpdateStkProfitList(StockDataList)));
 
 }
 
@@ -498,6 +510,7 @@ void HqInfoService::slotUpdateStkBaseinfoWithHistory(const QString &code)
     data.last_10day_pers = GetMultiDaysChangePercent(table, 10);
     data.last_month_pers = GetMultiDaysChangePercent(table, 22);
     data.last_close = last_close;
+    data.profit = mStkProfitMap[data.code];
     emit signalUpdateStkBaseinfoWithHistoryFinished(code);
 }
 
@@ -524,4 +537,21 @@ double HqInfoService::GetMultiDaysChangePercent(const QString &table, int days)
     }
 
     return (res - 1) * 100;
+}
+
+void HqInfoService::slotUpdateStkProfitList(const StockDataList &list)
+{
+    foreach (StockData data, list) {
+        mStkProfitMap[data.code.right(6)] = data.profit;
+    }
+}
+
+double HqInfoService::getProfit(const QString &code)
+{
+    return mStkProfitMap[code.right(6)];
+}
+
+QStringList HqInfoService::getExchangeCodeList()
+{
+    return mStkProfitMap.keys();
 }

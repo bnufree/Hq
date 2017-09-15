@@ -72,7 +72,8 @@ public slots:
     void setDisplayCol(bool isDisplay);
     void setTargetSize(const QSize& size);
 
-    void updateBlockTable(const BlockDataList& pDataList);
+    void updateBlockTable(const BlockDataList& pDataList, const QMap<QString, BlockData>& map);
+    void recvShareBlockDataMap(const QMap<QString, QStringList>& map);
     void displayBlockRealtimeInfo();
     void updateHqTable(const StockDataList& pDataList);
     void displayBlockDetailInfoInTable(const QStringList& stklist);
@@ -92,6 +93,7 @@ public slots:
     void slotUpdateStockCodesList(const QStringList& list);
     void slotTodayHSGUpdated();
     void slotHistoryDataFinish();
+    void slotUpdateFavList(const QStringList& list);
 
 private slots:
     void on_zxgBtn_clicked();
@@ -140,9 +142,10 @@ private:
     QSinaStkResultMergeThread     *mMergeThread;
     QSinaSearchThread             *mSearchThread;
     QMap<QString, double> mStockMap;
-    QMap<QString, double> mBlockMap;
-    QMap<QString, QString> mBlockNameMap;
+    //QMap<QString, double> mBlockMap;
+    QMap<QString, BlockData> mBlockDataMap;
     QMap<QString, QStringList> mBlockStkList;
+    QMap<QString, QStringList>mShareBlockList;
     QStringList           mFavStkList;
     QStringList           mHSFoundsList;
     QStringList           mAllStkList;

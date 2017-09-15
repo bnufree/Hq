@@ -25,6 +25,8 @@ QEastMoneyBlockThread::QEastMoneyBlockThread(int pBlockID, QObject *parent) : QO
     mSortRule = -1;
     mBlockDataList.clear();
     qRegisterMetaType<BlockDataList>("const BlockDataList&");
+    qRegisterMetaType<QMap<QString, QStringList>>("const QMap<QString, QStringList>&");
+    qRegisterMetaType<QMap<QString, BlockData>>("const QMap<QString, BlockData>&");
     this->moveToThread(&mWorkthread);
     connect(this, SIGNAL(start()), this, SLOT(slotUpdateBlockShare()));
     mWorkthread.start();
@@ -68,9 +70,10 @@ void QEastMoneyBlockThread::slotUpdateBlockInfos()
         data.changePer = rx.cap(3).toDouble();
         index += (rx.matchedLength()+2);
         list.append(data);
+        mBlockDataMap[data.code] = data;
     }
     //qDebug()<<__FUNCTION__<<__LINE__<<mBlockDataList.values().length();
-    emit sendBlockDataList(mBlockType, list);
+    emit sendBlockDataList(mBlockType, list, mBlockDataMap);
 
     return;
 }
@@ -90,6 +93,7 @@ void QEastMoneyBlockThread::slotBlockShareThreadFinished()
     if(mWorkThreadList.isEmpty())
     {
        qDebug()<<"update share codes finished.............................";
+       emit sendShareBlockDataMap(mShareBlockMap);
         while (true) {
             slotUpdateBlockInfos();
             QThread::sleep(2);
@@ -123,10 +127,15 @@ void QEastMoneyBlockThread::slotUpdateBlockShare()
         mWorkThreadList.append(thread);
         connect(thread, SIGNAL(signalUpdateBlockShareCodeList(QString,QStringList)), this, SLOT(slotUpdateBlockShareCodeList(QString,QStringList)));
         connect(thread, SIGNAL(finished()), this, SLOT(slotBlockShareThreadFinished()));
-        connect(thread, SIGNAL(signalUpdateShareBlock(QString,QString)), this, SIGNAL(signalUpdateShareBlock(QString,QString)));
+        connect(thread, SIGNAL(signalUpdateShareBlock(QString,QString)), this, SLOT(slotUpdateShareBlock(QString,QString)));
         thread->start();
     }
 
+}
+
+void QEastMoneyBlockThread::slotUpdateShareBlock(const QString &share, const QString &block)
+{
+    mShareBlockMap[share].append(block);
 }
 
 

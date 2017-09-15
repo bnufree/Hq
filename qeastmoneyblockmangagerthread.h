@@ -18,13 +18,15 @@ protected:
     void run();
 
 signals:
-    void signalBlockDataListUpdated(const BlockDataList& list);
+    void signalBlockDataListUpdated(const BlockDataList& list, const QMap<QString, BlockData>& map);
     void signalReceiveBlockDataList(int type, const BlockDataList& list);
+    void sendShareBlockDataMap(const QMap<QString, QStringList>& map);
 public slots:
-    void slotReceiveBlockDataList(int type, const BlockDataList& list);
+    void slotReceiveBlockDataList(int type, const BlockDataList& list, const QMap<QString, BlockData>& map);
 private:
     //QThread         mWorkThread;
     QMap<int, BlockDataList>    mBlockDataMapList;
+    QMap<QString, BlockData>       mBlockDataMap;
     QList<QEastMoneyBlockThread*>  mWorkThreadList;
     int             mCurBlockType;
 };

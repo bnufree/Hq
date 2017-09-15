@@ -25,6 +25,8 @@ public:
     friend class CGarbo;
     static HqInfoService* instance();
     StockData& getBasicStkData(const QString& code);
+    double getProfit(const QString& code);
+    QStringList  getExchangeCodeList();
     QDate  getLastUpdateDateOfHSGT();
     QDate  getLastUpdateDateOfShareHistory(const QString& code);
     bool   GetHistoryInfoWithDate(const QString& table, const QDate& date, double& close, double& money, qint64& total_share, qint64& mutalble_share);
@@ -46,6 +48,7 @@ signals:
     void signalAddShareBasicInfoList(const StockDataList& list);
     void signalUpdateStkBaseinfoWithHistory(const QString& code);
     void signalUpdateStkBaseinfoWithHistoryFinished(const QString &code);
+    void signalUpdateStkProfitList(const StockDataList& list);
 public slots:
     void slotRecvShareHistoryInfos(const StockDataList& list);
     bool slotAddHistoryData(const StockData& data);
@@ -63,12 +66,14 @@ public slots:
     void slotAddShareBasicInfoList(const StockDataList& list);
     void slotUpdateStkBaseinfoWithHistory(const QString& code);
     void slotUpdateHistoryChange(const QString& code);
+    void slotUpdateStkProfitList(const StockDataList& list);
 
 private:
     void initHistoryDates();
     void initSignalSlot();
     bool initDatabase();
     bool createHistoryTable(const QString& pTableName);
+    bool createProfitTable();
     bool isTableExist(const QString& pTable);
     bool blockExist(int code);
     bool isActive();
@@ -112,6 +117,7 @@ private:    //本类使用的变量
     QDate                       mLast10DaysDate;
     QDate                       mLast1MonthDate;
     QDate                       mLastActiveDate;
+    QMap<QString, double>       mStkProfitMap;
 };
 
 #endif // DBSERVICE_H

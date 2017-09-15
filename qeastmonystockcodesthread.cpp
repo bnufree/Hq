@@ -21,6 +21,8 @@ void QEastMonyStockCodesThread::run()
 
     //开始解析数据
     QByteArray bytes = QHttpGet::getContentOfURL(QString("http://quote.eastmoney.com/stocklist.html"));
+    qDebug()<<"total time cost:"<<t.elapsed();
+    t.start();
     QString result = QString::fromUtf8(bytes.data());
     int index = 0;
     QStringList list;

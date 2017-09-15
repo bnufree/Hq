@@ -39,6 +39,7 @@ bool QSinaStkResultMergeThread::isActive()
 
 void QSinaStkResultMergeThread::setSortType(int type)
 {
+    mCurPage = 1;
     if(mSortType == type)
     {
         mSortRule = (mSortRule == -1 ? 1: -1);
@@ -248,6 +249,17 @@ void QSinaStkResultMergeThread::run()
                 } else
                 {
                     qSort(wklist.begin(), wklist.end(), StockData::sortByMcapAsc);
+                }
+            }
+
+            else if(mSortType == STK_DISPLAY_SORT_TYPE_PROFIT)
+            {
+                if(mSortRule == -1)
+                {
+                    qSort(wklist.begin(), wklist.end(), StockData::sortByProfitDesc);
+                } else
+                {
+                    qSort(wklist.begin(), wklist.end(), StockData::sortByProfitAsc);
                 }
             }
             if(mActive)emit sendStkDataList(wklist.mid((mCurPage - 1) * mPageSize, mPageSize));

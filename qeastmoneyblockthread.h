@@ -33,16 +33,17 @@ public:
     void    reverseSortRule();
 
 signals:
-    void    sendBlockDataList(int type, const BlockDataList& list);
+    void    sendBlockDataList(int type, const BlockDataList& list, const QMap<QString, BlockData>& map);
     void    sendStkinfoUpdateProgress(int cur, int total);
     void    signalUpdateMsg(const QString& msg);
     void    start();
+    void    sendShareBlockDataMap(const QMap<QString, QStringList>& map);
 public slots:
     void    slotUpdateBlockShare();
     void    slotUpdateBlockInfos();
     void    slotUpdateBlockShareCodeList(const QString& pBlockCode, const QStringList& pShareCodesList);
     void    slotBlockShareThreadFinished();    
-    //void    slotUpdateShareBlock(const QString& share, const QString& block);
+    void    slotUpdateShareBlock(const QString& share, const QString& block);
 
 private:
     int         mSortRule;
@@ -50,6 +51,8 @@ private:
     QMap<QString,BlockData> mBlockDataList;
     QList<QThread*>     mWorkThreadList;
     QMap<int, BlockDataList> mBlockRealInfo;
+    QMap<QString, QStringList>  mShareBlockMap;
+    QMap<QString, BlockData>   mBlockDataMap;
     QThread     mWorkthread;
 };
 

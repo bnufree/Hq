@@ -19,6 +19,7 @@
 #include "qeastmoneyhsgtdialog.h"
 #include "./history/qsharehistoryinfomgr.h"
 #include "qhttpget.h"
+#include "exchange/qexchangerecordworker.h"
 
 #define     STK_ZXG_SEC         "0520"
 #define     STK_HSJJ_SEC        "4521"
@@ -71,7 +72,7 @@ Dialog::Dialog(QWidget *parent) :
     mHqHeaderList<<QStringLiteral("代码")<<QStringLiteral("名称")<<QStringLiteral("现价")<<QStringLiteral("涨跌")\
                <<QStringLiteral("成交")<<QStringLiteral("资金比")<<QStringLiteral("3日")<<QStringLiteral("资金流")
                <<QStringLiteral("股息率")<<QStringLiteral("送转")<<QStringLiteral("总市值")<<QStringLiteral("流通市值")
-               <<QStringLiteral("登记日")<<QStringLiteral("公告日");
+               <<QStringLiteral("盈亏")<<QStringLiteral("登记日")<<QStringLiteral("公告日");
     ui->hqtbl->setColumnCount(mHqHeaderList.length());
     ui->hqtbl->setHorizontalHeaderLabels(mHqHeaderList);
     ui->hqtbl->horizontalHeader()->setDefaultSectionSize(mSecSize);
@@ -88,8 +89,9 @@ Dialog::Dialog(QWidget *parent) :
     ui->hqtbl->horizontalHeaderItem(9)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_SZZBL);
     ui->hqtbl->horizontalHeaderItem(10)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_TCAP);
     ui->hqtbl->horizontalHeaderItem(11)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_MCAP);
-    ui->hqtbl->horizontalHeaderItem(12)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_GQDJR);
-    ui->hqtbl->horizontalHeaderItem(13)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_NONE);
+    ui->hqtbl->horizontalHeaderItem(12)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_PROFIT);
+    ui->hqtbl->horizontalHeaderItem(13)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_GQDJR);
+    ui->hqtbl->horizontalHeaderItem(14)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_NONE);
 
 
     for(int i=3; i<ui->hqtbl->columnCount(); i++)
@@ -126,6 +128,14 @@ Dialog::Dialog(QWidget *parent) :
     QShareHistoryInfoMgr *mgr = new QShareHistoryInfoMgr();
     connect(mgr, SIGNAL(signalUpdateProcess(int,int)), this, SLOT(slotUpdate(int,int)));
     connect(mgr, SIGNAL(signalHistoryDataFinished()), this, SLOT(slotHistoryDataFinish()));
+
+
+    //更新记录
+
+    QExchangeRecordWorker *work = new QExchangeRecordWorker;
+    connect(work, SIGNAL(signalSendStkProfitList(StockDataList)), DATA_SERVICE, SIGNAL(signalUpdateStkProfitList(StockDataList)));
+    connect(work, SIGNAL(signalSendCodeList(QStringList)), this, SLOT(slotUpdateFavList(QStringList)));
+    work->signalStartImport("test.xlsx");
 
 
     //创建快捷事件
@@ -223,12 +233,11 @@ Dialog::~Dialog()
 
 void Dialog::setSortType(int index)
 {
-    if(index < 2 || index > 13) return;
+    int type = ui->hqtbl->horizontalHeaderItem(index)->data(Qt::UserRole+1).toInt();
     if(mMergeThread && mMergeThread->isActive())
     {
-        mMergeThread->setSortType((STK_DISPLAY_TYPE)(index-2));
+        mMergeThread->setSortType((STK_DISPLAY_TYPE)type);
     }
-
 }
 
 void Dialog::setBlockSort(int val)
@@ -517,6 +526,7 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f",data.totalCap / 100000000.0 ) + QStringLiteral("亿")));
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f",data.mutalbleCap/ 100000000.0 )+ QStringLiteral("亿")));
 
+        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f",data.profit)));
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(data.gqdjr.toString("yyyy-MM-dd")));
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(data.yaggr.toString("yyyy-MM-dd")));
 
@@ -551,7 +561,29 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
         //ui->hqtbl->setCellWidget(i, btnindex, btn);
         ui->hqtbl->item(i, 0)->setData(Qt::UserRole, code);
 //        qDebug()<<"data.blocklist:"<<data.blocklist;
+        if(data.blocklist.length() == 0) data.blocklist = mShareBlockList[code];
         ui->hqtbl->item(i, 0)->setData(Qt::UserRole+1, data.blocklist);
+        QColor backColor = Qt::white;
+        if(data.profit >=5000)
+        {
+            backColor = QColor(255, 0, 0);
+        } else if(data.profit >= 1000)
+        {
+            backColor = QColor(238, 0, 0);
+        } else if(data.profit >0)
+        {
+            backColor = QColor(200, 0, 0);
+        } else if(data.profit <-5000)
+        {
+            backColor = QColor(0, 255, 0);
+        } else if(data.profit <-1000)
+        {
+            backColor = QColor(0,238,0);
+        } else if(data.profit <0)
+        {
+            backColor = QColor(0,200,0);
+        }
+        ui->hqtbl->item(i, 0)->setBackgroundColor(backColor);
         i++;
 
     }
@@ -567,18 +599,12 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
 //    pDlg->updateBlockTable(pDataList);
 //}
 
-void Dialog::updateBlockTable(const BlockDataList& pDataList)
+void Dialog::updateBlockTable(const BlockDataList& pDataList, const QMap<QString, BlockData>& map)
 {
-    qDebug()<<"input:"<<pDataList.length();
-//    if(pDataList.length() == 0) return;
-
-//    //ui->blocktbl->clearContents();
-//    int totalrow = pDataList.length();
     ui->blocktbl->setRowCount(pDataList.count());
 
     int i=0;
     foreach (BlockData data, pDataList) {
-        mBlockNameMap[data.code] = data.name;
         mBlockStkList[data.code] = data.stklist;
         int k =0;
         ui->blocktbl->setRowHeight(i, 20);
@@ -588,23 +614,24 @@ void Dialog::updateBlockTable(const BlockDataList& pDataList)
         QString tempStr = QString("%1%2%");
         QString up = QStringLiteral("↑");
         QString down = QStringLiteral("↓");
-        if(mBlockMap[data.code] > data.changePer)
+        if(mBlockDataMap[data.code].changePer > data.changePer)
         {
             ui->blocktbl->setItem(i, k++, new HqTableWidgetItem(tempStr.arg(down).arg(QString::number(data.changePer, 'f', 2))));
-        } else if(mBlockMap[data.code] < data.changePer)
+        } else if(mBlockDataMap[data.code].changePer < data.changePer)
         {
             ui->blocktbl->setItem(i, k++, new HqTableWidgetItem(tempStr.arg(up).arg(QString::number(data.changePer, 'f', 2))));
         } else
         {
             ui->blocktbl->setItem(i, k++, new HqTableWidgetItem(tempStr.arg("").arg(QString::number(data.changePer, 'f', 2))));
         }
-        mBlockMap[data.code] = data.changePer;
+        //mBlockMap[data.code] = data.changePer;
         QVariant val;
         val.setValue(data);
         ui->blocktbl->item(i, 0)->setData(Qt::UserRole, val);
         i++;
 
     }
+    mBlockDataMap = map;
 
 
 }
@@ -702,9 +729,9 @@ void Dialog::on_hqtbl_customContextMenuRequested(const QPoint &pos)
         qDebug()<<"blocklist:"<<blocklist<<" code:"<<item->data(Qt::UserRole).toString();
         foreach (QString name, blocklist) {
             if(name.trimmed().isEmpty()) continue;
-            if(mBlockNameMap[name].trimmed().isEmpty()) continue;
+            if(mBlockDataMap[name].name.trimmed().isEmpty()) continue;
             QAction *act = new QAction(this);
-            act->setText(QString("%1:%2%").arg(mBlockNameMap[name]).arg(mBlockMap[name]));
+            act->setText(QString("%1:%2%").arg(mBlockDataMap[name].name).arg(mBlockDataMap[name].changePer));
             qDebug()<<"subtext:"<<act->text();
             HqTableMenuData data;
             data.mStockCode = stkCode;
@@ -1036,7 +1063,7 @@ void Dialog::slotHistoryDataFinish()
 
     //行情中心初始化开始为自选股
     //读取自选
-    mFavStkList = Profiles::instance()->value(STK_ZXG_SEC, STK_ZXG_NAME).toStringList();
+    if(mFavStkList.length() == 0)mFavStkList = Profiles::instance()->value(STK_ZXG_SEC, STK_ZXG_NAME).toStringList();
     mHSFoundsList = Profiles::instance()->value(STK_HSJJ_SEC, STK_ZXG_NAME).toStringList();
     mMergeThread = new QSinaStkResultMergeThread();
     connect(mMergeThread, SIGNAL(sendStkDataList(StockDataList)), this, SLOT(updateHqTable(StockDataList)));
@@ -1049,10 +1076,24 @@ void Dialog::slotHistoryDataFinish()
     mCurBlockType = BLOCK_INDUSTORY;
     mBlockMgr = new QEastMoneyBlockMangagerThread();
     mBlockMgr->setCurBlockType(2);
-    connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataList)), this, SLOT(updateBlockTable(BlockDataList)));
+    connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataList, QMap<QString,BlockData>)), this, SLOT(updateBlockTable(BlockDataList, QMap<QString,BlockData>)));
+    connect(mBlockMgr, SIGNAL(sendShareBlockDataMap(QMap<QString,QStringList>)), this, SLOT(recvShareBlockDataMap(QMap<QString,QStringList>)));
     mBlockMgr->start();
 
     //查询接口初始化
     mSearchThread = new QSinaSearchThread(this);
     connect(mSearchThread, SIGNAL(sendSearchResult(QStringList)), this, SLOT(displayBlockDetailInfoInTable(QStringList)));
+}
+
+void Dialog::slotUpdateFavList(const QStringList &list)
+{
+    mFavStkList = list;
+}
+
+void Dialog::recvShareBlockDataMap(const QMap<QString, QStringList> &map)
+{
+    foreach (QString key, map.keys()) {
+        qDebug()<<"key:"<<key<<"   list:"<<map[key];
+        mShareBlockList[key].append(map[key]);
+    }
 }

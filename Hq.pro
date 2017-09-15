@@ -4,6 +4,7 @@
 #
 #-------------------------------------------------
 
+include(./QtXlsx/QtXlsx.pri)
 QT       += core gui network sql concurrent
 
 //DEFINES *= Q_QDOC
