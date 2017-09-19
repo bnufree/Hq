@@ -49,6 +49,7 @@ void QEastMoneyHSGTDialog::slotRecvTop10Infos(const QList<ChinaShareExchange> &l
         ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString::number(info.mTop10Buy/10000)));
         ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString::number(info.mTop10Sell/10000)));
         ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString::number((info.mTop10Buy-info.mTop10Sell) /10000)));
+        ui->tableWidget->item(row, 0)->setData(Qt::UserRole+1, info.code);
         row++;
     }
 
@@ -67,4 +68,15 @@ void QEastMoneyHSGTDialog::on_DateCHK_clicked(bool checked)
 void QEastMoneyHSGTDialog::on_CodeCHK_clicked(bool checked)
 {
     ui->NameEdit->setEnabled(checked);
+}
+
+void QEastMoneyHSGTDialog::on_tableWidget_doubleClicked(const QModelIndex &index)
+{
+    int row = index.row();
+    if(row >= 0)
+    {
+        QString code = ui->tableWidget->item(row, 0)->data(Qt::UserRole+1).toString();
+        emit DATA_SERVICE->signalQueryTop10ChinaStockInfos(QDate(), code, 0);
+    }
+
 }

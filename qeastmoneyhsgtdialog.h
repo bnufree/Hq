@@ -26,6 +26,8 @@ private slots:
 
     void on_CodeCHK_clicked(bool checked);
 
+    void on_tableWidget_doubleClicked(const QModelIndex &index);
+
 private:
     Ui::QEastMoneyHSGTDialog *ui;
 };
