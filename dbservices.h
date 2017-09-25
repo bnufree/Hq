@@ -26,11 +26,14 @@ public:
     static HqInfoService* instance();
     StockData& getBasicStkData(const QString& code);
     double getProfit(const QString& code);
+    qint64 amountForeigner(const QString& code);
     QStringList  getExchangeCodeList();
     QDate  getLastUpdateDateOfHSGT();
+    QDate  getLastUpdateDateOfHSGTVol();
     QDate  getLastUpdateDateOfShareHistory(const QString& code);
     bool   GetHistoryInfoWithDate(const QString& table, const QDate& date, double& close, double& money, qint64& total_share, qint64& mutalble_share);
     double   GetMultiDaysChangePercent(const QString& table, int days);
+    void   GetForeignVolChange(const QString& code, qint64& cur, qint64& pre);
 
 signals:
     void signalRecvRealBlockInfo(const QList<BlockRealInfo>& list);
@@ -49,6 +52,9 @@ signals:
     void signalUpdateStkBaseinfoWithHistory(const QString& code);
     void signalUpdateStkBaseinfoWithHistoryFinished(const QString &code);
     void signalUpdateStkProfitList(const StockDataList& list);
+    //沪港通持股写入数据据
+    void signalAddShareAmoutByForeigner(const StockDataList& list);
+    void signalUpdateShareAmountByForeigner();
 public slots:
     void slotRecvShareHistoryInfos(const StockDataList& list);
     bool slotAddHistoryData(const StockData& data);
@@ -67,6 +73,8 @@ public slots:
     void slotUpdateStkBaseinfoWithHistory(const QString& code);
     void slotUpdateHistoryChange(const QString& code);
     void slotUpdateStkProfitList(const StockDataList& list);
+    void slotAddShareAmoutByForeigner(const StockDataList& list);
+    void slotUpdateShareAmountByForeigner();
 
 private:
     void initHistoryDates();
@@ -74,6 +82,7 @@ private:
     bool initDatabase();
     bool createHistoryTable(const QString& pTableName);
     bool createProfitTable();
+    bool createHSGTShareAmountTable();
     bool isTableExist(const QString& pTable);
     bool blockExist(int code);
     bool isActive();
@@ -118,6 +127,7 @@ private:    //本类使用的变量
     QDate                       mLast1MonthDate;
     QDate                       mLastActiveDate;
     QMap<QString, double>       mStkProfitMap;
+    QMap<QString, qint64>       mStkForeignerHoldMap;
 };
 
 #endif // DBSERVICE_H

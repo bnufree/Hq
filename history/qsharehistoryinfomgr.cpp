@@ -2,6 +2,7 @@
 #include "qeastmoneystockhistoryinfothread.h"
 #include "../dbservices.h"
 #include "../qeastmonystockcodesthread.h"
+#include "../qeastmoneyhsgtshareamount.h"
 #include <QDebug>
 
 QShareHistoryInfoMgr::QShareHistoryInfoMgr(QObject *parent) : QObject(parent)
@@ -120,7 +121,22 @@ void QShareHistoryInfoMgr::slotUpdateHistoryFinished(const QString& code)
     {
         //历史信息更新完毕
         qDebug()<<"all thread finished!!!!!!!!!!!!!!!!!!";
-        emit signalHistoryDataFinished();
+        //开始更新持股信息
+        QEastMoneyHSGTShareAmount * thread = new QEastMoneyHSGTShareAmount;
+        connect(thread, SIGNAL(finished()), this, SLOT(slotUpdateForeignAmountFinished()));
+        connect(thread, SIGNAL(signalAmountFinshedAtDate(QString)), this, SIGNAL(signalUpdateAmountProcess(QString)));
+        thread->start();
     }
 
+}
+
+void QShareHistoryInfoMgr::slotUpdateForeignAmountFinished()
+{
+    QEastMoneyHSGTShareAmount * thread = (QEastMoneyHSGTShareAmount*) sender();
+    if(thread)
+    {
+        emit DATA_SERVICE->signalUpdateShareAmountByForeigner();
+        //thread->deleteLater();
+        emit signalHistoryDataFinished();
+    }
 }
