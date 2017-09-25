@@ -3,8 +3,7 @@ MINGW_QWT_VERSION     = 1.0.0
 ######################################################################
 # 3rdparty path
 ######################################################################
-
-QTXLSX_PATH = ../$${QTXLSX_NAME}
+QTXLSX_PATH = $$PWD
 
 exists( $${QTXLSX_PATH} ) {
     message($${QTXLSX_PATH})

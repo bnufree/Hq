@@ -7,7 +7,7 @@
 include(./QtXlsx/QtXlsx.pri)
 QT       += core gui network sql concurrent
 
-//DEFINES *= Q_QDOC
+#DEFINES *= Q_QDOC
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -15,6 +15,8 @@ TARGET = Hq
 TEMPLATE = app
 DESTDIR = ../bin/
 
+#INCLUDEPATH += $$PWD/QtXlsx/include
+message("include dirname " + $$INCLUDEPATH)
 
 SOURCES += main.cpp\
         dialog.cpp \
