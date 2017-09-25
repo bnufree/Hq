@@ -20,6 +20,7 @@
 #include "./history/qsharehistoryinfomgr.h"
 #include "qhttpget.h"
 #include "exchange/qexchangerecordworker.h"
+#include "qeastmoneyhsgtshareamount.h"
 
 #define     STK_ZXG_SEC         "0520"
 #define     STK_HSJJ_SEC        "4521"
@@ -72,7 +73,7 @@ Dialog::Dialog(QWidget *parent) :
     mHqHeaderList<<QStringLiteral("代码")<<QStringLiteral("名称")<<QStringLiteral("现价")<<QStringLiteral("涨跌")\
                <<QStringLiteral("成交")<<QStringLiteral("资金比")<<QStringLiteral("3日")<<QStringLiteral("资金流")
                <<QStringLiteral("股息率")<<QStringLiteral("送转")<<QStringLiteral("总市值")<<QStringLiteral("流通市值")
-               <<QStringLiteral("盈亏")<<QStringLiteral("登记日")<<QStringLiteral("公告日");
+               <<QStringLiteral("盈亏")<<QStringLiteral("外资持股")<<QStringLiteral("持股市值")<<QStringLiteral("登记日")<<QStringLiteral("公告日");
     ui->hqtbl->setColumnCount(mHqHeaderList.length());
     ui->hqtbl->setHorizontalHeaderLabels(mHqHeaderList);
     ui->hqtbl->horizontalHeader()->setDefaultSectionSize(mSecSize);
@@ -90,8 +91,10 @@ Dialog::Dialog(QWidget *parent) :
     ui->hqtbl->horizontalHeaderItem(10)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_TCAP);
     ui->hqtbl->horizontalHeaderItem(11)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_MCAP);
     ui->hqtbl->horizontalHeaderItem(12)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_PROFIT);
-    ui->hqtbl->horizontalHeaderItem(13)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_GQDJR);
-    ui->hqtbl->horizontalHeaderItem(14)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_NONE);
+    ui->hqtbl->horizontalHeaderItem(13)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_FOREIGN_VOL);
+    ui->hqtbl->horizontalHeaderItem(14)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_FOREIGN_CAP);
+    ui->hqtbl->horizontalHeaderItem(15)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_GQDJR);
+    ui->hqtbl->horizontalHeaderItem(16)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_NONE);
 
 
     for(int i=3; i<ui->hqtbl->columnCount(); i++)
@@ -128,6 +131,7 @@ Dialog::Dialog(QWidget *parent) :
     QShareHistoryInfoMgr *mgr = new QShareHistoryInfoMgr();
     connect(mgr, SIGNAL(signalUpdateProcess(int,int)), this, SLOT(slotUpdate(int,int)));
     connect(mgr, SIGNAL(signalHistoryDataFinished()), this, SLOT(slotHistoryDataFinish()));
+    connect(mgr, SIGNAL(signalUpdateAmountProcess(QString)), this, SLOT(slotUpdateMsg(QString)));
 
 
     //更新记录
@@ -527,6 +531,16 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f",data.mutalbleCap/ 100000000.0 )+ QStringLiteral("亿")));
 
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f",data.profit)));
+        if(data.foreign_vol >= 10000000){
+            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f", data.foreign_vol / 100000000.0) + QStringLiteral("亿")));
+        } else {
+            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f", data.foreign_vol / 10000.0)  + QStringLiteral("万")));
+        }
+        if(data.foreign_cap >= 1000000){
+            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f", data.foreign_cap / 100000000.0) + QStringLiteral("亿")));
+        } else {
+            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f", data.foreign_cap / 10000.0) + QStringLiteral("万")));
+        }
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(data.gqdjr.toString("yyyy-MM-dd")));
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(data.yaggr.toString("yyyy-MM-dd")));
 
@@ -1042,7 +1056,6 @@ void Dialog::slotHistoryDataFinish()
     }
 
     ui->updatelbl->clear();
-
 
     QEastMoneyChinaShareExchange *tophk = new QEastMoneyChinaShareExchange(QDate::fromString("2017-07-13", "yyyy-MM-dd"));
     connect(tophk, SIGNAL(signalHSGTofTodayTop10Updated()), this, SLOT(slotTodayHSGUpdated()));

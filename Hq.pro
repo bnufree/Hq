@@ -52,7 +52,8 @@ SOURCES += main.cpp\
     webfile/weberror.cpp \
     webfile/webfile.cpp \
     exchange/qexchangerecordworker.cpp \
-    exchange/qexchangefiledlg.cpp
+    exchange/qexchangefiledlg.cpp \
+    qeastmoneyhsgtshareamount.cpp
 
 HEADERS  += dialog.h \
     stockdata.h \
@@ -90,7 +91,8 @@ HEADERS  += dialog.h \
     webfile/weberror.h \
     webfile/webfile.h \
     exchange/qexchangerecordworker.h \
-    exchange/qexchangefiledlg.h
+    exchange/qexchangefiledlg.h \
+    qeastmoneyhsgtshareamount.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

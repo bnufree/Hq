@@ -19,6 +19,7 @@ signals:
     void signalStartGetHistory();
     void signalHistoryDataFinished();
     void signalUpdateProcess(int cur, int total);
+    void signalUpdateAmountProcess(const QString& date);
 
 public slots:
     void slotSetHistoryCodeList(const QStringList& list);
@@ -27,6 +28,7 @@ public slots:
     void slotStartGetHistory();
     void slotUpdateHistoryFinished(const QString& code);
     void slotUpdateStockCodesList(const QStringList &list);
+    void slotUpdateForeignAmountFinished();
 private:
     QThread     mWorkThread;
     QList<QEastmoneyStockHistoryInfoThread*>     mWorkQueueThreadList;

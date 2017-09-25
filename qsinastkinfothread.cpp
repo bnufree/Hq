@@ -81,6 +81,7 @@ void QSinaStkInfoThread::setStkList(const QStringList &list)
             data.gxl = 0;
             data.szzbl = 0;
             data.xjfh = 0;
+            data.foreign_vol = DATA_SERVICE->amountForeigner(data.code.right(6));
         }
         mDataMap[data.code] = data;
     }
@@ -163,6 +164,7 @@ void QSinaStkInfoThread::RealtimeInfo()
             {
                 mDataMap[code].profit = DATA_SERVICE->getProfit(code);
             }
+            mDataMap[code].foreign_cap = mDataMap[code].foreign_vol * mDataMap[code].cur ;
         }
         emit sendStkDataList(mDataMap.values());
         QThread::sleep(1);

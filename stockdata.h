@@ -41,6 +41,10 @@ public:
     static bool sortByMcapAsc(const StockData& d1, const StockData& d2);
     static bool sortByProfitDesc(const StockData& d1, const StockData& d2);
     static bool sortByProfitAsc(const StockData& d1, const StockData& d2);
+    static bool sortByForVolDesc(const StockData& d1, const StockData& d2);
+    static bool sortByForVolAsc(const StockData& d1, const StockData& d2);
+    static bool sortByForCapDesc(const StockData& d1, const StockData& d2);
+    static bool sortByForCapAsc(const StockData& d1, const StockData& d2);
 
     bool operator ==(const StockData& data)
     {
@@ -88,6 +92,11 @@ public:
     bool        index;
     QDate       date; //当前的日期
     double      profit;
+    qint64      foreign_vol;
+    qint64      foreign_vol_chg;
+    double      foreign_cap;
+    double      foreign_cap_chg;
+
 
 };
 

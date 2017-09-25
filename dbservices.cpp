@@ -6,6 +6,7 @@
 #include <QtSql/QSqlRecord>
 #include "qexchangedatamanage.h"
 
+#define     HSGT_TABLE          "hsgvol"
 HqInfoService* HqInfoService::m_pInstance = 0;
 HqInfoService::CGarbo HqInfoService::s_Garbo;
 QMutex HqInfoService::mutex;
@@ -55,6 +56,17 @@ bool HqInfoService::createProfitTable()
                   "[code] VARCHAR(6)   NOT NULL,"
                   "[profit] REAL  NULL "
                   ")");
+    return mSqlQuery.exec(sql);
+}
+
+bool HqInfoService::createHSGTShareAmountTable()
+{
+    QString sql = tr("CREATE TABLE [%1] ("
+                  "[id] INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL,"
+                  "[code] VARCHAR(100)  NULL,"
+                  "[vol] NUMERIC  NULL,"
+                  "[date] DATE  NULL"
+                  ")").arg(HSGT_TABLE);
     return mSqlQuery.exec(sql);
 }
 
@@ -108,6 +120,10 @@ void HqInfoService::initSignalSlot()
             this, SLOT(slotUpdateStkBaseinfoWithHistory(QString)));
     connect(this, SIGNAL(signalUpdateStkProfitList(StockDataList)),
             this, SLOT(slotUpdateStkProfitList(StockDataList)));
+    connect(this, SIGNAL(signalAddShareAmoutByForeigner(StockDataList)),
+            this, SLOT(slotAddShareAmoutByForeigner(StockDataList)));
+    connect(this, SIGNAL(signalUpdateShareAmountByForeigner()),
+            this, SLOT(slotUpdateShareAmountByForeigner()));
 
 }
 
@@ -291,6 +307,17 @@ QDate HqInfoService::getLastUpdateDateOfTable(const QString &table)
 QDate HqInfoService::getLastUpdateDateOfHSGT()
 {
     return getLastUpdateDateOfTable("hstop10");
+}
+
+QDate HqInfoService::getLastUpdateDateOfHSGTVol()
+{
+    QDate date = getLastUpdateDateOfTable(HSGT_TABLE);
+    if(date == QDate(2016,12,4))
+    {
+        date = QDate::currentDate().addDays(-30);
+    }
+
+    return date;
 }
 
 QDate HqInfoService::getLastUpdateDateOfShareHistory(const QString &code)
@@ -539,11 +566,48 @@ double HqInfoService::GetMultiDaysChangePercent(const QString &table, int days)
     return (res - 1) * 100;
 }
 
+void HqInfoService::GetForeignVolChange(const QString &code, qint64 &cur, qint64 &pre)
+{
+    if(!mSqlQuery.exec(tr("select vol from %1 where code = '%2' order by date desc limit 2").arg(HSGT_TABLE).arg(code)))
+    {
+        return;
+    }
+
+    cur = 0;
+    pre = 0;
+
+    while (mSqlQuery.next()) {
+        if(cur == 0)
+        {
+            cur = mSqlQuery.value(0).toLongLong();
+        } else
+        {
+            pre = mSqlQuery.value(0).toLongLong();
+        }
+    }
+}
+
 void HqInfoService::slotUpdateStkProfitList(const StockDataList &list)
 {
     foreach (StockData data, list) {
         mStkProfitMap[data.code.right(6)] = data.profit;
     }
+}
+
+void HqInfoService::slotAddShareAmoutByForeigner(const StockDataList &list)
+{
+    //先检查表表是否存在，不存在，就添加
+    if(!isTableExist(HSGT_TABLE)) createHSGTShareAmountTable();
+    QSqlDatabase::database().transaction();
+    foreach (StockData info, list) {
+        mSqlQuery.prepare(tr("insert into %1 (code, vol, date) values ("
+                          "?, ?, ?)").arg(HSGT_TABLE));
+        mSqlQuery.addBindValue(info.code);
+        mSqlQuery.addBindValue(info.foreign_vol);
+        mSqlQuery.addBindValue(info.date);
+        mSqlQuery.exec();
+    }
+    QSqlDatabase::database().commit();
 }
 
 double HqInfoService::getProfit(const QString &code)
@@ -554,4 +618,22 @@ double HqInfoService::getProfit(const QString &code)
 QStringList HqInfoService::getExchangeCodeList()
 {
     return mStkProfitMap.keys();
+}
+
+void HqInfoService::slotUpdateShareAmountByForeigner()
+{
+    QDate date = getLastUpdateDateOfHSGTVol();
+    //开始插入
+    mSqlQuery.exec(tr("select * from %1 where date = '%2'").arg(HSGT_TABLE).arg(date.toString("yyyy-MM-dd")));
+    while(mSqlQuery.next())
+    {
+        QString code = mSqlQuery.value("code").toString();
+        qint64 num = mSqlQuery.value("vol").toLongLong();
+        mStkForeignerHoldMap[code] = num;
+    }
+}
+
+qint64 HqInfoService::amountForeigner(const QString &code)
+{
+    return mStkForeignerHoldMap[code];
 }

@@ -262,6 +262,26 @@ void QSinaStkResultMergeThread::run()
                     qSort(wklist.begin(), wklist.end(), StockData::sortByProfitAsc);
                 }
             }
+            else if(mSortType == STK_DISPLAY_SORT_TYPE_FOREIGN_VOL)
+            {
+                if(mSortRule == -1)
+                {
+                    qSort(wklist.begin(), wklist.end(), StockData::sortByForVolDesc);
+                } else
+                {
+                    qSort(wklist.begin(), wklist.end(), StockData::sortByForVolAsc);
+                }
+            }
+            else if(mSortType == STK_DISPLAY_SORT_TYPE_FOREIGN_CAP)
+            {
+                if(mSortRule == -1)
+                {
+                    qSort(wklist.begin(), wklist.end(), StockData::sortByForCapDesc);
+                } else
+                {
+                    qSort(wklist.begin(), wklist.end(), StockData::sortByForCapAsc);
+                }
+            }
             if(mActive)emit sendStkDataList(wklist.mid((mCurPage - 1) * mPageSize, mPageSize));
         } else
         {

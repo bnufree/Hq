@@ -169,3 +169,27 @@ bool StockData::sortByProfitAsc(const StockData& d1, const StockData& d2)
     if(d1.index ^ d2.index) return !d1.index;
     return d1.profit < d2.profit;
 }
+
+bool StockData::sortByForVolDesc(const StockData& d1, const StockData& d2)
+{
+    if(d1.index ^ d2.index) return d1.index;
+    return d1.foreign_vol > d2.foreign_vol;
+}
+
+bool StockData::sortByForVolAsc(const StockData& d1, const StockData& d2)
+{
+    if(d1.index ^ d2.index) return !d1.index;
+    return d1.foreign_vol < d2.foreign_vol;
+}
+
+bool StockData::sortByForCapDesc(const StockData& d1, const StockData& d2)
+{
+    if(d1.index ^ d2.index) return d1.index;
+    return d1.foreign_cap > d2.foreign_cap;
+}
+
+bool StockData::sortByForCapAsc(const StockData& d1, const StockData& d2)
+{
+    if(d1.index ^ d2.index) return !d1.index;
+    return d1.foreign_cap < d2.foreign_cap;
+}
