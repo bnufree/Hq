@@ -740,7 +740,7 @@ void Dialog::on_hqtbl_customContextMenuRequested(const QPoint &pos)
         }
         QMenu *submenu = new QMenu(QStringLiteral("所属板块"), this);
         QStringList blocklist = item->data(Qt::UserRole+1).toStringList();
-        qDebug()<<"blocklist:"<<blocklist<<" code:"<<item->data(Qt::UserRole).toString();
+        //qDebug()<<"blocklist:"<<blocklist<<" code:"<<item->data(Qt::UserRole).toString();
         foreach (QString name, blocklist) {
             if(name.trimmed().isEmpty()) continue;
             if(mBlockDataMap[name].name.trimmed().isEmpty()) continue;
@@ -815,7 +815,7 @@ void Dialog::hqMenuOpt()
     }
         break;
     case MENU_OPT_BLOCK:
-        displayBlockDetailInfoInTable(mBlockStkList[opt.mBlockCode]);
+        displayBlockDetailInfoInTable(mBlockDataMap[opt.mBlockCode].stklist);
         break;
     default:
         break;
@@ -1054,7 +1054,6 @@ void Dialog::slotHistoryDataFinish()
         mAllStkList = mgr->getCodesList();
         mgr->deleteLater();
     }
-
     ui->updatelbl->clear();
 
     QEastMoneyChinaShareExchange *tophk = new QEastMoneyChinaShareExchange(QDate::fromString("2017-07-13", "yyyy-MM-dd"));
@@ -1106,7 +1105,7 @@ void Dialog::slotUpdateFavList(const QStringList &list)
 void Dialog::recvShareBlockDataMap(const QMap<QString, QStringList> &map)
 {
     foreach (QString key, map.keys()) {
-        qDebug()<<"key:"<<key<<"   list:"<<map[key];
+        //qDebug()<<"key:"<<key<<"   list:"<<map[key];
         mShareBlockList[key].append(map[key]);
     }
 }

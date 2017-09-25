@@ -133,10 +133,11 @@ void QShareHistoryInfoMgr::slotUpdateHistoryFinished(const QString& code)
 void QShareHistoryInfoMgr::slotUpdateForeignAmountFinished()
 {
     QEastMoneyHSGTShareAmount * thread = (QEastMoneyHSGTShareAmount*) sender();
+    qDebug()<<"hsgt thread:"<<thread;
     if(thread)
     {
-        emit DATA_SERVICE->signalUpdateShareAmountByForeigner();
-        //thread->deleteLater();
+        DATA_SERVICE->slotUpdateShareAmountByForeigner();
+        thread->deleteLater();
         emit signalHistoryDataFinished();
     }
 }

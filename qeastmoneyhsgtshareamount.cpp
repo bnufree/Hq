@@ -50,8 +50,11 @@ void QEastMoneyHSGTShareAmount::run()
 
     }
     qDebug()<<"list length:"<<list.length();
+    if(list.length() > 0)
+    {
 
     emit DATA_SERVICE->signalAddShareAmoutByForeigner(list);
+    }
 
     return;
 }

@@ -623,14 +623,19 @@ QStringList HqInfoService::getExchangeCodeList()
 void HqInfoService::slotUpdateShareAmountByForeigner()
 {
     QDate date = getLastUpdateDateOfHSGTVol();
+    qDebug()<<"last date:"<<date;
     //开始插入
-    mSqlQuery.exec(tr("select * from %1 where date = '%2'").arg(HSGT_TABLE).arg(date.toString("yyyy-MM-dd")));
+    if(!mSqlQuery.exec(tr("select * from %1 where date = '%2'").arg(HSGT_TABLE).arg(date.toString("yyyy-MM-dd"))))
+    {
+        qDebug()<<"error:"<<mSqlQuery.lastError().text();
+    }
     while(mSqlQuery.next())
     {
         QString code = mSqlQuery.value("code").toString();
         qint64 num = mSqlQuery.value("vol").toLongLong();
         mStkForeignerHoldMap[code] = num;
     }
+    qDebug()<<"sql:"<<mSqlQuery.lastQuery();
 }
 
 qint64 HqInfoService::amountForeigner(const QString &code)
