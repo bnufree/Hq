@@ -73,7 +73,7 @@ Dialog::Dialog(QWidget *parent) :
     mHqHeaderList<<QStringLiteral("代码")<<QStringLiteral("名称")<<QStringLiteral("现价")<<QStringLiteral("涨跌")\
                <<QStringLiteral("成交")<<QStringLiteral("资金比")<<QStringLiteral("3日")<<QStringLiteral("资金流")
                <<QStringLiteral("股息率")<<QStringLiteral("送转")<<QStringLiteral("总市值")<<QStringLiteral("流通市值")
-               <<QStringLiteral("盈亏")<<QStringLiteral("外资持股")<<QStringLiteral("持股市值")<<QStringLiteral("登记日")<<QStringLiteral("公告日");
+               <<QStringLiteral("盈亏")<<QStringLiteral("外资持股")<<QStringLiteral("外资持股△")<<QStringLiteral("持股市值")<<QStringLiteral("持股市值△")<<QStringLiteral("登记日")<<QStringLiteral("公告日");
     ui->hqtbl->setColumnCount(mHqHeaderList.length());
     ui->hqtbl->setHorizontalHeaderLabels(mHqHeaderList);
     ui->hqtbl->horizontalHeader()->setDefaultSectionSize(mSecSize);
@@ -91,10 +91,12 @@ Dialog::Dialog(QWidget *parent) :
     ui->hqtbl->horizontalHeaderItem(10)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_TCAP);
     ui->hqtbl->horizontalHeaderItem(11)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_MCAP);
     ui->hqtbl->horizontalHeaderItem(12)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_PROFIT);
-    ui->hqtbl->horizontalHeaderItem(13)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_FOREIGN_VOL);
-    ui->hqtbl->horizontalHeaderItem(14)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_FOREIGN_CAP);
-    ui->hqtbl->horizontalHeaderItem(15)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_GQDJR);
-    ui->hqtbl->horizontalHeaderItem(16)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_NONE);
+    ui->hqtbl->horizontalHeaderItem(13)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_FOREIGN_VOL);    
+    ui->hqtbl->horizontalHeaderItem(14)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG);
+    ui->hqtbl->horizontalHeaderItem(15)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_FOREIGN_CAP);
+    ui->hqtbl->horizontalHeaderItem(16)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_FOREIGN_CAP_CHG);
+    ui->hqtbl->horizontalHeaderItem(17)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_GQDJR);
+    ui->hqtbl->horizontalHeaderItem(18)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_NONE);
 
 
     for(int i=3; i<ui->hqtbl->columnCount(); i++)
@@ -483,66 +485,77 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
     ui->hqtbl->setRowCount(pDataList.count());
     int i=0;
     foreach (StockData data, pDataList) {
-        if(data.name.isEmpty()) continue;
+        if(data.mName.isEmpty()) continue;
         int k =0;
 //        qDebug()<<data.code;
         ui->hqtbl->setRowHeight(i, 20);
-        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(data.code, Qt::AlignRight));
-        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(data.name));
+        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(data.mCode, Qt::AlignRight));
+        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(data.mName));
         QString tempStr;
-        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f", data.cur)));
+        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f", data.mCur)));
         //ui->hqtbl->setItem(i, k++, new QTableWidgetItem(tempStr.sprintf("%.2f", data.chg)));
 //        if(!mStockMap.contains(data.code))
 //        {
 //            ui->hqtbl->setItem(i, k++, new QTableWidgetItem(tempStr.sprintf("%.2f%%", data.per)));
 //        } else {
-            double val = mStockMap[data.code];
+            double val = mStockMap[data.mCode];
             QString up = QStringLiteral("↑");
             QString down = QStringLiteral("↓");
-            if(val > data.per)
+            if(val > data.mChgPercent)
             {
-                ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(QString("%1%2%").arg(down).arg(QString::number(data.per, 'f', 2))));
-            } else if(val < data.per)
+                ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(QString("%1%2%").arg(down).arg(QString::number(data.mChgPercent, 'f', 2))));
+            } else if(val < data.mChgPercent)
             {
-               ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(QString("%1%2%").arg(up).arg(QString::number(data.per, 'f', 2))));
+               ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(QString("%1%2%").arg(up).arg(QString::number(data.mChgPercent, 'f', 2))));
             } else {
-               ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(QString("%1%2%").arg("").arg(QString::number(data.per, 'f', 2))));
+               ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(QString("%1%2%").arg("").arg(QString::number(data.mChgPercent, 'f', 2))));
             }
 
 //        }
-        mStockMap[data.code] = data.per;
+        mStockMap[data.mCode] = data.mChgPercent;
         //ui->hqtbl->setItem(i, k++, new QTableWidgetItem(QString::number(data.vol / 10000) + QStringLiteral("万")));
-        if(data.money >= 1000){
-            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f", data.money / 10000.0) + QStringLiteral("亿")));
+        if(data.mMoney >= 1000){
+            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f", data.mMoney / 10000.0) + QStringLiteral("亿")));
         } else {
-            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f", data.money) + QStringLiteral("万")));
+            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f", data.mMoney) + QStringLiteral("万")));
         }
         //ui->hqtbl->setItem(i, k++, new QTableWidgetItem(QString::number(data.money)));
-        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f",data.money_ratio)));
-        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f",data.last_3day_pers)));
-        if(fabs(data.zjlx) >= 1000){
-            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f", data.zjlx / 10000.0) + QStringLiteral("亿")));
+        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f",data.mMoney)));
+        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f",data.mLast3DaysChgPers)));
+        if(fabs(data.mZJLX) >= 1000){
+            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f", data.mZJLX / 10000.0) + QStringLiteral("亿")));
         } else {
-            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f", data.zjlx) + QStringLiteral("万")));
+            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f", data.mZJLX) + QStringLiteral("万")));
         }
-        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f%(%.2f)",data.gxl * 100, data.xjfh)));
-        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f",data.szzbl)));
-        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f",data.totalCap / 100000000.0 ) + QStringLiteral("亿")));
-        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f",data.mutalbleCap/ 100000000.0 )+ QStringLiteral("亿")));
+        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f%(%.2f)",data.mGXL * 100, data.mXJFH)));
+        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f",data.mSZZG)));
+        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f",data.mTotalCap / 100000000.0 ) + QStringLiteral("亿")));
+        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f",data.mMutalbleCap/ 100000000.0 )+ QStringLiteral("亿")));
 
-        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f",data.profit)));
-        if(data.foreign_vol >= 10000000){
-            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f", data.foreign_vol / 100000000.0) + QStringLiteral("亿")));
+        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f",data.mProfit)));
+        if(data.mForeignVol >= 10000000){
+            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f", data.mForeignVol / 100000000.0) + QStringLiteral("亿")));
         } else {
-            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f", data.foreign_vol / 10000.0)  + QStringLiteral("万")));
+            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f", data.mForeignVol / 10000.0)  + QStringLiteral("万")));
         }
-        if(data.foreign_cap >= 1000000){
-            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f", data.foreign_cap / 100000000.0) + QStringLiteral("亿")));
+        if(data.mForeignVolChg >= 10000000){
+            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f", data.mForeignVolChg / 100000000.0) + QStringLiteral("亿")));
         } else {
-            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f", data.foreign_cap / 10000.0) + QStringLiteral("万")));
+            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f", data.mForeignVolChg / 10000.0)  + QStringLiteral("万")));
         }
-        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(data.gqdjr.toString("yyyy-MM-dd")));
-        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(data.yaggr.toString("yyyy-MM-dd")));
+        if(data.mForeignCap >= 1000000){
+            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f", data.mForeignCap / 100000000.0) + QStringLiteral("亿")));
+        } else {
+            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f", data.mForeignCap / 10000.0) + QStringLiteral("万")));
+        }
+
+        if(data.mForeignCapChg >= 1000000){
+            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f", data.mForeignCapChg / 100000000.0) + QStringLiteral("亿")));
+        } else {
+            ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f", data.mForeignCapChg / 10000.0) + QStringLiteral("万")));
+        }
+        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(data.mGQDJR.toString("yyyy-MM-dd")));
+        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(data.mYAGGR.toString("yyyy-MM-dd")));
 
 #if 0
         int btnindex = k;
@@ -554,7 +567,7 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
             connect(btn, SIGNAL(clicked()), this, SLOT(editFavorite()));
         }
 #endif
-        QString code = data.code;
+        QString code = data.mCode;
         if(code.left(1) == "5" || code.left(1) == "6")
         {
             code = "sh"+code;
@@ -575,25 +588,25 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
         //ui->hqtbl->setCellWidget(i, btnindex, btn);
         ui->hqtbl->item(i, 0)->setData(Qt::UserRole, code);
 //        qDebug()<<"data.blocklist:"<<data.blocklist;
-        if(data.blocklist.length() == 0) data.blocklist = mShareBlockList[code];
-        ui->hqtbl->item(i, 0)->setData(Qt::UserRole+1, data.blocklist);
+        if(data.mBlockList.length() == 0) data.mBlockList = mShareBlockList[code];
+        ui->hqtbl->item(i, 0)->setData(Qt::UserRole+1, data.mBlockList);
         QColor backColor = Qt::white;
-        if(data.profit >=5000)
+        if(data.mProfit >=5000)
         {
             backColor = QColor(255, 0, 0);
-        } else if(data.profit >= 1000)
+        } else if(data.mProfit >= 1000)
         {
             backColor = QColor(238, 0, 0);
-        } else if(data.profit >0)
+        } else if(data.mProfit >0)
         {
             backColor = QColor(200, 0, 0);
-        } else if(data.profit <-5000)
+        } else if(data.mProfit <-5000)
         {
             backColor = QColor(0, 255, 0);
-        } else if(data.profit <-1000)
+        } else if(data.mProfit <-1000)
         {
             backColor = QColor(0,238,0);
-        } else if(data.profit <0)
+        } else if(data.mProfit <0)
         {
             backColor = QColor(0,200,0);
         }

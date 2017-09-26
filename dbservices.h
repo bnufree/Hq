@@ -26,7 +26,7 @@ public:
     static HqInfoService* instance();
     StockData& getBasicStkData(const QString& code);
     double getProfit(const QString& code);
-    qint64 amountForeigner(const QString& code);
+    foreignHolder amountForeigner(const QString& code);
     QStringList  getExchangeCodeList();
     QDate  getLastUpdateDateOfHSGT();
     QDate  getLastUpdateDateOfHSGTVol();
@@ -127,7 +127,7 @@ private:    //本类使用的变量
     QDate                       mLast1MonthDate;
     QDate                       mLastActiveDate;
     QMap<QString, double>       mStkProfitMap;
-    QMap<QString, qint64>       mStkForeignerHoldMap;
+    QMap<QString, foreignHolder>       mStkForeignerHoldMap;
 };
 
 #endif // DBSERVICE_H

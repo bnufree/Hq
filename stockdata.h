@@ -1,16 +1,54 @@
 #ifndef STOCKDATA_H
 #define STOCKDATA_H
-
-#include "basedata.h"
 #include <QStringList>
 #include <QDate>
+#include <QList>
+#include <QObject>
 
 struct zjlxData{
     QString code;
     double zjlx;
 };
 
-class StockData : public BaseData
+class StockBaseData
+{
+public:
+    StockData()
+    {
+        mName = "";
+        mCode = "";
+        mCur = 0;
+        mChg = 0;
+        mChgPercent = 0;
+        mHigh = 0;
+        mLow = 0.0;
+        mOpen = 0.0;
+        mClose = 0.0;
+        mVol = 0.0;
+        mMoney = 0.0;
+        mTotalShare = 0;
+        mMutableShare = 0;
+        mDate = QDate(2017,1,1);
+    }
+
+public:
+    QString         mName;
+    QString         mCode;
+    double          mCur;
+    double          mChg;
+    double          mChgPercent;
+    double          mHigh;
+    double          mLow;
+    double          mOpen;
+    double          mClose;
+    qint64          mVol;
+    double          mMoney;
+    qint64          mTotalShare;
+    qint64          mMutableShare;
+    QDate          mDate;
+};
+
+class StockData : public StockBaseData
 {
 public:
     StockData();
@@ -46,60 +84,51 @@ public:
     static bool sortByForCapDesc(const StockData& d1, const StockData& d2);
     static bool sortByForCapAsc(const StockData& d1, const StockData& d2);
 
+    static bool sortByForVolChgDesc(const StockData& d1, const StockData& d2);
+    static bool sortByForVolChgAsc(const StockData& d1, const StockData& d2);
+    static bool sortByForCapChgDesc(const StockData& d1, const StockData& d2);
+    static bool sortByForCapChgAsc(const StockData& d1, const StockData& d2);
+
     bool operator ==(const StockData& data)
     {
-        return this->code == data.code;
+        return this->mCode == data.mCode;
     }
 
 public:
-//    QString     name;
-//    QString     code;
-//    double      cur;
-//    double      chg;
-//    double      per;
-//    int      money;
-//    double      high;
-//    double      low;
-    double      zht;
-    double      dit;
-    qint64         vol;
-    double         money;
-    double      hsl;
-    double      last_money;
-    int         last_vol;
-    double      last_per;
-    double      last_3day_pers;
-    double      last_5day_pers;
-    double      last_10day_pers;
-    double      last_month_pers;
-    double      open;
-    double      last_close;
-    qint64      totalshare;
-    qint64      mutableshare;
-    double      money_ratio;
-    double      mkt;
-    //QList<void*> blocklist;
-    QStringList blocklist;
-    QString     time;
-    double      zjlx;
-    double      szzbl; //送转股比例
-    double      xjfh;  //现金分红
-    double      gxl;   //股息率
-    QDate     gqdjr; //股权登记日
-    QDate     yaggr; //预案公告日
-    double      totalCap;
-    double      mutalbleCap;
-    bool        index;
-    QDate       date; //当前的日期
-    double      profit;
-    qint64      foreign_vol;
-    qint64      foreign_vol_chg;
-    double      foreign_cap;
-    double      foreign_cap_chg;
-
-
+    double          mMax;
+    double          mMin;
+    double          mMoney;
+    double          mHsl;
+    double          mLastMoney;
+    qint64          mLastVol;
+    double          mLastChgPer;
+    double          mLast3DaysChgPers;
+    double          mLast5DaysChgPers;
+    double          mLast10DaysChgPers;
+    double          mLastMonthChgPers;
+    double          mChgPersFromYear;
+    double          mChgPersFromWeek;
+    double          mChgPersFromMonth;
+    double          mLastClose;
+    double          mMoneyRatio;
+    QStringList     mBlockList;
+    double          mZJLX;      //资金流向
+    double          mSZZG; //送转股比例
+    double          mXJFH;  //现金分红
+    double          mGXL;   //股息率
+    QDate           mGQDJR; //股权登记日
+    QDate           mYAGGR; //预案公告日
+    double          mTotalCap;
+    double          mMutalbleCap;
+    bool            mIndexFlag;
+    double          mProfit;
+    qint64          mForeignVol;
+    qint64          mForeignVolChg;
+    double          mForeignCap;
+    double          mForeignCapChg;
 };
 
 Q_DECLARE_METATYPE(StockData)
-typedef QList<StockData>        StockDataList;
+
+typedef QList<StockData> StockDataList;
 #endif // STOCKDATA_H

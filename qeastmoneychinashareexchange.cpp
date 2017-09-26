@@ -35,11 +35,11 @@ void QEastMoneyChinaShareExchange::getHGTTop10Share(QList<ChinaShareExchange>& l
         int market_type = obj.value("MarketType").toInt();
         if(market_type == 2 || market_type == 4) continue;
         ChinaShareExchange data;
-        data.code = obj.value("Code").toString();
-        data.name = obj.value("Name").toString();
-        data.cur = obj.value("Close").toDouble();
-        data.per = obj.value("ChangePercent").toDouble();
-        if(data.code.left(1) == "6")
+        data.mCode = obj.value("Code").toString();
+        data.mName = obj.value("Name").toString();
+        data.mCur = obj.value("Close").toDouble();
+        data.mChgPercent = obj.value("ChangePercent").toDouble();
+        if(data.mCode.left(1) == "6")
         {
             //上海
             data.mTop10Buy = obj.value("HGTMRJE").toDouble();

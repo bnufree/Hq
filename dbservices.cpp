@@ -277,10 +277,10 @@ bool HqInfoService::addTop10ChinaStockInfo(const ChinaShareExchange &info)
 {
     mSqlQuery.prepare("insert into hstop10 (id, name, close, change_percent, buy, sell, date) values ("
                       "?, ?, ?, ?, ?, ?, ?)");
-    mSqlQuery.addBindValue(info.code);
-    mSqlQuery.addBindValue(info.name);
-    mSqlQuery.addBindValue(info.cur);
-    mSqlQuery.addBindValue(info.per);
+    mSqlQuery.addBindValue(info.mCode);
+    mSqlQuery.addBindValue(info.mName);
+    mSqlQuery.addBindValue(info.mCur);
+    mSqlQuery.addBindValue(info.mChgPercent);
     mSqlQuery.addBindValue(info.mTop10Buy);
     mSqlQuery.addBindValue(info.mTop10Sell);
     mSqlQuery.addBindValue(info.mDate);
@@ -357,10 +357,10 @@ bool HqInfoService::queryTop10ChinaShareInfos(QList<ChinaShareExchange>& list, c
     qDebug()<<mSqlQuery.lastQuery();
     while (mSqlQuery.next()) {
         ChinaShareExchange info;
-        info.code = mSqlQuery.value("id").toString();
-        info.name = mSqlQuery.value("name").toString();
-        info.cur = mSqlQuery.value("close").toDouble();
-        info.per = mSqlQuery.value("change_percent").toDouble();
+        info.mCode = mSqlQuery.value("id").toString();
+        info.mName = mSqlQuery.value("name").toString();
+        info.mCur = mSqlQuery.value("close").toDouble();
+        info.mChgPercent = mSqlQuery.value("change_percent").toDouble();
         info.mTop10Buy = mSqlQuery.value("buy").toDouble();
         info.mTop10Sell = mSqlQuery.value("sell").toDouble();
         info.mDate = mSqlQuery.value("date").toDate();
@@ -385,11 +385,7 @@ void HqInfoService::slotRecvShareHistoryInfos(const StockDataList &list)
 
 bool HqInfoService::slotAddHistoryData(const StockData &info)
 {
-    QString tableName = "stk" + info.code.right(6);
-//    if(!isTableExist(tableName))
-//    {
-//        if(!createHistoryTable(tableName)) return false;
-//    }
+    QString tableName = "stk" + info.mCode.right(6);
     mSqlQuery.prepare(tr("insert into %1 ("
                          "name, close, open, high, low, "
                          "change, change_percent, vol, money, puremoney, "
@@ -398,21 +394,21 @@ bool HqInfoService::slotAddHistoryData(const StockData &info)
                          "?, ?, ?, ?, ?, "
                          "?, ?, ?)"
                          ).arg(tableName));
-    mSqlQuery.addBindValue(info.name);
-    mSqlQuery.addBindValue(info.cur);
-    mSqlQuery.addBindValue(info.open);
-    mSqlQuery.addBindValue(info.high);
-    mSqlQuery.addBindValue(info.low);
+    mSqlQuery.addBindValue(info.mName);
+    mSqlQuery.addBindValue(info.mCur);
+    mSqlQuery.addBindValue(info.mOpen);
+    mSqlQuery.addBindValue(info.mHigh);
+    mSqlQuery.addBindValue(info.mLow);
 
-    mSqlQuery.addBindValue(info.chg);
-    mSqlQuery.addBindValue(info.per);
-    mSqlQuery.addBindValue(info.vol);
-    mSqlQuery.addBindValue(info.money);
-    mSqlQuery.addBindValue(info.zjlx);
+    mSqlQuery.addBindValue(info.mChg);
+    mSqlQuery.addBindValue(info.mChgPercent);
+    mSqlQuery.addBindValue(info.mVol);
+    mSqlQuery.addBindValue(info.mMoney);
+    mSqlQuery.addBindValue(info.mZJLX);
 
-    mSqlQuery.addBindValue(info.totalshare);
-    mSqlQuery.addBindValue(info.mutableshare);
-    mSqlQuery.addBindValue(info.date);
+    mSqlQuery.addBindValue(info.mTotalShare);
+    mSqlQuery.addBindValue(info.mMutableShare);
+    mSqlQuery.addBindValue(info.mDate);
     return mSqlQuery.exec();
 }
 
@@ -427,29 +423,29 @@ void HqInfoService::slotQueryAllShareBasicInfo()
     if(!mSqlQuery.exec(tr("select * from share_basic"))) return ;
     while (mSqlQuery.next()) {
         StockData info;
-        info.code = mSqlQuery.value("code").toString();
-        info.name = mSqlQuery.value("name").toString();
-        info.totalshare = mSqlQuery.value("total_share").toLongLong();
-        info.mutableshare = mSqlQuery.value("mutable_share").toLongLong();
-        info.blocklist = mSqlQuery.value("block").toStringList();
-        info.last_money = mSqlQuery.value("last_money").toDouble();
-        info.last_3day_pers = mSqlQuery.value("chg_last_3day").toDouble();
-        info.last_5day_pers = mSqlQuery.value("chg_last_5day").toDouble();
-        info.last_10day_pers = mSqlQuery.value("chg_last_10day").toDouble();
-        info.last_month_pers = mSqlQuery.value("chg_last_month").toDouble();
-        info.xjfh = mSqlQuery.value("cash_10_share").toDouble();
-        info.szzbl = mSqlQuery.value("share_10_share").toDouble();
-        info.yaggr = mSqlQuery.value("announce_date").toDate();
-        info.gqdjr = mSqlQuery.value("register_date").toDate();
-        info.date = mSqlQuery.value("update_date").toDate();
-        mBasicStkInfo[info.code.right(6)] = info;
+        info.mCode = mSqlQuery.value("code").toString();
+        info.mName = mSqlQuery.value("name").toString();
+        info.mTotalShare = mSqlQuery.value("total_share").toLongLong();
+        info.mMutableShare = mSqlQuery.value("mutable_share").toLongLong();
+        info.mBlockList = mSqlQuery.value("block").toStringList();
+        info.mLastMoney = mSqlQuery.value("last_money").toDouble();
+        info.mLast3DaysChgPers = mSqlQuery.value("chg_last_3day").toDouble();
+        info.mLast5DaysChgPers = mSqlQuery.value("chg_last_5day").toDouble();
+        info.mLast10DaysChgPers = mSqlQuery.value("chg_last_10day").toDouble();
+        info.mLastMonthChgPers = mSqlQuery.value("chg_last_month").toDouble();
+        info.mXJFH = mSqlQuery.value("cash_10_share").toDouble();
+        info.mSZZG = mSqlQuery.value("share_10_share").toDouble();
+        info.mYAGGR = mSqlQuery.value("announce_date").toDate();
+        info.mGQDJR = mSqlQuery.value("register_date").toDate();
+        info.mDate = mSqlQuery.value("update_date").toDate();
+        mBasicStkInfo[info.mCode.right(6)] = info;
     }
 }
 
 bool HqInfoService::slotAddShareBasicInfo(const StockData &data)
 {
     //先检查是否已经添加，如果已经添加就更新
-    if(!mSqlQuery.exec(tr("delete from share_basic where code = '%1'").arg(data.code.right(6)))) return false;
+    if(!mSqlQuery.exec(tr("delete from share_basic where code = '%1'").arg(data.mCode.right(6)))) return false;
     //开始插入
     mSqlQuery.prepare(tr("insert into share_basic ("
                          "code, name, total_share, mutable_share, block, "
@@ -459,23 +455,23 @@ bool HqInfoService::slotAddShareBasicInfo(const StockData &data)
                          "?, ?, ?, ?, ?, "
                          "?, ?, ?, ?, ?)"
                          ));
-    mSqlQuery.addBindValue(data.code.right(6));
-    mSqlQuery.addBindValue(data.name);
-    mSqlQuery.addBindValue(data.totalshare);
-    mSqlQuery.addBindValue(data.mutableshare);
-    mSqlQuery.addBindValue(data.blocklist);
+    mSqlQuery.addBindValue(data.mCode.right(6));
+    mSqlQuery.addBindValue(data.mName);
+    mSqlQuery.addBindValue(data.mTotalShare);
+    mSqlQuery.addBindValue(data.mMutableShare);
+    mSqlQuery.addBindValue(data.mBlockList);
 
-    mSqlQuery.addBindValue(data.last_money);
-    mSqlQuery.addBindValue(data.last_3day_pers);
-    mSqlQuery.addBindValue(data.last_5day_pers);
-    mSqlQuery.addBindValue(data.last_10day_pers);
-    mSqlQuery.addBindValue(data.last_month_pers);
+    mSqlQuery.addBindValue(data.mLastMoney);
+    mSqlQuery.addBindValue(data.mLast3DaysChgPers);
+    mSqlQuery.addBindValue(data.mLast5DaysChgPers);
+    mSqlQuery.addBindValue(data.mLast10DaysChgPers);
+    mSqlQuery.addBindValue(data.mLastMonthChgPers);
 
-    mSqlQuery.addBindValue(data.xjfh);
-    mSqlQuery.addBindValue(data.szzbl);
-    mSqlQuery.addBindValue(data.yaggr);
-    mSqlQuery.addBindValue(data.gqdjr);
-    mSqlQuery.addBindValue(data.date);
+    mSqlQuery.addBindValue(data.mXJFH);
+    mSqlQuery.addBindValue(data.mSZZG);
+    mSqlQuery.addBindValue(data.mYAGGR);
+    mSqlQuery.addBindValue(data.mGQDJR);
+    mSqlQuery.addBindValue(data.mDate);
     return mSqlQuery.exec();
 }
 
@@ -528,16 +524,16 @@ void HqInfoService::slotUpdateStkBaseinfoWithHistory(const QString &code)
         qDebug()<<"total:"<<total_share<<" "<<mutable_share<<" "<<last_close<<" "<<last_money<<" "<<mLastActiveDate;
 
     StockData &data = mBasicStkInfo[code.right(6)];
-    data.code = code.right(6);
-    data.totalshare = total_share;
-    data.mutableshare = mutable_share;
-    data.last_money = last_money;
-    data.last_3day_pers = GetMultiDaysChangePercent(table, 3);
-    data.last_5day_pers = GetMultiDaysChangePercent(table, 5);
-    data.last_10day_pers = GetMultiDaysChangePercent(table, 10);
-    data.last_month_pers = GetMultiDaysChangePercent(table, 22);
-    data.last_close = last_close;
-    data.profit = mStkProfitMap[data.code];
+    data.mCode = code.right(6);
+    data.mTotalShare = total_share;
+    data.mMutableShare = mutable_share;
+    data.mLastMoney = last_money;
+    data.mLast3DaysChgPers = GetMultiDaysChangePercent(table, 3);
+    data.mLast5DaysChgPers = GetMultiDaysChangePercent(table, 5);
+    data.mLast10DaysChgPers = GetMultiDaysChangePercent(table, 10);
+    data.mLastMonthChgPers = GetMultiDaysChangePercent(table, 22);
+    data.mLastClose = last_close;
+    data.mProfit = mStkProfitMap[data.mCode];
     emit signalUpdateStkBaseinfoWithHistoryFinished(code);
 }
 
@@ -590,7 +586,7 @@ void HqInfoService::GetForeignVolChange(const QString &code, qint64 &cur, qint64
 void HqInfoService::slotUpdateStkProfitList(const StockDataList &list)
 {
     foreach (StockData data, list) {
-        mStkProfitMap[data.code.right(6)] = data.profit;
+        mStkProfitMap[data.mCode.right(6)] = data.mProfit;
     }
 }
 
@@ -602,9 +598,9 @@ void HqInfoService::slotAddShareAmoutByForeigner(const StockDataList &list)
     foreach (StockData info, list) {
         mSqlQuery.prepare(tr("insert into %1 (code, vol, date) values ("
                           "?, ?, ?)").arg(HSGT_TABLE));
-        mSqlQuery.addBindValue(info.code);
-        mSqlQuery.addBindValue(info.foreign_vol);
-        mSqlQuery.addBindValue(info.date);
+        mSqlQuery.addBindValue(info.mCode);
+        mSqlQuery.addBindValue(info.mForeignVol);
+        mSqlQuery.addBindValue(info.mDate);
         mSqlQuery.exec();
     }
     QSqlDatabase::database().commit();
@@ -624,8 +620,13 @@ void HqInfoService::slotUpdateShareAmountByForeigner()
 {
     QDate date = getLastUpdateDateOfHSGTVol();
     qDebug()<<"last date:"<<date;
+    QDate preDate = date.addDays(-1);
+    while (preDate.dayOfWeek() == 6 || preDate.dayOfWeek() == 7) {
+        preDate = preDate.addDays(-1);
+    }
+    //取得昨天的数据
     //开始插入
-    if(!mSqlQuery.exec(tr("select * from %1 where date = '%2'").arg(HSGT_TABLE).arg(date.toString("yyyy-MM-dd"))))
+    if(!mSqlQuery.exec(tr("select * from %1 where date >= '%2'").arg(HSGT_TABLE).arg(preDate.toString("yyyy-MM-dd"))))
     {
         qDebug()<<"error:"<<mSqlQuery.lastError().text();
     }
@@ -633,12 +634,18 @@ void HqInfoService::slotUpdateShareAmountByForeigner()
     {
         QString code = mSqlQuery.value("code").toString();
         qint64 num = mSqlQuery.value("vol").toLongLong();
-        mStkForeignerHoldMap[code] = num;
+        QDate curDate = mSqlQuery.value("date").toDate();
+        if(curDate == date)
+        {
+            mStkForeignerHoldMap[code].last = num;
+        } else {
+            mStkForeignerHoldMap[code].previous = num;
+        }
     }
     qDebug()<<"sql:"<<mSqlQuery.lastQuery();
 }
 
-qint64 HqInfoService::amountForeigner(const QString &code)
+foreignHolder HqInfoService::amountForeigner(const QString &code)
 {
     return mStkForeignerHoldMap[code];
 }

@@ -49,11 +49,11 @@ void QEastmoneyNorthBoundThread::run()
         {
             QStringList hgt = splitstr[i].split(",");
             StockData data;
-            data.code = hgt[0];
-            data.name = hgt[2];
-            data.per = hgt[3].left(hgt[3].length() -1).toDouble();
-            data.cur = pure_in[i-3];
-            data.chg = data.cur / 130;
+            data.mCode = hgt[0];
+            data.mName = hgt[2];
+            data.mChgPercent = hgt[3].left(hgt[3].length() -1).toDouble();
+            data.mCur = pure_in[i-3];
+            data.mChg = data.mCur / 130;
             wklist.append(data);
         }
 

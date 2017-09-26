@@ -282,6 +282,28 @@ void QSinaStkResultMergeThread::run()
                     qSort(wklist.begin(), wklist.end(), StockData::sortByForCapAsc);
                 }
             }
+
+            else if(mSortType == STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG)
+            {
+                if(mSortRule == -1)
+                {
+                    qSort(wklist.begin(), wklist.end(), StockData::sortByForVolChgDesc);
+                } else
+                {
+                    qSort(wklist.begin(), wklist.end(), StockData::sortByForVolChgAsc);
+                }
+            }
+            else if(mSortType == STK_DISPLAY_SORT_TYPE_FOREIGN_CAP_CHG)
+            {
+                if(mSortRule == -1)
+                {
+                    qSort(wklist.begin(), wklist.end(), StockData::sortByForCapChgDesc);
+                } else
+                {
+                    qSort(wklist.begin(), wklist.end(), StockData::sortByForCapChgAsc);
+                }
+            }
+
             if(mActive)emit sendStkDataList(wklist.mid((mCurPage - 1) * mPageSize, mPageSize));
         } else
         {
@@ -299,9 +321,9 @@ void QSinaStkResultMergeThread::slotRevResList(const StockDataList &mid)
     //qDebug()<<"recv Thread:"<<QThread::currentThreadId();
     mListMutex.lock();
     foreach (StockData data, mid) {
-        if(data.cur < 0.1) continue;
-        data.zjlx = mZjlxMaplist[data.code];
-        mMidStkDataMapList[data.code] = data;
+        if(data.mCur < 0.1) continue;
+        data.mZJLX = mZjlxMaplist[data.mCode];
+        mMidStkDataMapList[data.mCode] = data;
     }
     mListMutex.unlock();
 }

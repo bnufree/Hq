@@ -40,16 +40,16 @@ void QEastMoneyHSGTDialog::slotRecvTop10Infos(const QList<ChinaShareExchange> &l
     foreach (ChinaShareExchange info, list) {
         int col = 0;
         ui->tableWidget->setItem(row, col++, new QTableWidgetItem(info.mDate.toString("yyyy-MM-dd")));
-        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(info.code));
-        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(info.name));
-        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString::number(info.cur)));
-        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString("").sprintf("%.2f%", info.per)));
+        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(info.mCode));
+        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(info.mName));
+        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString::number(info.mCur)));
+        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString("").sprintf("%.2f%", info.mChgPercent)));
         col++;
         col++;
         ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString::number(info.mTop10Buy/10000)));
         ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString::number(info.mTop10Sell/10000)));
         ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString::number((info.mTop10Buy-info.mTop10Sell) /10000)));
-        ui->tableWidget->item(row, 0)->setData(Qt::UserRole+1, info.code);
+        ui->tableWidget->item(row, 0)->setData(Qt::UserRole+1, info.mCode);
         row++;
     }
 

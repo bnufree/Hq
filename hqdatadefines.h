@@ -33,5 +33,15 @@ public:
     double              mTop10AvgCost;
 };
 
+struct  foreignHolder{
+    qint64 last;
+    qint64 previous;
+
+    foreignHolder()
+    {
+        last = 0;
+        previous = 0;
+    }
+};
 #endif // HQDATADEFINES
 

@@ -37,9 +37,9 @@ void QEastMoneyHSGTShareAmount::run()
                 {
                     QJsonObject obj = result.at(i).toObject();
                     StockData data;
-                    data.code = obj.value("SCODE").toString();
-                    data.foreign_vol = (qint64)(obj.value("SHAREHOLDSUM").toDouble());
-                    data.date = date;
+                    data.mCode = obj.value("SCODE").toString();
+                    data.mForeignVol = (qint64)(obj.value("SHAREHOLDSUM").toDouble());
+                    data.mDate = date;
                     list.append(data);
                 }
             }
@@ -52,8 +52,9 @@ void QEastMoneyHSGTShareAmount::run()
     qDebug()<<"list length:"<<list.length();
     if(list.length() > 0)
     {
+        DATA_SERVICE->slotAddShareAmoutByForeigner(list);
 
-    emit DATA_SERVICE->signalAddShareAmoutByForeigner(list);
+    //emit DATA_SERVICE->signalAddShareAmoutByForeigner(list);
     }
 
     return;

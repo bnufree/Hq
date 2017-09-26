@@ -52,21 +52,21 @@ void QEastmoneyStockHistoryInfoThread::run()
             if(cols.length() >= 15)
             {
                 StockData data;
-                data.date = QDate::fromString(cols[0], "yyyy-MM-dd");
-                data.code = cols[1].right(6);
-                data.name = cols[2];
-                data.cur = cols[3].toDouble();
-                data.high = cols[4].toDouble();
-                data.low = cols[5].toDouble();
-                data.open = cols[6].toDouble();
-                data.last_close = cols[7].toDouble();
-                data.chg = cols[8].toDouble();
-                data.per = cols[9].toDouble();
-                data.hsl = cols[10].toDouble();
-                data.vol = cols[11].toLongLong();
-                data.money = cols[12].toDouble();
-                data.totalshare = cols[13].toDouble() / data.cur;
-                data.mutableshare = cols[14].toDouble() / data.cur;
+                data.mDate = QDate::fromString(cols[0], "yyyy-MM-dd");
+                data.mCode = cols[1].right(6);
+                data.mName = cols[2];
+                data.mCur = cols[3].toDouble();
+                data.mHigh = cols[4].toDouble();
+                data.mLow = cols[5].toDouble();
+                data.mOpen = cols[6].toDouble();
+                data.mLastClose = cols[7].toDouble();
+                data.mChg = cols[8].toDouble();
+                data.mChgPercent = cols[9].toDouble();
+                data.mHsl = cols[10].toDouble();
+                data.mVol = cols[11].toLongLong();
+                data.mMoney = cols[12].toDouble();
+                data.mTotalShare = cols[13].toDouble() / data.mCur;
+                data.mMutableShare = cols[14].toDouble() / data.mCur;
                 list.append(data);
             }
         }

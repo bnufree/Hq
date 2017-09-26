@@ -21,9 +21,9 @@ void QIndexWidget::updateData(const StockDataList &list)
 {
     foreach (StockData data, list) {
         QIndexFrame* w = NULL;
-        if(mIndexWidgetMap.contains(data.code))
+        if(mIndexWidgetMap.contains(data.mCode))
         {
-            w = mIndexWidgetMap[data.code];
+            w = mIndexWidgetMap[data.mCode];
         } else
         {
             QHBoxLayout *hlay = 0;
@@ -36,12 +36,12 @@ void QIndexWidget::updateData(const StockDataList &list)
                 QLayoutItem* item = ((QVBoxLayout*) this->layout())->itemAt(this->layout()->count()-1);
                 if(item) hlay = (QHBoxLayout*)(item->layout());
             }
-            w = new QIndexFrame(data.name, this);
+            w = new QIndexFrame(data.mName, this);
             //this->layout()->addWidget(w);
             if(hlay)   hlay->addWidget(w);
-            mIndexWidgetMap[data.code] = w;
+            mIndexWidgetMap[data.mCode] = w;
         }
-        w->updateVal(data.cur, data.chg, data.per);
+        w->updateVal(data.mCur, data.mChg, data.mChgPercent);
     }
 }
 

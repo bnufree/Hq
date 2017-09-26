@@ -40,11 +40,11 @@ void QExchangeRecordWorker::slotStartImport(const QString &sFilePathName)
     for(int i = 1;i<nRowCount;i++)
     {
         StockData data;
-        data.code = xlsx.read(i+1,2).toString();
-        data.profit = xlsx.read(i+1,5).toDouble();
-        if(data.code.contains("mf")) continue;
+        data.mCode = xlsx.read(i+1,2).toString();
+        data.mProfit = xlsx.read(i+1,5).toDouble();
+        if(data.mCode.contains("mf")) continue;
         list.append(data);
-        codelist.append(data.code);
+        codelist.append(data.mCode);
     }
     emit signalSendStkProfitList(list);
     emit signalSendCodeList(codelist);

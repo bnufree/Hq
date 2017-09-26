@@ -23,7 +23,6 @@ SOURCES += main.cpp\
     stockdata.cpp \
     dataexchange.cpp \
     blockdata.cpp \
-    basedata.cpp \
     qeastmoneyblockthread.cpp \
     profiles.cpp \
     qsinastkinfothread.cpp \
@@ -59,7 +58,6 @@ HEADERS  += dialog.h \
     stockdata.h \
     dataexchange.h \
     blockdata.h \
-    basedata.h \
     qeastmoneyblockthread.h \
     profiles.h \
     qsinastkinfothread.h \
