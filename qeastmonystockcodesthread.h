@@ -12,6 +12,8 @@ public:
 
 protected:
     void run();
+    bool getCodesFromFile(QStringList& codes);
+    bool writeCodes(const QStringList& codes);
 
 signals:
     void signalSendCodesList(const QStringList& list);

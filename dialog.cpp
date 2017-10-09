@@ -520,7 +520,7 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
             ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f", data.mMoney) + QStringLiteral("万")));
         }
         //ui->hqtbl->setItem(i, k++, new QTableWidgetItem(QString::number(data.money)));
-        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f",data.mMoney)));
+        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f",data.mMoneyRatio)));
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f",data.mLast3DaysChgPers)));
         if(fabs(data.mZJLX) >= 1000){
             ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f", data.mZJLX / 10000.0) + QStringLiteral("亿")));

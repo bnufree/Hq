@@ -10,20 +10,7 @@
 #include "qeastmoneyzjlxthread.h"
 #include "qsinastkinfothread.h"
 
-typedef enum MktType
-{
-    MKT_ALL,        //沪深全部
-    MKT_SH,         //上海
-    MKT_SZ,         //深圳
-    MKT_ZXB,        //中小板
-    MKT_CYB,        //创业板
-    MKT_JJ,         //沪深基金
-    MKT_HK_HSZS,    //恒生指数
-    MKT_HK_HSGQ,    //恒生国企
-    MKT_HK_GGT,        //港股通（）
-    MKT_ZXG,        //自选股
-    MKT_OTHER,      //保留
-}MKT_TYPE;
+
 
 
 class QSinaStkResultMergeThread : public QThread
