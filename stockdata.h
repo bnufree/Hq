@@ -28,6 +28,10 @@ public:
         mMoney = 0.0;
         mTotalShare = 0;
         mMutableShare = 0;
+        mZJLX = 0.0;
+        mRZRQ = 0.0;
+        mHSGT = 0.0;
+        mHSGTEstimateFlag = false;
         mDate = QDate(2017,1,1);
     }
 
@@ -45,7 +49,11 @@ public:
     double          mMoney;
     qint64          mTotalShare;
     qint64          mMutableShare;
-    QDate          mDate;
+    QDate           mDate;
+    double          mZJLX;
+    double          mRZRQ;
+    double          mHSGT;
+    bool            mHSGTEstimateFlag;
 };
 
 class StockData : public StockBaseData

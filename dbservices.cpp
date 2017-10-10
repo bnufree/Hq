@@ -491,7 +491,7 @@ void HqInfoService::slotAddShareBasicInfoList(const StockDataList &list)
 bool HqInfoService::GetHistoryInfoWithDate(const QString &table, const QDate &date, double &close, double &money, qint64 &total_share, qint64 &mutalble_share)
 {
 //    qDebug()<<__FUNCTION__<<__LINE__<<table<<"  "<<date;
-    if(mSqlQuery.exec(tr("select close, money, marketshare, mutalbleshare from %1 where date = '%2'").arg(table).arg(date.toString("yyyy-MM-dd"))))
+    if(mSqlQuery.exec(tr("select close, money, marketshare, mutalbleshare from %1 where date <= '%2' order by date desc limit 1").arg(table).arg(date.toString("yyyy-MM-dd"))))
     {
         while(mSqlQuery.next())
         {

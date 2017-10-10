@@ -65,8 +65,10 @@ void QEastmoneyStockHistoryInfoThread::run()
                 data.mHsl = cols[10].toDouble();
                 data.mVol = cols[11].toLongLong();
                 data.mMoney = cols[12].toDouble();
-                data.mTotalShare = cols[13].toDouble() / data.mCur;
-                data.mMutableShare = cols[14].toDouble() / data.mCur;
+                double price = data.mCur;
+                if(price == 0) price = data.mLastClose;
+                data.mTotalShare = cols[13].toDouble() / price;
+                data.mMutableShare = cols[14].toDouble() / price;
                 list.append(data);
             }
         }

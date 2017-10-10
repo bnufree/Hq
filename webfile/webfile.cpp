@@ -32,8 +32,8 @@ static char THIS_FILE[] = __FILE__;
 #endif
 #endif
 
-#define DEF_OPENTIMEOUT     80000000 /* ms */
-#define DEF_READTIMEOUT     80000000 /* ms */
+#define DEF_OPENTIMEOUT     3000 /* ms */
+#define DEF_READTIMEOUT     3000 /* ms */
 #define DEF_BUFFERSIZE      (1024*1204) /* = 1 MB */
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0) // Qt 5.0.0

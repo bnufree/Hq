@@ -520,7 +520,7 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
             ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.0f", data.mMoney) + QStringLiteral("万")));
         }
         //ui->hqtbl->setItem(i, k++, new QTableWidgetItem(QString::number(data.money)));
-        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f",data.mMoney)));
+        ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f",data.mMoneyRatio)));
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f",data.mLast3DaysChgPers)));
         if(fabs(data.mZJLX) >= 1000){
             ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(tempStr.sprintf("%.2f", data.mZJLX / 10000.0) + QStringLiteral("亿")));
@@ -556,17 +556,6 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
         }
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(data.mGQDJR.toString("yyyy-MM-dd")));
         ui->hqtbl->setItem(i, k++, new HqTableWidgetItem(data.mYAGGR.toString("yyyy-MM-dd")));
-
-#if 0
-        int btnindex = k;
-        QPushButton* btn = (QPushButton*)(ui->hqtbl->cellWidget(i, btnindex));
-        if(!btn)
-        {
-            btn = new QPushButton(this);
-            btn->setStyleSheet("border:none;color:blue;");
-            connect(btn, SIGNAL(clicked()), this, SLOT(editFavorite()));
-        }
-#endif
         QString code = data.mCode;
         if(code.left(1) == "5" || code.left(1) == "6")
         {
@@ -1068,7 +1057,6 @@ void Dialog::slotHistoryDataFinish()
         mgr->deleteLater();
     }
     ui->updatelbl->clear();
-
     QEastMoneyChinaShareExchange *tophk = new QEastMoneyChinaShareExchange(QDate::fromString("2017-07-13", "yyyy-MM-dd"));
     connect(tophk, SIGNAL(signalHSGTofTodayTop10Updated()), this, SLOT(slotTodayHSGUpdated()));
     tophk->start();
@@ -1112,6 +1100,7 @@ void Dialog::slotHistoryDataFinish()
 
 void Dialog::slotUpdateFavList(const QStringList &list)
 {
+    if(mFavStkList.length() == 0)
     mFavStkList = list;
 }
 
