@@ -52,7 +52,10 @@ SOURCES += main.cpp\
     webfile/webfile.cpp \
     exchange/qexchangerecordworker.cpp \
     exchange/qexchangefiledlg.cpp \
-    qeastmoneyhsgtshareamount.cpp
+    qeastmoneyhsgtshareamount.cpp \
+    table/qstktablewidgetitem.cpp \
+    table/HqTableWidget.cpp \
+    table/qsharetablewidget.cpp
 
 HEADERS  += dialog.h \
     stockdata.h \
@@ -90,7 +93,11 @@ HEADERS  += dialog.h \
     webfile/webfile.h \
     exchange/qexchangerecordworker.h \
     exchange/qexchangefiledlg.h \
-    qeastmoneyhsgtshareamount.h
+    qeastmoneyhsgtshareamount.h \
+    table/qstktablewidgetitem.h \
+    utils/comdatadefines.h \
+    table/HqTableWidget.h \
+    table/qsharetablewidget.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \
