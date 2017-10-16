@@ -112,25 +112,25 @@ private slots:
 
     void on_minBtn_clicked();
 
-    void on_blocktbl_itemDoubleClicked(QTableWidgetItem *item);
+//    void on_blocktbl_itemDoubleClicked(QTableWidgetItem *item);
 
-    void on_blocktbl_customContextMenuRequested(const QPoint &pos);
+//    void on_blocktbl_customContextMenuRequested(const QPoint &pos);
 
-    void on_hqtbl_customContextMenuRequested(const QPoint &pos);
+//    void on_hqtbl_customContextMenuRequested(const QPoint &pos);
 
     void on_searchTxt_textChanged(const QString &arg1);
 
     void on_DateMgrBtn_clicked();
 
-    void on_hqtbl_itemDoubleClicked(QTableWidgetItem *item);
+//    void on_hqtbl_itemDoubleClicked(QTableWidgetItem *item);
 
-    void on_hqtbl_itemEntered(QTableWidgetItem *item);
+//    void on_hqtbl_itemEntered(QTableWidgetItem *item);
 
     void on_MainDialog_customContextMenuRequested(const QPoint &pos);
 
-    void on_hqtbl_itemClicked(QTableWidgetItem *item);
+//    void on_hqtbl_itemClicked(QTableWidgetItem *item);
 
-    void on_blocktbl_itemClicked(QTableWidgetItem *item);
+//    void on_blocktbl_itemClicked(QTableWidgetItem *item);
 
     void on_HSGTBTN_clicked();
 

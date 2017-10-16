@@ -35,6 +35,7 @@ public slots:
     void slotSetColDisplay(bool isDisplay);
     void slotCustomContextMenuRequested(const QPoint& point);
     virtual void slotCellDoubleClicked(int row, int col);
+    void slotCellClicked(int row, int col);
 
 private:
     TableColDataList        mColDataList;

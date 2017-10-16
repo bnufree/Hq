@@ -427,7 +427,7 @@ void HqInfoService::slotQueryAllShareBasicInfo()
         info.mName = mSqlQuery.value("name").toString();
         info.mTotalShare = mSqlQuery.value("total_share").toLongLong();
         info.mMutableShare = mSqlQuery.value("mutable_share").toLongLong();
-        info.mBlockList = mSqlQuery.value("block").toStringList();
+        info.mBlockList = BlockData::BlockDataListFromCodesList(mSqlQuery.value("block").toStringList());
         info.mLastMoney = mSqlQuery.value("last_money").toDouble();
         info.mLast3DaysChgPers = mSqlQuery.value("chg_last_3day").toDouble();
         info.mLast5DaysChgPers = mSqlQuery.value("chg_last_5day").toDouble();
@@ -459,7 +459,7 @@ bool HqInfoService::slotAddShareBasicInfo(const StockData &data)
     mSqlQuery.addBindValue(data.mName);
     mSqlQuery.addBindValue(data.mTotalShare);
     mSqlQuery.addBindValue(data.mMutableShare);
-    mSqlQuery.addBindValue(data.mBlockList);
+    mSqlQuery.addBindValue(BlockData::BlockCodsListFromBlockData(data.mBlockList));
 
     mSqlQuery.addBindValue(data.mLastMoney);
     mSqlQuery.addBindValue(data.mLast3DaysChgPers);

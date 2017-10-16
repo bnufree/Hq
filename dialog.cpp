@@ -656,6 +656,7 @@ void Dialog::updateBlockTable(const BlockDataList& pDataList, const QMap<QString
 
 }
 
+#if 0
 void Dialog::on_blocktbl_itemDoubleClicked(QTableWidgetItem *item)
 {
     if(item == NULL) return;
@@ -669,6 +670,7 @@ void Dialog::on_blocktbl_itemDoubleClicked(QTableWidgetItem *item)
     qDebug()<<"code:"<<data.stklist;
    displayBlockDetailInfoInTable(data.stklist);
 }
+#endif
 
 void Dialog::displayBlockDetailInfoInTable(const QStringList& stklist)
 {
@@ -685,7 +687,7 @@ void Dialog::displayBlockDetailInfoInTable(const QStringList& stklist)
 
 
 }
-
+#if 0
 void Dialog::on_blocktbl_customContextMenuRequested(const QPoint &pos)
 {
     qDebug()<<"right menu clicked";
@@ -766,7 +768,9 @@ void Dialog::on_hqtbl_customContextMenuRequested(const QPoint &pos)
     }
 
     popMenu->popup(QCursor::pos());
+
 }
+#endif
 
 void Dialog::editFavorite()
 {
@@ -821,7 +825,7 @@ void Dialog::hqMenuOpt()
     }
         break;
     case MENU_OPT_BLOCK:
-        displayBlockDetailInfoInTable(mBlockDataMap[opt.mBlockCode].stklist);
+        displayBlockDetailInfoInTable(mBlockDataMap[opt.mBlockCode].mShareCodeList);
         break;
     default:
         break;
@@ -836,6 +840,7 @@ void Dialog::on_DateMgrBtn_clicked()
     dlg->exec();
 }
 
+#if 0
 void Dialog::on_hqtbl_itemDoubleClicked(QTableWidgetItem *item)
 {
     if(!item) return;
@@ -853,6 +858,8 @@ void Dialog::on_hqtbl_itemDoubleClicked(QTableWidgetItem *item)
     Profiles::instance()->setValue(STK_ZXG_SEC, STK_ZXG_NAME, mFavStkList);
     qDebug()<<"fav:"<<mFavStkList;
 }
+
+#endif
 
 void Dialog::slotUpdateIndex(const StockDataList &pDataList)
 {
@@ -892,12 +899,13 @@ void Dialog::slotUpdateIndex(const StockDataList &pDataList)
 
 
 }
-
+#if 0
 void Dialog::on_hqtbl_itemEntered(QTableWidgetItem *item)
 {
     QTableWidgetItem *wkitem = ui->hqtbl->item(item->row(), 0);
     //qDebug()<<"entered item:"<<wkitem->data(Qt::UserRole).toString();
 }
+#endif
 
 //void Dialog::keyPressEvent(QKeyEvent *e)
 //{
@@ -1018,7 +1026,7 @@ void Dialog::mouseMoveEvent(QMouseEvent *event)
 //    }
 //    return true;
 //}
-
+#if 0
 void Dialog::on_hqtbl_itemClicked(QTableWidgetItem *item)
 {
     item->tableWidget()->horizontalHeader()->setHighlightSections(false);
@@ -1028,6 +1036,7 @@ void Dialog::on_blocktbl_itemClicked(QTableWidgetItem *item)
 {
     item->tableWidget()->horizontalHeader()->setHighlightSections(false);
 }
+#endif
 
 void Dialog::slotUpdateStockCodesList(const QStringList &list)
 {
@@ -1112,6 +1121,6 @@ void Dialog::recvShareBlockDataMap(const QMap<QString, QStringList> &map)
 {
     foreach (QString key, map.keys()) {
         //qDebug()<<"key:"<<key<<"   list:"<<map[key];
-        mShareBlockList[key].append(map[key]);
+        //mShareBlockList[key].append(map[key]);
     }
 }

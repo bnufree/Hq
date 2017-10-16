@@ -196,5 +196,10 @@ void HqTableWidget::slotCellDoubleClicked(int row, int col)
     return;
 }
 
+void HqTableWidget::slotCellClicked(int row, int col)
+{
+    this->horizontalHeader()->setHighlightSections(false);
+}
+
 
 

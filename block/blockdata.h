@@ -5,11 +5,25 @@
 #include <QObject>
 #include <QColor>
 
+class BlockData;
+typedef QList<BlockData*>        BlockDataList;
+
+typedef enum BlockType
+{
+    BLOCK_NONE= 0,
+    BLOCK_GN,
+    BLOCK_HY,
+    BLOCK_DQ,
+    BLOCK_USER,
+}BLOCKTYPE;
+
 class BlockData
 {
 public:
     BlockData();
     ~BlockData();
+    static BlockDataList BlockDataListFromCodesList(const QStringList& codes);
+    static QStringList   BlockCodsListFromBlockData(const BlockDataList& list);
 public:
     QString             mName;
     QString             mCode;
@@ -40,7 +54,7 @@ public:
 
 Q_DECLARE_METATYPE(BlockData)
 
-typedef QList<BlockData*>        BlockDataList;
+
 
 
 #endif // BLOCKDATA_H
