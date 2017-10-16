@@ -21,8 +21,6 @@ typedef enum enBlockDisplayRule
     BLOCK_DISPLAY_SORT_ASCEND
 }BLOCK_DISPLAY_RULE;
 
-typedef QList<BlockData>        BlockDataList;
-
 class QEastMoneyBlockThread : public QObject
 {
     Q_OBJECT
@@ -37,7 +35,7 @@ signals:
     void    sendStkinfoUpdateProgress(int cur, int total);
     void    signalUpdateMsg(const QString& msg);
     void    start();
-    void    sendShareBlockDataMap(const QMap<QString, QStringList>& map);
+    void    sendShareBlockDataMap(const QMap<QString, BlockDataList>& map);
 public slots:
     void    slotUpdateBlockShare();
     void    slotUpdateBlockInfos();
@@ -48,10 +46,10 @@ public slots:
 private:
     int         mSortRule;
     int         mBlockType;
-    QMap<QString,BlockData> mBlockDataList;
+    QMap<QString,   BlockData*> mBlockDataList;
     QList<QThread*>     mWorkThreadList;
     QMap<int, BlockDataList> mBlockRealInfo;
-    QMap<QString, QStringList>  mShareBlockMap;
+    QMap<QString, BlockDataList>  mShareBlockMap;
     QMap<QString, BlockData>   mBlockDataMap;
     QThread     mWorkthread;
 };

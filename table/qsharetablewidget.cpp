@@ -1,6 +1,7 @@
 #include "qsharetablewidget.h"
+#include <QDebug>
 
-QShareTablewidget::QShareTablewidget(QWidget *parent) : QWidget(parent)
+QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
 {
     //设定抬头
     TableColDataList datalist;
@@ -23,15 +24,15 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : QWidget(parent)
     datalist.append(TableColData(QStringLiteral("登记日"), STK_DISPLAY_SORT_TYPE_GQDJR));
     datalist.append(TableColData(QStringLiteral("公告日"), STK_DISPLAY_SORT_TYPE_YAGGR));
     datalist.append(TableColData(QStringLiteral("换手率"), STK_DISPLAY_SORT_TYPE_HSL));
+
+    setHeaders(datalist);
 }
 
 void QShareTablewidget::setDataList(const StockDataList &list)
 {
-    prepareUpdateTable();
-    int newRowCount = list.size();
+    prepareUpdateTable(list.size());
     int i = 0;
     foreach (StockData data, list) {
-        if(i+1 > oldRowCount) this->appendRow();
         int k =0;
         this->setRowHeight(i, 20);
         this->setItemText(i, k++, data.mCode, Qt::AlignRight);
@@ -82,13 +83,20 @@ void QShareTablewidget::setDataList(const StockDataList &list)
         }
         this->setItemText(i, k++, data.mGQDJR.toString("yyyy-MM-dd"));
         this->setItemText(i, k++, data.mYAGGR.toString("yyyy-MM-dd"));
-        this->updateFavShareIconOfRow(i);
-        this->item(i, 0)->setData(Qt::UserRole, code);
+        this->updateFavShareIconOfRow(i, data.mIsFavCode);
+        this->item(i, 0)->setData(Qt::UserRole, data.mCode);
         this->item(i, 0)->setData(Qt::UserRole+1, data.mBlockList);
         i++;
 
     }
-    afterUpdateTable(newRowCount);
+}
+
+void QShareTablewidget::setStockMarket()
+{
+    QAction *act = (QAction*)sender();
+    if(act == NULL) return;
+    qDebug()<<"mkt_type:"<<act->data().toInt();
+    emit signalSetStockMarket(act->data().toInt());
 }
 
 void QShareTablewidget::initMenu()
@@ -96,114 +104,107 @@ void QShareTablewidget::initMenu()
     QMenu* hqCenterMenu = new QMenu(QStringLiteral("行情中心"), this);
     QList<QAction*> actlist;
 
-    QStringList poplist;
-    poplist<<QStringLiteral("自选")<<QStringLiteral("沪深")<<QStringLiteral("沪市")<<QStringLiteral("深市")
-          <<QStringLiteral("中小板")<<QStringLiteral("创业板")<<QStringLiteral("沪深基金")
-         <<QStringLiteral("恒指")<<QStringLiteral("恒生国企")
-        <<QStringLiteral("港股通");
-    QList<int> mktlist;
-        mktlist<<MKT_ZXG<<MKT_ALL<<MKT_SH<<MKT_SZ<<MKT_ZXB<<MKT_CYB<<MKT_JJ<<MKT_HK_HSZS<<MKT_HK_HSGQ<<MKT_HK_GGT;
-        int index = -1;
-        foreach (QString name, poplist) {
-            index++;
-            QAction *act = new QAction(this);
-            act->setText(name);
-            act->setData(mktlist[index]);
-            connect(act, &QAction::triggered, this, &Dialog::setStockMarket);
-            actlist.append(act);
-        }
+    QList<struMenu> itemlist;
+    itemlist.append(struMenu(QStringLiteral("自选"), MKT_ZXG));
+    itemlist.append(struMenu(QStringLiteral("沪深"), MKT_ALL));
+    itemlist.append(struMenu(QStringLiteral("沪市"), MKT_SH));
+    itemlist.append(struMenu(QStringLiteral("深市"), MKT_SZ));
+    itemlist.append(struMenu(QStringLiteral("中小板"), MKT_ZXB));
+    itemlist.append(struMenu(QStringLiteral("创业板"), MKT_CYB));
+    itemlist.append(struMenu(QStringLiteral("沪深基金"), MKT_JJ));
+    itemlist.append(struMenu(QStringLiteral("恒指"), MKT_HK_HSZS));
+    itemlist.append(struMenu(QStringLiteral("恒生国企"), MKT_HK_HSGQ));
+    itemlist.append(struMenu(QStringLiteral("港股通"), MKT_HK_GGT));
 
-        mHqCenterMenu->addActions(actlist);
-
-
-        mHqHeaderMenu = new QMenu(QStringLiteral("列表标题"), this);
-        for(int i=0; i<mHqHeaderList.length(); i++)
-        {
-            QAction *act = new QAction(this);
-            act->setText(mHqHeaderList[i]);
-            TableColDisplayStatus data;
-            data.mTable = ui->hqtbl;
-            data.mColIndex = i;
-            data.mIsDisplay = true;
-            //act->setData(i);
-            act->setCheckable(true);
-            data.mIsDisplay = true;
-            act->setChecked(data.mIsDisplay);
-            act->setData(QVariant::fromValue(data));
-            connect(act, &QAction::triggered, this, &Dialog::setDisplayCol);
-            mHqColActList.append(act);
-        }
-
-        mHqHeaderMenu->addActions(mHqColActList);
-
-        mHqPageMenu = new QMenu(QStringLiteral("页面控制"), this);
-        poplist.clear();
-        poplist<<QStringLiteral("首页")<<QStringLiteral("前一页")<<QStringLiteral("后一页")<<QStringLiteral("末页");
-        for(int i=0; i<poplist.length(); i++)
-        {
-            QAction *act = new QAction(this);
-            act->setText(poplist[i]);
-            act->setData(i);
-            connect(act, &QAction::triggered, this, &Dialog::setDisplayPage);
-            mHqPageMenu->addAction(act);
-        }
-
+    foreach (struMenu item, itemlist) {
+        QAction *act = new QAction(this);
+        act->setText(item.mDisplayText);
+        act->setData(item.mCmd);
+        connect(act, &QAction::triggered, this, &QShareTablewidget::setStockMarket);
+        actlist.append(act);
     }
+
+    hqCenterMenu->addActions(actlist);
+
+    insertContextMenu(hqCenterMenu);
 
 }
 
-void QShareTablewidget::slotCustomContextMenuRequested(const QPoint &point)
+void QShareTablewidget::slotCustomContextMenuRequested(const QPoint &pos)
 {
-    QMenu *popMenu = new QMenu(this);
-    popMenu->addMenu(mHqCenterMenu);
-    popMenu->addMenu(mHqHeaderMenu);
-    popMenu->addMenu(mHqPageMenu);
-
     //自选股编辑
-    QTableWidgetItem *item = ui->hqtbl->itemAt(pos);
-    if(item)
+    QTableWidgetItem *table_item = this->itemAt(pos);
+    if(table_item)
     {
-        item = ui->hqtbl->item(item->row(), 0);
-        QString stkCode = item->data(Qt::UserRole).toString();
-        QList<QAction*> actlist;
-        int row = item->row();
-        item = ui->hqtbl->item(row, 0);
-        QStringList poplist;
-        poplist<<QStringLiteral("分时图")<<QStringLiteral("日线图")<<QStringLiteral("沪深股通");
-        QList<int> Optlist;
-        Optlist<<MENU_OPT_MINUTE<<MENU_OPT_DAY<<MENU_OPT_HSGT;
-        int index = -1;
-        foreach (QString name, poplist) {
-            index++;
-            QAction *act = new QAction(this);
-            act->setText(name);
-            HqTableMenuData  data;
-            data.mStockCode = stkCode;
-            data.mMenuCmd = Optlist[index];
-            act->setData(QVariant::fromValue(data));
-            connect(act, &QAction::triggered, this, &Dialog::hqMenuOpt);
-            actlist.append(act);
+        table_item = this->item(table_item->row(), 0);
+        QString stkCode = table_item->data(Qt::UserRole).toString();
+        QList<struMenu> itemlist;
+        itemlist.append(struMenu(QStringLiteral("分时图"), INFO_MINUTE_GRAPH));
+        itemlist.append(struMenu(QStringLiteral("日线图"), INFO_K_GRAPH));
+        itemlist.append(struMenu(QStringLiteral("沪深港通"), INFO_HSHK));
+        itemlist.append(struMenu(QStringLiteral("所属板块"), INFO_BLOCK_LIST));
+
+        foreach (struMenu menu_item, itemlist) {
+            if(menu_item.mCmd == INFO_BLOCK_LIST)
+            {
+                QMenu *submenu = new QMenu(menu_item.mDisplayText, this);
+                QList<BlockData*> blocklist = table_item->data(Qt::UserRole+1).value<QList<BlockData*>>();
+                //qDebug()<<"blocklist:"<<blocklist<<" code:"<<item->data(Qt::UserRole).toString();
+                foreach (BlockData* block, blocklist) {
+                    QAction *act = new QAction(this);
+                    act->setText(QString("%1:%2%").arg(block->mName).arg(block->mChangePer));
+                    act->setData(block->mShareCodeList);
+                    connect(act, &QAction::triggered, this, &QShareTablewidget::setDisplayBlockDetail);
+                    submenu->addAction(act);
+                }
+                insertContextMenu(submenu);
+            } else
+            {
+                QAction *act = new QAction(this);
+                act->setText(menu_item.mDisplayText);
+                act->setData(stkCode);
+                if(menu_item.mCmd == INFO_MINUTE_GRAPH)
+                {
+                    connect(act, &QAction::triggered, this, &QShareTablewidget::setDisplayMinuteGraph);
+                } else if(menu_item.mCmd == INFO_K_GRAPH)
+                {
+                    connect(act, &QAction::triggered, this, &QShareTablewidget::setDisplayDayGraph);
+                } else if(menu_item.mCmd == INFO_HSHK)
+                {
+                    connect(act, &QAction::triggered, this, &QShareTablewidget::setDisplayHSHK);
+                }
+
+                insertContextMenu(act);
+            }
         }
-        QMenu *submenu = new QMenu(QStringLiteral("所属板块"), this);
-        QStringList blocklist = item->data(Qt::UserRole+1).toStringList();
-        //qDebug()<<"blocklist:"<<blocklist<<" code:"<<item->data(Qt::UserRole).toString();
-        foreach (QString name, blocklist) {
-            if(name.trimmed().isEmpty()) continue;
-            if(mBlockDataMap[name].name.trimmed().isEmpty()) continue;
-            QAction *act = new QAction(this);
-            act->setText(QString("%1:%2%").arg(mBlockDataMap[name].name).arg(mBlockDataMap[name].changePer));
-            qDebug()<<"subtext:"<<act->text();
-            HqTableMenuData data;
-            data.mStockCode = stkCode;
-            data.mBlockCode = name;
-            data.mMenuCmd = MENU_OPT_BLOCK;
-            act->setData(QVariant::fromValue(data));
-            connect(act, &QAction::triggered, this, &Dialog::hqMenuOpt);
-            submenu->addAction(act);
-        }
-        popMenu->addActions(actlist);
-        popMenu->addMenu(submenu);
+
     }
 
-    popMenu->popup(QCursor::pos());
+    HqTableWidget::slotCustomContextMenuRequested(pos);
+
+}
+
+void QShareTablewidget::setDisplayMinuteGraph()
+{
+
+}
+
+void QShareTablewidget::setDisplayDayGraph()
+{
+
+}
+
+void QShareTablewidget::setDisplayBlockDetail()
+{
+
+}
+
+void QShareTablewidget::setDisplayHSHK()
+{
+
+}
+
+void QShareTablewidget::slotCellDoubleClicked(int row, int col)
+{
+    return;
 }

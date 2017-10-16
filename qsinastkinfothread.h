@@ -5,6 +5,7 @@
 #include <QList>
 #include <QMap>
 #include "stockdata.h"
+#include "utils/comdatadefines.h"
 #include <QStringList>
 
 

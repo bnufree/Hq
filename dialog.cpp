@@ -479,6 +479,8 @@ void Dialog::resizeEvent(QResizeEvent *event)
 
 void Dialog::updateHqTable(const StockDataList& pDataList)
 {
+    ui->hqtbl->setDataList(pDataList);
+#if 0
 //    qDebug()<<"input";
     //qDebug()<<"main Thread:"<<QThread::currentThreadId();
     //if(pDataList.length() == 0) return;
@@ -604,7 +606,7 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
 
     }
 
-
+#endif
 }
 
 //void Dialog::HQBLOCKINFOCBKFUNC(BlockDataList& pDataList, void *pUser)
@@ -617,6 +619,8 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
 
 void Dialog::updateBlockTable(const BlockDataList& pDataList, const QMap<QString, BlockData>& map)
 {
+    ui->blocktbl->setDataList(pDataList);
+#if 0
     ui->blocktbl->setRowCount(pDataList.count());
 
     int i=0;
@@ -648,7 +652,7 @@ void Dialog::updateBlockTable(const BlockDataList& pDataList, const QMap<QString
 
     }
     mBlockDataMap = map;
-
+#endif
 
 }
 

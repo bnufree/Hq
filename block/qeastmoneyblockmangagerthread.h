@@ -25,7 +25,7 @@ public slots:
     void slotReceiveBlockDataList(int type, const BlockDataList& list, const QMap<QString, BlockData>& map);
 private:
     //QThread         mWorkThread;
-    QMap<int, BlockDataList>    mBlockDataMapList;
+    QMap<int, BlockDataList>    mBlockDataMapList;      //分行业，概念，地区显示。int为类别码
     QMap<QString, BlockData>       mBlockDataMap;
     QList<QEastMoneyBlockThread*>  mWorkThreadList;
     int             mCurBlockType;

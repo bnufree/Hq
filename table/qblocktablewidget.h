@@ -1,14 +1,14 @@
-#ifndef QSHARETABLEWIDGET_H
-#define QSHARETABLEWIDGET_H
+#ifndef QBLOCKTABLEWIDGET_H
+#define QBLOCKTABLEWIDGET_H
 
 #include "HqTableWidget.h"
-#include "stockdata.h"
+#include "block/blockdata.h"
 
-class QShareTablewidget : public HqTableWidget
+class QBlockTableWidget : public HqTableWidget
 {
     Q_OBJECT
 public:
-    explicit QShareTablewidget(QWidget *parent = 0);
+    explicit QBlockTableWidget(QWidget *parent = 0);
 private:
     void    initMenu();
 
@@ -20,7 +20,7 @@ signals:
     void    signalSetDisplayHSHK(const QString& code);
 
 public slots:
-    void    setDataList(const StockDataList& list);
+    void    setDataList(const BlockDataList& list);
     void    slotCustomContextMenuRequested(const QPoint &pos);
     void    setStockMarket();
     void    setDisplayMinuteGraph();
@@ -32,4 +32,4 @@ private:
     QMap<QString, double>   mStockMap;
 };
 
-#endif // QSHARETABLEWIDGET_H
+#endif // QBLOCKTABLEWIDGET_H

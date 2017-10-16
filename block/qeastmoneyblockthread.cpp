@@ -25,8 +25,8 @@ QEastMoneyBlockThread::QEastMoneyBlockThread(int pBlockID, QObject *parent) : QO
     mSortRule = -1;
     mBlockDataList.clear();
     qRegisterMetaType<BlockDataList>("const BlockDataList&");
-    qRegisterMetaType<QMap<QString, QStringList>>("const QMap<QString, QStringList>&");
-    qRegisterMetaType<QMap<QString, BlockData>>("const QMap<QString, BlockData>&");
+    qRegisterMetaType<QMap<QString, BlockDataList>>("const QMap<QString, BlockDataList>&");
+    qRegisterMetaType<QMap<QString, BlockData*>>("const QMap<QString, BlockData*>&");
     this->moveToThread(&mWorkthread);
     connect(this, SIGNAL(start()), this, SLOT(slotUpdateBlockShare()));
     mWorkthread.start();
@@ -80,8 +80,7 @@ void QEastMoneyBlockThread::slotUpdateBlockInfos()
 
 void QEastMoneyBlockThread::slotUpdateBlockShareCodeList(const QString &pBlockCode, const QStringList &pShareCodesList)
 {
-    //qDebug()<<"block:"<<pBlockCode<<" list:"<<pShareCodesList;
-    mBlockDataList[pBlockCode].stklist = pShareCodesList;
+    mBlockDataList[pBlockCode]->mShareCodeList = pShareCodesList;
 }
 
 void QEastMoneyBlockThread::slotBlockShareThreadFinished()
@@ -115,15 +114,14 @@ void QEastMoneyBlockThread::slotUpdateBlockShare()
     QString replaceStr = (mBlockType == BLOCK_CONCEPT ? "3" : mBlockType == BLOCK_INDUSTORY ? "2" : "1");
     int index = 0;
     while ((index = result.indexOf(QRegularExpression("BK0[0-9]{3}"), index)) > 0) {
-        BlockData data;
-        data.code = result.mid(index, 6).replace("BK0", replaceStr);
-        qDebug()<<"code:"<<data.code;
-        mBlockDataList[data.code] = data;
+        BlockData *data = new BlockData;
+        data->mCode = result.mid(index, 6).replace("BK0", replaceStr);
+        mBlockDataList[data->code] = data;
         index += 6;
     }
     //开始根据板块代码，获取板块内的所有shares
     foreach (QString key, mBlockDataList.keys()) {
-        QEastMoneyBlockShareThread *thread = new QEastMoneyBlockShareThread(key, this);
+        QEastMoneyBlockShareThread *thread = new QEastMoneyBlockShareThread(key);
         mWorkThreadList.append(thread);
         connect(thread, SIGNAL(signalUpdateBlockShareCodeList(QString,QStringList)), this, SLOT(slotUpdateBlockShareCodeList(QString,QStringList)));
         connect(thread, SIGNAL(finished()), this, SLOT(slotBlockShareThreadFinished()));
@@ -135,7 +133,7 @@ void QEastMoneyBlockThread::slotUpdateBlockShare()
 
 void QEastMoneyBlockThread::slotUpdateShareBlock(const QString &share, const QString &block)
 {
-    mShareBlockMap[share].append(block);
+    mShareBlockMap[share].append(mBlockDataList[block]);
 }
 
 

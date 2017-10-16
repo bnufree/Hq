@@ -13,25 +13,35 @@ public:
     void setHeaders(const TableColDataList& list);
     void appendRow();
     void setItemText(int row, int column, const QString& text, Qt::AlignmentFlag flg = Qt::AlignCenter);
-    void setFavShareList(const QString& list);
+    void setFavShareList(const QStringList& list);
     void appendFavShare(const QString& code);
     void removeFavShare(const QString& code);
-    void updateFavShareIconOfRow(int row);
+    void updateFavShareIconOfRow(int row, bool isFav);
+    void prepareUpdateTable(int newRowCount);
+    void removeRows(int start, int count);
+    void initPageCtrlMenu();
+    void insertContextMenu(QMenu* menu);
+    void insertContextMenu(QAction *act);
 private slots:
-    void prepareUpdateTable();
-    void afterUpdateTable(int newRowCount);
+
 signals:
+    void signalDisplayFirstPage();
+    void signalDisplayPreviousPage();
+    void signalDisplayNextPage();
+    void signalDisplayEndPage();
 
 public slots:
+    void slotSetDisplayPage();
     void slotSetColDisplay(bool isDisplay);
     void slotCustomContextMenuRequested(const QPoint& point);
+    virtual void slotCellDoubleClicked(int row, int col);
 
 private:
     TableColDataList        mColDataList;
     int                     mColWidth;
-    QMenu                   *mHeaderMenu;
+    QMenu                   *mCustomContextMenu;
     QStringList             mFavShareList;
-    int                     mOldRowCount;
+    //int                     mOldRowCount;
 };
 
 #endif // HqTableWidget_H

@@ -22,8 +22,6 @@ SOURCES += main.cpp\
         dialog.cpp \
     stockdata.cpp \
     dataexchange.cpp \
-    blockdata.cpp \
-    qeastmoneyblockthread.cpp \
     profiles.cpp \
     qsinastkinfothread.cpp \
     qsinasearchthread.cpp \
@@ -40,8 +38,6 @@ SOURCES += main.cpp\
     qindexframe.cpp \
     qindexwidget.cpp \
     qeastmonystockcodesthread.cpp \
-    qeastmoneyblocksharethread.cpp \
-    qeastmoneyblockmangagerthread.cpp \
     qeastmoneysharefhspthread.cpp \
     qhttpget.cpp \
     qeastmoneynorthboundthread.cpp \
@@ -55,13 +51,16 @@ SOURCES += main.cpp\
     qeastmoneyhsgtshareamount.cpp \
     table/qstktablewidgetitem.cpp \
     table/HqTableWidget.cpp \
-    table/qsharetablewidget.cpp
+    table/qsharetablewidget.cpp \
+    block/blockdata.cpp \
+    block/qeastmoneyblockmangagerthread.cpp \
+    block/qeastmoneyblocksharethread.cpp \
+    block/qeastmoneyblockthread.cpp \
+    table/qblocktablewidget.cpp
 
 HEADERS  += dialog.h \
     stockdata.h \
     dataexchange.h \
-    blockdata.h \
-    qeastmoneyblockthread.h \
     profiles.h \
     qsinastkinfothread.h \
     qsinasearchthread.h \
@@ -80,8 +79,6 @@ HEADERS  += dialog.h \
     qindexframe.h \
     qindexwidget.h \
     qeastmonystockcodesthread.h \
-    qeastmoneyblocksharethread.h \
-    qeastmoneyblockmangagerthread.h \
     qeastmoneysharefhspthread.h \
     qhttpget.h \
     qeastmoneynorthboundthread.h \
@@ -97,7 +94,12 @@ HEADERS  += dialog.h \
     table/qstktablewidgetitem.h \
     utils/comdatadefines.h \
     table/HqTableWidget.h \
-    table/qsharetablewidget.h
+    table/qsharetablewidget.h \
+    block/blockdata.h \
+    block/qeastmoneyblockmangagerthread.h \
+    block/qeastmoneyblocksharethread.h \
+    block/qeastmoneyblockthread.h \
+    table/qblocktablewidget.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

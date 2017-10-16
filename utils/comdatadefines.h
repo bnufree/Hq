@@ -2,6 +2,7 @@
 #define COMDATADEFINES_H
 
 #include  <QString>
+#include  <QVariant>
 
 typedef enum enStockDisplayRule
 {
@@ -49,6 +50,34 @@ typedef enum MktType
     MKT_ZXG,        //自选股
     MKT_OTHER,      //保留
 }MKT_TYPE;
+
+typedef enum Page_Ctrl
+{
+    FIRST_PAGE = 0,
+    PRE_PAGE,
+    NEXT_PAGE,
+    END_PAGE,
+}PAGECTRL;
+
+typedef enum Share_Detail_Info
+{
+    INFO_MINUTE_GRAPH = 0,
+    INFO_K_GRAPH,
+    INFO_HSHK,
+    INFO_BLOCK_LIST,
+    INFO_STOCK_LIST,
+}STK_DETAIL;
+
+struct  struMenu{
+    QString     mDisplayText;
+    QVariant    mCmd;
+
+    struMenu(const QString& text, QVariant val)
+    {
+        mDisplayText = text;
+        mCmd = val;
+    }
+};
 
 typedef struct struTableColData
 {

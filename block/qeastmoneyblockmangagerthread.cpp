@@ -41,7 +41,6 @@ void QEastMoneyBlockMangagerThread::slotReceiveBlockDataList(int type, const Blo
     mBlockDataMapList[type] = list;
     foreach (QString key, map.keys()) {
         mBlockDataMap[key] = map[key];
-        //qDebug()<<"key:"<<key<<" list:"<<mBlockDataMap[key].stklist;
     }
 }
 

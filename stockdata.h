@@ -4,6 +4,7 @@
 #include <QDate>
 #include <QList>
 #include <QObject>
+#include "block/blockdata.h"
 
 struct zjlxData{
     QString code;
@@ -33,6 +34,7 @@ public:
         mHSGT = 0.0;
         mHSGTEstimateFlag = false;
         mDate = QDate(2017,1,1);
+        mIsFavCode = false;
     }
 
 public:
@@ -54,6 +56,7 @@ public:
     double          mRZRQ;
     double          mHSGT;
     bool            mHSGTEstimateFlag;
+    bool            mIsFavCode;
 };
 
 class StockData : public StockBaseData
@@ -119,7 +122,7 @@ public:
     double          mChgPersFromMonth;
     double          mLastClose;
     double          mMoneyRatio;
-    QStringList     mBlockList;
+    QList<BlockData*>     mBlockList;
     double          mZJLX;      //资金流向
     double          mSZZG; //送转股比例
     double          mXJFH;  //现金分红

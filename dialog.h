@@ -4,7 +4,7 @@
 #include <QDialog>
 #include <QSystemTrayIcon>
 #include <QTableWidget>
-#include "qeastmoneyblockmangagerthread.h"
+#include "block/qeastmoneyblockmangagerthread.h"
 #include "qsinastkinfothread.h"
 #include "qsinasearchthread.h"
 #include "qsinastkresultmergethread.h"
@@ -145,7 +145,7 @@ private:
     //QMap<QString, double> mBlockMap;
     QMap<QString, BlockData> mBlockDataMap;
     QMap<QString, QStringList> mBlockStkList;
-    QMap<QString, QStringList>mShareBlockList;
+    QMap<QString, BlockDataList>mShareBlockList;
     QStringList           mFavStkList;
     QStringList           mHSFoundsList;
     QStringList           mAllStkList;

@@ -7,8 +7,9 @@
 #define     COL_TYPE_ROLE               Qt::UserRole + 1
 #define     COL_SORT_ROLE               Qt::UserRole + 2
 
-HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),mHeaderMenu(0)
+HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),mCustomContextMenu(0)
 {
+    initPageCtrlMenu();
     mColDataList.clear();
     mColWidth = 60;
     this->verticalHeader()->setVisible(false);
@@ -18,17 +19,17 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),mHeaderMenu
     this->setEditTriggers(QAbstractItemView::NoEditTriggers);
     //鼠标右键选择
     connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotCustomContextMenuRequested(QPoint)));
+    connect(this, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(slotCellDoubleClicked(int,int)));
 }
 
 void HqTableWidget::setHeaders(const TableColDataList &list)
 {
-    if(mHeaderMenu == NULL) mHeaderMenu = new QMenu(QStringLiteral("列表标题"), this);
-    if(mHeaderMenu) mHeaderMenu->clear();
+    QMenu *menu = new QMenu(QStringLiteral("列表标题"), this);
     mColDataList = list;
     this->setColumnCount(list.length());
     for(int i=0; i<mColDataList.size(); i++) {
         mColDataList[i].mColNum = i;
-        this->setHorizontalHeaderItem(i, QStkTableWidgetItem(mColDataList[i].mColStr));
+        this->setHorizontalHeaderItem(i, new QStkTableWidgetItem(mColDataList[i].mColStr));
         this->horizontalHeaderItem(i)->setData(COL_TYPE_ROLE, mColDataList[i].mType);
         this->horizontalHeaderItem(i)->setData(COL_SORT_ROLE, QVariant::fromValue((void*) &(mColDataList[i].mRule)));
         QAction *act = new QAction(this);
@@ -37,8 +38,10 @@ void HqTableWidget::setHeaders(const TableColDataList &list)
         act->setCheckable(true);
         act->setChecked(mColDataList[i].mIsDisplay);
         connect(act, SIGNAL(triggered(bool)), this, SLOT(slotSetColDisplay(bool)));
-        mHeaderMenu->addAction(act);
+        menu->addAction(act);
     }
+
+    insertContextMenu(menu);
 }
 
 void HqTableWidget::slotSetColDisplay(bool isDisplay)
@@ -70,7 +73,7 @@ void HqTableWidget::setItemText(int row, int column, const QString &text, Qt::Al
     }
 }
 
-void HqTableWidget::setFavShareList(const QString &list)
+void HqTableWidget::setFavShareList(const QStringList &list)
 {
     mFavShareList = list;
 }
@@ -85,51 +88,112 @@ void HqTableWidget::removeFavShare(const QString &code)
     if(mFavShareList.contains(code)) mFavShareList.removeOne(code);
 }
 
-void HqTableWidget::updateFavShareIconOfRow(int row)
+void HqTableWidget::updateFavShareIconOfRow(int row, bool isFav)
 {
     if(row >= this->rowCount()) return;
-    QString code = this->item(row, 0)->text().trimmed();
-    if(code.left(1) == "5" || code.left(1) == "6")
+    if(isFav) this->item(row, 0)->setIcon(QIcon(":/icon/image/zxg.ico"));
+}
+
+void HqTableWidget::prepareUpdateTable(int newRowCount)
+{
+    int oldRowCount = this->rowCount();
+    if(oldRowCount < newRowCount)
     {
-        code = "sh"+code;
+        this->setRowCount(newRowCount);
+    } else if(oldRowCount > newRowCount)
+    {
+        removeRows(newRowCount, oldRowCount - newRowCount);
     } else
     {
-        code = "sz"+code;
+        //do nothing
     }
-    if(mFavShareList.contains(code)) this->item(i, 0)->setIcon(QIcon(":/icon/image/zxg.ico"));
 }
 
-void HqTableWidget::prepareUpdateTable()
+void HqTableWidget::removeRows(int start, int count)
 {
-    mOldRowCount = this->rowCount();
-}
-
-void HqTableWidget::afterUpdateTable(int newRowCount)
-{
-    if(newRowCount < mOldRowCount)
+    for(int i=0; i<count; i++)
     {
-        for(int i=newRowCount; i<mOldRowCount; i++)
+        for(int k=0; k<this->columnCount(); k++)
         {
-            for(int k=0; k<this->columnCount(); k++)
+            QStkTableWidgetItem *item = (QStkTableWidgetItem*)(this->item(start, k));
+            if(item)
             {
-                QStkTableWidgetItem *item = (QStkTableWidgetItem*)(this->item(i, k));
-                if(item)
-                {
-                    delete item;
-                    item = 0;
-                }
+                delete item;
+                item = 0;
             }
         }
-        while (mOldRowCount > newRowCount) {
-            this->removeRow(mOldRowCount-1);
-            mOldRowCount--;
-        }
+        this->removeRow(start);
     }
 }
 
 void HqTableWidget::slotCustomContextMenuRequested(const QPoint &point)
 {
+    mCustomContextMenu->popup(QCursor::pos());
+}
 
+void HqTableWidget::initPageCtrlMenu()
+{
+    QMenu *menu = new QMenu(QStringLiteral("页面控制"), this);
+    QList<QAction*> actlist;
+
+    QList<struMenu> itemlist;
+    itemlist.append(struMenu(QStringLiteral("首页"), FIRST_PAGE));
+    itemlist.append(struMenu(QStringLiteral("前一页"), PRE_PAGE));
+    itemlist.append(struMenu(QStringLiteral("后一页"), NEXT_PAGE));
+    itemlist.append(struMenu(QStringLiteral("末页"), END_PAGE));
+
+    foreach (struMenu item, itemlist) {
+        QAction *act = new QAction(this);
+        act->setText(item.mDisplayText);
+        act->setData(item.mCmd);
+        connect(act, &QAction::triggered, this, &HqTableWidget::slotSetDisplayPage);
+        actlist.append(act);
+    }
+
+    menu->addActions(actlist);
+
+    insertContextMenu(menu);
+}
+
+void HqTableWidget::insertContextMenu(QMenu *menu)
+{
+    if(!menu) return;
+    if(!mCustomContextMenu) mCustomContextMenu = new QMenu(this);
+    mCustomContextMenu->addMenu(menu);
+}
+
+void HqTableWidget::insertContextMenu(QAction *act)
+{
+    if(!act) return;
+    if(!mCustomContextMenu) mCustomContextMenu = new QMenu(this);
+    mCustomContextMenu->addAction(act);
+}
+
+void HqTableWidget::slotSetDisplayPage()
+{
+    QAction *act = (QAction*) sender();
+    if(!act) return;
+
+    int val = act->data().toInt();
+    if(val == FIRST_PAGE)
+    {
+        emit signalDisplayFirstPage();
+    } else if(val == PRE_PAGE)
+    {
+        emit signalDisplayPreviousPage();
+    } else if(val == NEXT_PAGE)
+    {
+        emit signalDisplayNextPage();
+    } else if(val == END_PAGE)
+    {
+        emit signalDisplayEndPage();
+    }
+
+}
+
+void HqTableWidget::slotCellDoubleClicked(int row, int col)
+{
+    return;
 }
 
 

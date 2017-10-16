@@ -94,7 +94,7 @@ QMenu::icon:checked { background: gray; border: 1px inset gray; position: absolu
       <number>0</number>
      </property>
      <item>
-      <widget class="QTableWidget" name="blocktbl">
+      <widget class="QBlockTableWidget" name="blocktbl">
        <property name="maximumSize">
         <size>
          <width>150</width>
@@ -125,7 +125,7 @@ QMenu::icon:checked { background: gray; border: 1px inset gray; position: absolu
       </widget>
      </item>
      <item>
-      <widget class="QTableWidget" name="hqtbl">
+      <widget class="QShareTablewidget" name="hqtbl">
        <property name="mouseTracking">
         <bool>true</bool>
        </property>
@@ -243,6 +243,18 @@ QMenu::icon:checked { background: gray; border: 1px inset gray; position: absolu
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>QShareTablewidget</class>
+   <extends>QTableWidget</extends>
+   <header>table/qsharetablewidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QBlockTableWidget</class>
+   <extends>QTableWidget</extends>
+   <header>table/qblocktablewidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
