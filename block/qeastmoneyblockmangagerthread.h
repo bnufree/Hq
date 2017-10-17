@@ -3,10 +3,12 @@
 
 #include <QObject>
 #include <QThread>
-#include <QMap>
-#include "qeastmoneyblockthread.h"
+#include "blockdata.h"
 
-class QEastMoneyBlockMangagerThread : public QThread
+class QEastMoneyBlockThread;
+class QTimer;
+
+class QEastMoneyBlockMangagerThread : public QObject
 {
     Q_OBJECT
 public:
@@ -14,21 +16,20 @@ public:
     ~QEastMoneyBlockMangagerThread();
     void    setCurBlockType(int type);
     void    reverseSortRule();
-protected:
-    void run();
 
 signals:
-    void signalBlockDataListUpdated(const BlockDataList& list, const QMap<QString, BlockData>& map);
-    void signalReceiveBlockDataList(int type, const BlockDataList& list);
-    void sendShareBlockDataMap(const QMap<QString, QStringList>& map);
+    void signalBlockDataListUpdated(const BlockDataList& list);
+    void start();
 public slots:
-    void slotReceiveBlockDataList(int type, const BlockDataList& list, const QMap<QString, BlockData>& map);
+    void slotRecvBlockDataList(const BlockDataList& list);
+    void slotStartRunMgr();
+    void slotUpdateBlockInfo();
 private:
-    //QThread         mWorkThread;
-    QMap<int, BlockDataList>    mBlockDataMapList;      //分行业，概念，地区显示。int为类别码
-    QMap<QString, BlockData>       mBlockDataMap;
     QList<QEastMoneyBlockThread*>  mWorkThreadList;
     int             mCurBlockType;
+    QThread         mWorkThread;
+    QTimer          *mWorkTimer;
+    BlockDataList   mBlockDataList;
 };
 
 #endif // QEASTMONEYBLOCKMANGAGERTHREAD_H

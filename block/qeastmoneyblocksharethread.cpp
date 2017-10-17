@@ -2,6 +2,7 @@
 #include <QRegularExpression>
 #include "qhttpget.h"
 #include <QDebug>
+#include "dbservices.h"
 QEastMoneyBlockShareThread::QEastMoneyBlockShareThread(const QString& pBlockCode, QObject *parent) : QThread(parent)
 {
     mBlockCode = pBlockCode;
@@ -29,7 +30,7 @@ void QEastMoneyBlockShareThread::run()
         code.left(1) == "1"? code.replace(0, 2, "sh"):code.replace(0, 2, "sz");
         index = index+8;
         sharecodeslist.append(code);
-        emit signalUpdateShareBlock(code, mBlockCode);
+        DATA_SERVICE->setShareBlock(code, mBlockCode);
     }
 
     emit signalUpdateBlockShareCodeList(mBlockCode, sharecodeslist);

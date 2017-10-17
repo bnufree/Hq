@@ -72,7 +72,7 @@ public slots:
     void setDisplayCol(bool isDisplay);
     void setTargetSize(const QSize& size);
 
-    void updateBlockTable(const BlockDataList& pDataList, const QMap<QString, BlockData>& map);
+    void updateBlockTable(const BlockDataList& pDataList);
     void recvShareBlockDataMap(const QMap<QString, QStringList>& map);
     void displayBlockRealtimeInfo();
     void updateHqTable(const StockDataList& pDataList);
@@ -149,7 +149,7 @@ private:
     QStringList           mFavStkList;
     QStringList           mHSFoundsList;
     QStringList           mAllStkList;
-    int                   mCurBlockType;
+//    int                   mCurBlockType;
     int                   mDisplayMode;
     int                   mSecSize;
     bool                  mInit;

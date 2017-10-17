@@ -2,6 +2,7 @@
 
 BlockData::BlockData()
 {
+    mBlockType = BLOCK_NONE;
 
 }
 

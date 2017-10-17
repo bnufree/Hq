@@ -85,7 +85,7 @@ void QShareTablewidget::setDataList(const StockDataList &list)
         this->setItemText(i, k++, data.mYAGGR.toString("yyyy-MM-dd"));
         this->updateFavShareIconOfRow(i, data.mIsFavCode);
         this->item(i, 0)->setData(Qt::UserRole, data.mCode);
-        this->item(i, 0)->setData(Qt::UserRole+1, data.mBlockList);
+        this->item(i, 0)->setData(Qt::UserRole+1, QVariant::fromValue(data.mBlockList));
         i++;
 
     }

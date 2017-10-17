@@ -1,34 +1,48 @@
 #include "qeastmoneyblockmangagerthread.h"
+#include "qeastmoneyblockthread.h"
 #include <QDebug>
+#include <QTimer>
 
-QEastMoneyBlockMangagerThread::QEastMoneyBlockMangagerThread(QObject *parent) : QThread(parent)
+QEastMoneyBlockMangagerThread::QEastMoneyBlockMangagerThread(QObject *parent) : QObject(parent)
 {
-    mCurBlockType = 2;
-    //this->moveToThread(&mWorkThread);
-    //connect(this, SIGNAL(signalReceiveBlockDataList(int,BlockDataList)), this,SLOT(slotReceiveBlockDataList(int,BlockDataList)), Qt::QueuedConnection);
+    mCurBlockType = BLOCK_HY;
+    mWorkTimer = new QTimer;
+    mWorkTimer->setInterval(3000);
+    connect(mWorkTimer, SIGNAL(timeout()), this, SLOT(slotUpdateBlockInfo()));
+    connect(this, SIGNAL(start()), this, SLOT(slotStartRunMgr()));
+    this->moveToThread(&mWorkThread);
+    mWorkThread.start();
+    mWorkTimer->start();
 }
 
 QEastMoneyBlockMangagerThread::~QEastMoneyBlockMangagerThread()
 {
-
+    if(mWorkTimer)
+    {
+        mWorkTimer->stop();
+        mWorkTimer->deleteLater();
+    }
+    foreach (QEastMoneyBlockThread* thread, mWorkThreadList) {
+        thread->stop();
+        thread->deleteLater();
+    }
+    mWorkThread.wait();
+    mWorkThread.quit();
 }
 
-void QEastMoneyBlockMangagerThread::run()
+void QEastMoneyBlockMangagerThread::slotStartRunMgr()
 {
     //创建板块线程，开始更新板块信息
-    for(int i= 1; i<=3; i++)
+    for(int i= BLOCK_GN; i<=BLOCK_DQ; i++)
     {
-        QEastMoneyBlockThread *hy = new QEastMoneyBlockThread(i);
-        connect(hy, SIGNAL(sendBlockDataList(int,BlockDataList,QMap<QString,BlockData>)), this, SLOT(slotReceiveBlockDataList(int,BlockDataList,QMap<QString,BlockData>)));
-        connect(hy, SIGNAL(sendShareBlockDataMap(QMap<QString,QStringList>)), this, SIGNAL(sendShareBlockDataMap(QMap<QString,QStringList>)));
-        mWorkThreadList.append(hy);
-        emit hy->start();
+        if(i== BLOCK_GN || i==BLOCK_HY || i== BLOCK_DQ)
+        {
+            QEastMoneyBlockThread *hy = new QEastMoneyBlockThread(i);
+            connect(hy, SIGNAL(sendBlockDataList(BlockDataList)), this, SLOT(slotRecvBlockDataList(BlockDataList)));
+            mWorkThreadList.append(hy);
+            hy->start();
+        }
     }
-    while (1) {
-        emit signalBlockDataListUpdated(mBlockDataMapList[mCurBlockType], mBlockDataMap);
-        sleep(3);
-    }
-
 }
 
 void QEastMoneyBlockMangagerThread::setCurBlockType(int type)
@@ -36,18 +50,32 @@ void QEastMoneyBlockMangagerThread::setCurBlockType(int type)
     mCurBlockType = type;
 }
 
-void QEastMoneyBlockMangagerThread::slotReceiveBlockDataList(int type, const BlockDataList &list, const QMap<QString, BlockData>& map)
-{
-    mBlockDataMapList[type] = list;
-    foreach (QString key, map.keys()) {
-        mBlockDataMap[key] = map[key];
-    }
-}
-
 void QEastMoneyBlockMangagerThread::reverseSortRule()
 {
     foreach (QEastMoneyBlockThread *t, mWorkThreadList) {
         t->reverseSortRule();
     }
+}
+
+void QEastMoneyBlockMangagerThread::slotRecvBlockDataList(const BlockDataList &list)
+{
+    foreach (BlockData* data, list) {
+        if(mBlockDataList.contains(data)) continue;
+        mBlockDataList.append(data);
+    }
+
+}
+
+void QEastMoneyBlockMangagerThread::slotUpdateBlockInfo()
+{
+    BlockDataList wklist;
+    foreach (BlockData *data, mBlockDataList) {
+        if(data->mBlockType & mCurBlockType)
+        {
+            wklist.append(data);
+        }
+    }
+
+    emit signalBlockDataListUpdated(wklist);
 }
 

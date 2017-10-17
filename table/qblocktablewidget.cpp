@@ -41,14 +41,6 @@ void QBlockTableWidget::slotCellDoubleClicked(int row, int col)
 
 }
 
-void QBlockTableWidget::setStockMarket()
-{
-    QAction *act = (QAction*)sender();
-    if(act == NULL) return;
-    qDebug()<<"mkt_type:"<<act->data().toInt();
-    emit signalSetStockMarket(act->data().toInt());
-}
-
 void QBlockTableWidget::initMenu()
 {
     QList<QAction*> actlist;

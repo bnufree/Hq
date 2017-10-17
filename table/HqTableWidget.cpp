@@ -13,10 +13,11 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),mCustomCont
     mColDataList.clear();
     mColWidth = 60;
     this->verticalHeader()->setVisible(false);
-    this->horizontalHeader()->setDefaultSectionSize(mColWidth);
+    this->horizontalHeader()->setDefaultSectionSize(mColWidth);    
     this->setSelectionBehavior(QAbstractItemView::SelectRows);
     this->setSelectionMode(QAbstractItemView::SingleSelection);
     this->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     //鼠标右键选择
     connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotCustomContextMenuRequested(QPoint)));
     connect(this, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(slotCellDoubleClicked(int,int)));

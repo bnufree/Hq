@@ -7,14 +7,15 @@
 
 class BlockData;
 typedef QList<BlockData*>        BlockDataList;
+Q_DECLARE_METATYPE(BlockDataList)
 
 typedef enum BlockType
 {
     BLOCK_NONE= 0,
-    BLOCK_GN,
-    BLOCK_HY,
-    BLOCK_DQ,
-    BLOCK_USER,
+    BLOCK_GN = 1,
+    BLOCK_HY = 2,
+    BLOCK_DQ = 4,
+    BLOCK_USER = 8,
 }BLOCKTYPE;
 
 class BlockData
@@ -33,6 +34,7 @@ public:
     double              mTopShareChangePer;
     QStringList         mShareCodeList;
     bool                mIsFav;
+    int                 mBlockType;
 
 public:
     bool operator <(const BlockData& other)

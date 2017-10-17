@@ -122,7 +122,7 @@ public:
     double          mChgPersFromMonth;
     double          mLastClose;
     double          mMoneyRatio;
-    QList<BlockData*>     mBlockList;
+    BlockDataList     mBlockList;
     double          mZJLX;      //资金流向
     double          mSZZG; //送转股比例
     double          mXJFH;  //现金分红

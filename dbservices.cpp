@@ -649,3 +649,27 @@ foreignHolder HqInfoService::amountForeigner(const QString &code)
 {
     return mStkForeignerHoldMap[code];
 }
+
+BlockData*  HqInfoService::getBlockDataOfCode(const QString &code)
+{
+    QMutexLocker locker(&mBlockMutex);
+    return mBlockDataMap.value(code, 0);
+
+}
+
+void   HqInfoService::setBlockData(BlockData *data)
+{
+    if(data == 0) return;
+    QMutexLocker locker(&mBlockMutex);
+    mBlockDataMap[data->mCode] = data;
+}
+
+void   HqInfoService::setShareBlock(const QString &code, const QString &block)
+{
+    QMutexLocker locker(&mShareMutex);
+    QStringList &wklist = mShareBlockMap[code];
+    if(!wklist.contains(block))
+    {
+        wklist.append(block);
+    }
+}

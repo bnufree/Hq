@@ -11,6 +11,6 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("GB18030"));
     Dialog w;
-    w.show();
+    w.showMaximized();
     return a.exec();
 }

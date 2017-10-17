@@ -7,12 +7,12 @@
 
 
 #include "blockdata.h"
-typedef enum enBlockType
-{
-    BLOCK_DISTRICT = 1 ,
-    BLOCK_INDUSTORY,
-    BLOCK_CONCEPT,
-}BLOCK_OPT_TYPE;
+//typedef enum enBlockType
+//{
+//    BLOCK_DISTRICT = 1 ,
+//    BLOCK_INDUSTORY,
+//    BLOCK_CONCEPT,
+//}BLOCK_OPT_TYPE;
 
 typedef enum enBlockDisplayRule
 {
@@ -29,9 +29,9 @@ public:
     ~QEastMoneyBlockThread();
     void    setSortRule(BLOCK_DISPLAY_RULE rule);
     void    reverseSortRule();
-
+    void    stop();
 signals:
-    void    sendBlockDataList(int type, const BlockDataList& list, const QMap<QString, BlockData>& map);
+    void    sendBlockDataList(const BlockDataList& list);
     void    sendStkinfoUpdateProgress(int cur, int total);
     void    signalUpdateMsg(const QString& msg);
     void    start();
@@ -40,18 +40,16 @@ public slots:
     void    slotUpdateBlockShare();
     void    slotUpdateBlockInfos();
     void    slotUpdateBlockShareCodeList(const QString& pBlockCode, const QStringList& pShareCodesList);
-    void    slotBlockShareThreadFinished();    
-    void    slotUpdateShareBlock(const QString& share, const QString& block);
+    void    slotBlockShareThreadFinished();
 
 private:
     int         mSortRule;
-    int         mBlockType;
+    int         mUserBlockType;
+    int         mWebBlockType;
     QMap<QString,   BlockData*> mBlockDataList;
     QList<QThread*>     mWorkThreadList;
-    QMap<int, BlockDataList> mBlockRealInfo;
-    QMap<QString, BlockDataList>  mShareBlockMap;
-    QMap<QString, BlockData>   mBlockDataMap;
     QThread     mWorkthread;
+    bool        mUpdateRealInfo;
 };
 
 #endif // QEASTMONEYBLOCKTHREAD_H

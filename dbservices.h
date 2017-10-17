@@ -34,6 +34,9 @@ public:
     bool   GetHistoryInfoWithDate(const QString& table, const QDate& date, double& close, double& money, qint64& total_share, qint64& mutalble_share);
     double   GetMultiDaysChangePercent(const QString& table, int days);
     void   GetForeignVolChange(const QString& code, qint64& cur, qint64& pre);
+    BlockData*   getBlockDataOfCode(const QString& code);
+    void         setBlockData(BlockData* data);
+    void         setShareBlock(const QString& code, const QString& block);
 
 signals:
     void signalRecvRealBlockInfo(const QList<BlockRealInfo>& list);
@@ -75,6 +78,7 @@ public slots:
     void slotUpdateStkProfitList(const StockDataList& list);
     void slotAddShareAmoutByForeigner(const StockDataList& list);
     void slotUpdateShareAmountByForeigner();
+
 
 private:
     void initHistoryDates();
@@ -128,6 +132,10 @@ private:    //本类使用的变量
     QDate                       mLastActiveDate;
     QMap<QString, double>       mStkProfitMap;
     QMap<QString, foreignHolder>       mStkForeignerHoldMap;
+    QMap<QString,   BlockData*> mBlockDataMap;
+    QMap<QString,   QStringList> mShareBlockMap;
+    QMutex                      mBlockMutex;
+    QMutex                      mShareMutex;
 };
 
 #endif // DBSERVICE_H

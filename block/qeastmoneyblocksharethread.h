@@ -13,7 +13,6 @@ public:
 
 signals:
     void    signalUpdateBlockShareCodeList(const QString& pBlockCode, const QStringList& pShareCodesList);
-    void    signalUpdateShareBlock(const QString& share, const QString& block);
 protected:
     void    run();
 private:
