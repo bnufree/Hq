@@ -1,6 +1,6 @@
 #include "qsharehistoryinfomgr.h"
 #include "qeastmoneystockhistoryinfothread.h"
-#include "../dbservices.h"
+#include "dbservices/dbservices.h"
 #include "../qeastmonystockcodesthread.h"
 #include "../qeastmoneyhsgtshareamount.h"
 #include <QDebug>
@@ -27,7 +27,8 @@ QStringList QShareHistoryInfoMgr::getCodesList()
 
 void QShareHistoryInfoMgr::slotUpdateStockCodesList(const QStringList &list)
 {
-    qDebug()<<"total stk codelist:"<<list.length();
+    qDebug()<<"total stk codelist:"<<list.length()<<list.mid(0,100);
+    DATA_SERVICE->signalInitStockRealInfos(list);
     emit signalSetHistoryCodeList(list);
 }
 
@@ -45,7 +46,7 @@ void QShareHistoryInfoMgr::slotSetHistoryCodeList(const QStringList &list)
 
 void QShareHistoryInfoMgr::slotRecvCodeHistoryDate(const QString& code, const QDate& date)
 {
-    //qDebug()<<__FUNCTION__<<"code:"<<code<<" date:"<<date<<" len:"<<mWorkQueueThreadList.length();
+    qDebug()<<__FUNCTION__<<"code:"<<code<<" date:"<<date<<" len:"<<mWorkQueueThreadList.length();
     mRecvCodeNum++;
     QEastmoneyStockHistoryInfoThread* thread = new QEastmoneyStockHistoryInfoThread(code, date);
     if(thread)

@@ -3,6 +3,7 @@
 #include <QHeaderView>
 #include <QAction>
 #include "qstktablewidgetitem.h"
+#include <QDebug>
 
 #define     COL_TYPE_ROLE               Qt::UserRole + 1
 #define     COL_SORT_ROLE               Qt::UserRole + 2
@@ -127,8 +128,9 @@ void HqTableWidget::removeRows(int start, int count)
     }
 }
 
-void HqTableWidget::slotCustomContextMenuRequested(const QPoint &point)
+void HqTableWidget::slotCustomContextMenuRequested(const QPoint &pos)
 {
+    qDebug()<<__FILE__<<__FUNCTION__<<__LINE__;
     mCustomContextMenu->popup(QCursor::pos());
 }
 

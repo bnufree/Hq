@@ -2,7 +2,7 @@
 #include <QRegularExpression>
 #include "qhttpget.h"
 #include <QDebug>
-#include "dbservices.h"
+#include "dbservices/dbservices.h"
 QEastMoneyBlockShareThread::QEastMoneyBlockShareThread(const QString& pBlockCode, QObject *parent) : QThread(parent)
 {
     mBlockCode = pBlockCode;

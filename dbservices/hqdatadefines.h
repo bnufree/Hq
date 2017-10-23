@@ -6,6 +6,18 @@
 #include <QDate>
 #include "stockdata.h"
 
+//表名
+#define         HQ_SHARE_BASIC_INFO_TABLE           "stock_base_info"
+
+
+//列名
+#define         HQ_TABLE_COL_ID                 "id"
+#define         HQ_TABLE_COL_CODE               "code"
+#define         HQ_TABLE_COL_NAME               "name"
+#define         HQ_TABLE_COL_PROFIT             "profit"
+#define         HQ_TABLE_COL_TOTALMNT           "total_amount"
+#define         HQ_TABLE_COL_MUTAL              "mutable_amount"
+
 struct BlockBaseData{
     int                 mCode;
     int                 mType;              //

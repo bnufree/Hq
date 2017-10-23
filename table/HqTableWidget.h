@@ -33,7 +33,7 @@ signals:
 public slots:
     void slotSetDisplayPage();
     void slotSetColDisplay(bool isDisplay);
-    void slotCustomContextMenuRequested(const QPoint& point);
+    virtual void slotCustomContextMenuRequested(const QPoint& pos);
     virtual void slotCellDoubleClicked(int row, int col);
     void slotCellClicked(int row, int col);
 

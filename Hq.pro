@@ -33,7 +33,6 @@ SOURCES += main.cpp\
     qexchangedatamanage.cpp \
     qexchangedatemangagedialog.cpp \
     qglobalapplication.cpp \
-    dbservices.cpp \
     qeastmoneychinashareexchange.cpp \
     qindexframe.cpp \
     qindexwidget.cpp \
@@ -56,7 +55,9 @@ SOURCES += main.cpp\
     block/qeastmoneyblockmangagerthread.cpp \
     block/qeastmoneyblocksharethread.cpp \
     block/qeastmoneyblockthread.cpp \
-    table/qblocktablewidget.cpp
+    table/qblocktablewidget.cpp \
+    dbservices/hqdbdatabase.cpp \
+    dbservices/dbservices.cpp
 
 HEADERS  += dialog.h \
     stockdata.h \
@@ -74,7 +75,6 @@ HEADERS  += dialog.h \
     qglobalapplication.h \
     qthook.h \
     dbservices.h \
-    hqdatadefines.h \
     qeastmoneychinashareexchange.h \
     qindexframe.h \
     qindexwidget.h \
@@ -99,7 +99,10 @@ HEADERS  += dialog.h \
     block/qeastmoneyblockmangagerthread.h \
     block/qeastmoneyblocksharethread.h \
     block/qeastmoneyblockthread.h \
-    table/qblocktablewidget.h
+    table/qblocktablewidget.h \
+    dbservices/hqdbdatabase.h \
+    dbservices/dbservices.h \
+    dbservices/hqdatadefines.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

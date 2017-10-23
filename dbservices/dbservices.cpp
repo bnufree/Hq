@@ -12,14 +12,10 @@ HqInfoService::CGarbo HqInfoService::s_Garbo;
 QMutex HqInfoService::mutex;
 
 HqInfoService::HqInfoService(QObject *parent) :
-    QObject(parent),
-    mDataBaseInitFlag(0)
+    QObject(parent)
 {
     qRegisterMetaType<QList<ChinaShareExchange>>("const QList<ChinaShareExchange>&");
     qRegisterMetaType<StockDataList>("const StockDataList&");
-    bool sts = initDatabase();
-    mSqlQuery = QSqlQuery(mDB);
-    qDebug()<<"init db status:"<<sts;
     initHistoryDates();
     //3、开启异步通讯
     moveToThread(&m_threadWork);
@@ -29,34 +25,23 @@ HqInfoService::HqInfoService(QObject *parent) :
 
 HqInfoService::~HqInfoService()
 {
-    if(mDataBaseInitFlag)
-    {
-        mDB.close();
-    }
     m_threadWork.quit();
     m_threadWork.wait(500);
     m_threadWork.terminate();
 }
 
-bool HqInfoService::isTableExist(const QString &pTable)
+bool HqInfoService::createStockBaseInfoTable()
 {
-    //qDebug()<<__FUNCTION__<<__LINE__<<" "<<pTable;
-    if(!mSqlQuery.exec(tr("SELECT COUNT(*) FROM sqlite_master where type='table' and name='%1'").arg(pTable))) return  false;
-    //qDebug()<<__FUNCTION__<<__LINE__;
-    while (mSqlQuery.next()) {
-        return mSqlQuery.value(0).toBool();
-    }
-    return false;
-}
+    QMap<QString, QString> colist;
+    colist.insert("id", "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL");
+    colist.insert("code", "VARCHAR(6) NOT NULL");
+    colist.insert("name", "VARCHAR(100) NOT NULL");
+    colist.insert("total_amount", "NUMERIC NULL");
+    colist.insert("mutal_amount", "NUMERIC NULL");
+    colist.insert("profit", "REAL  NULL ");
+    colist.insert("update_date", "DATE NULL");
 
-bool HqInfoService::createProfitTable()
-{
-    QString sql = tr("CREATE TABLE [profit] ("
-                  "[id] INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL,"
-                  "[code] VARCHAR(6)   NOT NULL,"
-                  "[profit] REAL  NULL "
-                  ")");
-    return mSqlQuery.exec(sql);
+    return mDataBase.createTable("stock_base_info", colist);
 }
 
 bool HqInfoService::createHSGTShareAmountTable()
@@ -102,6 +87,8 @@ void HqInfoService::initHistoryDates()
 
 void HqInfoService::initSignalSlot()
 {
+    connect(this, SIGNAL(signalInitStockRealInfos(QStringList)),
+            this, SLOT(slotInitStockRealInfos(QStringList)));
     connect(this, SIGNAL(signalRecvTop10ChinaStockInfos(QList<ChinaShareExchange>)),
             this, SLOT(slotRecvTop10ChinaStockInfos(QList<ChinaShareExchange>)));
     connect(this, SIGNAL(signalQueryTop10ChinaStockInfos(QDate,QString,int)),
@@ -229,23 +216,6 @@ HqInfoService *HqInfoService::instance()
         }
     }
     return m_pInstance;
-}
-
-
-bool HqInfoService::initDatabase()
-{
-    qDebug()<<__FUNCTION__<<__LINE__;
-    if(mDataBaseInitFlag) return true;
-    //初始化本地数据库的连接
-    qDebug()<<__FUNCTION__<<__LINE__<<"database:"<<QSqlDatabase::database().databaseName();
-    if(QSqlDatabase::contains("qt_sql_default_connection"))
-      mDB = QSqlDatabase::database("qt_sql_default_connection");
-    else
-      mDB = QSqlDatabase::addDatabase("QSQLITE");
-
-    //mDB = QSqlDatabase::addDatabase("QSQLITE");//链接数据库
-    mDB.setDatabaseName("StockData.s3db");
-    return mDB.open();
 }
 
 void HqInfoService::saveDB()
@@ -672,4 +642,14 @@ void   HqInfoService::setShareBlock(const QString &code, const QString &block)
     {
         wklist.append(block);
     }
+}
+
+void  HqInfoService::slotInitStockRealInfos(const QStringList &list)
+{
+    foreach (QString code, list) {
+        StockData *data = new StockData;
+        data->mCode = code.right(6);
+        mRealStockInfoMap[code] = data;
+    }
+
 }

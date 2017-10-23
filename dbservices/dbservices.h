@@ -3,13 +3,7 @@
 
 #include <QObject>
 #include <QThread>
-#include <QtSql/QSqlDatabase>
-#include <QtSql/QSqlQuery>
-#include "hqdatadefines.h"
-#include <QMap>
-#include <QTimer>
-#include <QMutex>
-#include <QMutexLocker>
+#include "hqdbdatabase.h"
 
 
 #define DATA_SERVICE HqInfoService::instance()
@@ -55,6 +49,7 @@ signals:
     void signalUpdateStkBaseinfoWithHistory(const QString& code);
     void signalUpdateStkBaseinfoWithHistoryFinished(const QString &code);
     void signalUpdateStkProfitList(const StockDataList& list);
+    void signalInitStockRealInfos(const QStringList& codes);
     //沪港通持股写入数据据
     void signalAddShareAmoutByForeigner(const StockDataList& list);
     void signalUpdateShareAmountByForeigner();
@@ -78,16 +73,15 @@ public slots:
     void slotUpdateStkProfitList(const StockDataList& list);
     void slotAddShareAmoutByForeigner(const StockDataList& list);
     void slotUpdateShareAmountByForeigner();
+    void slotInitStockRealInfos(const QStringList& list);
 
 
 private:
     void initHistoryDates();
     void initSignalSlot();
-    bool initDatabase();
     bool createHistoryTable(const QString& pTableName);
-    bool createProfitTable();
+    bool createStockBaseInfoTable();
     bool createHSGTShareAmountTable();
-    bool isTableExist(const QString& pTable);
     bool blockExist(int code);
     bool isActive();
     void initBlockInfo();
@@ -118,10 +112,6 @@ private:    //本类使用的变量
     };
     static CGarbo s_Garbo; // 定义一个静态成员，在程序结束时，系统会调用它的析构函数
     QThread             m_threadWork;       //工作线程
-    bool                        mDataBaseInitFlag;
-    QSqlDatabase                mDB;
-    int                         mCurrentRPLIndex;
-    QSqlQuery                   mSqlQuery;
     QMap<int, BlockRealInfo>    mBlockInfo;
     QStringList                 mNotExchangeDaysList;
     QMap<QString, StockData>    mBasicStkInfo;
@@ -134,8 +124,10 @@ private:    //本类使用的变量
     QMap<QString, foreignHolder>       mStkForeignerHoldMap;
     QMap<QString,   BlockData*> mBlockDataMap;
     QMap<QString,   QStringList> mShareBlockMap;
+    QMap<QString,   StockData*>     mRealStockInfoMap;
     QMutex                      mBlockMutex;
     QMutex                      mShareMutex;
+    HQDBDataBase                mDataBase;
 };
 
 #endif // DBSERVICE_H

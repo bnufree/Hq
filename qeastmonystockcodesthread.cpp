@@ -5,6 +5,7 @@
 #include "qhttpget.h"
 #include <QFile>
 
+#define         STOCK_CODE_FILE             "data/stock.data"
 QEastMonyStockCodesThread::QEastMonyStockCodesThread(QObject *parent) : QThread(parent)
 {
 
@@ -17,7 +18,7 @@ QEastMonyStockCodesThread::~QEastMonyStockCodesThread()
 
 bool QEastMonyStockCodesThread::writeCodes(const QStringList &codes)
 {
-    FILE *fp = fopen("stock.data", "wb+");
+    FILE *fp = fopen(STOCK_CODE_FILE, "wb+");
     if(fp)
     {
         qint64 cur = QDateTime::currentMSecsSinceEpoch();
@@ -40,9 +41,9 @@ bool QEastMonyStockCodesThread::writeCodes(const QStringList &codes)
 bool QEastMonyStockCodesThread::getCodesFromFile(QStringList& codes)
 {
     codes.clear();
-    if(!QFile::exists("stock.data")) return false;
+    if(!QFile::exists(STOCK_CODE_FILE)) return false;
     //读取文件
-    QFile file("stock.data");
+    QFile file(STOCK_CODE_FILE);
     if(!file.open(QIODevice::ReadOnly)) return false;
     int size = file.size();
     int totalNum = 0;

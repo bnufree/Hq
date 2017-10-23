@@ -17,6 +17,7 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
     datalist.append(TableColData(QStringLiteral("送转"), STK_DISPLAY_SORT_TYPE_SZZBL));
     datalist.append(TableColData(QStringLiteral("总市值"), STK_DISPLAY_SORT_TYPE_TCAP));
     datalist.append(TableColData(QStringLiteral("流通市值"), STK_DISPLAY_SORT_TYPE_MCAP));
+    datalist.append(TableColData(QStringLiteral("盈亏"), STK_DISPLAY_SORT_TYPE_PROFIT));
     datalist.append(TableColData(QStringLiteral("外资持股"), STK_DISPLAY_SORT_TYPE_FOREIGN_VOL));
     datalist.append(TableColData(QStringLiteral("外资持股△"), STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG));
     datalist.append(TableColData(QStringLiteral("持股市值"), STK_DISPLAY_SORT_TYPE_FOREIGN_CAP));
@@ -26,6 +27,7 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
     datalist.append(TableColData(QStringLiteral("换手率"), STK_DISPLAY_SORT_TYPE_HSL));
 
     setHeaders(datalist);
+    initMenu();
 }
 
 void QShareTablewidget::setDataList(const StockDataList &list)
@@ -134,6 +136,7 @@ void QShareTablewidget::slotCustomContextMenuRequested(const QPoint &pos)
 {
     //自选股编辑
     QTableWidgetItem *table_item = this->itemAt(pos);
+    qDebug()<<"item:"<<table_item;
     if(table_item)
     {
         table_item = this->item(table_item->row(), 0);

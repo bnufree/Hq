@@ -2,7 +2,7 @@
 #define QEASTMONEYHSGTDIALOG_H
 
 #include <QDialog>
-#include "dbservices.h"
+#include "dbservices/dbservices.h"
 
 namespace Ui {
 class QEastMoneyHSGTDialog;

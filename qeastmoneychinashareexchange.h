@@ -3,7 +3,7 @@
 
 #include <QThread>
 #include <QDate>
-#include "hqdatadefines.h"
+#include "dbservices/dbservices.h"
 
 class QEastMoneyChinaShareExchange : public QThread
 {

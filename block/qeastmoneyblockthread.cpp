@@ -10,7 +10,7 @@
 #include <QRegularExpression>
 #include "qeastmoneyblocksharethread.h"
 #include "qhttpget.h"
-#include "dbservices.h"
+#include "dbservices/dbservices.h"
 
 #define     BLOCK_NMAE          "name"
 #define     BLOCK_CODE          "codes"

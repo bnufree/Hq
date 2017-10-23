@@ -15,6 +15,7 @@ public:
     QStringList  getCodesList();
 
 signals:
+    void signalGetCodesFinished(const QStringList& list);
     void signalSetHistoryCodeList(const QStringList& list);
     void signalStartGetHistory();
     void signalHistoryDataFinished();

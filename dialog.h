@@ -94,6 +94,7 @@ public slots:
     void slotTodayHSGUpdated();
     void slotHistoryDataFinish();
     void slotUpdateFavList(const QStringList& list);
+    //void slotStartRealInfo();
 
 private slots:
     void on_zxgBtn_clicked();

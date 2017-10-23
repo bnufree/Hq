@@ -1,8 +1,7 @@
 #include "qeastmoneystockhistoryinfothread.h"
 #include <QDateTime>
 #include <QDebug>
-#include "../hqdatadefines.h"
-#include "../dbservices.h"
+#include "dbservices/dbservices.h"
 #include "../qhttpget.h"
 
 QEastmoneyStockHistoryInfoThread::QEastmoneyStockHistoryInfoThread(const QString& code, const QDate& date,  QObject *parent) :

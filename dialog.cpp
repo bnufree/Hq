@@ -1060,7 +1060,11 @@ void Dialog::slotTodayHSGUpdated()
 {
     ui->HSGTBTN->setStyleSheet("background-color:red");
 }
+//void Dialog::slotStartRealInfo(const QStringList& list)
+//{
 
+
+//}
 void Dialog::slotHistoryDataFinish()
 {
     QShareHistoryInfoMgr *mgr = qobject_cast<QShareHistoryInfoMgr*> (sender());
