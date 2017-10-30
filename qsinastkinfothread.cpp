@@ -144,7 +144,13 @@ void QSinaStkInfoThread::RealtimeInfo()
             mDataMap[code].mForeignCapChg = mDataMap[code].mForeignVolChg * mDataMap[code].mCur ;
         }
         emit sendStkDataList(mDataMap.values());
-        QThread::sleep(1);
+        QDateTime cur = QDateTime::currentDateTime();
+        if(cur.date().day() == 6 || cur.date().day() == 7 ||
+                cur.time().hour() <= 9 || cur.time().hour() >= 15)
+        {
+            break;
+        }
+        QThread::sleep(3);
     }
 
 }

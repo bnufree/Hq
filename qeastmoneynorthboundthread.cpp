@@ -29,7 +29,7 @@ void QEastmoneyNorthBoundThread::run()
 {
     while (true) {
         QString url = tr("http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&cmd=P.(x),(x),(x)|0000011|3990012|3990012,BK07071,BK08041&sty=SHSTD|SZSTD|FCSHSTR&st=z&sr=&p=&ps=&cb=&js=(x)&token=1942f5da9b46b069953c873404aad4b5");
-        QString result = QString::fromUtf8(QHttpGet().getContent(url));
+        QString result = QString::fromUtf8(QHttpGet::getContentOfURL(url));
         //开始解析
         //"5.12亿元,99.88亿元,105亿元,0,0.00万元,2500亿元,12.93亿元,117.07亿元,130亿元,0,0.00万元,0万元","2.92亿元,102.08亿元,105亿元,0,0.00万元,0万元,9.19亿元,120.81亿元,130亿元,0,0.00万元,0万元","399001,2,深证成指,0.23%,310|50|140|37","BK0707,1,沪股通,0.57%,349|59|166|31","BK0804,1,深股通,0.60%,608|109|241|84"
         QStringList splitstr = result.split(QRegExp("\"|\","), QString::SkipEmptyParts);
@@ -58,6 +58,13 @@ void QEastmoneyNorthBoundThread::run()
         }
 
         emit signalUpdateNorthBoundList(wklist);
+        //检查当前时间
+        QDateTime cur = QDateTime::currentDateTime();
+        if(cur.date().dayOfWeek() == 6 || cur.date().dayOfWeek() == 7||
+                cur.time().hour() <=9 || cur.time().hour() >= 15)
+        {
+            break;
+        }
 
         QThread::sleep(1*60);
     }
