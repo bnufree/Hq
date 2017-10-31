@@ -17,6 +17,14 @@
 #define         HQ_TABLE_COL_PROFIT             "profit"
 #define         HQ_TABLE_COL_TOTALMNT           "total_amount"
 #define         HQ_TABLE_COL_MUTAL              "mutable_amount"
+#define         HQ_TABLE_COL_CLOSE              "close"
+#define         HQ_TABLE_COL_VOL                "vol"
+#define         HQ_TABLE_COL_MONEY              "money"
+#define         HQ_TABLE_COL_CHANGE_PERCENT     "change"
+#define         HQ_TABLE_COL_DATE               "date"
+#define         HQ_TABLE_COL_FOREIGN_VOL        "vol_foreign"
+#define         HQ_TABLE_COL_FAVORITE           "favorite"
+
 
 struct BlockBaseData{
     int                 mCode;

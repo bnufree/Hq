@@ -33,13 +33,12 @@ HqInfoService::~HqInfoService()
 bool HqInfoService::createStockBaseInfoTable()
 {
     QMap<QString, QString> colist;
-    colist.insert("id", "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL");
-    colist.insert("code", "VARCHAR(6) NOT NULL");
+    colist.insert(HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL");
+    colist.insert(HQ_, "VARCHAR(6) NOT NULL");
     colist.insert("name", "VARCHAR(100) NOT NULL");
     colist.insert("total_amount", "NUMERIC NULL");
     colist.insert("mutal_amount", "NUMERIC NULL");
-    colist.insert("profit", "REAL  NULL ");
-    colist.insert("update_date", "DATE NULL");
+    colist.insert("date", "DATE NULL");
 
     return mDataBase.createTable("stock_base_info", colist);
 }
