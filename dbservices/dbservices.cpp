@@ -45,6 +45,8 @@ bool HqInfoService::createStockBaseInfoTable()
 
 bool HqInfoService::createHSGTShareAmountTable()
 {
+    return true;
+#if 0
     QString sql = tr("CREATE TABLE [%1] ("
                   "[id] INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL,"
                   "[code] VARCHAR(100)  NULL,"
@@ -52,10 +54,13 @@ bool HqInfoService::createHSGTShareAmountTable()
                   "[date] DATE  NULL"
                   ")").arg(HSGT_TABLE);
     return mSqlQuery.exec(sql);
+#endif
 }
 
 bool HqInfoService::createHistoryTable(const QString &pTableName)
 {
+    return true;
+#if 0
     QString sql = tr("CREATE TABLE [%1] ("
                   "[id] INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL,"
                   "[name] VARCHAR(100)  NULL,"
@@ -73,6 +78,7 @@ bool HqInfoService::createHistoryTable(const QString &pTableName)
                   "[date] DATE  NULL"
                   ")").arg(pTableName);
     return mSqlQuery.exec(sql);
+#endif
 }
 
 void HqInfoService::initHistoryDates()
@@ -135,6 +141,7 @@ bool HqInfoService::blockExist(int code)
 
 void HqInfoService::addBlock(const BlockRealInfo &info)
 {
+#if 0
     mSqlQuery.prepare("insert into Block values ("
                       "?, ?, ?, ?, ?, ?, ?, ?, ?)");
     mSqlQuery.addBindValue(info.mCode);
@@ -148,10 +155,12 @@ void HqInfoService::addBlock(const BlockRealInfo &info)
     mSqlQuery.addBindValue(QDateTime::currentMSecsSinceEpoch());
 
     mSqlQuery.exec();
+#endif
 }
 
 void HqInfoService::modBlock(const BlockRealInfo &info)
 {
+#if 0
     mSqlQuery.prepare("update Block set "
                       "price = ?, change = ?, change_percent = ?"
                       "zjlx = ?, codelist = ?, update = ? "
@@ -165,18 +174,20 @@ void HqInfoService::modBlock(const BlockRealInfo &info)
     mSqlQuery.addBindValue(info.mCode);
 
     mSqlQuery.exec();
+#endif
 }
 
 void HqInfoService::delBlock(int code)
 {
-    mSqlQuery.exec(tr("delete from Block where id = %1").arg(code));
+//    mSqlQuery.exec(tr("delete from Block where id = %1").arg(code));
 }
 
 void HqInfoService::queryBlock(int type, bool init)
 {
     QString filter = (type != 0 ? tr(" where type = %1").arg(type) : "");
-    if(!mSqlQuery.exec(tr("select * from Block %1").arg(filter))) return;
+//    if(!mSqlQuery.exec(tr("select * from Block %1").arg(filter))) return;
 
+#if 0
     QList<BlockRealInfo> selist;
     while (mSqlQuery.next()) {
         BlockRealInfo info;
@@ -195,6 +206,7 @@ void HqInfoService::queryBlock(int type, bool init)
     }
 
     emit signalSendBlockInfoList(selist);
+#endif
 }
 
 void HqInfoService::initBlockInfo()
@@ -236,7 +248,7 @@ void HqInfoService::slotRecvTop10ChinaStockInfos(const QList<ChinaShareExchange>
     foreach (ChinaShareExchange info, list) {
         if(!addTop10ChinaStockInfo(info))
         {
-            qDebug()<<"error:"<<mSqlQuery.lastError().text();
+//            qDebug()<<"error:"<<mSqlQuery.lastError().text();
         }
     }
     QSqlDatabase::database().commit();
@@ -244,6 +256,8 @@ void HqInfoService::slotRecvTop10ChinaStockInfos(const QList<ChinaShareExchange>
 
 bool HqInfoService::addTop10ChinaStockInfo(const ChinaShareExchange &info)
 {
+    return true;
+#if 0
     mSqlQuery.prepare("insert into hstop10 (id, name, close, change_percent, buy, sell, date) values ("
                       "?, ?, ?, ?, ?, ?, ?)");
     mSqlQuery.addBindValue(info.mCode);
@@ -255,11 +269,13 @@ bool HqInfoService::addTop10ChinaStockInfo(const ChinaShareExchange &info)
     mSqlQuery.addBindValue(info.mDate);
 
     return mSqlQuery.exec();
+#endif
 }
 
 QDate HqInfoService::getLastUpdateDateOfTable(const QString &table)
 {
     QDate date = QDate(2016, 12, 4);
+#if 0
     if(mSqlQuery.exec(tr("select max(date) from %1").arg(table)))
     {
         while (mSqlQuery.next()) {
@@ -270,6 +286,7 @@ QDate HqInfoService::getLastUpdateDateOfTable(const QString &table)
             }
         }
     }
+#endif
     return date;
 }
 
@@ -292,7 +309,7 @@ QDate HqInfoService::getLastUpdateDateOfHSGTVol()
 QDate HqInfoService::getLastUpdateDateOfShareHistory(const QString &code)
 {
     QString table = "stk"+ code.right(6);
-    if(!isTableExist(table)) createHistoryTable(table);
+//    if(!isTableExist(table)) createHistoryTable(table);
 
     return getLastUpdateDateOfTable(table);
 }
@@ -322,7 +339,8 @@ bool HqInfoService::queryTop10ChinaShareInfos(QList<ChinaShareExchange>& list, c
             filterList.append(tr(" name like '%%1%' ").arg(share));
         }
     }
-    if(!mSqlQuery.exec(tr("select * from hstop10 %1 order by date desc, (buy-sell) desc").arg(filterList.length() > 0 ? " where " + filterList.join(" and ") : ""))) return false;
+#if 0
+   if(!mSqlQuery.exec(tr("select * from hstop10 %1 order by date desc, (buy-sell) desc").arg(filterList.length() > 0 ? " where " + filterList.join(" and ") : ""))) return false;
     qDebug()<<mSqlQuery.lastQuery();
     while (mSqlQuery.next()) {
         ChinaShareExchange info;
@@ -335,6 +353,7 @@ bool HqInfoService::queryTop10ChinaShareInfos(QList<ChinaShareExchange>& list, c
         info.mDate = mSqlQuery.value("date").toDate();
         list.append(info);
     }
+#endif
 
     return true;
 }
@@ -346,7 +365,7 @@ void HqInfoService::slotRecvShareHistoryInfos(const StockDataList &list)
     foreach (StockData info, list) {
         if(!slotAddHistoryData(info))
         {
-            qDebug()<<"error:"<<mSqlQuery.lastError().text()<<" "<<mSqlQuery.lastQuery();
+//            qDebug()<<"error:"<<mSqlQuery.lastError().text()<<" "<<mSqlQuery.lastQuery();
         }
     }
     QSqlDatabase::database().commit();
@@ -354,31 +373,32 @@ void HqInfoService::slotRecvShareHistoryInfos(const StockDataList &list)
 
 bool HqInfoService::slotAddHistoryData(const StockData &info)
 {
+    return true;
     QString tableName = "stk" + info.mCode.right(6);
-    mSqlQuery.prepare(tr("insert into %1 ("
-                         "name, close, open, high, low, "
-                         "change, change_percent, vol, money, puremoney, "
-                         "marketshare, mutalbleshare, date) values ("
-                         "?, ?, ?, ?, ?, "
-                         "?, ?, ?, ?, ?, "
-                         "?, ?, ?)"
-                         ).arg(tableName));
-    mSqlQuery.addBindValue(info.mName);
-    mSqlQuery.addBindValue(info.mCur);
-    mSqlQuery.addBindValue(info.mOpen);
-    mSqlQuery.addBindValue(info.mHigh);
-    mSqlQuery.addBindValue(info.mLow);
+//    mSqlQuery.prepare(tr("insert into %1 ("
+//                         "name, close, open, high, low, "
+//                         "change, change_percent, vol, money, puremoney, "
+//                         "marketshare, mutalbleshare, date) values ("
+//                         "?, ?, ?, ?, ?, "
+//                         "?, ?, ?, ?, ?, "
+//                         "?, ?, ?)"
+//                         ).arg(tableName));
+//    mSqlQuery.addBindValue(info.mName);
+//    mSqlQuery.addBindValue(info.mCur);
+//    mSqlQuery.addBindValue(info.mOpen);
+//    mSqlQuery.addBindValue(info.mHigh);
+//    mSqlQuery.addBindValue(info.mLow);
 
-    mSqlQuery.addBindValue(info.mChg);
-    mSqlQuery.addBindValue(info.mChgPercent);
-    mSqlQuery.addBindValue(info.mVol);
-    mSqlQuery.addBindValue(info.mMoney);
-    mSqlQuery.addBindValue(info.mZJLX);
+//    mSqlQuery.addBindValue(info.mChg);
+//    mSqlQuery.addBindValue(info.mChgPercent);
+//    mSqlQuery.addBindValue(info.mVol);
+//    mSqlQuery.addBindValue(info.mMoney);
+///   mSqlQuery.addBindValue(info.mZJLX);
 
-    mSqlQuery.addBindValue(info.mTotalShare);
-    mSqlQuery.addBindValue(info.mMutableShare);
-    mSqlQuery.addBindValue(info.mDate);
-    return mSqlQuery.exec();
+//    mSqlQuery.addBindValue(info.mTotalShare);
+//    mSqlQuery.addBindValue(info.mMutableShare);
+//    mSqlQuery.addBindValue(info.mDate);
+//    return mSqlQuery.exec();
 }
 
 void HqInfoService::slotQueryShareHistoryLastDate(const QString &code)
@@ -389,6 +409,7 @@ void HqInfoService::slotQueryShareHistoryLastDate(const QString &code)
 void HqInfoService::slotQueryAllShareBasicInfo()
 {
     mBasicStkInfo.clear();
+#if 0
     if(!mSqlQuery.exec(tr("select * from share_basic"))) return ;
     while (mSqlQuery.next()) {
         StockData info;
@@ -409,10 +430,13 @@ void HqInfoService::slotQueryAllShareBasicInfo()
         info.mDate = mSqlQuery.value("update_date").toDate();
         mBasicStkInfo[info.mCode.right(6)] = info;
     }
+#endif
 }
 
 bool HqInfoService::slotAddShareBasicInfo(const StockData &data)
 {
+    return true;
+#if 0
     //先检查是否已经添加，如果已经添加就更新
     if(!mSqlQuery.exec(tr("delete from share_basic where code = '%1'").arg(data.mCode.right(6)))) return false;
     //开始插入
@@ -442,6 +466,7 @@ bool HqInfoService::slotAddShareBasicInfo(const StockData &data)
     mSqlQuery.addBindValue(data.mGQDJR);
     mSqlQuery.addBindValue(data.mDate);
     return mSqlQuery.exec();
+#endif
 }
 
 void HqInfoService::slotAddShareBasicInfoList(const StockDataList &list)
@@ -451,7 +476,7 @@ void HqInfoService::slotAddShareBasicInfoList(const StockDataList &list)
     foreach (StockData info, list) {
         if(!slotAddShareBasicInfo(info))
         {
-            qDebug()<<"error:"<<mSqlQuery.lastError().text()<<" "<<mSqlQuery.lastQuery();
+//            qDebug()<<"error:"<<mSqlQuery.lastError().text()<<" "<<mSqlQuery.lastQuery();
         }
     }
     QSqlDatabase::database().commit();
@@ -459,6 +484,7 @@ void HqInfoService::slotAddShareBasicInfoList(const StockDataList &list)
 
 bool HqInfoService::GetHistoryInfoWithDate(const QString &table, const QDate &date, double &close, double &money, qint64 &total_share, qint64 &mutalble_share)
 {
+#if 0
 //    qDebug()<<__FUNCTION__<<__LINE__<<table<<"  "<<date;
     if(mSqlQuery.exec(tr("select close, money, marketshare, mutalbleshare from %1 where date <= '%2' order by date desc limit 1").arg(table).arg(date.toString("yyyy-MM-dd"))))
     {
@@ -476,6 +502,7 @@ bool HqInfoService::GetHistoryInfoWithDate(const QString &table, const QDate &da
     {
         //qDebug()<<__FUNCTION__<<__LINE__<<table<<"  "<<date<<" "<<mSqlQuery.lastError().text();
     }
+#endif
 
     return false;
 }
@@ -518,6 +545,10 @@ StockData& HqInfoService::getBasicStkData(const QString &code)
 
 double HqInfoService::GetMultiDaysChangePercent(const QString &table, int days)
 {
+    return 0.0;
+}
+
+#if 0
     if(!mSqlQuery.exec(tr("select 1+change_percent/100 from %1 order by date desc limit %2").arg(table).arg(days)))
     {
         return 0.0;
@@ -528,11 +559,15 @@ double HqInfoService::GetMultiDaysChangePercent(const QString &table, int days)
         res *= mSqlQuery.value(0).toDouble();
     }
 
+
+
     return (res - 1) * 100;
 }
+#endif
 
 void HqInfoService::GetForeignVolChange(const QString &code, qint64 &cur, qint64 &pre)
 {
+#if 0
     if(!mSqlQuery.exec(tr("select vol from %1 where code = '%2' order by date desc limit 2").arg(HSGT_TABLE).arg(code)))
     {
         return;
@@ -550,6 +585,7 @@ void HqInfoService::GetForeignVolChange(const QString &code, qint64 &cur, qint64
             pre = mSqlQuery.value(0).toLongLong();
         }
     }
+#endif
 }
 
 void HqInfoService::slotUpdateStkProfitList(const StockDataList &list)
@@ -561,6 +597,7 @@ void HqInfoService::slotUpdateStkProfitList(const StockDataList &list)
 
 void HqInfoService::slotAddShareAmoutByForeigner(const StockDataList &list)
 {
+#if 0
     //先检查表表是否存在，不存在，就添加
     if(!isTableExist(HSGT_TABLE)) createHSGTShareAmountTable();
     QSqlDatabase::database().transaction();
@@ -573,6 +610,7 @@ void HqInfoService::slotAddShareAmoutByForeigner(const StockDataList &list)
         mSqlQuery.exec();
     }
     QSqlDatabase::database().commit();
+#endif
 }
 
 double HqInfoService::getProfit(const QString &code)
@@ -587,6 +625,7 @@ QStringList HqInfoService::getExchangeCodeList()
 
 void HqInfoService::slotUpdateShareAmountByForeigner()
 {
+#if 0
     QDate date = getLastUpdateDateOfHSGTVol();
     qDebug()<<"last date:"<<date;
     QDate preDate = date.addDays(-1);
@@ -611,7 +650,8 @@ void HqInfoService::slotUpdateShareAmountByForeigner()
             mStkForeignerHoldMap[code].previous = num;
         }
     }
-    qDebug()<<"sql:"<<mSqlQuery.lastQuery();
+//    qDebug()<<"sql:"<<mSqlQuery.lastQuery();
+#endif
 }
 
 foreignHolder HqInfoService::amountForeigner(const QString &code)

@@ -1,6 +1,7 @@
 #include "qindexwidget.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QDebug>
 
 QIndexWidget::QIndexWidget(QWidget *parent) : QWidget(parent)
 {
@@ -19,6 +20,7 @@ QIndexWidget::~QIndexWidget()
 
 void QIndexWidget::updateData(const StockDataList &list)
 {
+    qDebug()<<"sender:"<<sender();
     foreach (StockData data, list) {
         QIndexFrame* w = NULL;
         if(mIndexWidgetMap.contains(data.mCode))
