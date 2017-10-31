@@ -122,7 +122,7 @@ void QSinaStkResultMergeThread::run()
                     wklist.append(mMidStkDataMapList.value(key.right(6)));
             }
 
-            //qDebug()<<"wklist len"<<wklist.length();
+
         }
         mListMutex.unlock();
         mTotalPage = (wklist.length() + mPageSize -1) / mPageSize;
@@ -304,7 +304,12 @@ void QSinaStkResultMergeThread::run()
                 }
             }
 
-            if(mActive)emit sendStkDataList(wklist.mid((mCurPage - 1) * mPageSize, mPageSize));
+            if(mActive)
+            {
+                StockDataList mid = wklist.mid((mCurPage - 1) * mPageSize, mPageSize);
+                qDebug()<<"mid:"<<mid.length();
+                emit sendStkDataList(mid);
+            }
         } else
         {
             emit sendStkDataList(StockDataList());
@@ -318,7 +323,6 @@ void QSinaStkResultMergeThread::run()
 
 void QSinaStkResultMergeThread::slotRevResList(const StockDataList &mid)
 {
-    //qDebug()<<"recv Thread:"<<QThread::currentThreadId();
     mListMutex.lock();
     foreach (StockData data, mid) {
         if(data.mCur < 0.1) continue;

@@ -27,7 +27,21 @@ double QEastmoneyNorthBoundThread::changeRMBString(const QString &src)
 
 void QEastmoneyNorthBoundThread::run()
 {
+    bool isContinue = true;
     while (true) {
+        if(!isContinue)
+        {
+            QDateTime now = QDateTime::currentDateTime();
+            if(now.date().dayOfWeek() == 6 || now.date().dayOfWeek() == 7 ||
+                    now.time().hour() < 9 || now.time().hour() >= 15)
+            {
+                QThread::sleep(3);
+                continue;
+            } else
+            {
+                isContinue = true;
+            }
+        }
         QString url = tr("http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&cmd=P.(x),(x),(x)|0000011|3990012|3990012,BK07071,BK08041&sty=SHSTD|SZSTD|FCSHSTR&st=z&sr=&p=&ps=&cb=&js=(x)&token=1942f5da9b46b069953c873404aad4b5");
         QString result = QString::fromUtf8(QHttpGet::getContentOfURL(url));
         //开始解析
@@ -61,9 +75,9 @@ void QEastmoneyNorthBoundThread::run()
         //检查当前时间
         QDateTime cur = QDateTime::currentDateTime();
         if(cur.date().dayOfWeek() == 6 || cur.date().dayOfWeek() == 7||
-                cur.time().hour() <=9 || cur.time().hour() >= 15)
+                cur.time().hour() <9 || cur.time().hour() >= 15)
         {
-            break;
+            isContinue = false;
         }
 
         QThread::sleep(1*60);

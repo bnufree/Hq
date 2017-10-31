@@ -483,6 +483,7 @@ void Dialog::resizeEvent(QResizeEvent *event)
 
 void Dialog::updateHqTable(const StockDataList& pDataList)
 {
+    qDebug()<<"data list:"<<pDataList.length();
     ui->hqtbl->setDataList(pDataList);
 #if 0
 //    qDebug()<<"input";
@@ -1068,7 +1069,7 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
     mMergeThread->setStkList(mAllStkList);
     mMergeThread->setSelfCodesList(mFavStkList);
     mMergeThread->setActive(true);
-    mMergeThread->setMktType(MKT_ZXG);
+    mMergeThread->setMktType(MKT_ALL);
     mMergeThread->start();
 #if 0
     //板块行情初始化

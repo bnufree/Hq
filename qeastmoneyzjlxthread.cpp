@@ -16,7 +16,7 @@ void QEastMoneyZjlxThread::run()
 {
     QString wkURL = QString("http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx/JS.aspx?type=ct&st=(BalFlowMain)&sr=-1&p=1&ps=5000&js=var%20jRmrwiia={pages:(pc),data:[(x)]}&token=894050c76af8597a853f5b408b759f5d&cmd=C._AB&sty=DCFFITA&rt=49490052");
 
-    qDebug()<<"zjlx url:"<<wkURL;
+    //qDebug()<<"zjlx url:"<<wkURL;
     while(true)
     {
         //开始解析数据

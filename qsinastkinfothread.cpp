@@ -11,6 +11,7 @@
 
 QSinaStkInfoThread::QSinaStkInfoThread(QObject *parent) : QThread(parent)
 {
+    qRegisterMetaType<StockDataList>("const StockDataList&");
     mOptType =STK_DISPLAY_SORT_TYPE_CHGPER;
     mSortRule = -1;
     mStkList.clear();
@@ -53,6 +54,7 @@ void QSinaStkInfoThread::reverseSortRule()
 void QSinaStkInfoThread::setStkList(const QStringList &list)
 {
     mStkList = list;
+#if 0
     //取得配置文件保存的昨天的数据
     mDataMap.clear();
     foreach (QString wkcode, mStkList) {
@@ -63,6 +65,7 @@ void QSinaStkInfoThread::setStkList(const QStringList &list)
         data.mForeignVolChg = holder.last - holder.previous;
         mDataMap[data.mCode] = data;
     }
+#endif
 
    // qDebug()<<"mdataMap:"<<mDataMap.keys();
 
@@ -76,9 +79,24 @@ void QSinaStkInfoThread::setActive(bool act)
 void QSinaStkInfoThread::RealtimeInfo()
 {
     QString url("http://hq.sinajs.cn/?list=%1");
+    bool isContinue = true;
     while(true)
     {
         if(mStkList.length() == 0) continue;
+        if(!isContinue)
+        {
+            QDateTime now = QDateTime::currentDateTime();
+            if(now.date().dayOfWeek() == 6 || now.date().dayOfWeek() == 7 ||
+                    now.time().hour() < 9 || now.time().hour() >= 15)
+            {
+                qDebug()<<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<"hour:"<<now.time().hour()<<" day:"<<now.date().dayOfWeek();
+                QThread::sleep(3);
+                continue;
+            } else
+            {
+                isContinue = true;
+            }
+        }
 
         QString wkURL = url.arg(mStkList.join(","));
         //开始解析数据
@@ -87,10 +105,13 @@ void QSinaStkInfoThread::RealtimeInfo()
         //先换行
         QStringList resultlist = result.split(QRegExp("[\\n|;]"), QString::SkipEmptyParts);
         //再分割具体的字段
-        foreach (QString detail, resultlist) {
+        StockDataList datalist;
+        foreach (QString detail, resultlist)
+        {
             detail.replace(QRegExp("([a-z]{1,} )"), "");
             QStringList detailList = detail.split(QRegExp("[a-z|\"|\"|,|=|_]"), QString::SkipEmptyParts);
             if(detailList.length() < 20) continue;
+#if 0
             QString code = detailList[0];
             mDataMap[code].mName = detailList[1];
             mDataMap[code].mOpen = detailList[2].toDouble();
@@ -142,13 +163,41 @@ void QSinaStkInfoThread::RealtimeInfo()
             }
             mDataMap[code].mForeignCap = mDataMap[code].mForeignVol * mDataMap[code].mCur ;
             mDataMap[code].mForeignCapChg = mDataMap[code].mForeignVolChg * mDataMap[code].mCur ;
+#else
+            StockData data;
+            data.mCode = detailList[0];
+            data.mName = detailList[1];
+            data.mOpen = detailList[2].toDouble();
+            data.mLastClose = detailList[3].toDouble();
+            data.mCur = detailList[4].toDouble();
+            data.mHigh = detailList[5].toDouble();
+            data.mLow = detailList[6].toDouble();
+            data.mVol = detailList[9].toInt();
+            data.mMoney = detailList[10].toDouble() / 10000;
+            int hour = QDateTime::currentDateTime().time().hour();
+            int min = QDateTime::currentDateTime().time().minute();
+            if( hour == 9){
+                if(min>=15 && min<=25){
+                    data.mCur = detailList[12].toDouble();
+                }
+            }
+            data.mChg = data.mCur - data.mLastClose;
+            data.mChgPercent = data.mChg *100 / data.mLastClose;
+            datalist.append(data);
+
+#endif
         }
+#if 0
         emit sendStkDataList(mDataMap.values());
+#else
+        emit sendStkDataList(datalist);
+#endif
         QDateTime cur = QDateTime::currentDateTime();
-        if(cur.date().day() == 6 || cur.date().day() == 7 ||
-                cur.time().hour() <= 9 || cur.time().hour() >= 15)
+        if(cur.date().dayOfWeek() == 6 || cur.date().dayOfWeek() == 7 ||
+                cur.time().hour() < 9 || cur.time().hour() >= 15)
         {
-            break;
+            qDebug()<<"??????????????????????????";
+            isContinue = false;
         }
         QThread::sleep(3);
     }

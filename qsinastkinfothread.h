@@ -34,7 +34,7 @@ private:
     int         mSortRule;
     int         mOptType;
     QStringList mStkList;
-    QMap<QString, StockData>    mDataMap;
+    //QMap<QString, StockData>    mDataMap;
     //bool        mActive;
 };
 
