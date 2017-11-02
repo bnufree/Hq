@@ -2,18 +2,22 @@
 #include <QDebug>
 #include <QDateTime>
 #include <QRegularExpression>
-#include "qhttpget.h"
 #include <QFile>
 
 #define         STOCK_CODE_FILE             "data/stock.data"
-QEastMonyStockCodesThread::QEastMonyStockCodesThread(QObject *parent) : QThread(parent)
+QEastMonyStockCodesThread::QEastMonyStockCodesThread(QObject *parent) : QObject(parent)
 {
-
+    mHttp = 0;
+    connect(this, SIGNAL(start()), this, SLOT(run()));
+    this->moveToThread(&mThread);
+    mThread.start();
 }
 
 QEastMonyStockCodesThread::~QEastMonyStockCodesThread()
 {
-
+    if(mHttp) mHttp->deleteLater();
+    mThread.quit();
+    mThread.deleteLater();
 }
 
 bool QEastMonyStockCodesThread::writeCodes(const QStringList &codes)
@@ -86,27 +90,31 @@ void QEastMonyStockCodesThread::run()
     t.start();
 
     QStringList list;
-    if(!getCodesFromFile(list))
+    if(getCodesFromFile(list))
     {
-        list.clear();
-        //开始解析数据
-        QByteArray bytes = QHttpGet::getContentOfURL(QString("http://quote.eastmoney.com/stocklist.html"));
-        qDebug()<<"total time cost:"<<t.elapsed();
-        t.start();
-        QString result = QString::fromUtf8(bytes.data());
-        int index = 0;
-        while((index = result.indexOf(QRegularExpression(tr("s[hz](60[013][0-9]{3}|300[0-9]{3}|00[012][0-9]{3})")), index)) >= 0)
-        {
-            QString code = result.mid(index, 8);
-            //qDebug()<<code;
-            if(!list.contains(code)) list.append(code);
-            index = index+8;
-        }
-
-        writeCodes(list);
+        emit signalSendCodesList(list);
+        return;
     }
-    //qDebug()<<"stock codes list:"<<list.length()<<" "<<list.mid(0, 100);
+
+    mHttp = new QHttpGet(QString("http://quote.eastmoney.com/stocklist.html"));
+    connect(mHttp, SIGNAL(signalSendHttpConent(QByteArray)), this, SLOT(slotRecvHttpContent(QByteArray)));
+    mHttp->startGet();
+}
+
+void QEastMonyStockCodesThread::slotRecvHttpContent(const QByteArray &bytes)
+{
+    QStringList list;
+    QString result = QString::fromUtf8(bytes.data());
+    int index = 0;
+    while((index = result.indexOf(QRegularExpression(tr("s[hz](60[013][0-9]{3}|300[0-9]{3}|00[012][0-9]{3})")), index)) >= 0)
+    {
+        QString code = result.mid(index, 8);
+        //qDebug()<<code;
+        if(!list.contains(code)) list.append(code);
+        index = index+8;
+    }
+
+    writeCodes(list);
     emit signalSendCodesList(list);
-    qDebug()<<"total time cost:"<<t.elapsed();
 }
 

@@ -2,8 +2,9 @@
 #define QEASTMONYSTOCKCODESTHREAD_H
 
 #include <QThread>
+#include "qhttpget.h"
 
-class QEastMonyStockCodesThread : public QThread
+class QEastMonyStockCodesThread : public QObject
 {
     Q_OBJECT
 public:
@@ -11,14 +12,19 @@ public:
     ~QEastMonyStockCodesThread();
 
 protected:
-    void run();
     bool getCodesFromFile(QStringList& codes);
     bool writeCodes(const QStringList& codes);
 
 signals:
+    void start();
     void signalSendCodesList(const QStringList& list);
 
 public slots:
+    void run();
+    void slotRecvHttpContent(const QByteArray& bytes);
+private:
+    QHttpGet    *mHttp;
+    QThread     mThread;
 };
 
 #endif // QEASTMONYSTOCKCODESTHREAD_H

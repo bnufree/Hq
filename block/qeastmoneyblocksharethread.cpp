@@ -15,6 +15,7 @@ QEastMoneyBlockShareThread::~QEastMoneyBlockShareThread()
 
 void QEastMoneyBlockShareThread::run()
 {
+#if 0
     QStringList     sharecodeslist;
     QString wkURL = QString("http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&cmd=C.BK0wkcode1&sty=FCOIATA&sortType=C&sortRule=-1&page=1&pageSize=1000&js=var%20quote_123%3d{rank:[(x)],pages:(pc)}&token=7bc05d0d4c3c22ef9fca8c2a912d779c&jsName=quote_123&_g=0.5186116359042079");
     wkURL.replace("wkcode", mBlockCode.right(3));
@@ -34,5 +35,6 @@ void QEastMoneyBlockShareThread::run()
     }
 
     emit signalUpdateBlockShareCodeList(mBlockCode, sharecodeslist);
+#endif
 }
 

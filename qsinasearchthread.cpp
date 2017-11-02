@@ -5,6 +5,8 @@
 
 QSinaSearchThread::QSinaSearchThread(QObject *parent) : QObject(parent)
 {
+    mHttp = new QHttpGet;
+    connect(mHttp, SIGNAL(signalSendHttpConent(QByteArray)), this, SLOT(slotRecvHttpContent(QByteArray)));
     connect(this ,SIGNAL(signalSetSearchString(QString)), this, SLOT(slotRecvSearchString(QString)));
     moveToThread(&mWorkThread);
     mWorkThread.start();
@@ -13,16 +15,16 @@ QSinaSearchThread::QSinaSearchThread(QObject *parent) : QObject(parent)
 QSinaSearchThread::~QSinaSearchThread()
 {
     qDebug()<<__FUNCTION__<<__LINE__;
-
+    if(mHttp)
+    {
+        mHttp->deleteLater();
+    }
+    mWorkThread.quit();
+    mWorkThread.wait();
 }
 
-void QSinaSearchThread::slotRecvSearchString(const QString& text)
+void QSinaSearchThread::slotRecvHttpContent(const QByteArray &bytes)
 {
-    QString wkURL = QString("http://suggest3.sinajs.cn/suggest/type=11&key=%1&name=suggestdata_%2")
-            .arg(text)
-            .arg(QDateTime::currentDateTime().toMSecsSinceEpoch());
-
-    QByteArray bytes = QHttpGet::getContentOfURL(wkURL);
     QString result = QString::fromLocal8Bit(bytes.data());
     //qDebug()<<"result:"<<result;
     int start = 0;
@@ -36,4 +38,13 @@ void QSinaSearchThread::slotRecvSearchString(const QString& text)
     }
     //qDebug()<<"search result:"<<resultlist;
     emit sendSearchResult(resultlist);
+}
+
+void QSinaSearchThread::slotRecvSearchString(const QString& text)
+{
+    QString wkURL = QString("http://suggest3.sinajs.cn/suggest/type=11&key=%1&name=suggestdata_%2")
+            .arg(text)
+            .arg(QDateTime::currentDateTime().toMSecsSinceEpoch());
+    mHttp->setUrl(wkURL);
+    mHttp->startGet();
 }

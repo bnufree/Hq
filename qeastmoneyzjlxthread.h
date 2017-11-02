@@ -3,20 +3,22 @@
 
 #include <QThread>
 #include "stockdata.h"
+#include "qhttpget.h"
 
 
-class QEastMoneyZjlxThread : public QThread
+class QEastMoneyZjlxThread : public QObject
 {
     Q_OBJECT
 public:
     explicit QEastMoneyZjlxThread(QObject *parent = 0);
     ~QEastMoneyZjlxThread();
-protected:
-    void run();
-
 signals:
     void sendZjlxDataList(const QList<zjlxData>& zjlxDataList);
 public slots:
+    void slotRecvHttpContent(const QByteArray& bytes);
+private:
+    QThread     mWorkThread;
+    QHttpGet    *mHttp;
 
 };
 
