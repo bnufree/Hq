@@ -83,6 +83,7 @@ void QSinaStkInfoThread::RealtimeInfo()
     while(true)
     {
         if(mStkList.length() == 0) continue;
+#if 0
         if(!isContinue)
         {
             QDateTime now = QDateTime::currentDateTime();
@@ -97,10 +98,12 @@ void QSinaStkInfoThread::RealtimeInfo()
                 isContinue = true;
             }
         }
-
+#endif
         QString wkURL = url.arg(mStkList.join(","));
         //开始解析数据
         QByteArray bytes = QHttpGet::getContentOfURL(wkURL);
+        QThread::sleep(3);
+        continue;
         QString result = QString::fromLocal8Bit(bytes.data());
         //先换行
         QStringList resultlist = result.split(QRegExp("[\\n|;]"), QString::SkipEmptyParts);
@@ -192,6 +195,7 @@ void QSinaStkInfoThread::RealtimeInfo()
 #else
         emit sendStkDataList(datalist);
 #endif
+#if 0
         QDateTime cur = QDateTime::currentDateTime();
         if(cur.date().dayOfWeek() == 6 || cur.date().dayOfWeek() == 7 ||
                 cur.time().hour() < 9 || cur.time().hour() >= 15)
@@ -199,6 +203,7 @@ void QSinaStkInfoThread::RealtimeInfo()
             qDebug()<<"??????????????????????????";
             isContinue = false;
         }
+#endif
         QThread::sleep(3);
     }
 

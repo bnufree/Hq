@@ -49,7 +49,7 @@ QByteArray QHttpGet::getContentOfURL(const QString& url)
     if(file.open())
     {
         res = file.readAll();
-        //file.close();
+        file.close();
     }
 
     return res;
