@@ -1,58 +1,70 @@
 #include "qhttpget.h"
-#include <QNetworkAccessManager>
-#include <QEventLoop>
-#include <QNetworkReply>
 #include <QDebug>
-#include <QThread>
-#include <QTime>
-#include "webfile/webfile.h"
 
-QHttpGet::QHttpGet(const QString& url, QObject *parent) : QObject(parent)
+QHttpGet::QHttpGet(const QString& url, bool sequential, QObject *parent) :
+    QObject(parent),mMgr(0), mUrl(url), mReply(0), mIsSequential(sequential), mUpdateTimer(0)
 {
-    mUrl = url;
+    mMgr = new QNetworkAccessManager;
+    mInertVal = 3;
 }
 
 QHttpGet::~QHttpGet()
 {
+    if(mUpdateTimer)
+    {
+        mUpdateTimer->stop();
+        mUpdateTimer->deleteLater();
+    }
+    if(mMgr) delete mMgr;
 
 }
 
-QByteArray QHttpGet::getContent(const QString &url)
+void QHttpGet::startGet()
 {
-    QString wkURL = url.length() != 0 ? url : mUrl;
-    if(wkURL.length() == 0) return QByteArray();
-
-    QNetworkAccessManager *mgr = new QNetworkAccessManager;
-    QNetworkReply *reply = mgr->get(QNetworkRequest(wkURL));
-    if(!reply)
+    if(mIsSequential)
     {
-        delete mgr;
-        return QByteArray();
+        mUpdateTimer = new QTimer;
+        mUpdateTimer->setInterval(mInertVal * 1000);
+        connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdateHttp()));
+        mUpdateTimer->start();
+    } else
+    {
+        slotUpdateHttp();
     }
-    QEventLoop loop; // 使用事件循环使得网络通讯同步进行
-    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-    loop.exec(); // 进入事件循环， 直到reply的finished()信号发出， 这个语句才能退出
-    if(reply->error()) return QByteArray();;
-
-    //开始解析数据
-    QByteArray res = reply->readAll();
-    reply->deleteLater();
-    mgr->deleteLater();
-    return res;
 }
 
-QByteArray QHttpGet::getContentOfURL(const QString& url)
+void QHttpGet::setUpdateInterval(int secs)
 {
-    if(url.length() == 0) return QByteArray();
-    webfile file(url);
-    QByteArray res;
-    if(file.open())
+    mInertVal = secs;
+    if(mUpdateTimer)
     {
-        res = file.readAll();
-        file.close();
+        mUpdateTimer->setInterval(mInertVal * 1000);
     }
+}
 
-    return res;
+void QHttpGet::slotUpdateHttp()
+{
+    if(mUrl.length() == 0) return;
+    mReply = mMgr->get(QNetworkRequest(mUrl));
+    connect(mReply, SIGNAL(finished()), this, SLOT(slotReadHttpContent()));
+    connect(mReply, SIGNAL(readyRead()), this, SLOT(slotStartReadHttpContent()));
+    connect(mReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SIGNAL(signalErrorOccured(QNetworkReply::NetworkError)));
+}
+
+void QHttpGet::setUrl(const QString &url)
+{
+    mUrl = url;
+}
+
+void QHttpGet::slotStartReadHttpContent()
+{
+}
+
+void QHttpGet::slotReadHttpContent()
+{
+    if(!mReply) return;
+    emit signalSendHttpConent(mReply->readAll());
+    mReply->deleteLater();
 }
 
 

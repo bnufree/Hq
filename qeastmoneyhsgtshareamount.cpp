@@ -15,6 +15,7 @@ QEastMoneyHSGTShareAmount::QEastMoneyHSGTShareAmount(QObject *parent) : QThread(
 
 void QEastMoneyHSGTShareAmount::run()
 {
+#if 0
     QDate date = DATA_SERVICE->getLastUpdateDateOfHSGTVol();
     qDebug()<<"last date:"<<date;
     date = date.addDays(1);
@@ -56,6 +57,7 @@ void QEastMoneyHSGTShareAmount::run()
 
     //emit DATA_SERVICE->signalAddShareAmoutByForeigner(list);
     }
+#endif
 
     return;
 }

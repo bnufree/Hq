@@ -20,6 +20,7 @@ QEastMoneyChinaShareExchange::~QEastMoneyChinaShareExchange()
 
 void QEastMoneyChinaShareExchange::getHGTTop10Share(QList<ChinaShareExchange>& list, const QDate& date)
 {
+#if 0
     QString url = tr("http://dcfm.eastmoney.com//EM_MutiSvcExpandInterface/api/js/get?type=HSGTCJB&"
                      "token=70f12f2f4f091e459a279469fe49eca5&filter=(DetailDate=^%1^)&js=(x)&sr=1&st=Rank&rt=50014200")
             .arg(date.toString("yyyy-MM-dd"));
@@ -54,6 +55,7 @@ void QEastMoneyChinaShareExchange::getHGTTop10Share(QList<ChinaShareExchange>& l
 
         list.append(data);
     }
+#endif
 
     return;
 

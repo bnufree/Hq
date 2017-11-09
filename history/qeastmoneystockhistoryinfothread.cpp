@@ -23,6 +23,7 @@ QEastmoneyStockHistoryInfoThread::~QEastmoneyStockHistoryInfoThread()
 
 void QEastmoneyStockHistoryInfoThread::run()
 {
+#if 0
     //QDate lastDate = DATA_SERVICE->getLastUpdateDateOfShareHistory(mCode);
     //检查是否需要更新
     QDate start = mDate.addDays(1);
@@ -77,6 +78,7 @@ void QEastmoneyStockHistoryInfoThread::run()
 
     //查询数据库更新历史信息
     emit DATA_SERVICE->signalUpdateStkBaseinfoWithHistory(mCode.right(6));
+#endif
 
 }
 

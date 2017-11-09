@@ -146,7 +146,7 @@ Dialog::Dialog(QWidget *parent) :
 #endif
    QEastMonyStockCodesThread *codesThread = new QEastMonyStockCodesThread;
    connect(codesThread, SIGNAL(signalSendCodesList(QStringList)), this, SLOT(slotUpdateStockCodesList(QStringList)));
-   connect(codesThread, SIGNAL(finished()), codesThread, SLOT(deleteLater()));
+//   connect(codesThread, SIGNAL(finished()), codesThread, SLOT(deleteLater()));
    codesThread->start();
     //创建快捷事件
     QShortcut *shotcut = new QShortcut(QKeySequence("Alt+X"), this);  //隐藏
@@ -1045,6 +1045,7 @@ void Dialog::on_blocktbl_itemClicked(QTableWidgetItem *item)
 
 void Dialog::slotUpdateStockCodesList(const QStringList &list)
 {
+    qDebug()<<"update code finshed:"<<list.length();
     mAllStkList = list;
 #if 0
     //更新指数
@@ -1052,12 +1053,11 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
     ui->verticalLayout->insertWidget(0, indexw);
     QStringList indexlist;
     indexlist<<"sh000001"<<"sh000300"<<"sz399001"/*<<"sh000043"*/<<"sz399006"<<"sh000016"<<"sh000010";
-    mIndexThread = new QSinaStkInfoThread(this);
+    mIndexThread = new QSinaStkInfoThread(0);
     connect(mIndexThread, SIGNAL(sendStkDataList(StockDataList)), indexw, SLOT(updateData(StockDataList)));
     connect(mIndexThread, SIGNAL(finished()), mIndexThread, SLOT(deleteLater()));
-    mIndexThread->setStkList(indexlist);
-    mIndexThread->start();
-    QEastmoneyNorthBoundThread *north = new QEastmoneyNorthBoundThread(this);
+    mIndexThread->signalSetStkList(indexlist);
+    QEastmoneyNorthBoundThread *north = new QEastmoneyNorthBoundThread();
     connect(north, SIGNAL(signalUpdateNorthBoundList(StockDataList)), indexw, SLOT(updateData(StockDataList)));
     connect(north, SIGNAL(finished()), north, SLOT(deleteLater()));
     north->start();
@@ -1068,6 +1068,7 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
     mHSFoundsList = Profiles::instance()->value(STK_HSJJ_SEC, STK_ZXG_NAME).toStringList();
     mMergeThread = new QSinaStkResultMergeThread();
     connect(mMergeThread, SIGNAL(sendStkDataList(StockDataList)), this, SLOT(updateHqTable(StockDataList)));
+    connect(ui->hqtbl, SIGNAL(signalSetStockMarket(int)), mMergeThread, SLOT(setMktType(int)));
     mMergeThread->setStkList(mAllStkList);
     mMergeThread->setSelfCodesList(mFavStkList);
     mMergeThread->setActive(true);
@@ -1125,7 +1126,7 @@ void Dialog::slotHistoryDataFinish()
     mIndexThread = new QSinaStkInfoThread(this);
     connect(mIndexThread, SIGNAL(sendStkDataList(StockDataList)), indexw, SLOT(updateData(StockDataList)));
     mIndexThread->setStkList(indexlist);
-    mIndexThread->start();
+    //mIndexThread->start();
     QEastmoneyNorthBoundThread *north = new QEastmoneyNorthBoundThread(this);
     connect(north, SIGNAL(signalUpdateNorthBoundList(StockDataList)), indexw, SLOT(updateData(StockDataList)));
     north->start();

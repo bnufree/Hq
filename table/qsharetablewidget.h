@@ -30,6 +30,7 @@ public slots:
     void    slotCellDoubleClicked(int row, int col);
 private:
     QMap<QString, double>   mStockMap;
+    QList<QAction*>         mCodesActionList;
 };
 
 #endif // QSHARETABLEWIDGET_H

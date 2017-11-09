@@ -2,6 +2,7 @@
 #define QSINASEARCHTHREAD_H
 
 #include <QThread>
+#include "qhttpget.h"
 
 class QSinaSearchThread : public QObject
 {
@@ -11,6 +12,7 @@ public:
     ~QSinaSearchThread();
 private slots:
     void slotRecvSearchString(const QString& text);
+    void slotRecvHttpContent(const QByteArray& bytes);
 
 signals:
     void sendSearchResult(const QStringList& list);
@@ -19,6 +21,7 @@ public slots:
 
 private:
     QThread mWorkThread;
+    QHttpGet    *mHttp;
 };
 
 #endif // QSINASEARCHTHREAD_H

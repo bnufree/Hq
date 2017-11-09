@@ -20,7 +20,7 @@ public:
     void prepareUpdateTable(int newRowCount);
     void removeRows(int start, int count);
     void initPageCtrlMenu();
-    void insertContextMenu(QMenu* menu);
+    QAction* insertContextMenu(QMenu* menu);
     void insertContextMenu(QAction *act);
 private slots:
 

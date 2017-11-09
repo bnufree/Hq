@@ -62,6 +62,7 @@ void QEastMoneyBlockThread::reverseSortRule()
 
 void QEastMoneyBlockThread::slotUpdateBlockInfos()
 {
+#if 0
     QString url("http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&cmd=C._BK%1&sty=FCCS&st=c&p=1&ps=100&cb=&token=d0075ac6916d4aa6ec8495db9efe7ede&bklb=%2&jsName=BKtrade&sr=%3&dt=%4");
 
     QString wkURL = url.arg(blockthread[mWebBlockType]).arg(mWebBlockType).arg(mSortRule).arg(QDateTime::currentDateTime().toMSecsSinceEpoch());
@@ -93,7 +94,7 @@ void QEastMoneyBlockThread::slotUpdateBlockInfos()
     }
     //qDebug()<<__FUNCTION__<<__LINE__<<mBlockDataList.values().length();
     emit sendBlockDataList(list);
-
+#endif
     return;
 }
 
@@ -129,6 +130,7 @@ void QEastMoneyBlockThread::stop()
 
 void QEastMoneyBlockThread::slotUpdateBlockShare()
 {
+#if 0
     QString url("http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&cmd=C._BK%1&sty=FCCS&st=c&p=1&ps=100&cb=&js=var%20BKtrade%20={Trade:[[(x)]]}&token=d0075ac6916d4aa6ec8495db9efe7ede&bklb=%2&jsName=BKtrade&sr=%3&dt=%4");
     QString wkURL = url.arg(blockthread[mWebBlockType]).arg(mWebBlockType).arg(mSortRule).arg(QDateTime::currentDateTime().toMSecsSinceEpoch());
 
@@ -153,6 +155,7 @@ void QEastMoneyBlockThread::slotUpdateBlockShare()
         connect(thread, SIGNAL(finished()), this, SLOT(slotBlockShareThreadFinished()));
         thread->start();
     }
+#endif
 
 }
 
