@@ -17,8 +17,10 @@ QSinaStkResultMergeThread::QSinaStkResultMergeThread(QObject *parent) : QThread(
     mSortType = STK_DISPLAY_SORT_TYPE_CHGPER;
     mSortRule = -1;
     mActive = true;
+#if 0
     QEastMoneyZjlxThread *zjt = new QEastMoneyZjlxThread(this);
     connect(zjt, SIGNAL(sendZjlxDataList(QList<zjlxData>)), this, SLOT(slotRevZjlxData(QList<zjlxData>)));
+#endif
 }
 
 QSinaStkResultMergeThread::~QSinaStkResultMergeThread()
@@ -62,7 +64,7 @@ void QSinaStkResultMergeThread::run()
         if(mThreadList.length() == 0)
         {
             //还没有初始化行情线程
-            int thread_code = 80;
+            int thread_code = 200;
             int nthread = (mStkCodesList.length() + thread_code-1 ) / thread_code;
             for(int i=0; i<nthread; i++)
             {
@@ -340,9 +342,9 @@ void QSinaStkResultMergeThread::updateStkInfoList(const QList<QStringList>& pStk
 
 }
 
-void QSinaStkResultMergeThread::setMktType(MKT_TYPE type)
+void QSinaStkResultMergeThread::setMktType(int type)
 {
-    mMktType = type;
+    mMktType = (MKT_TYPE)type;
     mCurPage = 1;
     //updateStkCodes(mMktType);
 }

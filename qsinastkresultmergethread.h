@@ -35,7 +35,7 @@ protected:
 public slots:
     void        setStkList(const QStringList& list);
     void        stopUpdate();
-    void        setMktType(MKT_TYPE type);
+    void        setMktType(int type);
     void        setSortType(int type);
     void        setActive(bool active);
     void        setSelfCodesList(const QStringList& list );

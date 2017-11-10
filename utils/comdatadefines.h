@@ -71,13 +71,20 @@ typedef enum Share_Detail_Info
 struct  struMenu{
     QString     mDisplayText;
     QVariant    mCmd;
+    QVariant    mKey;
 
     struMenu(const QString& text, QVariant val)
     {
         mDisplayText = text;
         mCmd = val;
     }
+    struMenu()
+    {
+        mDisplayText = "";
+    }
 };
+
+Q_DECLARE_METATYPE(struMenu)
 
 typedef struct struTableColData
 {

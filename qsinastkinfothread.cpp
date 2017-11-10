@@ -115,7 +115,7 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
             }
         }
         if(mDataMap[code].mCur == 0)
-        {
+{
             mDataMap[code].mCur = mDataMap[code].mLastClose;
         }
         if(mDataMap[code].mCur != 0)

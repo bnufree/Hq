@@ -1047,6 +1047,7 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
 {
     qDebug()<<"update code finshed:"<<list.length();
     mAllStkList = list;
+#if 0
     //更新指数
     QIndexWidget *indexw = new QIndexWidget(this);
     ui->verticalLayout->insertWidget(0, indexw);
@@ -1060,12 +1061,14 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
     connect(north, SIGNAL(signalUpdateNorthBoundList(StockDataList)), indexw, SLOT(updateData(StockDataList)));
     connect(north, SIGNAL(finished()), north, SLOT(deleteLater()));
     north->start();
+#endif
     //行情中心初始化开始为自选股
     //读取自选
     if(mFavStkList.length() == 0) mFavStkList = Profiles::instance()->value(STK_ZXG_SEC, STK_ZXG_NAME).toStringList();
     mHSFoundsList = Profiles::instance()->value(STK_HSJJ_SEC, STK_ZXG_NAME).toStringList();
     mMergeThread = new QSinaStkResultMergeThread();
     connect(mMergeThread, SIGNAL(sendStkDataList(StockDataList)), this, SLOT(updateHqTable(StockDataList)));
+    connect(ui->hqtbl, SIGNAL(signalSetStockMarket(int)), mMergeThread, SLOT(setMktType(int)));
     mMergeThread->setStkList(mAllStkList);
     mMergeThread->setSelfCodesList(mFavStkList);
     mMergeThread->setActive(true);

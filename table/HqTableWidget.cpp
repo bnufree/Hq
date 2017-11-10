@@ -159,11 +159,11 @@ void HqTableWidget::initPageCtrlMenu()
     insertContextMenu(menu);
 }
 
-void HqTableWidget::insertContextMenu(QMenu *menu)
+QAction* HqTableWidget::insertContextMenu(QMenu *menu)
 {
-    if(!menu) return;
+    if(!menu) return 0;
     if(!mCustomContextMenu) mCustomContextMenu = new QMenu(this);
-    mCustomContextMenu->addMenu(menu);
+    return mCustomContextMenu->addMenu(menu);
 }
 
 void HqTableWidget::insertContextMenu(QAction *act)

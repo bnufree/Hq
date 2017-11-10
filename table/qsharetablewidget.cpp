@@ -134,13 +134,8 @@ void QShareTablewidget::initMenu()
 
 void QShareTablewidget::slotCustomContextMenuRequested(const QPoint &pos)
 {
-    //自选股编辑
-    QTableWidgetItem *table_item = this->itemAt(pos);
-    qDebug()<<"item:"<<table_item;
-    if(table_item)
+    if(mCodesActionList.length() == 0)
     {
-        table_item = this->item(table_item->row(), 0);
-        QString stkCode = table_item->data(Qt::UserRole).toString();
         QList<struMenu> itemlist;
         itemlist.append(struMenu(QStringLiteral("分时图"), INFO_MINUTE_GRAPH));
         itemlist.append(struMenu(QStringLiteral("日线图"), INFO_K_GRAPH));
@@ -148,24 +143,14 @@ void QShareTablewidget::slotCustomContextMenuRequested(const QPoint &pos)
         itemlist.append(struMenu(QStringLiteral("所属板块"), INFO_BLOCK_LIST));
 
         foreach (struMenu menu_item, itemlist) {
+            QAction *act = 0;
             if(menu_item.mCmd == INFO_BLOCK_LIST)
             {
-                QMenu *submenu = new QMenu(menu_item.mDisplayText, this);
-                QList<BlockData*> blocklist = table_item->data(Qt::UserRole+1).value<QList<BlockData*>>();
-                //qDebug()<<"blocklist:"<<blocklist<<" code:"<<item->data(Qt::UserRole).toString();
-                foreach (BlockData* block, blocklist) {
-                    QAction *act = new QAction(this);
-                    act->setText(QString("%1:%2%").arg(block->mName).arg(block->mChangePer));
-                    act->setData(block->mShareCodeList);
-                    connect(act, &QAction::triggered, this, &QShareTablewidget::setDisplayBlockDetail);
-                    submenu->addAction(act);
-                }
-                insertContextMenu(submenu);
+                act = insertContextMenu(new QMenu(menu_item.mDisplayText, this));
             } else
             {
                 QAction *act = new QAction(this);
                 act->setText(menu_item.mDisplayText);
-                act->setData(stkCode);
                 if(menu_item.mCmd == INFO_MINUTE_GRAPH)
                 {
                     connect(act, &QAction::triggered, this, &QShareTablewidget::setDisplayMinuteGraph);
@@ -179,8 +164,44 @@ void QShareTablewidget::slotCustomContextMenuRequested(const QPoint &pos)
 
                 insertContextMenu(act);
             }
+            act->setData(QVariant::fromValue(menu_item));
+            mCodesActionList.append(act);
         }
 
+    }
+    //自选股编辑
+    QTableWidgetItem *table_item = this->itemAt(pos);
+    qDebug()<<"item:"<<table_item;
+    if(table_item)
+    {
+        table_item = this->item(table_item->row(), 0);
+        QString stkCode = table_item->data(Qt::UserRole).toString();
+        foreach (QAction* act, mCodesActionList) {
+            struMenu menu_item = act->data().value<struMenu>();
+            if(menu_item.mCmd == INFO_BLOCK_LIST)
+            {
+                QMenu *wk = act->menu();
+                wk->clear();
+                QList<BlockData*> blocklist = table_item->data(Qt::UserRole+1).value<QList<BlockData*>>();
+                //qDebug()<<"blocklist:"<<blocklist<<" code:"<<item->data(Qt::UserRole).toString();
+                foreach (BlockData* block, blocklist) {
+                    QAction *act = new QAction(this);
+                    act->setText(QString("%1:%2%").arg(block->mName).arg(block->mChangePer));
+                    act->setData(block->mShareCodeList);
+                    connect(act, &QAction::triggered, this, &QShareTablewidget::setDisplayBlockDetail);
+                    wk->addAction(act);
+                }
+            } else
+            {
+                menu_item.mKey.setValue(stkCode);
+            }
+        }
+
+    } else
+    {
+        foreach (QAction* act, mCodesActionList) {
+            act->setVisible(false);
+        }
     }
 
     HqTableWidget::slotCustomContextMenuRequested(pos);
