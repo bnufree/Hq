@@ -1,4 +1,4 @@
-#ifndef HQDBDATABASE_H
+﻿#ifndef HQDBDATABASE_H
 #define HQDBDATABASE_H
 
 #include <QObject>

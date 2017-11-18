@@ -1,4 +1,4 @@
-#include <QDebug>
+﻿#include <QDebug>
 #include <QSharedPointer>
 #include <QSqlError>
 #include <QDir>
@@ -539,9 +539,17 @@ void HqInfoService::slotUpdateHistoryChange(const QString &code)
 
 }
 
-StockData& HqInfoService::getBasicStkData(const QString &code)
+StockData* HqInfoService::getBasicStkData(const QString &code)
 {
-    return mBasicStkInfo[code.right(6)];
+    if(!mBasicStkInfo.contains(code))
+    {
+        StockData *data = new StockData;
+        data->mCode = code;
+        mBasicStkInfo[code] = data;
+    }
+
+    return mBasicStkInfo[code];
+
 }
 
 double HqInfoService::GetMultiDaysChangePercent(const QString &table, int days)

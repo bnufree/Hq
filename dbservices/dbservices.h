@@ -18,7 +18,7 @@ protected:
 public:
     friend class CGarbo;
     static HqInfoService* instance();
-    StockData& getBasicStkData(const QString& code);
+    StockData* getBasicStkData(const QString& code);
     double getProfit(const QString& code);
     foreignHolder amountForeigner(const QString& code);
     QStringList  getExchangeCodeList();
@@ -114,7 +114,7 @@ private:    //本类使用的变量
     QThread             m_threadWork;       //工作线程
     QMap<int, BlockRealInfo>    mBlockInfo;
     QStringList                 mNotExchangeDaysList;
-    QMap<QString, StockData>    mBasicStkInfo;
+    QMap<QString, StockData*>    mBasicStkInfo;
     QDate                       mLast3DaysDate;
     QDate                       mLast5DaysDate;
     QDate                       mLast10DaysDate;
