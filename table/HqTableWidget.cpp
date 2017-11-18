@@ -1,4 +1,4 @@
-#include "HqTableWidget.h"
+﻿#include "HqTableWidget.h"
 #include "utils/comdatadefines.h"
 #include <QHeaderView>
 #include <QAction>
@@ -23,6 +23,7 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),mCustomCont
     connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotCustomContextMenuRequested(QPoint)));
     connect(this, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(slotCellDoubleClicked(int,int)));
     this->horizontalHeader()->setHighlightSections(false);
+    connect(this->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(slotHeaderClicked(int)));
 }
 
 void HqTableWidget::setHeaders(const TableColDataList &list)
@@ -45,6 +46,14 @@ void HqTableWidget::setHeaders(const TableColDataList &list)
     }
 
     insertContextMenu(menu);
+}
+
+void HqTableWidget::slotHeaderClicked(int col)
+{
+    emit signalSetSortType(this->horizontalHeaderItem(col)->data(COL_TYPE_ROLE).toInt());/*
+    int *rule = (int*)(this->horizontalHeaderItem(col)->data(COL_SORT_ROLE).value<void*>());
+    *rule = !(rule);
+    emit signalSetSortRule(*rule);*/
 }
 
 void HqTableWidget::slotSetColDisplay(bool isDisplay)
@@ -179,19 +188,7 @@ void HqTableWidget::slotSetDisplayPage()
     if(!act) return;
 
     int val = act->data().toInt();
-    if(val == FIRST_PAGE)
-    {
-        emit signalDisplayFirstPage();
-    } else if(val == PRE_PAGE)
-    {
-        emit signalDisplayPreviousPage();
-    } else if(val == NEXT_PAGE)
-    {
-        emit signalDisplayNextPage();
-    } else if(val == END_PAGE)
-    {
-        emit signalDisplayEndPage();
-    }
+    emit signalDisplayPage(val);
 
 }
 

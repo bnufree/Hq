@@ -1,4 +1,4 @@
-#ifndef QSINASTKRESULTMERGETHREAD_H
+﻿#ifndef QSINASTKRESULTMERGETHREAD_H
 #define QSINASTKRESULTMERGETHREAD_H
 
 #include <QThread>
@@ -39,10 +39,11 @@ public slots:
     void        setSortType(int type);
     void        setActive(bool active);
     void        setSelfCodesList(const QStringList& list );
+    void        setDisplayPage(int val);
 private slots:
     void        updateStkCodes(MKT_TYPE type);
     void        updateStkInfoList(const QList<QStringList>& pStkSectionList);
-    StockDataList   RealtimeInfo(const QStringList& codes);
+    //StockDataList   RealtimeInfo(const QStringList& codes);
     void            SortResultList(StockDataList& result, const StockDataList& mid);
     void         slotRevResList(const StockDataList& mid);
     void         slotRevZjlxData(const QList<zjlxData>& zjlist);

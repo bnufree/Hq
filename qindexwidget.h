@@ -1,4 +1,4 @@
-#ifndef QINDEXWIDGET_H
+﻿#ifndef QINDEXWIDGET_H
 #define QINDEXWIDGET_H
 
 #include <QWidget>
@@ -18,6 +18,7 @@ signals:
 
 public slots:
     void updateData(const StockDataList& list);
+    void insetWidget(const QString& code);
 
 private:
     QMap<QString, QIndexFrame*> mIndexWidgetMap;

@@ -14,7 +14,7 @@ struct zjlxData{
 class StockBaseData
 {
 public:
-    StockData()
+    StockBaseData()
     {
         mName = "";
         mCode = "";
@@ -57,6 +57,7 @@ public:
     double          mHSGT;
     bool            mHSGTEstimateFlag;
     bool            mIsFavCode;
+    QTime           mUpdateTime;
 };
 
 class StockData : public StockBaseData

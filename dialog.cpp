@@ -8,7 +8,7 @@
 #include "qexchangedatemangagedialog.h"
 #include "qeastmoneyzjlxthread.h"
 #include <QShortcut>
-#include "qthook.h"
+//#include "qthook.h"
 #include <QProcess>
 #include <QDesktopWidget>
 #include <QResizeEvent>
@@ -440,6 +440,11 @@ void Dialog::on_lhbBtn_clicked()
 }
 
 void Dialog::on_closeBtn_clicked()
+{
+    this->hide();
+}
+
+void Dialog::closeEvent(QCloseEvent *event)
 {
     this->hide();
 }
@@ -1047,12 +1052,14 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
 {
     qDebug()<<"update code finshed:"<<list.length();
     mAllStkList = list;
-#if 0
     //更新指数
     QIndexWidget *indexw = new QIndexWidget(this);
     ui->verticalLayout->insertWidget(0, indexw);
     QStringList indexlist;
-    indexlist<<"sh000001"<<"sh000300"<<"sz399001"/*<<"sh000043"*/<<"sz399006"<<"sh000016"<<"sh000010";
+    indexlist<<"s_sh000001"<<"s_sh000300"<<"s_sz399001"<<"s_sz399006"<<"s_sh000016"<<"s_sh000010";
+    foreach (QString code, indexlist) {
+        indexw->insetWidget(code);
+    }
     mIndexThread = new QSinaStkInfoThread(0);
     connect(mIndexThread, SIGNAL(sendStkDataList(StockDataList)), indexw, SLOT(updateData(StockDataList)));
     connect(mIndexThread, SIGNAL(finished()), mIndexThread, SLOT(deleteLater()));
@@ -1061,7 +1068,6 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
     connect(north, SIGNAL(signalUpdateNorthBoundList(StockDataList)), indexw, SLOT(updateData(StockDataList)));
     connect(north, SIGNAL(finished()), north, SLOT(deleteLater()));
     north->start();
-#endif
     //行情中心初始化开始为自选股
     //读取自选
     if(mFavStkList.length() == 0) mFavStkList = Profiles::instance()->value(STK_ZXG_SEC, STK_ZXG_NAME).toStringList();
@@ -1069,6 +1075,8 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
     mMergeThread = new QSinaStkResultMergeThread();
     connect(mMergeThread, SIGNAL(sendStkDataList(StockDataList)), this, SLOT(updateHqTable(StockDataList)));
     connect(ui->hqtbl, SIGNAL(signalSetStockMarket(int)), mMergeThread, SLOT(setMktType(int)));
+    connect(ui->hqtbl, SIGNAL(signalSetSortType(int)), mMergeThread, SLOT(setSortType(int)));
+    connect(ui->hqtbl, SIGNAL(signalDisplayPage(int)), mMergeThread, SLOT(setDisplayPage(int)));
     mMergeThread->setStkList(mAllStkList);
     mMergeThread->setSelfCodesList(mFavStkList);
     mMergeThread->setActive(true);

@@ -1,4 +1,4 @@
-#ifndef DIALOG_H
+﻿#ifndef DIALOG_H
 #define DIALOG_H
 
 #include <QDialog>
@@ -61,6 +61,7 @@ protected:
     void resizeEvent(QResizeEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
+    void closeEvent(QCloseEvent* event);
     //bool eventFilter(QObject *obj, QEvent *event);
     //void keyPressEvent(QKeyEvent *);
 public slots:

@@ -1,4 +1,4 @@
-#ifndef HQTABLEWIDGET_H
+﻿#ifndef HQTABLEWIDGET_H
 #define HQTABLEWIDGET_H
 
 #include <QTableWidget>
@@ -25,10 +25,9 @@ public:
 private slots:
 
 signals:
-    void signalDisplayFirstPage();
-    void signalDisplayPreviousPage();
-    void signalDisplayNextPage();
-    void signalDisplayEndPage();
+    void signalDisplayPage(int val);
+    void signalSetSortType(int type);
+    void signalSetSortRule(int rule);
 
 public slots:
     void slotSetDisplayPage();
@@ -36,6 +35,7 @@ public slots:
     virtual void slotCustomContextMenuRequested(const QPoint& pos);
     virtual void slotCellDoubleClicked(int row, int col);
     void slotCellClicked(int row, int col);
+    void slotHeaderClicked(int col);
 
 private:
     TableColDataList        mColDataList;

@@ -1,8 +1,8 @@
-#include "qexchangerecordworker.h"
-#include <QtXlsx/QtXlsx>
-#include <QtXlsx/xlsxworksheet.h>
-#include <QtXlsx/xlsxworkbook.h>
-#include <QtXlsx/xlsxcellrange.h>
+﻿#include "qexchangerecordworker.h"
+//#include <QtXlsx/QtXlsx>
+//#include <QtXlsx/xlsxworksheet.h>
+//#include <QtXlsx/xlsxworkbook.h>
+//#include <QtXlsx/xlsxcellrange.h>
 #include <QDebug>
 #include <QFile>
 
@@ -15,6 +15,7 @@ QExchangeRecordWorker::QExchangeRecordWorker(QObject *parent) : QObject(parent)
 
 void QExchangeRecordWorker::slotStartImport(const QString &sFilePathName)
 {
+#if 0
     //检查文件是否存在
     if(!QFile::exists(sFilePathName))
     {
@@ -48,6 +49,7 @@ void QExchangeRecordWorker::slotStartImport(const QString &sFilePathName)
     }
     emit signalSendStkProfitList(list);
     emit signalSendCodeList(codelist);
+#endif
     return ;
 
 }

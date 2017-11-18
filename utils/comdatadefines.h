@@ -1,4 +1,4 @@
-#ifndef COMDATADEFINES_H
+﻿#ifndef COMDATADEFINES_H
 #define COMDATADEFINES_H
 
 #include  <QString>
@@ -6,7 +6,7 @@
 
 typedef enum enStockDisplayRule
 {
-    STK_DISPLAY_SORT_RULE_NONE = 0,
+    STK_DISPLAY_SORT_RULE_NONE = -1,
     STK_DISPLAY_SORT_RULE_DESCEND,
     STK_DISPLAY_SORT_RULE_ASCEND
 }STK_DISPLAY_RULE;

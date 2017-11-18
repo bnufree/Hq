@@ -1,4 +1,4 @@
-#include "qindexframe.h"
+﻿#include "qindexframe.h"
 #include "ui_qindexframe.h"
 
 QIndexFrame::QIndexFrame(const QString& name, QWidget *parent) :
@@ -12,6 +12,11 @@ QIndexFrame::QIndexFrame(const QString& name, QWidget *parent) :
 QIndexFrame::~QIndexFrame()
 {
     delete ui;
+}
+
+void QIndexFrame::setName(const QString &name)
+{
+    ui->name->setText(name);
 }
 
 void QIndexFrame::updateVal(double cur, double chg, double chgper)

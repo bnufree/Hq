@@ -1,4 +1,4 @@
-#include "qsharetablewidget.h"
+﻿#include "qsharetablewidget.h"
 #include <QDebug>
 
 QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
@@ -25,6 +25,7 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
     datalist.append(TableColData(QStringLiteral("登记日"), STK_DISPLAY_SORT_TYPE_GQDJR));
     datalist.append(TableColData(QStringLiteral("公告日"), STK_DISPLAY_SORT_TYPE_YAGGR));
     datalist.append(TableColData(QStringLiteral("换手率"), STK_DISPLAY_SORT_TYPE_HSL));
+    datalist.append(TableColData(QStringLiteral("时间"), STK_DISPLAY_SORT_TYPE_NONE));
 
     setHeaders(datalist);
     initMenu();
@@ -83,8 +84,10 @@ void QShareTablewidget::setDataList(const StockDataList &list)
         } else {
             this->setItemText(i, k++, QString("").sprintf("%.0f", data.mForeignCapChg / 10000.0) + QStringLiteral("万"));
         }
+        this->setItemText(i, k++, QString("").sprintf("%.2f",data.mHsl));
         this->setItemText(i, k++, data.mGQDJR.toString("yyyy-MM-dd"));
         this->setItemText(i, k++, data.mYAGGR.toString("yyyy-MM-dd"));
+        this->setItemText(i, k++, data.mUpdateTime.toString("hh:mm:ss"));
         this->updateFavShareIconOfRow(i, data.mIsFavCode);
         this->item(i, 0)->setData(Qt::UserRole, data.mCode);
         this->item(i, 0)->setData(Qt::UserRole+1, QVariant::fromValue(data.mBlockList));
@@ -149,7 +152,7 @@ void QShareTablewidget::slotCustomContextMenuRequested(const QPoint &pos)
                 act = insertContextMenu(new QMenu(menu_item.mDisplayText, this));
             } else
             {
-                QAction *act = new QAction(this);
+                act = new QAction(this);
                 act->setText(menu_item.mDisplayText);
                 if(menu_item.mCmd == INFO_MINUTE_GRAPH)
                 {

@@ -1,4 +1,4 @@
-#include "qblocktablewidget.h"
+﻿#include "qblocktablewidget.h"
 #include <QDebug>
 
 QBlockTableWidget::QBlockTableWidget(QWidget *parent) : HqTableWidget(parent)

@@ -1,4 +1,4 @@
-#include "qindexwidget.h"
+﻿#include "qindexwidget.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QDebug>
@@ -18,14 +18,24 @@ QIndexWidget::~QIndexWidget()
 
 }
 
+void QIndexWidget::insetWidget(const QString &code)
+{
+    StockDataList list;
+    StockData data;
+    data.mCode = code.right(6);
+    list<<data;
+    updateData(list);
+}
+
 void QIndexWidget::updateData(const StockDataList &list)
 {
-    qDebug()<<"sender:"<<sender();
     foreach (StockData data, list) {
+        //qDebug()<<"data:"<<data.mCode<<" "<<data.mName<<" "<<data.mChg<<" "<<data.mChgPercent;
         QIndexFrame* w = NULL;
         if(mIndexWidgetMap.contains(data.mCode))
         {
             w = mIndexWidgetMap[data.mCode];
+            w->setName(data.mName);
         } else
         {
             QHBoxLayout *hlay = 0;

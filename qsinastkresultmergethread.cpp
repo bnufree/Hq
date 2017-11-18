@@ -1,4 +1,4 @@
-#include "qsinastkresultmergethread.h"
+﻿#include "qsinastkresultmergethread.h"
 #include <QtConcurrent>
 #include <QFuture>
 #include "qsinastkinfothread.h"
@@ -121,6 +121,15 @@ void QSinaStkResultMergeThread::run()
                     wklist.append(mMidStkDataMapList.value(key.right(6)));
             }
 
+
+        } else if(mMktType == MKT_JJ)
+        {
+            foreach (QString key, mMidStkDataMapList.keys()) {
+                if(key.left(1) == "5")
+                {
+                    wklist.append(mMidStkDataMapList.value(key));
+                }
+            }
 
         }
         mListMutex.unlock();
@@ -493,10 +502,10 @@ void QSinaStkResultMergeThread::SortResultList(StockDataList &result, const Stoc
 //}
 }
 
-StockDataList QSinaStkResultMergeThread::RealtimeInfo(const QStringList& codes)
-{
+//StockDataList QSinaStkResultMergeThread::RealtimeInfo(const QStringList& codes)
+//{
 
-}
+//}
 
 void QSinaStkResultMergeThread::setSelfCodesList(const QStringList &list)
 {
@@ -547,5 +556,23 @@ void QSinaStkResultMergeThread::setCurPage(int page)
     }
     if(mCurPage <= 0)
         mCurPage = 1;
+}
+
+void QSinaStkResultMergeThread::setDisplayPage(int val)
+{
+    if(val == FIRST_PAGE)
+    {
+        displayFirst();
+    } else if(val == NEXT_PAGE)
+    {
+        displayNext();
+    } else if(val == PRE_PAGE)
+    {
+        displayPrevious();
+    } else if(val == END_PAGE)
+    {
+        displayLast();
+    }
+
 }
 

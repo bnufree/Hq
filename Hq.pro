@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-include(./QtXlsx/QtXlsx.pri)
+#include(./QtXlsx/QtXlsx.pri)
 QT       += core gui network sql concurrent
 
 #DEFINES *= Q_QDOC
@@ -13,7 +13,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = Hq
 TEMPLATE = app
-DESTDIR = ../bin/
+DESTDIR = ../bin2/
 
 SOURCES += main.cpp\
         dialog.cpp \
@@ -40,8 +40,8 @@ SOURCES += main.cpp\
     qeastmoneyhsgtdialog.cpp \
     history/qeastmoneystockhistoryinfothread.cpp \
     history/qsharehistoryinfomgr.cpp \
-    webfile/weberror.cpp \
-    webfile/webfile.cpp \
+#    webfile/weberror.cpp \
+#    webfile/webfile.cpp \
     exchange/qexchangerecordworker.cpp \
     exchange/qexchangefiledlg.cpp \
     qeastmoneyhsgtshareamount.cpp \
@@ -70,7 +70,7 @@ HEADERS  += dialog.h \
     qexchangedatamanage.h \
     qexchangedatemangagedialog.h \
     qglobalapplication.h \
-    qthook.h \
+#    qthook.h \
     dbservices.h \
     qeastmoneychinashareexchange.h \
     qindexframe.h \
@@ -82,9 +82,9 @@ HEADERS  += dialog.h \
     qeastmoneyhsgtdialog.h \
     history/qeastmoneystockhistoryinfothread.h \
     history/qsharehistoryinfomgr.h \
-    webfile/debugout.h \
-    webfile/weberror.h \
-    webfile/webfile.h \
+#    webfile/debugout.h \
+#    webfile/weberror.h \
+#    webfile/webfile.h \
     exchange/qexchangerecordworker.h \
     exchange/qexchangefiledlg.h \
     qeastmoneyhsgtshareamount.h \

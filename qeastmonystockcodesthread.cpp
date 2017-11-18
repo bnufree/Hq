@@ -1,10 +1,11 @@
-#include "qeastmonystockcodesthread.h"
+﻿#include "qeastmonystockcodesthread.h"
 #include <QDebug>
 #include <QDateTime>
 #include <QRegularExpression>
 #include <QFile>
+#include <QDir>
 
-#define         STOCK_CODE_FILE             "data/stock.data"
+#define STOCK_CODE_FILE  "stock.data"
 QEastMonyStockCodesThread::QEastMonyStockCodesThread(QObject *parent) : QObject(parent)
 {
     mHttp = 0;
@@ -36,8 +37,9 @@ bool QEastMonyStockCodesThread::writeCodes(const QStringList &codes)
         }
         fwrite(stks, sizeof(int), codes.length() + 1, fp);
 
+        fclose(fp);
+
     }
-    fclose(fp);
 
     return true;
 }
@@ -65,10 +67,10 @@ bool QEastMonyStockCodesThread::getCodesFromFile(QStringList& codes)
                 file.read((char*)(&code), sizeof(int));
                 if(code > 500000)
                 {
-                    codes.append(QString("").sprintf("sh%06d", code));
+                    codes.append(QString("").sprintf("s_sh%06d", code));
                 } else
                 {
-                    codes.append(QString("").sprintf("sz%06d", code));
+                    codes.append(QString("").sprintf("s_sz%06d", code));
                 }
             }
         }
@@ -106,11 +108,10 @@ void QEastMonyStockCodesThread::slotRecvHttpContent(const QByteArray &bytes)
     QStringList list;
     QString result = QString::fromUtf8(bytes.data());
     int index = 0;
-    while((index = result.indexOf(QRegularExpression(tr("s[hz](60[013][0-9]{3}|300[0-9]{3}|00[012][0-9]{3})")), index)) >= 0)
+    while((index = result.indexOf(QRegularExpression(tr("s[hz](60[013][0-9]{3}|300[0-9]{3}|00[012][0-9]{3}|510[0-9]{3})")), index)) >= 0)
     {
         QString code = result.mid(index, 8);
-        //qDebug()<<code;
-        if(!list.contains(code)) list.append(code);
+        if(!list.contains(code)) list.append("s_"+code);
         index = index+8;
     }
 
