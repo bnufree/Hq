@@ -1,4 +1,4 @@
-#ifndef QSINASTKINFOTHREAD_H
+﻿#ifndef QSINASTKINFOTHREAD_H
 #define QSINASTKINFOTHREAD_H
 
 #include <QThread>
@@ -29,7 +29,7 @@ public slots:
 private:
     QStringList mStkList;
     QThread     mWorkThread;
-    QMap<QString, StockData>    mDataMap;
+    //QMap<QString, StockData>    mDataMap;
     //QTimer      *mUpdateTimer;
     QHttpGet    *mHttp;
 };

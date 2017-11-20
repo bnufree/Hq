@@ -15,12 +15,12 @@ HqInfoService::HqInfoService(QObject *parent) :
     QObject(parent)
 {
     qRegisterMetaType<QList<ChinaShareExchange>>("const QList<ChinaShareExchange>&");
-    qRegisterMetaType<StockDataList>("const StockDataList&");
+    qRegisterMetaType<StockDataList>("const StockDataList&");    
+    initSignalSlot();
     initHistoryDates();
     //3、开启异步通讯
     moveToThread(&m_threadWork);
-    m_threadWork.start();    
-    initSignalSlot();
+    m_threadWork.start();
 }
 
 HqInfoService::~HqInfoService()
@@ -520,17 +520,17 @@ void HqInfoService::slotUpdateStkBaseinfoWithHistory(const QString &code)
     if(code == "600111")
         qDebug()<<"total:"<<total_share<<" "<<mutable_share<<" "<<last_close<<" "<<last_money<<" "<<mLastActiveDate;
 
-    StockData &data = mBasicStkInfo[code.right(6)];
-    data.mCode = code.right(6);
-    data.mTotalShare = total_share;
-    data.mMutableShare = mutable_share;
-    data.mLastMoney = last_money;
-    data.mLast3DaysChgPers = GetMultiDaysChangePercent(table, 3);
-    data.mLast5DaysChgPers = GetMultiDaysChangePercent(table, 5);
-    data.mLast10DaysChgPers = GetMultiDaysChangePercent(table, 10);
-    data.mLastMonthChgPers = GetMultiDaysChangePercent(table, 22);
-    data.mLastClose = last_close;
-    data.mProfit = mStkProfitMap[data.mCode];
+    StockData *data = mBasicStkInfo[code.right(6)];
+    data->mCode = code.right(6);
+    data->mTotalShare = total_share;
+    data->mMutableShare = mutable_share;
+    data->mLastMoney = last_money;
+    data->mLast3DaysChgPers = GetMultiDaysChangePercent(table, 3);
+    data->mLast5DaysChgPers = GetMultiDaysChangePercent(table, 5);
+    data->mLast10DaysChgPers = GetMultiDaysChangePercent(table, 10);
+    data->mLastMonthChgPers = GetMultiDaysChangePercent(table, 22);
+    data->mLastClose = last_close;
+    data->mProfit = mStkProfitMap[data->mCode];
     emit signalUpdateStkBaseinfoWithHistoryFinished(code);
 }
 

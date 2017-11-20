@@ -1,4 +1,4 @@
-#include "qhttpget.h"
+﻿#include "qhttpget.h"
 #include <QDebug>
 
 QHttpGet::QHttpGet(const QString& url, bool sequential, QObject *parent) :
@@ -47,7 +47,7 @@ void QHttpGet::slotUpdateHttp()
     if(mUrl.length() == 0) return;
     mReply = mMgr->get(QNetworkRequest(mUrl));
     connect(mReply, SIGNAL(finished()), this, SLOT(slotReadHttpContent()));
-    connect(mReply, SIGNAL(readyRead()), this, SLOT(slotStartReadHttpContent()));
+//    connect(mReply, SIGNAL(readyRead()), this, SLOT(slotStartReadHttpContent()));
     connect(mReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SIGNAL(signalErrorOccured(QNetworkReply::NetworkError)));
 }
 

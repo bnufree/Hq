@@ -40,16 +40,16 @@ QSinaStkInfoThread::~QSinaStkInfoThread()
 void QSinaStkInfoThread::setStkList(const QStringList &list)
 {
     mStkList = list;
-    //取得配置文件保存的昨天的数据
-    mDataMap.clear();
-    foreach (QString wkcode, mStkList) {
-        StockData& data = DATA_SERVICE->getBasicStkData(wkcode.right(6));
-        data.mCode = wkcode.right(6);
-//        foreignHolder holder = DATA_SERVICE->amountForeigner(data.mCode);
-//        data.mForeignVol = holder.last;
-//        data.mForeignVolChg = holder.last - holder.previous;
-        mDataMap[data.mCode] = data;
-    }
+//    //取得配置文件保存的昨天的数据
+//    mDataMap.clear();
+//    foreach (QString wkcode, mStkList) {
+//        StockData& data = DATA_SERVICE->getBasicStkData(wkcode.right(6));
+//        data.mCode = wkcode.right(6);
+////        foreignHolder holder = DATA_SERVICE->amountForeigner(data.mCode);
+////        data.mForeignVol = holder.last;
+////        data.mForeignVolChg = holder.last - holder.previous;
+//        mDataMap[data.mCode] = data;
+//    }
     //开始更新
     QString url("http://hq.sinajs.cn/?list=%1");
     if(mStkList.length() > 0)
@@ -81,64 +81,48 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
     //先换行
     QStringList resultlist = result.split(QRegExp("[\\n|;]"), QString::SkipEmptyParts);
     //再分割具体的字段
+    StockDataList datalist;
     foreach (QString detail, resultlist)
     {
         detail.replace(QRegExp("([a-z]{1,} )"), "");
         QStringList detailList = detail.split(QRegExp("[a-z|\"|\"|,|=|_]"), QString::SkipEmptyParts);
         if(detailList.length() < 7) continue;
         QString code = detailList[0];
-        mDataMap[code].mName = detailList[1];
-        //mDataMap[code].mOpen = detailList[2].toDouble();
-        //mDataMap[code].mLastClose = detailList[3].toDouble();
-        mDataMap[code].mCur = detailList[2].toDouble();
-        mDataMap[code].mChg = detailList[3].toDouble();
-        mDataMap[code].mChgPercent = detailList[4].toDouble();
-//        mDataMap[code].mHigh = detailList[5].toDouble();
-//        mDataMap[code].mLow = detailList[6].toDouble();
-        mDataMap[code].mVol = detailList[5].toInt() * 100;
-        mDataMap[code].mMoney = detailList[6].toDouble();
-//        qint64 total = mDataMap[code].mMutableShare;
-//        if(total > 0){
-//            mDataMap[code].mHsl = mDataMap[code].mVol / (double)total * 100;
-//        } else {
-//            mDataMap[code].mHsl = 0.00;
-//        }
-//        double lastmonry = mDataMap[code].mLastMoney;
-//        if(lastmonry > 0){
-//            mDataMap[code].mMoneyRatio = detailList[10].toDouble() / lastmonry;
-//        } else {
-//            mDataMap[code].mMoneyRatio = 0.00;
-//        }
-//        mDataMap[code].mMoney = detailList[10].toDouble() / 10000;
-//        int hour = QDateTime::currentDateTime().time().hour();
-//        int min = QDateTime::currentDateTime().time().minute();
-//        if( hour == 9){
-//            if(min>=15 && min<=25){
-//                mDataMap[code].mCur = detailList[12].toDouble();
-//            }
-//        }
-//        if(mDataMap[code].mCur == 0)
-//        {
-//            mDataMap[code].mCur = mDataMap[code].mLastClose;
-//        }
-//        if(mDataMap[code].mCur != 0)
-//        {
-//            mDataMap[code].mGXL = mDataMap[code].mXJFH / mDataMap[code].mCur;
-//        }
-        //if(data.cur == 0 ) continue;
-        //mDataMap[code].mChg = mDataMap[code].mCur - mDataMap[code].mLastClose;
-        //mDataMap[code].mChgPercent = mDataMap[code].mChg *100 / mDataMap[code].mLastClose;
-        mDataMap[code].mTotalCap = mDataMap[code].mCur * mDataMap[code].mTotalShare;
-        mDataMap[code].mMutalbleCap = mDataMap[code].mCur * mDataMap[code].mMutableShare;
-        if(mDataMap[code].mProfit == 0)
-        {
-            mDataMap[code].mProfit = DATA_SERVICE->getProfit(code);
+        StockData * data = DATA_SERVICE->getBasicStkData(code);
+        data->mName = detailList[1];
+        data->mCur = detailList[2].toDouble();
+        data->mChg = detailList[3].toDouble();
+        data->mChgPercent = detailList[4].toDouble();
+        data->mVol = detailList[5].toInt() * 100;
+        data->mMoney = detailList[6].toDouble();
+        data->mHsl = 0.0;
+        if(data->mMutableShare > 0){
+            data->mHsl = data->mVol / (double)(data->mVol) * 100;
         }
-        mDataMap[code].mForeignCap = mDataMap[code].mForeignVol * mDataMap[code].mCur ;
-        mDataMap[code].mForeignCapChg = mDataMap[code].mForeignVolChg * mDataMap[code].mCur ;
-        mDataMap[code].mUpdateTime = QDateTime::currentDateTime().time();
+        data->mMoneyRatio = 0.0;
+        if(data->mLastMoney> 0){
+            data->mMoneyRatio = data->mMoney / data->mLastMoney;
+        }
+        if(data->mCur == 0)
+        {
+            data->mCur = data->mLastClose;
+        }
+        if(data->mCur != 0)
+        {
+            data->mGXL = data->mXJFH / data->mCur;
+        }
+        data->mTotalCap = data->mCur * data->mTotalShare;
+        data->mMutalbleCap = data->mCur * data->mMutableShare;
+        if(data->mProfit == 0)
+        {
+            data->mProfit = DATA_SERVICE->getProfit(code);
+        }
+        data->mForeignCap = data->mForeignVol * data->mCur ;
+        data->mForeignCapChg = data->mForeignVolChg * data->mCur ;
+        data->mUpdateTime = QDateTime::currentDateTime().time();
+        datalist.append(*data);
     }
-    emit sendStkDataList(mDataMap.values());
+    emit sendStkDataList(datalist);
 }
 
 int QSinaStkInfoThread::getStkCount()
