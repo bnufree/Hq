@@ -7,7 +7,7 @@
 #include "stockdata.h"
 
 //表名
-#define         HQ_SHARE_BASIC_INFO_TABLE           "stock_base_info"
+#define         HQ_SHARE_BASIC_INFO_TABLE           "stock_"
 
 
 //列名
@@ -24,7 +24,11 @@
 #define         HQ_TABLE_COL_DATE               "date"
 #define         HQ_TABLE_COL_FOREIGN_VOL        "vol_foreign"
 #define         HQ_TABLE_COL_FAVORITE           "favorite"
-
+#define         HQ_TABLE_COL_ZJLX               "zjlx"
+#define         HQ_TABLE_COL_RZRQ               "rzrq"
+#define         HQ_TABLE_COL_FOREIGN_MONEY      "foreign_money"
+#define         HQ_TABLE_COL_HSGT_TOP10         "hsgt"
+#define         HQ_TABLE_COL_FOREIGN_HAVE       "foreign_amount"
 
 struct BlockBaseData{
     int                 mCode;

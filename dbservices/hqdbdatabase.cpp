@@ -64,3 +64,21 @@ bool HQDBDataBase::createTable(const QString &pTable, const QMap<QString, QStrin
     QMutexLocker locker(&mSQlMutex);
     return mSQLQuery.exec(sql);
 }
+
+QDate HQDBDataBase::getLastUpdateDateOfTable(const QString &table)
+{
+    QMutexLocker locker(&mSQlMutex);
+    QDate date = QDate(2016, 12, 4);
+    if(mSQLQuery.exec(tr("select max(date) from %1").arg(table)))
+    {
+        while (mSQLQuery.next()) {
+            if(!mSQLQuery.value(0).isNull())
+            {
+                date = mSQLQuery.value(0).toDate();
+                break;
+            }
+        }
+    }
+    return date;
+}
+

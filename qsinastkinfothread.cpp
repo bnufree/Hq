@@ -58,7 +58,7 @@ void QSinaStkInfoThread::setStkList(const QStringList &list)
         mHttp = new QHttpGet(wkURL, true);
         connect(mHttp, SIGNAL(signalSendHttpConent(QByteArray)), this, SLOT(slotRecvHttpContent(QByteArray)));
         connect(mHttp, SIGNAL(signalErrorOccured(QNetworkReply::NetworkError)), this, SLOT(slotRecvError(QNetworkReply::NetworkError)));
-        mHttp->startGet();
+        mHttp->start();
     }
 }
 
@@ -72,7 +72,7 @@ void QSinaStkInfoThread::slotUpdateInfo()
        return;
     }
 
-    if(mHttp) mHttp->startGet();
+    if(mHttp) mHttp->start();
 }
 
 void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)

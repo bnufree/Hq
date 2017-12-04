@@ -1,8 +1,10 @@
 ﻿#include "qhttpget.h"
 #include <QDebug>
+#include <QThread>
+#include <QEventLoop>
 
 QHttpGet::QHttpGet(const QString& url, bool sequential, QObject *parent) :
-    QObject(parent),mMgr(0), mUrl(url), mReply(0), mIsSequential(sequential), mUpdateTimer(0)
+    QThread(parent),mMgr(0), mUrl(url), mReply(0), mIsSequential(sequential), mUpdateTimer(0)
 {
     mMgr = new QNetworkAccessManager;
     mInertVal = 3;
@@ -18,7 +20,7 @@ QHttpGet::~QHttpGet()
     if(mMgr) delete mMgr;
 
 }
-
+#if 0
 void QHttpGet::startGet()
 {
     if(mIsSequential)
@@ -32,6 +34,7 @@ void QHttpGet::startGet()
         slotUpdateHttp();
     }
 }
+#endif
 
 void QHttpGet::setUpdateInterval(int secs)
 {
@@ -42,13 +45,52 @@ void QHttpGet::setUpdateInterval(int secs)
     }
 }
 
-void QHttpGet::slotUpdateHttp()
+//void QHttpGet::slotUpdateHttp()
+//{
+//    if(mUrl.length() == 0) return;
+//    mReply = mMgr->get(QNetworkRequest(mUrl));
+//    QEventLoop mainLoop;
+//    connect(mReply, SIGNAL(finished())
+////    qDebug()<<__FUNCTION__<<QThread::currentThread();
+////    connect(mReply, SIGNAL(finished()), this, SLOT(slotReadHttpContent()));
+//////    connect(mReply, SIGNAL(readyRead()), this, SLOT(slotStartReadHttpContent()));
+////    connect(mReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SIGNAL(signalErrorOccured(QNetworkReply::NetworkError)));
+//}
+
+void QHttpGet::run()
 {
     if(mUrl.length() == 0) return;
-    mReply = mMgr->get(QNetworkRequest(mUrl));
-    connect(mReply, SIGNAL(finished()), this, SLOT(slotReadHttpContent()));
-//    connect(mReply, SIGNAL(readyRead()), this, SLOT(slotStartReadHttpContent()));
-    connect(mReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SIGNAL(signalErrorOccured(QNetworkReply::NetworkError)));
+    QNetworkAccessManager mgr;
+    do{
+        if(mReply)
+        {
+            mReply->abort();
+            mReply->close();
+            delete mReply;
+        }
+        mReply = mgr.get(QNetworkRequest(mUrl));
+        if(mReply)
+        {
+            QEventLoop subloop;
+            connect(mReply, SIGNAL(finished()), &subloop, SLOT(quit()));
+            connect(mReply, SIGNAL(error(QNetworkReply::NetworkError)), &subloop, SLOT(quit()));
+            subloop.exec();
+            if(mReply->error() == QNetworkReply::NoError)
+            {
+                emit signalSendHttpConent(mReply->readAll());
+            } else
+            {
+                qDebug()<<"networkreply error:"<<mReply->error();
+            }
+            mReply->abort();
+            mReply->close();
+            delete mReply;
+            mReply = 0;
+            //QThread::run();
+        }
+        QThread::sleep(2);
+    } while(mIsSequential);
+    QThread::run();
 }
 
 void QHttpGet::setUrl(const QString &url)
@@ -62,6 +104,7 @@ void QHttpGet::slotStartReadHttpContent()
 
 void QHttpGet::slotReadHttpContent()
 {
+    qDebug()<<__FUNCTION__<<QThread::currentThread();
     if(!mReply) return;
     emit signalSendHttpConent(mReply->readAll());
     mReply->deleteLater();

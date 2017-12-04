@@ -125,7 +125,7 @@ void QSinaStkResultMergeThread::run()
         } else if(mMktType == MKT_JJ)
         {
             foreach (QString key, mMidStkDataMapList.keys()) {
-                if(key.left(1) == "5")
+                if(key.left(1) == "5" || key.left(1) == "1")
                 {
                     wklist.append(mMidStkDataMapList.value(key));
                 }
@@ -315,7 +315,7 @@ void QSinaStkResultMergeThread::run()
             if(mActive)
             {
                 StockDataList mid = wklist.mid((mCurPage - 1) * mPageSize, mPageSize);
-                qDebug()<<"mid:"<<mid.length();
+                //qDebug()<<"mid:"<<mid.length();
                 emit sendStkDataList(mid);
             }
         } else

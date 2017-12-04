@@ -46,5 +46,5 @@ void QSinaSearchThread::slotRecvSearchString(const QString& text)
             .arg(text)
             .arg(QDateTime::currentDateTime().toMSecsSinceEpoch());
     mHttp->setUrl(wkURL);
-    mHttp->startGet();
+    mHttp->start();
 }

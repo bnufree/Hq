@@ -39,7 +39,7 @@ double QEastmoneyNorthBoundThread::changeRMBString(const QString &src)
 
 void QEastmoneyNorthBoundThread::run()
 {
-    if(mHttp) mHttp->startGet();
+    if(mHttp) mHttp->start();
 }
 
 void QEastmoneyNorthBoundThread::slotRecvHttpContent(const QByteArray &bytes)

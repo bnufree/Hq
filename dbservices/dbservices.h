@@ -55,6 +55,7 @@ signals:
     void signalUpdateShareAmountByForeigner();
 public slots:
     void slotRecvShareHistoryInfos(const StockDataList& list);
+    //void slotUpdateShareHistoryInfos(const QMap<QString, StockDataList> map);
     bool slotAddHistoryData(const StockData& data);
     void updateBlockInfoList(const QList<BlockRealInfo>& list);
     void addBlock(const BlockRealInfo& info);
@@ -80,7 +81,7 @@ private:
     void initHistoryDates();
     void initSignalSlot();
     bool createHistoryTable(const QString& pTableName);
-    bool createStockBaseInfoTable();
+    bool createStockBaseInfoTable(const QString& code);
     bool createHSGTShareAmountTable();
     bool blockExist(int code);
     bool isActive();
@@ -90,8 +91,6 @@ private:
     //数据库查询指定日期的沪深股通的TOP10交易
     bool queryTop10ChinaShareInfos(QList<ChinaShareExchange>& list, const QDate& date = QDate(), const QString& share = QString(), int market = 0);
     bool addTop10ChinaStockInfo(const ChinaShareExchange& info);
-    //查询表的更新日期
-    QDate getLastUpdateDateOfTable(const QString& table);
 
 private:    //本类使用的变量
     static HqInfoService *m_pInstance;

@@ -11,7 +11,7 @@ QEastMoneyZjlxThread::QEastMoneyZjlxThread(QObject *parent) : QObject(parent)
     connect(mHttp, SIGNAL(signalSendHttpConent(QByteArray)), this, SLOT(slotRecvHttpContent(QByteArray)));
     this->moveToThread(&mWorkThread);
     mWorkThread.start();
-    mHttp->startGet();
+    mHttp->start();
 }
 
 QEastMoneyZjlxThread::~QEastMoneyZjlxThread()

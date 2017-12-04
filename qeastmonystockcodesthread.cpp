@@ -100,7 +100,7 @@ void QEastMonyStockCodesThread::run()
 
     mHttp = new QHttpGet(QString("http://quote.eastmoney.com/stocklist.html"));
     connect(mHttp, SIGNAL(signalSendHttpConent(QByteArray)), this, SLOT(slotRecvHttpContent(QByteArray)));
-    mHttp->startGet();
+    mHttp->start();
 }
 
 void QEastMonyStockCodesThread::slotRecvHttpContent(const QByteArray &bytes)
@@ -108,7 +108,7 @@ void QEastMonyStockCodesThread::slotRecvHttpContent(const QByteArray &bytes)
     QStringList list;
     QString result = QString::fromUtf8(bytes.data());
     int index = 0;
-    while((index = result.indexOf(QRegularExpression(tr("s[hz](60[013][0-9]{3}|300[0-9]{3}|00[012][0-9]{3}|510[0-9]{3})")), index)) >= 0)
+    while((index = result.indexOf(QRegularExpression(tr("s[hz](60[013][0-9]{3}|300[0-9]{3}|00[012][0-9]{3}|510[0-9]{3}|15[0-9]{4})")), index)) >= 0)
     {
         QString code = result.mid(index, 8);
         if(!list.contains(code)) list.append("s_"+code);

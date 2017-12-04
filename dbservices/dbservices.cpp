@@ -3,13 +3,15 @@
 #include <QSqlError>
 #include <QDir>
 #include "dbservices.h"
-#include <QtSql/QSqlRecord>
 #include "qexchangedatamanage.h"
+#include <QMap>
 
 #define     HSGT_TABLE          "hsgvol"
 HqInfoService* HqInfoService::m_pInstance = 0;
 HqInfoService::CGarbo HqInfoService::s_Garbo;
 QMutex HqInfoService::mutex;
+
+#define     HISTORY_TABLE(code) HQ_SHARE_BASIC_INFO_TABLE + code
 
 HqInfoService::HqInfoService(QObject *parent) :
     QObject(parent)
@@ -30,18 +32,30 @@ HqInfoService::~HqInfoService()
     m_threadWork.terminate();
 }
 
-bool HqInfoService::createStockBaseInfoTable()
+bool HqInfoService::createStockBaseInfoTable(const QString& code)
 {
-    return true;
-//    QMap<QString, QString> colist;
-//    colist.insert(HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL");
-//    colist.insert(HQ_, "VARCHAR(6) NOT NULL");
-//    colist.insert("name", "VARCHAR(100) NOT NULL");
-//    colist.insert("total_amount", "NUMERIC NULL");
-//    colist.insert("mutal_amount", "NUMERIC NULL");
-//    colist.insert("date", "DATE NULL");
+    if(mDataBase.isTableExist(HISTORY_TABLE(code))) return true;
+    QMap<QString, QString> colist;
+    colist.insert(HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL");
+    colist.insert(HQ_TABLE_COL_CODE, "VARCHAR(6) NOT NULL");
+    colist.insert(HQ_TABLE_COL_NAME, "VARCHAR(100) NOT NULL");
+    colist.insert(HQ_TABLE_COL_CLOSE, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_CHANGE_PERCENT, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_VOL, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_MONEY, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_ZJLX, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_RZRQ, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_FAVORITE, "BOOL NULL");
+    colist.insert(HQ_TABLE_COL_HSGT_TOP10, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_FOREIGN_VOL, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_FOREIGN_MONEY, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_FOREIGN_HAVE, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_TOTALMNT, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_MUTAL, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_DATE, "DATE NULL");
+    colist.insert(HQ_TABLE_COL_PROFIT, "NUMERIC NULL");
 
-//    return mDataBase.createTable("stock_base_info", colist);
+    return mDataBase.createTable(HISTORY_TABLE(code), colist);
 }
 
 bool HqInfoService::createHSGTShareAmountTable()
@@ -273,32 +287,14 @@ bool HqInfoService::addTop10ChinaStockInfo(const ChinaShareExchange &info)
 #endif
 }
 
-QDate HqInfoService::getLastUpdateDateOfTable(const QString &table)
-{
-    QDate date = QDate(2016, 12, 4);
-#if 0
-    if(mSqlQuery.exec(tr("select max(date) from %1").arg(table)))
-    {
-        while (mSqlQuery.next()) {
-            if(!mSqlQuery.value(0).isNull())
-            {
-                date = mSqlQuery.value(0).toDate();
-                break;
-            }
-        }
-    }
-#endif
-    return date;
-}
-
 QDate HqInfoService::getLastUpdateDateOfHSGT()
 {
-    return getLastUpdateDateOfTable("hstop10");
+    return mDataBase.getLastUpdateDateOfTable("hstop10");
 }
 
 QDate HqInfoService::getLastUpdateDateOfHSGTVol()
 {
-    QDate date = getLastUpdateDateOfTable(HSGT_TABLE);
+    QDate date = mDataBase.getLastUpdateDateOfTable(HSGT_TABLE);
     if(date == QDate(2016,12,4))
     {
         date = QDate::currentDate().addDays(-30);
@@ -309,10 +305,8 @@ QDate HqInfoService::getLastUpdateDateOfHSGTVol()
 
 QDate HqInfoService::getLastUpdateDateOfShareHistory(const QString &code)
 {
-    QString table = "stk"+ code.right(6);
-//    if(!isTableExist(table)) createHistoryTable(table);
-
-    return getLastUpdateDateOfTable(table);
+    createStockBaseInfoTable(code);
+    return mDataBase.getLastUpdateDateOfTable(HISTORY_TABLE(code));
 }
 
 void HqInfoService::slotQueryTop10ChinaStockInfos(const QDate &date, const QString &share, int market)
@@ -541,6 +535,7 @@ void HqInfoService::slotUpdateHistoryChange(const QString &code)
 
 StockData* HqInfoService::getBasicStkData(const QString &code)
 {
+    QMutexLocker locker(&mShareMutex);
     if(!mBasicStkInfo.contains(code))
     {
         StockData *data = new StockData;

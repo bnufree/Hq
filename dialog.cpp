@@ -488,7 +488,7 @@ void Dialog::resizeEvent(QResizeEvent *event)
 
 void Dialog::updateHqTable(const StockDataList& pDataList)
 {
-    qDebug()<<"data list:"<<pDataList.length();
+//    qDebug()<<"data list:"<<pDataList.length();
     ui->hqtbl->setDataList(pDataList);
 #if 0
 //    qDebug()<<"input";

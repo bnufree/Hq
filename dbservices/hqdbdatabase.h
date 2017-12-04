@@ -15,6 +15,7 @@ public:
     QString getErrorString();
     bool isTableExist(const QString &pTable);
     bool createTable(const QString& pTable, const QMap<QString, QString>& cols);
+    QDate getLastUpdateDateOfTable(const QString &table);
 
 private:
     bool initSqlDB();
