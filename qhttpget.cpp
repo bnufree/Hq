@@ -88,9 +88,9 @@ void QHttpGet::run()
             mReply = 0;
             //QThread::run();
         }
-        QThread::sleep(2);
+        QThread::sleep(mInertVal);
     } while(mIsSequential);
-    QThread::run();
+    //QThread::run();
 }
 
 void QHttpGet::setUrl(const QString &url)

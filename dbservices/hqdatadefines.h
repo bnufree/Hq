@@ -1,4 +1,4 @@
-#ifndef HQDATADEFINES
+﻿#ifndef HQDATADEFINES
 #define HQDATADEFINES
 
 #include <QString>
@@ -8,6 +8,7 @@
 
 //表名
 #define         HQ_SHARE_BASIC_INFO_TABLE           "stock_"
+#define         HQ_BLOCK_TABLE                      "block"
 
 
 //列名
@@ -29,6 +30,9 @@
 #define         HQ_TABLE_COL_FOREIGN_MONEY      "foreign_money"
 #define         HQ_TABLE_COL_HSGT_TOP10         "hsgt"
 #define         HQ_TABLE_COL_FOREIGN_HAVE       "foreign_amount"
+#define         HQ_TABLE_COL_SHARE_LIST         "share_list"
+#define         HQ_TABLE_COL_BLOCK_LIST         "block_list"
+#define         HQ_TABLE_COL_BLOCK_TYPE         "type"
 
 struct BlockBaseData{
     int                 mCode;

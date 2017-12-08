@@ -1,4 +1,4 @@
-#ifndef BLOCKDATA_H
+﻿#ifndef BLOCKDATA_H
 #define BLOCKDATA_H
 
 #include <QString>
@@ -6,7 +6,8 @@
 #include <QColor>
 
 class BlockData;
-typedef QList<BlockData*>        BlockDataList;
+typedef QList<BlockData*>        BlockDataPtrList;
+typedef QList<BlockData>         BlockDataList;
 Q_DECLARE_METATYPE(BlockDataList)
 
 typedef enum BlockType
@@ -23,8 +24,8 @@ class BlockData
 public:
     BlockData();
     ~BlockData();
-    static BlockDataList BlockDataListFromCodesList(const QStringList& codes);
-    static QStringList   BlockCodsListFromBlockData(const BlockDataList& list);
+    //static BlockDataList BlockDataListFromCodesList(const QStringList& codes);
+    //static QStringList   BlockCodsListFromBlockData(const BlockDataList& list);
 public:
     QString             mName;
     QString             mCode;

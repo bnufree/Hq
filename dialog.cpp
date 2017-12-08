@@ -1019,7 +1019,7 @@ void Dialog::mousePressEvent(QMouseEvent *event)
 void Dialog::mouseMoveEvent(QMouseEvent *event)
 
 {
-        qDebug()<<__FUNCTION__<<__LINE__;
+      //  qDebug()<<__FUNCTION__<<__LINE__;
      //this->move(event->globalPos() - this->dPos);
 
 }
@@ -1082,7 +1082,6 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
     mMergeThread->setActive(true);
     mMergeThread->setMktType(MKT_ALL);
     mMergeThread->start();
-#if 0
     //板块行情初始化
     //mCurBlockType = BLOCK_HY;
     mBlockMgr = new QEastMoneyBlockMangagerThread();
@@ -1092,7 +1091,6 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
     //查询接口初始化
     mSearchThread = new QSinaSearchThread(this);
     connect(mSearchThread, SIGNAL(sendSearchResult(QStringList)), this, SLOT(displayBlockDetailInfoInTable(QStringList)));
-#endif
 }
 
 void Dialog::on_HSGTBTN_clicked()
@@ -1151,12 +1149,12 @@ void Dialog::slotHistoryDataFinish()
     mMergeThread->setMktType(MKT_ZXG);
     mMergeThread->start();
     //板块行情初始化
-    //mCurBlockType = BLOCK_HY;
     mBlockMgr = new QEastMoneyBlockMangagerThread();
     connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataList)), this, SLOT(updateBlockTable(BlockDataList)));
     mBlockMgr->start();
 
     //查询接口初始化
+    qDebug()<<"search thread_________________";
     mSearchThread = new QSinaSearchThread(this);
     connect(mSearchThread, SIGNAL(sendSearchResult(QStringList)), this, SLOT(displayBlockDetailInfoInTable(QStringList)));
 }

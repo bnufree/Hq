@@ -1,4 +1,4 @@
-#ifndef QEASTMONYSTOCKCODESTHREAD_H
+﻿#ifndef QEASTMONYSTOCKCODESTHREAD_H
 #define QEASTMONYSTOCKCODESTHREAD_H
 
 #include <QThread>
@@ -22,6 +22,7 @@ signals:
 public slots:
     void run();
     void slotRecvHttpContent(const QByteArray& bytes);
+    void slotRecvAllCodes(const QStringList& list);
 private:
     QHttpGet    *mHttp;
     QThread     mThread;

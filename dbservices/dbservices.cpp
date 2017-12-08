@@ -25,11 +25,40 @@ HqInfoService::HqInfoService(QObject *parent) :
     m_threadWork.start();
 }
 
+
 HqInfoService::~HqInfoService()
 {
     m_threadWork.quit();
     m_threadWork.wait(500);
     m_threadWork.terminate();
+}
+
+bool HqInfoService::isDBInitOk()
+{
+    return mDataBase.isDBOK();
+}
+
+void HqInfoService::slotCreateDBTables()
+{
+    //创建板块的表
+    createBlockTable();
+
+    emit signalCreateDBTablesFinished(true, "");
+}
+
+bool HqInfoService::createBlockTable()
+{
+    if(mDataBase.isTableExist(HQ_BLOCK_TABLE)) return true;
+    QMap<QString, QString> colist;
+    colist.insert(HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL");
+    colist.insert(HQ_TABLE_COL_CODE, "VARCHAR(6) NOT NULL");
+    colist.insert(HQ_TABLE_COL_NAME, "VARCHAR(100) NOT NULL");
+    colist.insert(HQ_TABLE_COL_CLOSE, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_CHANGE_PERCENT, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_SHARE_LIST, "VARCHAR(10000) NULL");
+    colist.insert(HQ_TABLE_COL_DATE, "DATE NULL");
+    colist.insert(HQ_TABLE_COL_BLOCK_TYPE, "INTEGER NULL");
+    return mDataBase.createTable(HQ_BLOCK_TABLE, colist);
 }
 
 bool HqInfoService::createStockBaseInfoTable(const QString& code)
@@ -107,6 +136,10 @@ void HqInfoService::initHistoryDates()
 
 void HqInfoService::initSignalSlot()
 {
+    connect(this, SIGNAL(signalCreateDBTables()),
+            this, SLOT(slotCreateDBTables()));
+    connect(this, SIGNAL(signalQueryBlockInfo(int)),
+            this, SLOT(slotQueryBlock(int)));
     connect(this, SIGNAL(signalInitStockRealInfos(QStringList)),
             this, SLOT(slotInitStockRealInfos(QStringList)));
     connect(this, SIGNAL(signalRecvTop10ChinaStockInfos(QList<ChinaShareExchange>)),
@@ -197,7 +230,7 @@ void HqInfoService::delBlock(int code)
 //    mSqlQuery.exec(tr("delete from Block where id = %1").arg(code));
 }
 
-void HqInfoService::queryBlock(int type, bool init)
+void HqInfoService::slotQueryBlock(int type)
 {
     QString filter = (type != 0 ? tr(" where type = %1").arg(type) : "");
 //    if(!mSqlQuery.exec(tr("select * from Block %1").arg(filter))) return;
@@ -226,7 +259,7 @@ void HqInfoService::queryBlock(int type, bool init)
 
 void HqInfoService::initBlockInfo()
 {
-    queryBlock(0, true);
+    //queryBlock(0, true);
 }
 
 

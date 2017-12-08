@@ -1,6 +1,7 @@
-#include "qeastmoneyzjlxthread.h"
+﻿#include "qeastmoneyzjlxthread.h"
 #include <QDebug>
 #include "qhttpget.h"
+#include "dbservices/dbservices.h"
 
 QEastMoneyZjlxThread::QEastMoneyZjlxThread(QObject *parent) : QObject(parent)
 {
@@ -18,6 +19,7 @@ QEastMoneyZjlxThread::~QEastMoneyZjlxThread()
 {
     if(mHttp)
     {
+        mHttp->quit();
         mHttp->deleteLater();
     }
     mWorkThread.quit();
@@ -44,11 +46,13 @@ void QEastMoneyZjlxThread::slotRecvHttpContent(const QByteArray& bytes)
             zjlxData data;
             data.code = InfoList.at(1);
             data.zjlx = InfoList.at(5).toDouble();
+            StockData *pdata = DATA_SERVICE->getBasicStkData(data.code);
+            pdata->mZJLX = data.zjlx;
             //qDebug()<<"list "<<list.length() +1<<" code:"<<data.code<<" zjlx:"<<data.zjlx<<endl;
             list.append(data);
         }
 
-        emit sendZjlxDataList(list);
+        //emit sendZjlxDataList(list);
 
     }
 }

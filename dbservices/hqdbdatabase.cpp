@@ -1,4 +1,4 @@
-#include "hqdbdatabase.h"
+﻿#include "hqdbdatabase.h"
 #include <QMutexLocker>
 #include <QDebug>
 
@@ -19,6 +19,11 @@ HQDBDataBase::~HQDBDataBase()
     {
         mDB.close();
     }
+}
+
+bool HQDBDataBase::isDBOK()
+{
+    return mInitDBFlg;
 }
 
 bool HQDBDataBase::initSqlDB()
@@ -80,5 +85,33 @@ QDate HQDBDataBase::getLastUpdateDateOfTable(const QString &table)
         }
     }
     return date;
+}
+
+bool HQDBDataBase::getBlockDataList(BlockDataList &list, int type)
+{
+    QString filter = (type != 0 ? tr(" where %1 = %2").arg(HQ_TABLE_COL_BLOCK_TYPE).arg(type) : "");
+//    if(!mSqlQuery.exec(tr("select * from Block %1").arg(filter))) return;
+
+#if 0
+    QList<BlockRealInfo> selist;
+    while (mSqlQuery.next()) {
+        BlockRealInfo info;
+        int index = 0;
+        info.mCode = mSqlQuery.value(index++).toInt();
+        info.mName = mSqlQuery.value(index++).toString();
+        info.mCurPrice = mSqlQuery.value(index++).toDouble();
+        info.mChange = mSqlQuery.value(index++).toDouble();
+        info.mChangePercent = mSqlQuery.value(index++).toDouble();
+        info.mZjlx = mSqlQuery.value(index++).toDouble();
+        info.mShareCodesList = mSqlQuery.value(index++).toStringList();
+        info.mType = mSqlQuery.value(index++).toInt();
+        info.mDate = QDateTime::fromMSecsSinceEpoch(mSqlQuery.value(index++).toLongLong()).date();
+        if(init) mBlockInfo[info.mCode] = info;
+        selist.append(info);
+    }
+
+    emit signalSendBlockInfoList(selist);
+#endif
+    return true;
 }
 

@@ -16,6 +16,8 @@ public:
     bool isTableExist(const QString &pTable);
     bool createTable(const QString& pTable, const QMap<QString, QString>& cols);
     QDate getLastUpdateDateOfTable(const QString &table);
+    bool isDBOK();
+    bool getBlockDataList(BlockDataList& list, int type = 0);
 
 private:
     bool initSqlDB();

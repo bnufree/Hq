@@ -4,11 +4,13 @@
 #include <QRegularExpression>
 #include <QFile>
 #include <QDir>
+#include "dbservices/dbservices.h"
 
 #define STOCK_CODE_FILE  "stock.data"
 QEastMonyStockCodesThread::QEastMonyStockCodesThread(QObject *parent) : QObject(parent)
 {
-    mHttp = 0;
+    mHttp = new QHttpGet(QString("http://quote.eastmoney.com/stocklist.html"));
+    connect(mHttp, SIGNAL(signalSendHttpConent(QByteArray)), this, SLOT(slotRecvHttpContent(QByteArray)));
     connect(this, SIGNAL(start()), this, SLOT(run()));
     this->moveToThread(&mThread);
     mThread.start();
@@ -38,6 +40,7 @@ bool QEastMonyStockCodesThread::writeCodes(const QStringList &codes)
         fwrite(stks, sizeof(int), codes.length() + 1, fp);
 
         fclose(fp);
+        delete []stks;
 
     }
 
@@ -94,12 +97,10 @@ void QEastMonyStockCodesThread::run()
     QStringList list;
     if(getCodesFromFile(list))
     {
-        emit signalSendCodesList(list);
+        slotRecvAllCodes(list);
         return;
     }
-
-    mHttp = new QHttpGet(QString("http://quote.eastmoney.com/stocklist.html"));
-    connect(mHttp, SIGNAL(signalSendHttpConent(QByteArray)), this, SLOT(slotRecvHttpContent(QByteArray)));
+    if(mHttp)
     mHttp->start();
 }
 
@@ -108,7 +109,7 @@ void QEastMonyStockCodesThread::slotRecvHttpContent(const QByteArray &bytes)
     QStringList list;
     QString result = QString::fromUtf8(bytes.data());
     int index = 0;
-    while((index = result.indexOf(QRegularExpression(tr("s[hz](60[013][0-9]{3}|300[0-9]{3}|00[012][0-9]{3}|510[0-9]{3}|15[0-9]{4})")), index)) >= 0)
+    while((index = result.indexOf(QRegularExpression(tr("s[hz](60[013][0-9]{3}|300[0-9]{3}|00[012][0-9]{3}|510[0-9]{3}|1599[0-9]{2})")), index)) >= 0)
     {
         QString code = result.mid(index, 8);
         if(!list.contains(code)) list.append("s_"+code);
@@ -116,6 +117,14 @@ void QEastMonyStockCodesThread::slotRecvHttpContent(const QByteArray &bytes)
     }
 
     writeCodes(list);
+    slotRecvAllCodes(list);
+}
+
+void QEastMonyStockCodesThread::slotRecvAllCodes(const QStringList &list)
+{
+    foreach (QString code, list) {
+        DATA_SERVICE->getBasicStkData(code.right(6));
+    }
     emit signalSendCodesList(list);
 }
 

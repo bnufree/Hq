@@ -17,10 +17,8 @@ QSinaStkResultMergeThread::QSinaStkResultMergeThread(QObject *parent) : QThread(
     mSortType = STK_DISPLAY_SORT_TYPE_CHGPER;
     mSortRule = -1;
     mActive = true;
-#if 0
     QEastMoneyZjlxThread *zjt = new QEastMoneyZjlxThread(this);
     connect(zjt, SIGNAL(sendZjlxDataList(QList<zjlxData>)), this, SLOT(slotRevZjlxData(QList<zjlxData>)));
-#endif
 }
 
 QSinaStkResultMergeThread::~QSinaStkResultMergeThread()
@@ -334,7 +332,7 @@ void QSinaStkResultMergeThread::slotRevResList(const StockDataList &mid)
     mListMutex.lock();
     foreach (StockData data, mid) {
         if(data.mCur < 0.1) continue;
-        data.mZJLX = mZjlxMaplist[data.mCode];
+        //if(data.mMoney < 10000) continue;
         mMidStkDataMapList[data.mCode] = data;
     }
     mListMutex.unlock();

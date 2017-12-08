@@ -16,6 +16,7 @@ protected:
     ~HqInfoService();
 
 public:
+    bool   isDBInitOk();
     friend class CGarbo;
     static HqInfoService* instance();
     StockData* getBasicStkData(const QString& code);
@@ -33,6 +34,11 @@ public:
     void         setShareBlock(const QString& code, const QString& block);
 
 signals:
+    //开始创建数据库需要的表信息
+    void signalCreateDBTables();
+    void signalCreateDBTablesFinished(bool sts, const QString& errMsg);
+    //从数据库查询板块信息
+    void signalQueryBlockInfo(int type = 1);
     void signalRecvRealBlockInfo(const QList<BlockRealInfo>& list);
     void signalSendBlockInfoList(const QList<BlockRealInfo>& list);
     void signalSendTop10ChinaStockInfos(const QList<ChinaShareExchange>& list);
@@ -54,6 +60,7 @@ signals:
     void signalAddShareAmoutByForeigner(const StockDataList& list);
     void signalUpdateShareAmountByForeigner();
 public slots:
+    void slotCreateDBTables();
     void slotRecvShareHistoryInfos(const StockDataList& list);
     //void slotUpdateShareHistoryInfos(const QMap<QString, StockDataList> map);
     bool slotAddHistoryData(const StockData& data);
@@ -61,7 +68,7 @@ public slots:
     void addBlock(const BlockRealInfo& info);
     void modBlock(const BlockRealInfo& info);
     void delBlock(int code);
-    void queryBlock(int type = 0, bool init = false);
+    void slotQueryBlock(int type = 0);
     void recvRealBlockInfo(const QList<BlockRealInfo>& list);
     void slotRecvTop10ChinaStockInfos(const QList<ChinaShareExchange>& list);
     void slotQueryTop10ChinaStockInfos(const QDate& date = QDate(), const QString& share = QString(), int market = 0);
@@ -82,6 +89,7 @@ private:
     void initSignalSlot();
     bool createHistoryTable(const QString& pTableName);
     bool createStockBaseInfoTable(const QString& code);
+    bool createBlockTable();
     bool createHSGTShareAmountTable();
     bool blockExist(int code);
     bool isActive();
