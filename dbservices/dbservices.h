@@ -88,8 +88,8 @@ private:
     void initHistoryDates();
     void initSignalSlot();
     bool createHistoryTable(const QString& pTableName);
-    bool createStockBaseInfoTable(const QString& code);
-    bool createBlockTable();
+    //bool createStockBaseInfoTable(const QString& code);
+    //bool createBlockTable();
     bool createHSGTShareAmountTable();
     bool blockExist(int code);
     bool isActive();

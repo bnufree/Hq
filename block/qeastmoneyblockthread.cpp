@@ -1,4 +1,4 @@
-#include "qeastmoneyblockthread.h"
+﻿#include "qeastmoneyblockthread.h"
 #include <QDebug>
 #include "profiles.h"
 #include <QDateTime>

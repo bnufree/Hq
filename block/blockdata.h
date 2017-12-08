@@ -6,8 +6,7 @@
 #include <QColor>
 
 class BlockData;
-typedef QList<BlockData*>        BlockDataPtrList;
-typedef QList<BlockData>         BlockDataList;
+typedef QList<BlockData*>         BlockDataList;
 Q_DECLARE_METATYPE(BlockDataList)
 
 typedef enum BlockType

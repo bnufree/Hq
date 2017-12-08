@@ -3,6 +3,8 @@
 #include <QDebug>
 
 #define     QDebug()            qDebug()<<__FUNCTION__<<__LINE__
+#define     HISTORY_TABLE(code) HQ_SHARE_BASIC_INFO_TABLE + code
+
 
 HQDBDataBase::HQDBDataBase(QObject *parent) : QObject(parent)
 {
@@ -114,4 +116,58 @@ bool HQDBDataBase::getBlockDataList(BlockDataList &list, int type)
 #endif
     return true;
 }
+
+bool HQDBDataBase::createDBTables()
+{
+    if(!createBlockTable()) return false;
+    return true;
+}
+
+bool HQDBDataBase::createBlockTable()
+{
+    if(isTableExist(HQ_BLOCK_TABLE)) return true;
+    QMap<QString, QString> colist;
+    colist.insert(HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL");
+    colist.insert(HQ_TABLE_COL_CODE, "VARCHAR(6) NOT NULL");
+    colist.insert(HQ_TABLE_COL_NAME, "VARCHAR(100) NOT NULL");
+    colist.insert(HQ_TABLE_COL_CLOSE, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_CHANGE_PERCENT, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_SHARE_LIST, "VARCHAR(10000) NULL");
+    colist.insert(HQ_TABLE_COL_DATE, "DATE NULL");
+    colist.insert(HQ_TABLE_COL_BLOCK_TYPE, "INTEGER NULL");
+    return createTable(HQ_BLOCK_TABLE, colist);
+}
+
+bool HQDBDataBase::createStockBaseInfoTable(const QString& code)
+{
+    if(isTableExist(HISTORY_TABLE(code))) return true;
+    QMap<QString, QString> colist;
+    colist.insert(HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL");
+    colist.insert(HQ_TABLE_COL_CODE, "VARCHAR(6) NOT NULL");
+    colist.insert(HQ_TABLE_COL_NAME, "VARCHAR(100) NOT NULL");
+    colist.insert(HQ_TABLE_COL_CLOSE, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_CHANGE_PERCENT, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_VOL, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_MONEY, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_ZJLX, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_RZRQ, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_FAVORITE, "BOOL NULL");
+    colist.insert(HQ_TABLE_COL_HSGT_TOP10, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_FOREIGN_VOL, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_FOREIGN_MONEY, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_FOREIGN_HAVE, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_TOTALMNT, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_MUTAL, "NUMERIC NULL");
+    colist.insert(HQ_TABLE_COL_DATE, "DATE NULL");
+    colist.insert(HQ_TABLE_COL_PROFIT, "NUMERIC NULL");
+
+    return createTable(HISTORY_TABLE(code), colist);
+}
+
+QDate HQDBDataBase::getLastUpdateDateOfShareHistory(const QString &code)
+{
+    createStockBaseInfoTable(code);
+    return getLastUpdateDateOfTable(HISTORY_TABLE(code));
+}
+
 

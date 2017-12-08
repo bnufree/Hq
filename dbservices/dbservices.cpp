@@ -10,9 +10,6 @@
 HqInfoService* HqInfoService::m_pInstance = 0;
 HqInfoService::CGarbo HqInfoService::s_Garbo;
 QMutex HqInfoService::mutex;
-
-#define     HISTORY_TABLE(code) HQ_SHARE_BASIC_INFO_TABLE + code
-
 HqInfoService::HqInfoService(QObject *parent) :
     QObject(parent)
 {
@@ -40,52 +37,12 @@ bool HqInfoService::isDBInitOk()
 
 void HqInfoService::slotCreateDBTables()
 {
-    //创建板块的表
-    createBlockTable();
-
-    emit signalCreateDBTablesFinished(true, "");
+    if(mDataBase.createDBTables())
+    {
+        emit signalCreateDBTablesFinished(true, "");
+    }
 }
 
-bool HqInfoService::createBlockTable()
-{
-    if(mDataBase.isTableExist(HQ_BLOCK_TABLE)) return true;
-    QMap<QString, QString> colist;
-    colist.insert(HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL");
-    colist.insert(HQ_TABLE_COL_CODE, "VARCHAR(6) NOT NULL");
-    colist.insert(HQ_TABLE_COL_NAME, "VARCHAR(100) NOT NULL");
-    colist.insert(HQ_TABLE_COL_CLOSE, "NUMERIC NULL");
-    colist.insert(HQ_TABLE_COL_CHANGE_PERCENT, "NUMERIC NULL");
-    colist.insert(HQ_TABLE_COL_SHARE_LIST, "VARCHAR(10000) NULL");
-    colist.insert(HQ_TABLE_COL_DATE, "DATE NULL");
-    colist.insert(HQ_TABLE_COL_BLOCK_TYPE, "INTEGER NULL");
-    return mDataBase.createTable(HQ_BLOCK_TABLE, colist);
-}
-
-bool HqInfoService::createStockBaseInfoTable(const QString& code)
-{
-    if(mDataBase.isTableExist(HISTORY_TABLE(code))) return true;
-    QMap<QString, QString> colist;
-    colist.insert(HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL");
-    colist.insert(HQ_TABLE_COL_CODE, "VARCHAR(6) NOT NULL");
-    colist.insert(HQ_TABLE_COL_NAME, "VARCHAR(100) NOT NULL");
-    colist.insert(HQ_TABLE_COL_CLOSE, "NUMERIC NULL");
-    colist.insert(HQ_TABLE_COL_CHANGE_PERCENT, "NUMERIC NULL");
-    colist.insert(HQ_TABLE_COL_VOL, "NUMERIC NULL");
-    colist.insert(HQ_TABLE_COL_MONEY, "NUMERIC NULL");
-    colist.insert(HQ_TABLE_COL_ZJLX, "NUMERIC NULL");
-    colist.insert(HQ_TABLE_COL_RZRQ, "NUMERIC NULL");
-    colist.insert(HQ_TABLE_COL_FAVORITE, "BOOL NULL");
-    colist.insert(HQ_TABLE_COL_HSGT_TOP10, "NUMERIC NULL");
-    colist.insert(HQ_TABLE_COL_FOREIGN_VOL, "NUMERIC NULL");
-    colist.insert(HQ_TABLE_COL_FOREIGN_MONEY, "NUMERIC NULL");
-    colist.insert(HQ_TABLE_COL_FOREIGN_HAVE, "NUMERIC NULL");
-    colist.insert(HQ_TABLE_COL_TOTALMNT, "NUMERIC NULL");
-    colist.insert(HQ_TABLE_COL_MUTAL, "NUMERIC NULL");
-    colist.insert(HQ_TABLE_COL_DATE, "DATE NULL");
-    colist.insert(HQ_TABLE_COL_PROFIT, "NUMERIC NULL");
-
-    return mDataBase.createTable(HISTORY_TABLE(code), colist);
-}
 
 bool HqInfoService::createHSGTShareAmountTable()
 {
@@ -338,8 +295,7 @@ QDate HqInfoService::getLastUpdateDateOfHSGTVol()
 
 QDate HqInfoService::getLastUpdateDateOfShareHistory(const QString &code)
 {
-    createStockBaseInfoTable(code);
-    return mDataBase.getLastUpdateDateOfTable(HISTORY_TABLE(code));
+    return mDataBase.getLastUpdateDateOfShareHistory(code);
 }
 
 void HqInfoService::slotQueryTop10ChinaStockInfos(const QDate &date, const QString &share, int market)
