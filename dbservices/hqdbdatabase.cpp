@@ -91,29 +91,21 @@ QDate HQDBDataBase::getLastUpdateDateOfTable(const QString &table)
 
 bool HQDBDataBase::getBlockDataList(BlockDataList &list, int type)
 {
+    QMutexLocker locker(&mSQlMutex);
+    list.clear();
     QString filter = (type != 0 ? tr(" where %1 = %2").arg(HQ_TABLE_COL_BLOCK_TYPE).arg(type) : "");
-//    if(!mSqlQuery.exec(tr("select * from Block %1").arg(filter))) return;
-
-#if 0
-    QList<BlockRealInfo> selist;
-    while (mSqlQuery.next()) {
-        BlockRealInfo info;
-        int index = 0;
-        info.mCode = mSqlQuery.value(index++).toInt();
-        info.mName = mSqlQuery.value(index++).toString();
-        info.mCurPrice = mSqlQuery.value(index++).toDouble();
-        info.mChange = mSqlQuery.value(index++).toDouble();
-        info.mChangePercent = mSqlQuery.value(index++).toDouble();
-        info.mZjlx = mSqlQuery.value(index++).toDouble();
-        info.mShareCodesList = mSqlQuery.value(index++).toStringList();
-        info.mType = mSqlQuery.value(index++).toInt();
-        info.mDate = QDateTime::fromMSecsSinceEpoch(mSqlQuery.value(index++).toLongLong()).date();
-        if(init) mBlockInfo[info.mCode] = info;
-        selist.append(info);
+    if(!mSQLQuery.exec(tr("select * from %1 %2").arg(HQ_BLOCK_TABLE).arg(filter))) return false;
+    while (mSQLQuery.next()) {
+        BlockData *info = new BlockData;
+        info->mCode = mSQLQuery.value(HQ_TABLE_COL_CODE).toString();
+        info->mName = mSQLQuery.value(HQ_TABLE_COL_NAME).toString();
+        info->mChangePer = mSQLQuery.value(HQ_TABLE_COL_CHANGE_PERCENT).toDouble();
+        info->mBlockType = mSQLQuery.value(HQ_TABLE_COL_BLOCK_TYPE).toInt();
+        info->mIsFav = mSQLQuery.value(HQ_TABLE_COL_FAVORITE).toBool();
+        info->mShareCodeList = mSQLQuery.value(HQ_TABLE_COL_SHARE_LIST).toStringList();
+        info->mDate = QDateTime::fromMSecsSinceEpoch(mSQLQuery.value(HQ_TABLE_COL_DATE).toLongLong()).date();
+        list.append(info);
     }
-
-    emit signalSendBlockInfoList(selist);
-#endif
     return true;
 }
 

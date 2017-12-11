@@ -4,9 +4,11 @@
 #include <QString>
 #include <QObject>
 #include <QColor>
+#include <QList>
+#include <QDate>
 
 class BlockData;
-typedef QList<BlockData*>         BlockDataList;
+typedef QList<BlockData*>       BlockDataList;
 Q_DECLARE_METATYPE(BlockDataList)
 
 typedef enum BlockType
@@ -35,6 +37,7 @@ public:
     QStringList         mShareCodeList;
     bool                mIsFav;
     int                 mBlockType;
+    QDate               mDate;
 
 public:
     bool operator <(const BlockData& other)

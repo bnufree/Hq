@@ -1,4 +1,5 @@
 ﻿#include "blockdata.h"
+#include <QDebug>
 
 BlockData::BlockData()
 {
@@ -8,7 +9,7 @@ BlockData::BlockData()
 
 BlockData::~BlockData()
 {
-
+    qDebug()<<"block data descontruction.";
 }
 
 //BlockDataList BlockData::BlockDataListFromCodesList(const QStringList &codes)
