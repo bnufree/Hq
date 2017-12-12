@@ -7,8 +7,9 @@
 #include "stockdata.h"
 
 //表名
-#define         HQ_SHARE_BASIC_INFO_TABLE           "stock_"
+#define         HQ_SHARE_HISTORY_INFO_TABLE           "stock_"
 #define         HQ_BLOCK_TABLE                      "block"
+#define         HQ_SHARE_TABLE                      "stock"
 
 
 //列名
@@ -23,13 +24,13 @@
 #define         HQ_TABLE_COL_MONEY              "money"
 #define         HQ_TABLE_COL_CHANGE_PERCENT     "change"
 #define         HQ_TABLE_COL_DATE               "date"
-#define         HQ_TABLE_COL_FOREIGN_VOL        "vol_foreign"
+#define         HQ_TABLE_COL_HSGT_TOP10_VOL        "vol_foreign"
 #define         HQ_TABLE_COL_FAVORITE           "favorite"
 #define         HQ_TABLE_COL_ZJLX               "zjlx"
 #define         HQ_TABLE_COL_RZRQ               "rzrq"
-#define         HQ_TABLE_COL_FOREIGN_MONEY      "foreign_money"
+#define         HQ_TABLE_COL_HSGT_TOP10_MONEY      "foreign_money"
 #define         HQ_TABLE_COL_HSGT_TOP10         "hsgt"
-#define         HQ_TABLE_COL_FOREIGN_HAVE       "foreign_amount"
+#define         HQ_TABLE_COL_HSGT_HAVE       "foreign_amount"
 #define         HQ_TABLE_COL_SHARE_LIST         "share_list"
 #define         HQ_TABLE_COL_BLOCK_LIST         "block_list"
 #define         HQ_TABLE_COL_BLOCK_TYPE         "type"
@@ -71,5 +72,14 @@ struct  foreignHolder{
         previous = 0;
     }
 };
+
+struct TABLE_COL_DEF
+{
+    QString mKey;
+    QString mDef;
+};
+
+typedef QList<TABLE_COL_DEF>        TableColList;
+
 #endif // HQDATADEFINES
 

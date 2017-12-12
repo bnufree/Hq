@@ -1,4 +1,4 @@
-#ifndef STOCKDATA_H
+﻿#ifndef STOCKDATA_H
 #define STOCKDATA_H
 #include <QStringList>
 #include <QDate>
@@ -31,7 +31,9 @@ public:
         mMutableShare = 0;
         mZJLX = 0.0;
         mRZRQ = 0.0;
-        mHSGT = 0.0;
+        mHSGTTop10Money = 0.0;
+        mHSGTTop10Vol = 0;
+        mHSGTTop10 = false;
         mHSGTEstimateFlag = false;
         mDate = QDate(2017,1,1);
         mIsFavCode = false;
@@ -54,7 +56,9 @@ public:
     QDate           mDate;
     double          mZJLX;
     double          mRZRQ;
-    double          mHSGT;
+    double          mHSGTTop10Money;
+    qint64          mHSGTTop10Vol;
+    bool            mHSGTTop10;
     bool            mHSGTEstimateFlag;
     bool            mIsFavCode;
     QTime           mUpdateTime;
@@ -124,6 +128,7 @@ public:
     double          mLastClose;
     double          mMoneyRatio;
     BlockDataList     mBlockList;
+    QStringList       mBlockCodeList;
     double          mZJLX;      //资金流向
     double          mSZZG; //送转股比例
     double          mXJFH;  //现金分红

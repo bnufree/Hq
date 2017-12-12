@@ -30,6 +30,7 @@ public:
 public:
     QString             mName;
     QString             mCode;
+    double              mClose;
     double              mChangePer;
     QString             mTopShareCode;
     QString             mTopShareName;

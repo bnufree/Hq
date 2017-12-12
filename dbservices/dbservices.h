@@ -64,12 +64,8 @@ public slots:
     void slotRecvShareHistoryInfos(const StockDataList& list);
     //void slotUpdateShareHistoryInfos(const QMap<QString, StockDataList> map);
     bool slotAddHistoryData(const StockData& data);
-    void updateBlockInfoList(const QList<BlockRealInfo>& list);
-    void addBlock(const BlockRealInfo& info);
-    void modBlock(const BlockRealInfo& info);
-    void delBlock(int code);
-    void slotQueryBlock(int type = 0);
-    void recvRealBlockInfo(const QList<BlockRealInfo>& list);
+    void initBlockData(int type = 0);
+    void initShareData();
     void slotRecvTop10ChinaStockInfos(const QList<ChinaShareExchange>& list);
     void slotQueryTop10ChinaStockInfos(const QDate& date = QDate(), const QString& share = QString(), int market = 0);
     void slotQueryShareHistoryLastDate(const QString& code);
@@ -81,7 +77,7 @@ public slots:
     void slotUpdateStkProfitList(const StockDataList& list);
     void slotAddShareAmoutByForeigner(const StockDataList& list);
     void slotUpdateShareAmountByForeigner();
-    void slotInitStockRealInfos(const QStringList& list);
+    void slotUpdateStockRealInfos(const QStringList& list);
 
 
 private:
@@ -91,10 +87,7 @@ private:
     //bool createStockBaseInfoTable(const QString& code);
     //bool createBlockTable();
     bool createHSGTShareAmountTable();
-    bool blockExist(int code);
     bool isActive();
-    void initBlockInfo();
-    void saveDB();
     QString errMsg();
     //数据库查询指定日期的沪深股通的TOP10交易
     bool queryTop10ChinaShareInfos(QList<ChinaShareExchange>& list, const QDate& date = QDate(), const QString& share = QString(), int market = 0);
@@ -119,9 +112,8 @@ private:    //本类使用的变量
     };
     static CGarbo s_Garbo; // 定义一个静态成员，在程序结束时，系统会调用它的析构函数
     QThread             m_threadWork;       //工作线程
-    QMap<int, BlockRealInfo>    mBlockInfo;
     QStringList                 mNotExchangeDaysList;
-    QMap<QString, StockData*>    mBasicStkInfo;
+    QMap<QString, StockData*>    mStkRealInfo;
     QDate                       mLast3DaysDate;
     QDate                       mLast5DaysDate;
     QDate                       mLast10DaysDate;
@@ -131,7 +123,6 @@ private:    //本类使用的变量
     QMap<QString, foreignHolder>       mStkForeignerHoldMap;
     QMap<QString,   BlockData*> mBlockDataMap;
     QMap<QString,   QStringList> mShareBlockMap;
-    QMap<QString,   StockData*>     mRealStockInfoMap;
     QMutex                      mBlockMutex;
     QMutex                      mShareMutex;
     HQDBDataBase                mDataBase;
