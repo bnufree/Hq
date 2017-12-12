@@ -23,9 +23,11 @@ public slots:
     void run();
     void slotRecvHttpContent(const QByteArray& bytes);
     void slotRecvAllCodes(const QStringList& list);
+    void slotDBInitFinished();
 private:
     QHttpGet    *mHttp;
     QThread     mThread;
+    QStringList mCodesList;
 };
 
 #endif // QEASTMONYSTOCKCODESTHREAD_H

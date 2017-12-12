@@ -34,9 +34,11 @@ public:
     void         setShareBlock(const QString& code, const QString& block);
 
 signals:
-    //开始创建数据库需要的表信息
-    void signalCreateDBTables();
-    void signalCreateDBTablesFinished(bool sts, const QString& errMsg);
+    //开始创建数据库需要的表信息，初始化数据库
+    void signalInitDBTables();
+    void signalDbInitFinished();
+    void signalUpdateStockCodesList(const QStringList& codes);
+
     //从数据库查询板块信息
     void signalQueryBlockInfo(int type = 1);
     void signalRecvRealBlockInfo(const QList<BlockRealInfo>& list);
@@ -60,7 +62,8 @@ signals:
     void signalAddShareAmoutByForeigner(const StockDataList& list);
     void signalUpdateShareAmountByForeigner();
 public slots:
-    void slotCreateDBTables();
+    void slotInitDBTables();
+    void slotUpdateStockCodesList(const QStringList& list);
     void slotRecvShareHistoryInfos(const StockDataList& list);
     //void slotUpdateShareHistoryInfos(const QMap<QString, StockDataList> map);
     bool slotAddHistoryData(const StockData& data);
@@ -69,15 +72,11 @@ public slots:
     void slotRecvTop10ChinaStockInfos(const QList<ChinaShareExchange>& list);
     void slotQueryTop10ChinaStockInfos(const QDate& date = QDate(), const QString& share = QString(), int market = 0);
     void slotQueryShareHistoryLastDate(const QString& code);
-    void slotQueryAllShareBasicInfo();
-    bool slotAddShareBasicInfo(const StockData& data);
-    void slotAddShareBasicInfoList(const StockDataList& list);
     void slotUpdateStkBaseinfoWithHistory(const QString& code);
     void slotUpdateHistoryChange(const QString& code);
     void slotUpdateStkProfitList(const StockDataList& list);
     void slotAddShareAmoutByForeigner(const StockDataList& list);
     void slotUpdateShareAmountByForeigner();
-    void slotUpdateStockRealInfos(const QStringList& list);
 
 
 private:

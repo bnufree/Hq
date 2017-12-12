@@ -51,67 +51,8 @@ Dialog::Dialog(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowFlags(Qt::FramelessWindowHint);
-    //this->setAttribute(Qt::WA_TranslucentBackground);
-    //this->installEventFilter(this);
-//    ui->hqtbl->installEventFilter(this);
-//    ui->blocktbl->installEventFilter(this);
-//    ui->hqtbl->horizontalHeader()->setAutoFillBackground(false);
     this->setMouseTracking(true);
-//    ui->blocktbl->setAlternatingRowColors(false);
-//    ui->hqtbl->setAlternatingRowColors(false);
-//    mSecSize = 75;
     mDisplayMode = E_DISPLAY_ALL;
-    int wkwidth = 0;
-    //设定标题
-//    QStringList blockTitleList;
-//    blockTitleList<<QStringLiteral("名称")<<QStringLiteral("涨跌");
-//    ui->blocktbl->setColumnCount(blockTitleList.length());
-//    ui->blocktbl->setHorizontalHeaderLabels(blockTitleList);
-//    ui->blocktbl->horizontalHeader()->setDefaultSectionSize(mSecSize);
-//    mDisplayCol += blockTitleList.length();
-
-//    mHqHeaderList<<QStringLiteral("代码")<<QStringLiteral("名称")<<QStringLiteral("现价")<<QStringLiteral("涨跌")\
-//               <<QStringLiteral("成交")<<QStringLiteral("资金比")<<QStringLiteral("3日")<<QStringLiteral("资金流")
-//               <<QStringLiteral("股息率")<<QStringLiteral("送转")<<QStringLiteral("总市值")<<QStringLiteral("流通市值")
-//               <<QStringLiteral("盈亏")<<QStringLiteral("外资持股")<<QStringLiteral("外资持股△")<<QStringLiteral("持股市值")<<QStringLiteral("持股市值△")<<QStringLiteral("登记日")<<QStringLiteral("公告日");
-//    ui->hqtbl->setColumnCount(mHqHeaderList.length());
-//    ui->hqtbl->setHorizontalHeaderLabels(mHqHeaderList);
-//    ui->hqtbl->horizontalHeader()->setDefaultSectionSize(mSecSize);
-//    //开始给各列绑定数据
-//    ui->hqtbl->horizontalHeaderItem(0)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_CODE);
-//    ui->hqtbl->horizontalHeaderItem(1)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_NAME);
-//    ui->hqtbl->horizontalHeaderItem(2)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_PRICE);
-//    ui->hqtbl->horizontalHeaderItem(3)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_CHGPER);
-//    ui->hqtbl->horizontalHeaderItem(4)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_CJE);
-//    ui->hqtbl->horizontalHeaderItem(5)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_MONEYR);
-//    ui->hqtbl->horizontalHeaderItem(6)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_LAST3);
-//    ui->hqtbl->horizontalHeaderItem(7)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_ZJLX);
-//    ui->hqtbl->horizontalHeaderItem(8)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_GXL);
-//    ui->hqtbl->horizontalHeaderItem(9)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_SZZBL);
-//    ui->hqtbl->horizontalHeaderItem(10)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_TCAP);
-//    ui->hqtbl->horizontalHeaderItem(11)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_MCAP);
-//    ui->hqtbl->horizontalHeaderItem(12)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_PROFIT);
-//    ui->hqtbl->horizontalHeaderItem(13)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_FOREIGN_VOL);
-//    ui->hqtbl->horizontalHeaderItem(14)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG);
-//    ui->hqtbl->horizontalHeaderItem(15)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_FOREIGN_CAP);
-//    ui->hqtbl->horizontalHeaderItem(16)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_FOREIGN_CAP_CHG);
-//    ui->hqtbl->horizontalHeaderItem(17)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_GQDJR);
-//    ui->hqtbl->horizontalHeaderItem(18)->setData(Qt::UserRole+1, STK_DISPLAY_SORT_TYPE_NONE);
-
-
-//    for(int i=3; i<ui->hqtbl->columnCount(); i++)
-//    {
-//        ui->hqtbl->setColumnHidden(i, false);
-//    }
-//    mDisplayCol += mHqHeaderList.length();
-//    ui->blocktbl->verticalHeader()->setHidden(true);
-//    ui->hqtbl->setVisible(true);
-//    qDebug()<<"hqtbl visible:"<<ui->hqtbl->isVisible();
-//    windowPos = QPoint(-1, -1);
-//    mTargetSize.setWidth(mDisplayCol * mSecSize);
-//    mTargetSize.setHeight(QApplication::desktop()->availableGeometry(QApplication::desktop()->primaryScreen()).height() -30);
-//    setTargetSize(mTargetSize);
-
     ui->closeBtn->setIcon(style()->standardPixmap(QStyle::SP_TitleBarCloseButton));
     ui->minBtn->setIcon(style()->standardIcon(QStyle::SP_TitleBarMinButton));
     //ui->srchBtn->setIcon(style()->standardIcon(QStyle::SP_BrowserReload));
@@ -126,8 +67,8 @@ Dialog::Dialog(QWidget *parent) :
     systemIcon->setIcon(appIcon);
     systemIcon->show();
     connect(systemIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(setDlgShow(QSystemTrayIcon::ActivationReason)));
-//    connect(ui->hqtbl->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(setSortType(int)));
-//    connect(ui->blocktbl->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(setBlockSort(int)));
+    //数据库初始化
+    DATA_SERVICE->signalInitDBTables();
 
 #if 0
     //开始更新历史信息，龙虎榜信息，沪港通信息

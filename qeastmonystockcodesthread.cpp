@@ -10,6 +10,7 @@
 QEastMonyStockCodesThread::QEastMonyStockCodesThread(QObject *parent) : QObject(parent)
 {
     mHttp = new QHttpGet(QString("http://quote.eastmoney.com/stocklist.html"));
+    connect(DATA_SERVICE, SIGNAL(signalDbInitFinished()), this, SLOT(slotDBInitFinished()));
     connect(mHttp, SIGNAL(signalSendHttpConent(QByteArray)), this, SLOT(slotRecvHttpContent(QByteArray)));
     connect(this, SIGNAL(start()), this, SLOT(run()));
     this->moveToThread(&mThread);
@@ -122,9 +123,12 @@ void QEastMonyStockCodesThread::slotRecvHttpContent(const QByteArray &bytes)
 
 void QEastMonyStockCodesThread::slotRecvAllCodes(const QStringList &list)
 {
-    foreach (QString code, list) {
-        DATA_SERVICE->getBasicStkData(code.right(6));
-    }
-    emit signalSendCodesList(list);
+    mCodesList = list;
+    emit DATA_SERVICE->signalUpdateStockCodesList(list);
+}
+
+void QEastMonyStockCodesThread::slotDBInitFinished()
+{
+    emit signalSendCodesList(mCodesList);
 }
 
