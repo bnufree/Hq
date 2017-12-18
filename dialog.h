@@ -98,12 +98,6 @@ public slots:
     //void slotStartRealInfo();
 
 private slots:
-    void on_zxgBtn_clicked();
-
-    void iniHqCenterAction();
-
-    void on_blkbtn_clicked();
-
     void on_zjlxBtn_clicked();
 
     void on_lhbBtn_clicked();

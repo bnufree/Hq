@@ -100,8 +100,6 @@ Dialog::Dialog(QWidget *parent) :
     connect(shotcut3, SIGNAL(activated()), this, SLOT(slotDisplayStockMini()));
 //    setHook(this);
     mInit = false;
-
-//    iniHqCenterAction();
 }
 
 void Dialog::setDlgShow(QSystemTrayIcon::ActivationReason val)
@@ -208,80 +206,6 @@ void Dialog::setBlockName()
     qDebug()<<"act name:"<<act->text();
 
 }
-
-void Dialog::on_zxgBtn_clicked()
-{
-//    if(mMergeThread) /*mMergeThread->setActive(false);*/
-//    {
-//        mMergeThread->setSelfCodesList(mFavStkList);
-//        mMergeThread->setMktType(MKT_ZXG);
-//    }
-//    if(mStockThread)
-//    {
-//        mStockThread->setActive(true);
-//        mStockThread->setStkList(mFavStkList);
-//    }
-}
-
-void Dialog::iniHqCenterAction()
-{
-    mHqCenterMenu = new QMenu(QStringLiteral("行情中心"), this);
-    QList<QAction*> actlist;
-
-    QStringList poplist;
-    poplist<<QStringLiteral("自选")<<QStringLiteral("沪深")<<QStringLiteral("沪市")<<QStringLiteral("深市")
-          <<QStringLiteral("中小板")<<QStringLiteral("创业板")<<QStringLiteral("沪深基金")
-          <<QStringLiteral("恒指")<<QStringLiteral("恒生国企")
-          <<QStringLiteral("港股通");
-    QList<int> mktlist;
-    mktlist<<MKT_ZXG<<MKT_ALL<<MKT_SH<<MKT_SZ<<MKT_ZXB<<MKT_CYB<<MKT_JJ<<MKT_HK_HSZS<<MKT_HK_HSGQ<<MKT_HK_GGT;
-    int index = -1;
-    foreach (QString name, poplist) {
-        index++;
-        QAction *act = new QAction(this);
-        act->setText(name);
-        act->setData(mktlist[index]);
-        connect(act, &QAction::triggered, this, &Dialog::setStockMarket);
-        actlist.append(act);
-    }
-
-    mHqCenterMenu->addActions(actlist);
-
-
-    mHqHeaderMenu = new QMenu(QStringLiteral("列表标题"), this);
-    for(int i=0; i<mHqHeaderList.length(); i++)
-    {
-        QAction *act = new QAction(this);
-        act->setText(mHqHeaderList[i]);
-        TableColDisplayStatus data;
-        data.mTable = ui->hqtbl;
-        data.mColIndex = i;
-        data.mIsDisplay = true;
-        //act->setData(i);
-        act->setCheckable(true);
-        data.mIsDisplay = true;
-        act->setChecked(data.mIsDisplay);
-        act->setData(QVariant::fromValue(data));
-        connect(act, &QAction::triggered, this, &Dialog::setDisplayCol);
-        mHqColActList.append(act);
-    }
-
-    mHqHeaderMenu->addActions(mHqColActList);
-
-    mHqPageMenu = new QMenu(QStringLiteral("页面控制"), this);
-    poplist.clear();
-    poplist<<QStringLiteral("首页")<<QStringLiteral("前一页")<<QStringLiteral("后一页")<<QStringLiteral("末页");
-    for(int i=0; i<poplist.length(); i++)
-    {
-        QAction *act = new QAction(this);
-        act->setText(poplist[i]);
-        act->setData(i);
-        connect(act, &QAction::triggered, this, &Dialog::setDisplayPage);
-        mHqPageMenu->addAction(act);
-    }
-
-}
-
 void Dialog::setDisplayPage()
 {
     if(!mMergeThread) return;
@@ -348,27 +272,6 @@ void Dialog::setStockMarket()
 
 }
 
-void Dialog::on_blkbtn_clicked()
-{
-    QMenu *popMenu = new QMenu(this);
-    QList<QAction*> actlist;
-
-    QStringList poplist;
-    poplist<<QStringLiteral("地域")<<QStringLiteral("行业")<<QStringLiteral("概念");
-    int index = 0;
-    foreach (QString name, poplist) {
-        index++;
-        QAction *act = new QAction(this);
-        act->setText(name);
-        act->setData(index);
-        connect(act, &QAction::triggered, this, &Dialog::setBlockName);
-        actlist.append(act);
-    }
-
-    popMenu->addActions(actlist);
-    popMenu->popup(QCursor::pos());
-
-}
 
 void Dialog::on_zjlxBtn_clicked()
 {
