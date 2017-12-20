@@ -895,6 +895,8 @@ void Dialog::on_blocktbl_itemClicked(QTableWidgetItem *item)
 void Dialog::slotUpdateStockCodesList(const QStringList &list)
 {
     qDebug()<<"update code finshed:"<<list.length();
+    //更新股本信息等
+    QShareHistoryInfoMgr* mgr = new QShareHistoryInfoMgr(list);
     mAllStkList = list;
     //更新指数
     QIndexWidget *indexw = new QIndexWidget(this);

@@ -96,6 +96,9 @@ void HqInfoService::initSignalSlot()
 {
     connect(this, SIGNAL(signalInitDBTables()), this, SLOT(slotInitDBTables()));
     connect(this, SIGNAL(signalUpdateStockCodesList(QStringList)), this, SLOT(slotUpdateStockCodesList(QStringList)));
+    connect(this, SIGNAL(signalRecvShareHistoryInfos(QString,StockDataList)), this, SLOT(slotRecvShareHistoryInfos(QString,StockDataList)));
+    connect(this, SIGNAL(signalUpdateShareinfoWithHistory(QString)), this, SLOT(slotUpdateShareinfoWithHistory(QString)));
+    connect(this, SIGNAL(signalUpdateShareFinanceInfo(StockDataList)), this, SLOT(slotUpdateShareFinanceInfo(StockDataList)));
 }
 
 
@@ -230,17 +233,10 @@ bool HqInfoService::queryTop10ChinaShareInfos(QList<ChinaShareExchange>& list, c
     return true;
 }
 
-void HqInfoService::slotRecvShareHistoryInfos(const StockDataList &list)
+void HqInfoService::slotRecvShareHistoryInfos(const QString& code, const StockDataList &list)
 {
     //更新到数据库
-    QSqlDatabase::database().transaction();
-    foreach (StockData info, list) {
-        if(!slotAddHistoryData(info))
-        {
-//            qDebug()<<"error:"<<mSqlQuery.lastError().text()<<" "<<mSqlQuery.lastQuery();
-        }
-    }
-    QSqlDatabase::database().commit();
+    mDataBase.addHistoryDataList(code, list);
 }
 
 bool HqInfoService::slotAddHistoryData(const StockData &info)
@@ -304,7 +300,7 @@ bool HqInfoService::GetHistoryInfoWithDate(const QString &table, const QDate &da
     return false;
 }
 
-void HqInfoService::slotUpdateStkBaseinfoWithHistory(const QString &code)
+void HqInfoService::slotUpdateShareinfoWithHistory(const QString &code)
 {
 //    qDebug()<<__FUNCTION__<<" "<<code;
     QString table = "stk" + code.right(6);
@@ -347,6 +343,21 @@ StockData* HqInfoService::getBasicStkData(const QString &code)
 
     return mStkRealInfo[code];
 
+}
+
+void HqInfoService::slotUpdateShareFinanceInfo(const StockDataList &list)
+{
+    foreach (StockData data, list) {
+        StockData *res = mStkRealInfo[data.mCode];
+        if(res)
+        {
+            res->mMGJZC = data.mMGJZC;
+            res->mMGSY = data.mMGSY;
+            res->mTotalShare = data.mTotalShare;
+            res->mMutableShare = data.mMutableShare;
+            res->mJZCSYL = data.mJZCSYL;
+        }
+    }
 }
 
 double HqInfoService::GetMultiDaysChangePercent(const QString &table, int days)

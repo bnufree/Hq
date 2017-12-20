@@ -234,6 +234,20 @@ bool HQDBDataBase::createShareTable()
 
     return createTable(HQ_SHARE_TABLE, colist);
 }
+bool HQDBDataBase::addHistoryDataList(const QString &code, const StockDataList &list)
+{
+    if(!createStockHistoryInfoTable(code)) return false;
+    foreach (StockData data, list) {
+        bool exist = false;
+        if(!isRecordExist(exist, HISTORY_TABLE(code), HQ_TABLE_COL_DATE, data.mDate)) return false;
+        if(exist) continue;
+        if(!addShare(data, HISTORY_TABLE(code)))
+        {
+            return false;
+        }
+    }
+    return true;
+}
 
 bool HQDBDataBase::createStockHistoryInfoTable(const QString& code)
 {
@@ -299,7 +313,7 @@ bool HQDBDataBase::saveShareDataList(const QMap<QString, StockData *>& pShareMap
 {
     QSqlDatabase::database().transaction();
     //先删除基本表
-    if(!deleteShare())
+    if(!deleteShare(HQ_SHARE_TABLE))
     {
         QSqlDatabase::database().rollback();
         return false;
@@ -347,14 +361,30 @@ bool HQDBDataBase::addShare(const StockData &info, const QString& table)
 
 
 
-bool HQDBDataBase::deleteShare(const QString& code)
+bool HQDBDataBase::deleteShare(const QString& table, const QString& col, const QVariant& val)
 {
     QMutexLocker locker(&mSQlMutex);
-    if(code.length() == 0)
+    if(col.length() == 0)
     {
-        return mSQLQuery.exec(QString("delete from %1").arg(HQ_SHARE_TABLE));
+        return mSQLQuery.exec(QString("delete from %1").arg(table));
     }
-    return mSQLQuery.exec(QString("delete from %1 where %2 = %1").arg(HQ_SHARE_TABLE).arg(HQ_TABLE_COL_CODE).arg(code));
+    mSQLQuery.prepare(QString("delete from %1 where %2 = ?").arg(table).arg(col));
+    mSQLQuery.addBindValue(val);
+    return mSQLQuery.exec();
+}
+
+bool HQDBDataBase::isRecordExist(bool& exist,const QString &table, const QString &col, const QVariant &val)
+{
+    exist = false;
+    QMutexLocker locker(&mSQlMutex);
+    mSQLQuery.prepare(QString("select count(1) from %1 where %2 = ?").arg(table).arg(col));
+    mSQLQuery.addBindValue(val);
+    if(!mSQLQuery.exec()) return false;
+    while (mSQLQuery.next()) {
+        exist = true;
+        break;
+    }
+    return true;
 }
 
 

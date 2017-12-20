@@ -11,7 +11,7 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
     datalist.append(TableColData(QStringLiteral("涨跌"), STK_DISPLAY_SORT_TYPE_CHGPER));
     datalist.append(TableColData(QStringLiteral("成交"), STK_DISPLAY_SORT_TYPE_CJE));
     datalist.append(TableColData(QStringLiteral("资金比"), STK_DISPLAY_SORT_TYPE_MONEYR));
-    datalist.append(TableColData(QStringLiteral("3日"), STK_DISPLAY_SORT_TYPE_LAST3));
+    datalist.append(TableColData(QStringLiteral("阶段涨幅"), STK_DISPLAY_SORT_TYPE_LAST3));
     datalist.append(TableColData(QStringLiteral("资金流"), STK_DISPLAY_SORT_TYPE_ZJLX));
     datalist.append(TableColData(QStringLiteral("股息率"), STK_DISPLAY_SORT_TYPE_GXL));
     datalist.append(TableColData(QStringLiteral("送转"), STK_DISPLAY_SORT_TYPE_SZZBL));

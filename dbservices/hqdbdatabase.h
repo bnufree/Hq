@@ -6,6 +6,14 @@
 #include <QMutex>
 #include "hqdatadefines.h"
 
+enum HISTORY_CHANGEPERCENT{
+    DAYS_3 = 3,
+    DAYS_5 = 5,
+    DAYS_10 = 10,
+    DAYS_MONTH = 20,
+    DAYS_YEARS = QDate::currentDate().daysInYear(),
+};
+
 class HQDBDataBase : public QObject
 {
     Q_OBJECT
@@ -26,7 +34,10 @@ public:
     bool getShareDataList(QMap<QString, StockData*>& pShareMap);
     bool saveShareDataList(const QMap<QString, StockData*>& pShareMap );
     bool addShare(const StockData& data, const QString& table);
-    bool deleteShare(const QString& code = QString());
+    bool deleteShare(const QString& table, const QString& col = QString(), const QVariant& val = QVariant());
+    bool addHistoryDataList(const QString& code, const StockDataList& list);
+    bool isRecordExist(bool& exist, const QString& table, const QString& col, const QVariant& val);
+    bool getMultiDaysChangePercent(double& change, const QString &code, HISTORY_CHANGEPERCENT type );
 
     bool createDBTables();
     QDate getLastUpdateDateOfShareHistory(const QString &code);

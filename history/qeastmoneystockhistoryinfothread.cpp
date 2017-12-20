@@ -1,19 +1,19 @@
-#include "qeastmoneystockhistoryinfothread.h"
+﻿#include "qeastmoneystockhistoryinfothread.h"
 #include <QDateTime>
 #include <QDebug>
 #include "dbservices/dbservices.h"
-#include "../qhttpget.h"
+#include "qhttpget.h"
+#include "utils/hqutils.h"
 
-QEastmoneyStockHistoryInfoThread::QEastmoneyStockHistoryInfoThread(const QString& code, const QDate& date,  QObject *parent) :
+QEastmoneyStockHistoryInfoThread::QEastmoneyStockHistoryInfoThread(const QString& code, QObject *parent) :
     mCode(code),
     QThread(parent)
 {
     mCode = code;
-    if(mCode.length() != 6)
+    if(mCode.length() > 6)
     {
         mCode = mCode.right(6);
     }
-    mDate = date;
 }
 
 QEastmoneyStockHistoryInfoThread::~QEastmoneyStockHistoryInfoThread()
@@ -23,15 +23,12 @@ QEastmoneyStockHistoryInfoThread::~QEastmoneyStockHistoryInfoThread()
 
 void QEastmoneyStockHistoryInfoThread::run()
 {
-#if 0
-    //QDate lastDate = DATA_SERVICE->getLastUpdateDateOfShareHistory(mCode);
-    //检查是否需要更新
-    QDate start = mDate.addDays(1);
+    QDate lastDate = DATA_SERVICE->getLastUpdateDateOfShareHistory(mCode);
+    //检查日线数据是否需要更新
+    QDate start = lastDate.addDays(1);
     QDate end = QDate::currentDate();
     if(start < end)
     {
-
-//        qDebug()<<__FUNCTION__<<__LINE__<<mCode;
         mCode = mCode.right(6);
         if(mCode.left(1) == "6" || mCode.left(1) == "5")
         {
@@ -45,7 +42,7 @@ void QEastmoneyStockHistoryInfoThread::run()
 
         QString result = QString::fromLocal8Bit(QHttpGet::getContentOfURL(wkURL));
         QStringList lines = result.split("\r\n");
-        StockDataList list;
+        QMap<QString, StockData> list;
         for(int i=1; i<lines.length(); i++)
         {
             QStringList cols = lines[i].split(",");
@@ -53,6 +50,7 @@ void QEastmoneyStockHistoryInfoThread::run()
             {
                 StockData data;
                 data.mDate = QDate::fromString(cols[0], "yyyy-MM-dd");
+                if(HqUtils::isWeekend(data.mDate)) continue;
                 data.mCode = cols[1].right(6);
                 data.mName = cols[2];
                 data.mCur = cols[3].toDouble();
@@ -69,17 +67,15 @@ void QEastmoneyStockHistoryInfoThread::run()
                 if(price == 0) price = data.mLastClose;
                 data.mTotalShare = cols[13].toDouble() / price;
                 data.mMutableShare = cols[14].toDouble() / price;
-                list.append(data);
+                list[data.mDate.toString("yyyy-MM-dd")] = data;
             }
         }
 
-        emit DATA_SERVICE->signalRecvShareHistoryInfos(list);
+        emit DATA_SERVICE->signalRecvShareHistoryInfos(mCode, list.values());
     }
 
     //查询数据库更新历史信息
-    emit DATA_SERVICE->signalUpdateStkBaseinfoWithHistory(mCode.right(6));
-#endif
-
+    emit DATA_SERVICE->signalUpdateShareinfoWithHistory(mCode.right(6));
 }
 
 QString QEastmoneyStockHistoryInfoThread::getCode()

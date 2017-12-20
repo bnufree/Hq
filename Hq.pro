@@ -54,7 +54,9 @@ SOURCES += main.cpp\
     block/qeastmoneyblockthread.cpp \
     table/qblocktablewidget.cpp \
     dbservices/hqdbdatabase.cpp \
-    dbservices/dbservices.cpp
+    dbservices/dbservices.cpp \
+    utils/hqutils.cpp \
+    history/qsinasharevolinfothread.cpp
 
 HEADERS  += dialog.h \
     stockdata.h \
@@ -99,7 +101,9 @@ HEADERS  += dialog.h \
     table/qblocktablewidget.h \
     dbservices/hqdbdatabase.h \
     dbservices/dbservices.h \
-    dbservices/hqdatadefines.h
+    dbservices/hqdatadefines.h \
+    utils/hqutils.h \
+    history/qsinasharevolinfothread.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

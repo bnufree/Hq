@@ -1,4 +1,4 @@
-#ifndef QHTTPGET_H
+﻿#ifndef QHTTPGET_H
 #define QHTTPGET_H
 
 #include <QThread>
@@ -15,6 +15,7 @@ public:
     void setUrl(const QString& url);
     //void startGet();
     void setUpdateInterval(int secs);           //刷新间隔
+    QByteArray static getContentOfURL(const QString& url);
 signals:
     void signalSendHttpConent(const QByteArray& content);
     void signalErrorOccured(QNetworkReply::NetworkError);

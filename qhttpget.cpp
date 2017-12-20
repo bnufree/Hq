@@ -110,4 +110,26 @@ void QHttpGet::slotReadHttpContent()
     mReply->deleteLater();
 }
 
+QByteArray QHttpGet::getContentOfURL(const QString &url)
+{
+    QByteArray recv;
+    QNetworkAccessManager mgr;
+    QNetworkReply *reply = mgr.get(QNetworkRequest(url));
+    if(!reply) return recv;
+
+    QEventLoop subloop;
+    connect(reply, SIGNAL(finished()), &subloop, SLOT(quit()));
+    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), &subloop, SLOT(quit()));
+    subloop.exec();
+    if(reply->error() == QNetworkReply::NoError)
+    {
+        recv = reply->readAll();
+    }
+    reply->abort();
+    reply->close();
+    delete reply;
+    reply = 0;
+    return recv;
+}
+
 

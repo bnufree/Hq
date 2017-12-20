@@ -143,6 +143,9 @@ public:
     qint64          mForeignVolChg;
     double          mForeignCap;
     double          mForeignCapChg;
+    double          mMGSY;      //每股收益
+    double          mMGJZC;     //每股净资产
+    double          mJZCSYL;    //净资产收益率
 };
 
 Q_DECLARE_METATYPE(StockData)

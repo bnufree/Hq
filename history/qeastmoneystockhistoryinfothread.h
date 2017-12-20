@@ -1,26 +1,24 @@
-#ifndef QEASTMONEYSTOCKHISTORYINFOTHREAD_H
+﻿#ifndef QEASTMONEYSTOCKHISTORYINFOTHREAD_H
 #define QEASTMONEYSTOCKHISTORYINFOTHREAD_H
 
 #include <QThread>
 #include <QStringList>
 #include <QDate>
 
-class QNetworkReply;
 
 class QEastmoneyStockHistoryInfoThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit QEastmoneyStockHistoryInfoThread(const QString& code, const QDate& date, QObject *parent = 0);
+    explicit QEastmoneyStockHistoryInfoThread(const QString& code, QObject *parent = 0);
     ~QEastmoneyStockHistoryInfoThread();
     QString getCode();
-protected:   
-    void run();
 signals:
-public slots:
+protected:
+    void run();
 private:
     QString         mCode;
-    QDate           mDate;
+    QThread         mWorkThread;
 };
 
 #endif // QEASTMONEYSTOCKHISTORYINFOTHREAD_H

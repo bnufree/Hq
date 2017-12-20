@@ -1,4 +1,4 @@
-#ifndef QSHAREHISTORYINFOMGR_H
+﻿#ifndef QSHAREHISTORYINFOMGR_H
 #define QSHAREHISTORYINFOMGR_H
 
 #include <QObject>
@@ -11,8 +11,7 @@ class QShareHistoryInfoMgr : public QObject
 {
     Q_OBJECT
 public:
-    explicit QShareHistoryInfoMgr(QObject *parent = 0);
-    QStringList  getCodesList();
+    explicit QShareHistoryInfoMgr(const QStringList& codes, QObject *parent = 0);
 
 signals:
     void signalGetCodesFinished(const QStringList& list);
@@ -23,19 +22,10 @@ signals:
     void signalUpdateAmountProcess(const QString& date);
 
 public slots:
-    void slotSetHistoryCodeList(const QStringList& list);
-    void slotRecvCodeHistoryDate(const QString& code, const QDate& date);
-    void slotSubThreadFinish();
-    void slotStartGetHistory();
-    void slotUpdateHistoryFinished(const QString& code);
-    void slotUpdateStockCodesList(const QStringList &list);
-    void slotUpdateForeignAmountFinished();
+    void slotShareFinanceInfoFinished();
 private:
-    QThread     mWorkThread;
-    QList<QEastmoneyStockHistoryInfoThread*>     mWorkQueueThreadList;
-    QList<QEastmoneyStockHistoryInfoThread*>     mWorkingThreadList;
+    QThread             mWorkThread;
     QStringList         mCodesList;
-    int                 mRecvCodeNum;
 };
 
 #endif // QSHAREHISTORYINFOMGR_H
