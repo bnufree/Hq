@@ -387,5 +387,29 @@ bool HQDBDataBase::isRecordExist(bool& exist,const QString &table, const QString
     return true;
 }
 
+bool HQDBDataBase::getMultiDaysChangePercent(double &change, const QString &code, HISTORY_CHANGEPERCENT type)
+{
+    /*
+    QString table = HISTORY_TABLE(code);
+    QString col = HQ_TABLE_COL_CHANGE_PERCENT;
+    QString
+    if(!mSqlQuery.exec(tr("select 1+change_percent/100 from %1 order by date desc limit %2").arg(table).arg(days)))
+    {
+        return 0.0;
+    }
+
+    double res = 1.0;
+    while (mSqlQuery.next()) {
+        res *= mSqlQuery.value(0).toDouble();
+    }
+
+
+
+    return (res - 1) * 100;
+    */
+    return true;
+
+}
+
 
 

@@ -959,6 +959,7 @@ void Dialog::slotTodayHSGUpdated()
 //}
 void Dialog::slotHistoryDataFinish()
 {
+#if 0
     QShareHistoryInfoMgr *mgr = qobject_cast<QShareHistoryInfoMgr*> (sender());
     if(mgr)
     {
@@ -1003,6 +1004,7 @@ void Dialog::slotHistoryDataFinish()
     qDebug()<<"search thread_________________";
     mSearchThread = new QSinaSearchThread(this);
     connect(mSearchThread, SIGNAL(sendSearchResult(QStringList)), this, SLOT(displayBlockDetailInfoInTable(QStringList)));
+#endif
 }
 
 void Dialog::slotUpdateFavList(const QStringList &list)

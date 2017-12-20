@@ -28,7 +28,9 @@ void QSinaShareVolInfoThread::run()
             data.mMutableShare = qint64(list[10].toDouble() * 10000);
             data.mJZCSYL = list[18].toDouble();
             sharelist.append(data);
+            qDebug()<<data.mCode<<data.mMGSY<<data.mTotalShare<<data.mJZCSYL;
         }
     }
     emit DATA_SERVICE->signalUpdateShareFinanceInfo(sharelist);
+    qDebug()<<"update financial info end!!!!!!!!!!";
 }

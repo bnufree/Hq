@@ -17,7 +17,7 @@ QShareHistoryInfoMgr::QShareHistoryInfoMgr(const QStringList& codes, QObject *pa
 
 void QShareHistoryInfoMgr::slotShareFinanceInfoFinished()
 {
-    QSinaShareVolInfoThread *t1 = qobject_cast<QSinaShareVolInfoThread*> sender();
+    QSinaShareVolInfoThread *t1 = qobject_cast<QSinaShareVolInfoThread*>(sender());
     if(t1)
     {
         delete t1;

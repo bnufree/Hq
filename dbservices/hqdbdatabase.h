@@ -7,11 +7,11 @@
 #include "hqdatadefines.h"
 
 enum HISTORY_CHANGEPERCENT{
-    DAYS_3 = 3,
-    DAYS_5 = 5,
-    DAYS_10 = 10,
-    DAYS_MONTH = 20,
-    DAYS_YEARS = QDate::currentDate().daysInYear(),
+    DAYS_3 = 1,
+    DAYS_5,
+    DAYS_10,
+    DAYS_MONTH,
+    DAYS_YEARS,
 };
 
 class HQDBDataBase : public QObject
