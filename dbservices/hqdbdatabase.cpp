@@ -3,7 +3,7 @@
 #include <QDebug>
 
 #define     QDebug()            qDebug()<<__FUNCTION__<<__LINE__
-#define     HISTORY_TABLE(code) HQ_SHARE_HISTORY_INFO_TABLE + code
+#define     HISTORY_TABLE(code) HQ_SHARE_HISTORY_INFO_TABLE + code.right(6)
 
 
 HQDBDataBase::HQDBDataBase(QObject *parent) : QObject(parent)
@@ -53,7 +53,7 @@ QString HQDBDataBase::getErrorString()
 bool HQDBDataBase::isTableExist(const QString &pTable)
 {
     QMutexLocker locker(&mSQlMutex);
-    if(!mSQLQuery.exec(tr("SELECT COUNT(*) FROM sqlite_master where type='table' and name='%1'").arg(pTable)))
+    if(!mSQLQuery.exec(tr("SELECT COUNT(*) FROM sqlite_master where type='table' and name='%1'").arg(pTable))) return false;
     while (mSQLQuery.next()) {
         return mSQLQuery.value(0).toBool();
     }
@@ -237,15 +237,22 @@ bool HQDBDataBase::createShareTable()
 bool HQDBDataBase::addHistoryDataList(const QString &code, const StockDataList &list)
 {
     if(!createStockHistoryInfoTable(code)) return false;
+    QSqlDatabase::database().transaction();
     foreach (StockData data, list) {
         bool exist = false;
-        if(!isRecordExist(exist, HISTORY_TABLE(code), HQ_TABLE_COL_DATE, data.mDate)) return false;
+        if(!isRecordExist(exist, HISTORY_TABLE(code), HQ_TABLE_COL_DATE, data.mDate))
+        {
+            QSqlDatabase::database().rollback();
+            return false;
+        }
         if(exist) continue;
         if(!addShare(data, HISTORY_TABLE(code)))
         {
+            QSqlDatabase::database().rollback();
             return false;
         }
     }
+    QSqlDatabase::database().commit();
     return true;
 }
 
@@ -332,7 +339,12 @@ bool HQDBDataBase::saveShareDataList(const QMap<QString, StockData *>& pShareMap
 bool HQDBDataBase::addShare(const StockData &info, const QString& table)
 {
     QMutexLocker locker(&mSQlMutex);
-    mSQLQuery.prepare(QString("insert into %1 values ("
+    mSQLQuery.prepare(QString("insert into %1 ("
+                              "code, name, close, change, vol,"
+                              "money, zjlx, rzrq, favorite, hsgt,"
+                              "vol_foreign, foreign_money, foreign_amount,total_amount,mutable_amount,"
+                              "profit, block_list, date)"
+                              " values ("
                               "?, ?, ?, ?, ?, "
                               "?, ?, ?, ?, ?,"
                               "?, ?, ?, ?, ?,"
@@ -381,34 +393,53 @@ bool HQDBDataBase::isRecordExist(bool& exist,const QString &table, const QString
     mSQLQuery.addBindValue(val);
     if(!mSQLQuery.exec()) return false;
     while (mSQLQuery.next()) {
-        exist = true;
+        exist = mSQLQuery.value(0).toBool();
         break;
     }
     return true;
 }
 
-bool HQDBDataBase::getMultiDaysChangePercent(double &change, const QString &code, HISTORY_CHANGEPERCENT type)
+double HQDBDataBase::getMultiDaysChangePercent(const QString &code, HISTORY_CHANGEPERCENT type)
 {
-    /*
+    double change = 0.0;
+    QMutexLocker locker(&mSQlMutex);
     QString table = HISTORY_TABLE(code);
     QString col = HQ_TABLE_COL_CHANGE_PERCENT;
-    QString
-    if(!mSqlQuery.exec(tr("select 1+change_percent/100 from %1 order by date desc limit %2").arg(table).arg(days)))
+    if(!mSQLQuery.exec(tr("select 1+%1/100 from %2 order by date desc limit %3").arg(col).arg(table).arg(type)))
     {
-        return 0.0;
+        qDebug()<<errMsg();
+        return change;
     }
-
-    double res = 1.0;
-    while (mSqlQuery.next()) {
-        res *= mSqlQuery.value(0).toDouble();
+    change = 1.0;
+    while (mSQLQuery.next()) {
+        change *= mSQLQuery.value(0).toDouble();
     }
+    change = (change -1) * 100;
+    return change;
+}
 
+double HQDBDataBase::getLastMoney(const QString &code)
+{
+    double change = 0.0;
+    QMutexLocker locker(&mSQlMutex);
+    QString table = HISTORY_TABLE(code);
+    QString col = HQ_TABLE_COL_MONEY;
+    if(!mSQLQuery.exec(tr("select %1 from %2 order by date desc limit 1").arg(col).arg(table)))
+    {
+        qDebug()<<errMsg();
+        return change;
+    }
+    change = 1.0;
+    while (mSQLQuery.next()) {
+        change = mSQLQuery.value(0).toDouble() /10000.0;
+        break;
+    }
+    return change;
+}
 
-
-    return (res - 1) * 100;
-    */
-    return true;
-
+QString HQDBDataBase::errMsg()
+{
+    return QString("sql:%1\nerr:%2").arg(mSQLQuery.lastQuery()).arg(mSQLQuery.lastError().text());
 }
 
 

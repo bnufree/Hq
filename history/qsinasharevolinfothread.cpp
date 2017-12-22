@@ -50,24 +50,39 @@ void QSinaShareVolInfoThread::run()
     if(!updatedFromFile)
     {
         //联网更新
-        foreach (QString code, mShareCodesList) {
-            code = code.right(6);
-            QString prefix = HqUtils::prefixCode(code);
-            QString url = QString("http://hq.sinajs.cn/?list=%1%2_i").arg(prefix).arg(code);
-            QString result = QString::fromUtf8(QHttpGet::getContentOfURL(url));
-            QStringList list = result.split(QRegExp("[,\" ;]"));
-            if(list.length() > 20)
+        int pos = 0;
+        int section = 200;
+        while(pos < mShareCodesList.length())
+        {
+            QStringList sublist = mShareCodesList.mid(pos, section);
+            pos += section;
+            if(sublist.length() > 0)
             {
-                QString code = list[1].mid(9,6);
-                FINANCE_DATA data;
-                data.mCode = code.toInt();
-                data.mMGSY = round(list[6].toDouble()*100);
-                data.mMGJZC = round(list[7].toDouble()*100);
-                data.mTotalShare = qint64(list[9].toDouble() * 10000);
-                data.mMutalShare = qint64(list[10].toDouble() * 10000);
-                data.mJZCSYL = round(list[18].toDouble()*100);
-                sharelist.append(data);
-                //qDebug()<<data.mCode<<data.mMGSY<<data.mTotalShare<<data.mJZCSYL;
+                QStringList wklist;
+                foreach (QString code, sublist) {
+                    code = code.right(6);
+                    wklist.append(HqUtils::prefixCode(code) + code+ "_i");
+                }
+                QString url = QString("http://hq.sinajs.cn/?list=%1").arg(wklist.join(","));
+                QString result = QString::fromUtf8(QHttpGet::getContentOfURL(url));
+                //按行进行分割
+                QStringList rows = result.split(QRegExp("[\\r\\n]"));
+                foreach (QString row, rows) {
+                    QStringList list = row.split(QRegExp("[,\" ;]"));
+                    if(list.length() > 20)
+                    {
+                        QString code = list[1].mid(9,6);
+                        FINANCE_DATA data;
+                        data.mCode = code.toInt();
+                        data.mMGSY = round(list[6].toDouble()*100);
+                        data.mMGJZC = round(list[7].toDouble()*100);
+                        data.mTotalShare = qint64(list[9].toDouble() * 10000);
+                        data.mMutalShare = qint64(list[10].toDouble() * 10000);
+                        data.mJZCSYL = round(list[18].toDouble()*100);
+                        sharelist.append(data);
+                        //qDebug()<<data.mCode<<data.mMGSY<<data.mTotalShare<<data.mJZCSYL;
+                    }
+                }
             }
         }
         //将数据写入到文件

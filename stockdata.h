@@ -81,6 +81,19 @@ public:
     static bool sortByMonRatioAsc(const StockData& d1, const StockData& d2);
     static bool sortBy3DayChgDesc(const StockData& d1, const StockData& d2);
     static bool sortBy3DayChgAsc(const StockData& d1, const StockData& d2);
+
+    static bool sortBy5DayChgDesc(const StockData& d1, const StockData& d2);
+    static bool sortBy5DayChgAsc(const StockData& d1, const StockData& d2);
+
+    static bool sortBy10DayChgDesc(const StockData& d1, const StockData& d2);
+    static bool sortBy10DayChgAsc(const StockData& d1, const StockData& d2);
+
+    static bool sortByMonthChgDesc(const StockData& d1, const StockData& d2);
+    static bool sortByMonthChgAsc(const StockData& d1, const StockData& d2);
+
+    static bool sortByYearChgDesc(const StockData& d1, const StockData& d2);
+    static bool sortByYearChgAsc(const StockData& d1, const StockData& d2);
+
     static bool sortBy3DayZjlxDesc(const StockData& d1, const StockData& d2);
     static bool sortBy3DayZjlxAsc(const StockData& d1, const StockData& d2);
     static bool sortByGxlDesc(const StockData& d1, const StockData& d2);

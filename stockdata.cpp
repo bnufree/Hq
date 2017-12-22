@@ -1,4 +1,4 @@
-#include "stockdata.h"
+﻿#include "stockdata.h"
 
 StockData::StockData()
 {
@@ -243,4 +243,52 @@ bool StockData::sortByForCapChgAsc(const StockData& d1, const StockData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mForeignCapChg < d2.mForeignCapChg;
+}
+
+bool StockData::sortBy5DayChgAsc(const StockData &d1, const StockData &d2)
+{
+    if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
+    return d1.mLast5DaysChgPers < d2.mLast5DaysChgPers;
+}
+
+bool StockData::sortBy5DayChgDesc(const StockData &d1, const StockData &d2)
+{
+    if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
+    return d1.mLast5DaysChgPers > d2.mLast5DaysChgPers;
+}
+
+bool StockData::sortBy10DayChgAsc(const StockData &d1, const StockData &d2)
+{
+    if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
+    return d1.mLast10DaysChgPers < d2.mLast10DaysChgPers;
+}
+
+bool StockData::sortBy10DayChgDesc(const StockData &d1, const StockData &d2)
+{
+    if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
+    return d1.mLast10DaysChgPers > d2.mLast10DaysChgPers;
+}
+
+bool StockData::sortByMonthChgAsc(const StockData &d1, const StockData &d2)
+{
+    if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
+    return d1.mLastMonthChgPers < d2.mLastMonthChgPers;
+}
+
+bool StockData::sortByMonthChgDesc(const StockData &d1, const StockData &d2)
+{
+    if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
+    return d1.mLastMonthChgPers > d2.mLastMonthChgPers;
+}
+
+bool StockData::sortByYearChgAsc(const StockData &d1, const StockData &d2)
+{
+    if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
+    return d1.mChgPersFromYear < d2.mChgPersFromYear;
+}
+
+bool StockData::sortByYearChgDesc(const StockData &d1, const StockData &d2)
+{
+    if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
+    return d1.mChgPersFromYear > d2.mChgPersFromYear;
 }

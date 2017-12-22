@@ -114,6 +114,10 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
         }
         data->mTotalCap = data->mCur * data->mTotalShare;
         data->mMutalbleCap = data->mCur * data->mMutableShare;
+        if(data->mMutableShare > 0)
+        {
+            data->mHsl = data->mVol / (double)(data->mMutableShare);
+        }
         if(data->mProfit == 0)
         {
             data->mProfit = DATA_SERVICE->getProfit(code);

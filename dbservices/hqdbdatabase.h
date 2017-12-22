@@ -7,11 +7,12 @@
 #include "hqdatadefines.h"
 
 enum HISTORY_CHANGEPERCENT{
-    DAYS_3 = 1,
-    DAYS_5,
-    DAYS_10,
-    DAYS_MONTH,
-    DAYS_YEARS,
+    DAYS_3 = 3,
+    DAYS_5 = 5,
+    DAYS_10 = 10,
+    DAYS_MONTH = 20,
+    DAYS_HALF_YEAR = 120,
+    DAYS_YEARS = 240,
 };
 
 class HQDBDataBase : public QObject
@@ -37,10 +38,12 @@ public:
     bool deleteShare(const QString& table, const QString& col = QString(), const QVariant& val = QVariant());
     bool addHistoryDataList(const QString& code, const StockDataList& list);
     bool isRecordExist(bool& exist, const QString& table, const QString& col, const QVariant& val);
-    bool getMultiDaysChangePercent(double& change, const QString &code, HISTORY_CHANGEPERCENT type );
+    double getMultiDaysChangePercent(const QString &code, HISTORY_CHANGEPERCENT type );
+    double getLastMoney(const QString& code);
 
     bool createDBTables();
     QDate getLastUpdateDateOfShareHistory(const QString &code);
+    QString errMsg();
 
 private:
     bool initSqlDB();

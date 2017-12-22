@@ -237,7 +237,10 @@ bool HqInfoService::queryTop10ChinaShareInfos(QList<ChinaShareExchange>& list, c
 void HqInfoService::slotRecvShareHistoryInfos(const QString& code, const StockDataList &list)
 {
     //更新到数据库
-    mDataBase.addHistoryDataList(code, list);
+    if(!mDataBase.addHistoryDataList(code, list))
+    {
+        qDebug()<<mDataBase.errMsg();
+    }
 }
 
 bool HqInfoService::slotAddHistoryData(const StockData &info)
@@ -303,27 +306,18 @@ bool HqInfoService::GetHistoryInfoWithDate(const QString &table, const QDate &da
 
 void HqInfoService::slotUpdateShareinfoWithHistory(const QString &code)
 {
-//    qDebug()<<__FUNCTION__<<" "<<code;
-    QString table = "stk" + code.right(6);
-    double last_money = 0.0, last_close = 0.0;
-    qint64 total_share = 0;
-    qint64 mutable_share = 0;
-    //查询昨日的信息
-    GetHistoryInfoWithDate(table, mLastActiveDate, last_close, last_money, total_share, mutable_share);
-    if(code == "600111")
-        qDebug()<<"total:"<<total_share<<" "<<mutable_share<<" "<<last_close<<" "<<last_money<<" "<<mLastActiveDate;
-
     StockData *data = mStkRealInfo[code.right(6)];
-    data->mCode = code.right(6);
-    data->mTotalShare = total_share;
-    data->mMutableShare = mutable_share;
-    data->mLastMoney = last_money;
-    data->mLast3DaysChgPers = GetMultiDaysChangePercent(table, 3);
-    data->mLast5DaysChgPers = GetMultiDaysChangePercent(table, 5);
-    data->mLast10DaysChgPers = GetMultiDaysChangePercent(table, 10);
-    data->mLastMonthChgPers = GetMultiDaysChangePercent(table, 22);
-    data->mLastClose = last_close;
-    data->mProfit = mStkProfitMap[data->mCode];
+    if(data)
+    {
+        data->mLastMoney = mDataBase.getLastMoney(data->mCode);
+        data->mLast3DaysChgPers = mDataBase.getMultiDaysChangePercent(data->mCode, DAYS_3);
+        data->mLast5DaysChgPers = mDataBase.getMultiDaysChangePercent(data->mCode, DAYS_5);
+        data->mLast10DaysChgPers = mDataBase.getMultiDaysChangePercent(data->mCode, DAYS_10);
+        data->mLastMonthChgPers = mDataBase.getMultiDaysChangePercent(data->mCode, DAYS_MONTH);
+        data->mChgPersFromYear = mDataBase.getMultiDaysChangePercent(data->mCode, DAYS_YEARS);
+//        data->mLastClose = last_close;
+//        data->mProfit = mStkProfitMap[data->mCode];
+    }
     emit signalUpdateStkBaseinfoWithHistoryFinished(code);
 }
 
@@ -351,7 +345,7 @@ void HqInfoService::slotUpdateShareFinanceInfo(const FinDataList &list)
     foreach (FINANCE_DATA data, list) {
         QString code = QString("").sprintf("%06d", data.mCode);
         StockData *res = mStkRealInfo[code];
-        qDebug()<<__FUNCTION__<<code<<res;
+        //qDebug()<<__FUNCTION__<<code<<res;
         if(res)
         {
             res->mMGJZC = data.mMGJZC * 0.01;
@@ -513,7 +507,7 @@ void  HqInfoService::slotUpdateStockCodesList(const QStringList &list)
             StockData *data = new StockData;
             data->mCode = code.right(6);
             mStkRealInfo[code.right(6)] = data;
-            qDebug()<<__FUNCTION__<<code<<data;
+            //qDebug()<<__FUNCTION__<<code<<data;
         }
     }
 

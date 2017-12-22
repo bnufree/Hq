@@ -23,6 +23,7 @@ QEastmoneyStockHistoryInfoThread::~QEastmoneyStockHistoryInfoThread()
 
 void QEastmoneyStockHistoryInfoThread::run()
 {
+    if(mCode.left(1) == "5" || mCode.left(1) == "1") return;
     QDate lastDate = DATA_SERVICE->getLastUpdateDateOfShareHistory(mCode);
     //检查日线数据是否需要更新
     QDate start = lastDate.addDays(1);
@@ -30,16 +31,18 @@ void QEastmoneyStockHistoryInfoThread::run()
     if(start < end)
     {
         mCode = mCode.right(6);
+        QString wkCode;
         if(mCode.left(1) == "6" || mCode.left(1) == "5")
         {
-            mCode = "0" + mCode;
+            wkCode = "0" + mCode;
         } else
         {
-            mCode = "1" + mCode;
+            wkCode = "1" + mCode;
         }
         QString wkURL = QString("http://quotes.money.163.com/service/chddata.html?code=%1&start=%2&end=%3")
-                .arg(mCode).arg(start.toString("yyyyMMdd")).arg(end.toString("yyyyMMdd"));
+                .arg(wkCode).arg(start.toString("yyyyMMdd")).arg(end.toString("yyyyMMdd"));
 
+        //qDebug()<<wkURL;
         QString result = QString::fromLocal8Bit(QHttpGet::getContentOfURL(wkURL));
         QStringList lines = result.split("\r\n");
         QMap<QString, StockData> list;
@@ -71,6 +74,7 @@ void QEastmoneyStockHistoryInfoThread::run()
             }
         }
 
+        //qDebug()<<mCode<<lastDate<<list.values().size();
         emit DATA_SERVICE->signalRecvShareHistoryInfos(mCode, list.values());
     }
 

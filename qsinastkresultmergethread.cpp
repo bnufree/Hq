@@ -196,6 +196,49 @@ void QSinaStkResultMergeThread::run()
                     qSort(wklist.begin(), wklist.end(), StockData::sortBy3DayChgAsc);
                 }
             }
+            else if(mSortType == STK_DISPLAY_SORT_TYPE_LAST5)
+            {
+                if(mSortRule == -1)
+                {
+                    qSort(wklist.begin(), wklist.end(), StockData::sortBy5DayChgDesc);
+                } else
+                {
+                    qSort(wklist.begin(), wklist.end(), StockData::sortBy5DayChgAsc);
+                }
+            }
+
+            else if(mSortType == STK_DISPLAY_SORT_TYPE_LAST10)
+            {
+                if(mSortRule == -1)
+                {
+                    qSort(wklist.begin(), wklist.end(), StockData::sortBy10DayChgDesc);
+                } else
+                {
+                    qSort(wklist.begin(), wklist.end(), StockData::sortBy10DayChgAsc);
+                }
+            }
+
+            else if(mSortType == STK_DISPLAY_SORT_TYPE_LAST_MONTH)
+            {
+                if(mSortRule == -1)
+                {
+                    qSort(wklist.begin(), wklist.end(), StockData::sortByMonthChgDesc);
+                } else
+                {
+                    qSort(wklist.begin(), wklist.end(), StockData::sortByMonthChgAsc);
+                }
+            }
+
+            else if(mSortType == STK_DISPLAY_SORT_TYPE_LAST_YEAR)
+            {
+                if(mSortRule == -1)
+                {
+                    qSort(wklist.begin(), wklist.end(), StockData::sortByYearChgDesc);
+                } else
+                {
+                    qSort(wklist.begin(), wklist.end(), StockData::sortByYearChgAsc);
+                }
+            }
 
             else if(mSortType == STK_DISPLAY_SORT_TYPE_ZJLX)
             {

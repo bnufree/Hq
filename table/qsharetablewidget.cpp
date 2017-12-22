@@ -11,9 +11,13 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
     datalist.append(TableColData(QStringLiteral("涨跌"), STK_DISPLAY_SORT_TYPE_CHGPER));
     datalist.append(TableColData(QStringLiteral("成交"), STK_DISPLAY_SORT_TYPE_CJE));
     datalist.append(TableColData(QStringLiteral("资金比"), STK_DISPLAY_SORT_TYPE_MONEYR));
-    datalist.append(TableColData(QStringLiteral("阶段涨幅"), STK_DISPLAY_SORT_TYPE_LAST3));
+    datalist.append(TableColData(QStringLiteral("3日变动"), STK_DISPLAY_SORT_TYPE_LAST3));
+    datalist.append(TableColData(QStringLiteral("5日变动"), STK_DISPLAY_SORT_TYPE_LAST5));
+    datalist.append(TableColData(QStringLiteral("10日变动"), STK_DISPLAY_SORT_TYPE_LAST10));
+    datalist.append(TableColData(QStringLiteral("月变动"), STK_DISPLAY_SORT_TYPE_LAST_MONTH));
+    datalist.append(TableColData(QStringLiteral("年变动"), STK_DISPLAY_SORT_TYPE_LAST_YEAR));
     datalist.append(TableColData(QStringLiteral("资金流"), STK_DISPLAY_SORT_TYPE_ZJLX));
-    datalist.append(TableColData(QStringLiteral("股息率"), STK_DISPLAY_SORT_TYPE_GXL));
+    datalist.append(TableColData(QStringLiteral("股息率%"), STK_DISPLAY_SORT_TYPE_GXL));
     datalist.append(TableColData(QStringLiteral("送转"), STK_DISPLAY_SORT_TYPE_SZZBL));
     datalist.append(TableColData(QStringLiteral("总市值"), STK_DISPLAY_SORT_TYPE_TCAP));
     datalist.append(TableColData(QStringLiteral("流通市值"), STK_DISPLAY_SORT_TYPE_MCAP));
@@ -21,10 +25,10 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
     datalist.append(TableColData(QStringLiteral("外资持股"), STK_DISPLAY_SORT_TYPE_FOREIGN_VOL));
     datalist.append(TableColData(QStringLiteral("外资持股△"), STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG));
     datalist.append(TableColData(QStringLiteral("持股市值"), STK_DISPLAY_SORT_TYPE_FOREIGN_CAP));
-    datalist.append(TableColData(QStringLiteral("持股市值△"), STK_DISPLAY_SORT_TYPE_FOREIGN_CAP_CHG));
+    datalist.append(TableColData(QStringLiteral("持股市值△"), STK_DISPLAY_SORT_TYPE_FOREIGN_CAP_CHG));    
+    datalist.append(TableColData(QStringLiteral("换手率%"), STK_DISPLAY_SORT_TYPE_HSL));
     datalist.append(TableColData(QStringLiteral("登记日"), STK_DISPLAY_SORT_TYPE_GQDJR));
     datalist.append(TableColData(QStringLiteral("公告日"), STK_DISPLAY_SORT_TYPE_YAGGR));
-    datalist.append(TableColData(QStringLiteral("换手率"), STK_DISPLAY_SORT_TYPE_HSL));
     datalist.append(TableColData(QStringLiteral("时间"), STK_DISPLAY_SORT_TYPE_NONE));
 
     setHeaders(datalist);
@@ -52,12 +56,16 @@ void QShareTablewidget::setDataList(const StockDataList &list)
         }
         this->setItemText(i, k++, QString("").sprintf("%.2f",data.mMoneyRatio));
         this->setItemText(i, k++, QString("").sprintf("%.2f",data.mLast3DaysChgPers));
+        this->setItemText(i, k++, QString("").sprintf("%.2f",data.mLast5DaysChgPers));
+        this->setItemText(i, k++, QString("").sprintf("%.2f",data.mLast10DaysChgPers));
+        this->setItemText(i, k++, QString("").sprintf("%.2f",data.mLastMonthChgPers));
+        this->setItemText(i, k++, QString("").sprintf("%.2f",data.mChgPersFromYear));
         if(fabs(data.mZJLX) >= 1000){
             this->setItemText(i, k++, QString("").sprintf("%.2f", data.mZJLX / 10000.0) + QStringLiteral("亿"));
         } else {
             this->setItemText(i, k++, QString("").sprintf("%.0f", data.mZJLX) + QStringLiteral("万"));
         }
-        this->setItemText(i, k++, QString("").sprintf("%.2f%(%.2f)",data.mGXL * 100, data.mXJFH));
+        this->setItemText(i, k++, QString("").sprintf("%.2f",data.mGXL * 100));
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mSZZG));
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mTotalCap / 100000000.0 ) + QStringLiteral("亿"));
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mMutalbleCap/ 100000000.0 )+ QStringLiteral("亿"));
@@ -84,7 +92,7 @@ void QShareTablewidget::setDataList(const StockDataList &list)
         } else {
             this->setItemText(i, k++, QString("").sprintf("%.0f", data.mForeignCapChg / 10000.0) + QStringLiteral("万"));
         }
-        this->setItemText(i, k++, QString("").sprintf("%.2f",data.mHsl));
+        this->setItemText(i, k++, QString("").sprintf("%.2f",data.mHsl * 100));
         this->setItemText(i, k++, data.mGQDJR.toString("yyyy-MM-dd"));
         this->setItemText(i, k++, data.mYAGGR.toString("yyyy-MM-dd"));
         this->setItemText(i, k++, data.mUpdateTime.toString("hh:mm:ss"));
