@@ -14,7 +14,8 @@ HqInfoService::HqInfoService(QObject *parent) :
     QObject(parent)
 {
     qRegisterMetaType<QList<ChinaShareExchange>>("const QList<ChinaShareExchange>&");
-    qRegisterMetaType<StockDataList>("const StockDataList&");    
+    qRegisterMetaType<StockDataList>("const StockDataList&");
+    qRegisterMetaType<FinDataList>("const FinDataList&");
     initSignalSlot();
     initHistoryDates();
     //3、开启异步通讯
@@ -98,7 +99,7 @@ void HqInfoService::initSignalSlot()
     connect(this, SIGNAL(signalUpdateStockCodesList(QStringList)), this, SLOT(slotUpdateStockCodesList(QStringList)));
     connect(this, SIGNAL(signalRecvShareHistoryInfos(QString,StockDataList)), this, SLOT(slotRecvShareHistoryInfos(QString,StockDataList)));
     connect(this, SIGNAL(signalUpdateShareinfoWithHistory(QString)), this, SLOT(slotUpdateShareinfoWithHistory(QString)));
-    connect(this, SIGNAL(signalUpdateShareFinanceInfo(StockDataList)), this, SLOT(slotUpdateShareFinanceInfo(StockDataList)));
+    connect(this, SIGNAL(signalUpdateShareFinanceInfo(FinDataList)), this, SLOT(slotUpdateShareFinanceInfo(FinDataList)));
 }
 
 
@@ -334,28 +335,30 @@ void HqInfoService::slotUpdateHistoryChange(const QString &code)
 StockData* HqInfoService::getBasicStkData(const QString &code)
 {
     QMutexLocker locker(&mShareMutex);
-    if(!mStkRealInfo.contains(code))
+    if(!mStkRealInfo.contains(code.right(6)))
     {
         StockData *data = new StockData;
-        data->mCode = code;
-        mStkRealInfo[code] = data;
+        data->mCode = code.right(6);
+        mStkRealInfo[code.right(6)] = data;
     }
 
-    return mStkRealInfo[code];
+    return mStkRealInfo[code.right(6)];
 
 }
 
-void HqInfoService::slotUpdateShareFinanceInfo(const StockDataList &list)
+void HqInfoService::slotUpdateShareFinanceInfo(const FinDataList &list)
 {
-    foreach (StockData data, list) {
-        StockData *res = mStkRealInfo[data.mCode];
+    foreach (FINANCE_DATA data, list) {
+        QString code = QString("").sprintf("%06d", data.mCode);
+        StockData *res = mStkRealInfo[code];
+        qDebug()<<__FUNCTION__<<code<<res;
         if(res)
         {
-            res->mMGJZC = data.mMGJZC;
-            res->mMGSY = data.mMGSY;
+            res->mMGJZC = data.mMGJZC * 0.01;
+            res->mMGSY = data.mMGSY * 0.01;
             res->mTotalShare = data.mTotalShare;
-            res->mMutableShare = data.mMutableShare;
-            res->mJZCSYL = data.mJZCSYL;
+            res->mMutableShare = data.mMutalShare;
+            res->mJZCSYL = data.mJZCSYL * 0.01;
         }
     }
 }
@@ -509,10 +512,12 @@ void  HqInfoService::slotUpdateStockCodesList(const QStringList &list)
         {
             StockData *data = new StockData;
             data->mCode = code.right(6);
-            mStkRealInfo[code] = data;
+            mStkRealInfo[code.right(6)] = data;
+            qDebug()<<__FUNCTION__<<code<<data;
         }
     }
 
+    //qDebug()<<"list:"<<list.size()<<mStkRealInfo.size();
     emit signalDbInitFinished();
 
 }

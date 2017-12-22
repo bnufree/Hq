@@ -2,33 +2,93 @@
 #include "qhttpget.h"
 #include "dbservices/dbservices.h"
 #include "utils/hqutils.h"
+#include <QFile>
+
+#define STOCK_FINANCE_FILE  "stock-financial.data"
+
+//文件结构更新时间+所有的信息
 
 QSinaShareVolInfoThread::QSinaShareVolInfoThread(const QStringList& codes,QObject *parent) : QThread(parent)
 {
     mShareCodesList = codes;
 }
 
+
 void QSinaShareVolInfoThread::run()
 {
-    StockDataList sharelist;
-    foreach (QString code, mShareCodesList) {
-        code = code.right(6);
-        QString prefix = HqUtils::prefixCode(code);
-        QString url = QString("http://hq.sinajs.cn/?list=%1%2_i").arg(prefix).arg(code);
-        QString result = QString::fromUtf8(QHttpGet::getContentOfURL(url));
-        QStringList list = result.split(QRegExp("[,\" ;]"));
-        if(list.length() > 20)
+    FinDataList sharelist;
+    //检查本地文件是否已经更新过
+    bool updatedFromFile = false;
+    if(QFile::exists(STOCK_FINANCE_FILE))
+    {
+        //读取文件
+        QFile file(STOCK_FINANCE_FILE);
+        if(file.open(QIODevice::ReadOnly))
         {
-            QString code = list[1].mid(9,6);
-            StockData data;
-            data.mCode = code;
-            data.mMGSY = list[6].toDouble();
-            data.mMGJZC = list[7].toDouble();
-            data.mTotalShare = qint64(list[9].toDouble() * 10000);
-            data.mMutableShare = qint64(list[10].toDouble() * 10000);
-            data.mJZCSYL = list[18].toDouble();
-            sharelist.append(data);
-            qDebug()<<data.mCode<<data.mMGSY<<data.mTotalShare<<data.mJZCSYL;
+            int size = file.size();
+            if(size >= sizeof(qint64) + sizeof(FINANCE_DATA))
+            {
+                qint64 lastupdate = 0;
+                file.read((char*)(&lastupdate), sizeof(qint64));
+                if(QDateTime::fromMSecsSinceEpoch(lastupdate).date() == QDate::currentDate())
+                {
+                    while (!file.atEnd() ) {
+                        FINANCE_DATA data;
+                        int res = file.read((char*)(&data), sizeof(FINANCE_DATA));
+                        if(res<sizeof(FINANCE_DATA)) break;
+                        sharelist.append(data);
+                        //qDebug()<<data.mCode<<data.mMGSY<<data.mTotalShare<<data.mJZCSYL;
+                    }
+                    updatedFromFile = true;
+                }
+            }
+
+            file.close();
+        }
+    }
+
+    if(!updatedFromFile)
+    {
+        //联网更新
+        foreach (QString code, mShareCodesList) {
+            code = code.right(6);
+            QString prefix = HqUtils::prefixCode(code);
+            QString url = QString("http://hq.sinajs.cn/?list=%1%2_i").arg(prefix).arg(code);
+            QString result = QString::fromUtf8(QHttpGet::getContentOfURL(url));
+            QStringList list = result.split(QRegExp("[,\" ;]"));
+            if(list.length() > 20)
+            {
+                QString code = list[1].mid(9,6);
+                FINANCE_DATA data;
+                data.mCode = code.toInt();
+                data.mMGSY = round(list[6].toDouble()*100);
+                data.mMGJZC = round(list[7].toDouble()*100);
+                data.mTotalShare = qint64(list[9].toDouble() * 10000);
+                data.mMutalShare = qint64(list[10].toDouble() * 10000);
+                data.mJZCSYL = round(list[18].toDouble()*100);
+                sharelist.append(data);
+                //qDebug()<<data.mCode<<data.mMGSY<<data.mTotalShare<<data.mJZCSYL;
+            }
+        }
+        //将数据写入到文件
+        if(sharelist.length() > 0)
+        {
+            FILE *fp = fopen(STOCK_FINANCE_FILE, "wb+");
+            if(fp)
+            {
+                //首先写入所有财务数据
+                qint64 cur = QDateTime::currentDateTime().addDays(-1).toMSecsSinceEpoch();
+                fwrite(&cur, sizeof(cur), 1, fp);
+                //qDebug()<<"sizeof:"<<sizeof(FINANCE_DATA);
+                for(int i=0; i<sharelist.size(); i++){
+                    fwrite(&(sharelist[i]), sizeof(FINANCE_DATA), 1, fp);
+                }
+                //然后在移动到开头写入时间，保证是最新的
+                fseek(fp, 0, SEEK_SET);
+                cur = QDateTime::currentMSecsSinceEpoch();
+                fwrite(&cur, sizeof(cur), 1, fp);
+                fclose(fp);
+            }
         }
     }
     emit DATA_SERVICE->signalUpdateShareFinanceInfo(sharelist);

@@ -38,7 +38,7 @@ signals:
     void signalInitDBTables();
     void signalDbInitFinished();
     void signalUpdateStockCodesList(const QStringList& codes);
-    void signalUpdateShareFinanceInfo(const StockDataList& list);
+    void signalUpdateShareFinanceInfo(const FinDataList& list);
 
     //从数据库查询板块信息
     void signalQueryBlockInfo(int type = 1);
@@ -78,7 +78,7 @@ public slots:
     void slotUpdateStkProfitList(const StockDataList& list);
     void slotAddShareAmoutByForeigner(const StockDataList& list);
     void slotUpdateShareAmountByForeigner();
-    void slotUpdateShareFinanceInfo(const StockDataList& list);
+    void slotUpdateShareFinanceInfo(const FinDataList& list);
 
 
 private:

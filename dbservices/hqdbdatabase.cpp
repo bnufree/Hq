@@ -304,7 +304,7 @@ bool HQDBDataBase::getShareDataList(QMap<QString, StockData*>& pShareMap)
         info->mProfit = mSQLQuery.value(HQ_TABLE_COL_PROFIT).toDouble();
         info->mBlockCodeList = mSQLQuery.value(HQ_TABLE_COL_BLOCK_LIST).toStringList();
         info->mDate = mSQLQuery.value(HQ_TABLE_COL_DATE).toDate();
-        pShareMap[info->mCode] = info;
+        pShareMap[info->mCode.right(6)] = info;
     }
     return true;
 }

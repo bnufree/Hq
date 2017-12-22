@@ -89,6 +89,7 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
         if(detailList.length() < 7) continue;
         QString code = detailList[0];
         StockData * data = DATA_SERVICE->getBasicStkData(code);
+        if(!data) continue;
         data->mName = detailList[1];
         data->mCur = detailList[2].toDouble();
         data->mChg = detailList[3].toDouble();

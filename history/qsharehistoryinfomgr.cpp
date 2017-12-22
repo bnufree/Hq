@@ -23,14 +23,14 @@ void QShareHistoryInfoMgr::slotShareFinanceInfoFinished()
         delete t1;
     }
     //开始更新日线数据
-    foreach (QString code, mCodesList) {
-        QEastmoneyStockHistoryInfoThread* thread = new QEastmoneyStockHistoryInfoThread(code);
-        QEventLoop loop;
-        connect(thread, SIGNAL(finished()), &loop, SLOT(quit()));
-        thread->start();
-        loop.exec();
-        delete thread;
-    }
+//    foreach (QString code, mCodesList) {
+//        QEastmoneyStockHistoryInfoThread* thread = new QEastmoneyStockHistoryInfoThread(code);
+//        QEventLoop loop;
+//        connect(thread, SIGNAL(finished()), &loop, SLOT(quit()));
+//        thread->start();
+//        loop.exec();
+//        delete thread;
+//    }
 //    //开始更新持股信息
 //    QEastMoneyHSGTShareAmount * thread = new QEastMoneyHSGTShareAmount;
 //    connect(thread, SIGNAL(finished()), this, SLOT(slotUpdateForeignAmountFinished()));
