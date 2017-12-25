@@ -69,6 +69,7 @@ Dialog::Dialog(QWidget *parent) :
     connect(systemIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(setDlgShow(QSystemTrayIcon::ActivationReason)));
     //数据库初始化
     DATA_SERVICE->signalInitDBTables();
+    connect(ui->hqtbl, SIGNAL(signalSetFavCode(QString)), DATA_SERVICE, SLOT(slotSetFavCode(QString)));
 
 #if 0
     //开始更新历史信息，龙虎榜信息，沪港通信息

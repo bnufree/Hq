@@ -79,6 +79,7 @@ public slots:
     void slotAddShareAmoutByForeigner(const StockDataList& list);
     void slotUpdateShareAmountByForeigner();
     void slotUpdateShareFinanceInfo(const FinDataList& list);
+    void slotSetFavCode(const QString& code);
 
 
 private:

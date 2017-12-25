@@ -112,7 +112,15 @@ void QSinaStkResultMergeThread::run()
                 }
             }
 
-        } else if(mMktType == MKT_ZXG || mMktType == MKT_OTHER)
+        } else if(mMktType == MKT_ZXG)
+        {
+            foreach (QString key, mMidStkDataMapList.keys()) {
+                if(mMidStkDataMapList[key].mIsFavCode == true)
+                {
+                    wklist.append(mMidStkDataMapList.value(key));
+                }
+            }
+        } else if(mMktType == MKT_OTHER)
         {
             foreach (QString key, mSelfCodesList) {
                 if(mMidStkDataMapList.contains(key.right(6)))

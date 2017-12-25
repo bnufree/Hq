@@ -241,5 +241,9 @@ void QShareTablewidget::setDisplayHSHK()
 
 void QShareTablewidget::slotCellDoubleClicked(int row, int col)
 {
+    QTableWidgetItem *item = this->item(row, 0);
+    if(!item) return;
+    QString code = item->data(Qt::UserRole).toString();
+    emit signalSetFavCode(code);
     return;
 }

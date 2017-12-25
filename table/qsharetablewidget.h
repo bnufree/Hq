@@ -18,6 +18,7 @@ signals:
     void    signalSetDisplayDayGraph(const QString& code);
     void    signalSetDisplayBlockDetail(const QStringList& blockCodes);
     void    signalSetDisplayHSHK(const QString& code);
+    void    signalSetFavCode(const QString& code);
 
 public slots:
     void    setDataList(const StockDataList& list);

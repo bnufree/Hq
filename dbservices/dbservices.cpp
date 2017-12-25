@@ -515,3 +515,13 @@ void  HqInfoService::slotUpdateStockCodesList(const QStringList &list)
     emit signalDbInitFinished();
 
 }
+
+void HqInfoService::slotSetFavCode(const QString &code)
+{
+    QMutexLocker locker(&mShareMutex);
+    StockData* data = mStkRealInfo[code];
+    if(data)
+    {
+        data->mIsFavCode = !data->mIsFavCode;
+    }
+}
