@@ -437,6 +437,31 @@ double HQDBDataBase::getLastMoney(const QString &code)
     return change;
 }
 
+bool HQDBDataBase::getLastForeignVol(qint64 &vol, qint64 &vol_chg, const QString &code)
+{
+    QMutexLocker locker(&mSQlMutex);
+    QString table = HISTORY_TABLE(code);
+    QString col = HQ_TABLE_COL_HSGT_HAVE;
+    if(!mSQLQuery.exec(tr("select %1 from %2 where %3!=0 order by date desc limit 2").arg(col).arg(table).arg(col)))
+    {
+        qDebug()<<errMsg();
+        return false;
+    }
+    QList<qint64> list;
+    while (mSQLQuery.next()) {
+        list.append(mSQLQuery.value(0).toLongLong());
+    }
+    if(list.length() == 0) return false;
+    vol = list[0];
+    vol_chg = 0;
+    if(list.length() > 1)
+    {
+        vol_chg = list[0] - list[1];
+    }
+
+    return true;
+}
+
 QString HQDBDataBase::errMsg()
 {
     return QString("sql:%1\nerr:%2").arg(mSQLQuery.lastQuery()).arg(mSQLQuery.lastError().text());

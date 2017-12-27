@@ -315,6 +315,12 @@ void HqInfoService::slotUpdateShareinfoWithHistory(const QString &code)
         data->mLast10DaysChgPers = mDataBase.getMultiDaysChangePercent(data->mCode, DAYS_10);
         data->mLastMonthChgPers = mDataBase.getMultiDaysChangePercent(data->mCode, DAYS_MONTH);
         data->mChgPersFromYear = mDataBase.getMultiDaysChangePercent(data->mCode, DAYS_YEARS);
+        qint64 vol, vol_chg = 0;
+        if(mDataBase.getLastForeignVol(vol, vol_chg, data->mCode))
+        {
+            data->mForeignVol = vol;
+            data->mForeignVolChg = vol_chg;
+        }
 //        data->mLastClose = last_close;
 //        data->mProfit = mStkProfitMap[data->mCode];
     }

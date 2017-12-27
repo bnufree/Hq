@@ -40,6 +40,7 @@ public:
     bool isRecordExist(bool& exist, const QString& table, const QString& col, const QVariant& val);
     double getMultiDaysChangePercent(const QString &code, HISTORY_CHANGEPERCENT type );
     double getLastMoney(const QString& code);
+    bool   getLastForeignVol(qint64& vol, qint64& vol_chg, const QString& code);
 
     bool createDBTables();
     QDate getLastUpdateDateOfShareHistory(const QString &code);

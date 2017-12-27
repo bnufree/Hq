@@ -32,9 +32,9 @@ void QShareHistoryInfoMgr::slotShareFinanceInfoFinished()
         delete thread;
     }
     //开始更新持股信息
-//    QEastMoneyHSGTShareAmount * thread = new QEastMoneyHSGTShareAmount;
-//    connect(thread, SIGNAL(finished()), this, SLOT(slotUpdateForeignAmountFinished()));
-//    connect(thread, SIGNAL(signalAmountFinshedAtDate(QString)), this, SIGNAL(signalUpdateAmountProcess(QString)));
-//    thread->start();
-//    emit signalHistoryDataFinished();
+    QEastMoneyHSGTShareAmount * thread = new QEastMoneyHSGTShareAmount;
+    connect(thread, SIGNAL(finished()), this, SLOT(slotUpdateForeignAmountFinished()));
+    connect(thread, SIGNAL(signalAmountFinshedAtDate(QString)), this, SIGNAL(signalUpdateAmountProcess(QString)));
+    thread->start();
+    emit signalHistoryDataFinished();
 }

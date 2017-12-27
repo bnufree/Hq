@@ -39,6 +39,7 @@ void QEastmoneyStockHistoryInfoThread::run()
         {
             wkCode = "1" + mCode;
         }
+        //取得日线数据
         QString wkURL = QString("http://quotes.money.163.com/service/chddata.html?code=%1&start=%2&end=%3")
                 .arg(wkCode).arg(start.toString("yyyyMMdd")).arg(end.toString("yyyyMMdd"));
 
@@ -75,6 +76,29 @@ void QEastmoneyStockHistoryInfoThread::run()
         }
 
         //qDebug()<<mCode<<lastDate<<list.values().size();
+        //取得外资此股情况更新
+        wkURL = QString("http://dcfm.eastmoney.com//em_mutisvcexpandinterface/api/js/get?"
+                        "type=HSGTHDSTA&token=70f12f2f4f091e459a279469fe49eca5&filter="
+                        "(SCODE='%1')(HDDATE>=^%2^)&st=HDDATE&sr=-1&p=1&ps=5000&js=(x)")
+                .arg(mCode).arg(start.toString("yyyy-MM-dd"));
+        QJsonParseError err;
+        QJsonDocument doc = QJsonDocument::fromJson(QHttpGet::getContentOfURL(wkURL), &err);
+        if(err.error == QJsonParseError::NoError)
+        {
+            if(doc.isArray())
+            {
+                //开始解析
+                QJsonArray result = doc.array();
+                for(int i=0; i<result.size(); i++)
+                {
+                    QJsonObject obj = result.at(i).toObject();
+                    QString dateStr = obj.value("HDDATE").toString().left(10);
+                    if(!list.contains(dateStr)) continue;
+                    StockData &data = list[dateStr];
+                    data.mForeignVol = obj.value("SHAREHOLDSUM").toVariant().toLongLong();
+                }
+            }
+        }
         emit DATA_SERVICE->signalRecvShareHistoryInfos(mCode, list.values());
     }
 
