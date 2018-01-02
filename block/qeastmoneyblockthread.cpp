@@ -107,20 +107,7 @@ void QEastMoneyBlockThread::slotBlockShareThreadFinished()
 {
     QEastMoneyBlockShareThread * thread = static_cast<QEastMoneyBlockShareThread*>(sender());
     if(!thread) return;
-    mWorkThreadList.removeOne(thread);
     thread->deleteLater();
-    if(mWorkThreadList.isEmpty())
-    {
-       qDebug()<<"update share codes finished.............................";
-       mUpdateRealInfo = true;
-        while (mUpdateRealInfo) {
-            slotUpdateBlockInfos();
-            QThread::sleep(2);
-        }
-    } else
-    {
-        qDebug()<<"current block commnad length:"<<mWorkThreadList.length();
-    }
 }
 
 void QEastMoneyBlockThread::stop()
@@ -130,7 +117,6 @@ void QEastMoneyBlockThread::stop()
 
 void QEastMoneyBlockThread::slotUpdateBlockShare()
 {
-#if 0
     QString url("http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&cmd=C._BK%1&sty=FCCS&st=c&p=1&ps=100&cb=&js=var%20BKtrade%20={Trade:[[(x)]]}&token=d0075ac6916d4aa6ec8495db9efe7ede&bklb=%2&jsName=BKtrade&sr=%3&dt=%4");
     QString wkURL = url.arg(blockthread[mWebBlockType]).arg(mWebBlockType).arg(mSortRule).arg(QDateTime::currentDateTime().toMSecsSinceEpoch());
 
@@ -140,23 +126,31 @@ void QEastMoneyBlockThread::slotUpdateBlockShare()
     QString replaceStr = (mWebBlockType == 3? "3" : mWebBlockType == 2 ? "2" : "1");
     int index = 0;
     while ((index = result.indexOf(QRegularExpression("BK0[0-9]{3}"), index)) > 0) {
-        BlockData *data = new BlockData;
-        data->mCode = result.mid(index, 6).replace("BK0", replaceStr);
+        QString code = result.mid(index, 6).replace("BK0", replaceStr);
+        BlockData* data = DATA_SERVICE->getBlockDataOfCode(code);
+        if(!data)
+        {
+            data = new BlockData;
+            data->mCode = code;
+            DATA_SERVICE->setBlockData(data);
+        }
         data->mBlockType |= mUserBlockType;
         mBlockDataList[data->mCode] = data;
         index += 6;
-        DATA_SERVICE->setBlockData(data);
     }
     //开始根据板块代码，获取板块内的所有shares
     foreach (QString key, mBlockDataList.keys()) {
         QEastMoneyBlockShareThread *thread = new QEastMoneyBlockShareThread(key);
-        mWorkThreadList.append(thread);
         connect(thread, SIGNAL(signalUpdateBlockShareCodeList(QString,QStringList)), this, SLOT(slotUpdateBlockShareCodeList(QString,QStringList)));
         connect(thread, SIGNAL(finished()), this, SLOT(slotBlockShareThreadFinished()));
         thread->start();
     }
-#endif
-
+    //开始更新实时板块信息
+    while(1)
+    {
+        slotUpdateBlockInfos();
+        QThread::sleep(3);
+    }
 }
 
 

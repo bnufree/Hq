@@ -103,7 +103,13 @@ void HqTableWidget::removeFavShare(const QString &code)
 void HqTableWidget::updateFavShareIconOfRow(int row, bool isFav)
 {
     if(row >= this->rowCount()) return;
-    if(isFav) this->item(row, 0)->setIcon(QIcon(":/icon/image/zxg.ico"));
+    if(isFav)
+    {
+        this->item(row, 0)->setIcon(QIcon(":/icon/image/zxg.ico"));
+    } else
+    {
+        this->item(row, 0)->setIcon(QIcon());
+    }
 }
 
 void HqTableWidget::prepareUpdateTable(int newRowCount)

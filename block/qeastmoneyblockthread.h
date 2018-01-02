@@ -1,4 +1,4 @@
-#ifndef QEASTMONEYBLOCKTHREAD_H
+﻿#ifndef QEASTMONEYBLOCKTHREAD_H
 #define QEASTMONEYBLOCKTHREAD_H
 
 #include <QThread>
@@ -47,7 +47,6 @@ private:
     int         mUserBlockType;
     int         mWebBlockType;
     QMap<QString,   BlockData*> mBlockDataList;
-    QList<QThread*>     mWorkThreadList;
     QThread     mWorkthread;
     bool        mUpdateRealInfo;
 };
