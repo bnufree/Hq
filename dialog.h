@@ -65,15 +65,9 @@ protected:
     //bool eventFilter(QObject *obj, QEvent *event);
     //void keyPressEvent(QKeyEvent *);
 public slots:
-    void setSortType(int index);
-    void setBlockSort(int val);
-    void setBlockName();
-    void setStockMarket();
-    void setDisplayPage();
-    void setDisplayCol(bool isDisplay);
     void setTargetSize(const QSize& size);
 
-    void updateBlockTable(const BlockDataList& pDataList);
+    void updateBlockTable(const BlockDataVList& pDataList);
     void recvShareBlockDataMap(const QMap<QString, QStringList>& map);
     void displayBlockRealtimeInfo();
     void updateHqTable(const StockDataList& pDataList);

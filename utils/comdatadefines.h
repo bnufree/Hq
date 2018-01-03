@@ -106,12 +106,12 @@ typedef struct struTableColData
         mIsDisplay = true;
         mColNum = -1;
     }
-    struTableColData(const QString& col, STK_DISPLAY_TYPE type)
+    struTableColData(const QString& col, STK_DISPLAY_TYPE type, bool isDispaly = true)
     {
         mColStr = col;
         mRule = STK_DISPLAY_SORT_RULE_DESCEND;
         mType = type;
-        mIsDisplay = true;
+        mIsDisplay = isDispaly;
         mColNum = -1;
     }
 }TableColData;

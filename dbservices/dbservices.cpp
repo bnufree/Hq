@@ -496,10 +496,18 @@ void   HqInfoService::setBlockData(BlockData *data)
 void   HqInfoService::setShareBlock(const QString &code, const QString &block)
 {
     QMutexLocker locker(&mShareMutex);
-    QStringList &wklist = mShareBlockMap[code];
-    if(!wklist.contains(block))
+    StockData *data = mStkRealInfo[code.right(6)];
+    if(data)
     {
-        wklist.append(block);
+        if(!data->mBlockCodeList.contains(block))
+        {
+            data->mBlockCodeList.append(block);
+        }
+        BlockData* blockptr = mBlockDataMap[block];
+        if(blockptr && (!data->mBlockList.contains(blockptr)))
+        {
+            data->mBlockList.append(blockptr);
+        }
     }
 }
 

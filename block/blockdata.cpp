@@ -4,12 +4,21 @@
 BlockData::BlockData()
 {
     mBlockType = BLOCK_NONE;
-
 }
 
 BlockData::~BlockData()
 {
-    qDebug()<<"block data descontruction.";
+    //qDebug()<<"block data descontruction.";
+}
+
+bool BlockData::sortByChangeAsc(const BlockData& d1, const BlockData& d2)
+{
+    return d1.mChangePer < d2.mChangePer;
+}
+
+bool BlockData::sortByChangeDesc(const BlockData& d1, const BlockData& d2)
+{
+    return d1.mChangePer > d2.mChangePer;
 }
 
 //BlockDataList BlockData::BlockDataListFromCodesList(const QStringList &codes)

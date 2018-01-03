@@ -124,7 +124,6 @@ private:    //本类使用的变量
     QMap<QString, double>       mStkProfitMap;
     QMap<QString, foreignHolder>       mStkForeignerHoldMap;
     QMap<QString,   BlockData*> mBlockDataMap;
-    QMap<QString,   QStringList> mShareBlockMap;
     QMutex                      mBlockMutex;
     QMutex                      mShareMutex;
     HQDBDataBase                mDataBase;

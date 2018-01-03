@@ -1,4 +1,4 @@
-#ifndef QEASTMONEYBLOCKMANGAGERTHREAD_H
+﻿#ifndef QEASTMONEYBLOCKMANGAGERTHREAD_H
 #define QEASTMONEYBLOCKMANGAGERTHREAD_H
 
 #include <QObject>
@@ -15,21 +15,22 @@ public:
     explicit QEastMoneyBlockMangagerThread(QObject *parent = 0);
     ~QEastMoneyBlockMangagerThread();
     void    setCurBlockType(int type);
-    void    reverseSortRule();
 
 signals:
-    void signalBlockDataListUpdated(const BlockDataList& list);
+    void signalBlockDataListUpdated(const BlockDataVList& list);
     void start();
 public slots:
     void slotRecvBlockDataList(const BlockDataList& list);
     void slotStartRunMgr();
-    void slotUpdateBlockInfo();
+    void slotUpdateBlockInfo();    
+    void    reverseSortRule();
 private:
     QList<QEastMoneyBlockThread*>  mWorkThreadList;
     int             mCurBlockType;
     QThread         mWorkThread;
     QTimer          *mWorkTimer;
     BlockDataList   mBlockDataList;
+    int             mBlockRule;
 };
 
 #endif // QEASTMONEYBLOCKMANGAGERTHREAD_H

@@ -1,4 +1,4 @@
-#include "qeastmoneyblockmangagerthread.h"
+﻿#include "qeastmoneyblockmangagerthread.h"
 #include "qeastmoneyblockthread.h"
 #include <QDebug>
 #include <QTimer>
@@ -13,6 +13,7 @@ QEastMoneyBlockMangagerThread::QEastMoneyBlockMangagerThread(QObject *parent) : 
     this->moveToThread(&mWorkThread);
     mWorkThread.start();
     mWorkTimer->start();
+    mBlockRule = BLOCK_DISPLAY_SORT_DESCEND;
 }
 
 QEastMoneyBlockMangagerThread::~QEastMoneyBlockMangagerThread()
@@ -52,9 +53,9 @@ void QEastMoneyBlockMangagerThread::setCurBlockType(int type)
 
 void QEastMoneyBlockMangagerThread::reverseSortRule()
 {
-    foreach (QEastMoneyBlockThread *t, mWorkThreadList) {
-        t->reverseSortRule();
-    }
+    qDebug()<<__FUNCTION__<<mBlockRule;
+    mBlockRule *= (-1);
+    qDebug()<<__FUNCTION__<<mBlockRule;
 }
 
 void QEastMoneyBlockMangagerThread::slotRecvBlockDataList(const BlockDataList &list)
@@ -68,12 +69,19 @@ void QEastMoneyBlockMangagerThread::slotRecvBlockDataList(const BlockDataList &l
 
 void QEastMoneyBlockMangagerThread::slotUpdateBlockInfo()
 {
-    BlockDataList wklist;
+    BlockDataVList wklist;
     foreach (BlockData *data, mBlockDataList) {
         if(data->mBlockType & mCurBlockType)
         {
-            wklist.append(data);
+            wklist.append(*data);
         }
+    }
+    if(mBlockRule == BLOCK_DISPLAY_SORT_DESCEND)
+    {
+        qSort(wklist.begin(), wklist.end(), &BlockData::sortByChangeDesc);
+    } else if(mBlockRule == BLOCK_DISPLAY_SORT_ASCEND)
+    {
+        qSort(wklist.begin(), wklist.end(), &BlockData::sortByChangeAsc);
     }
 
     emit signalBlockDataListUpdated(wklist);

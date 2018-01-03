@@ -39,6 +39,7 @@ QEastMoneyBlockThread::QEastMoneyBlockThread(int pBlockID, QObject *parent) : QO
     qRegisterMetaType<BlockDataList>("const BlockDataList&");
     qRegisterMetaType<QMap<QString, BlockDataList>>("const QMap<QString, BlockDataList>&");
     qRegisterMetaType<QMap<QString, BlockData*>>("const QMap<QString, BlockData*>&");
+    qRegisterMetaType<BlockDataVList>("const BlockDataVList&");
     this->moveToThread(&mWorkthread);
     connect(this, SIGNAL(start()), this, SLOT(slotUpdateBlockShare()));
     mWorkthread.start();
@@ -62,7 +63,6 @@ void QEastMoneyBlockThread::reverseSortRule()
 
 void QEastMoneyBlockThread::slotUpdateBlockInfos()
 {
-#if 0
     QString url("http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&cmd=C._BK%1&sty=FCCS&st=c&p=1&ps=100&cb=&token=d0075ac6916d4aa6ec8495db9efe7ede&bklb=%2&jsName=BKtrade&sr=%3&dt=%4");
 
     QString wkURL = url.arg(blockthread[mWebBlockType]).arg(mWebBlockType).arg(mSortRule).arg(QDateTime::currentDateTime().toMSecsSinceEpoch());
@@ -80,21 +80,16 @@ void QEastMoneyBlockThread::slotUpdateBlockInfos()
         //qDebug()<<"rx:"<<rx.cap();
         QString code = rx.cap(1).replace("BK0", replaceStr);
         BlockData *data = mBlockDataList[code];
-        if(!data)
+        if(data)
         {
-            data = new BlockData;
-            data->mCode  = code;
-            DATA_SERVICE->setBlockData(data);
-            mBlockDataList[code] = data;
+            data->mName = rx.cap(2);
+            data->mChangePer = rx.cap(3).toDouble();
+            list.append(data);
         }
-        data->mName = rx.cap(2);
-        data->mChangePer = rx.cap(3).toDouble();
         index += (rx.matchedLength()+2);
-        list.append(data);
     }
     //qDebug()<<__FUNCTION__<<__LINE__<<mBlockDataList.values().length();
     emit sendBlockDataList(list);
-#endif
     return;
 }
 
@@ -132,6 +127,7 @@ void QEastMoneyBlockThread::slotUpdateBlockShare()
         {
             data = new BlockData;
             data->mCode = code;
+            data->mIsFav = false;
             DATA_SERVICE->setBlockData(data);
         }
         data->mBlockType |= mUserBlockType;

@@ -181,98 +181,6 @@ Dialog::~Dialog()
     delete ui;
 }
 
-void Dialog::setSortType(int index)
-{
-    int type = ui->hqtbl->horizontalHeaderItem(index)->data(Qt::UserRole+1).toInt();
-    if(mMergeThread && mMergeThread->isActive())
-    {
-        mMergeThread->setSortType((STK_DISPLAY_TYPE)type);
-    }
-}
-
-void Dialog::setBlockSort(int val)
-{
-    qDebug("click val = %d, total = %d", val, ui->blocktbl->rowCount() -1);
-    if(val != 1) return;
-    if(mBlockMgr) mBlockMgr->reverseSortRule();
-}
-
-void Dialog::setBlockName()
-{
-    QAction *act = (QAction*)sender();
-    if(act == NULL) return;
-    int index = act->data().toInt();
-    //mCurBlockType = index;
-    //if(mBlockMgr) mBlockMgr->setCurBlockType(mCurBlockType);
-    qDebug()<<"act name:"<<act->text();
-
-}
-void Dialog::setDisplayPage()
-{
-    if(!mMergeThread) return;
-    QAction *act = (QAction*)sender();
-    if(act == NULL) return;
-    int val = act->data().toInt();
-    switch (val) {
-    case 0:
-        mMergeThread->displayFirst();
-        break;
-    case 1:
-        mMergeThread->displayPrevious();
-        break;
-    case 2:
-        mMergeThread->displayNext();
-        break;
-    case 3:
-        mMergeThread->displayLast();
-    default:
-        break;
-    }
-}
-
-void Dialog::setDisplayCol(bool isDisplay)
-{
-    QAction *act = (QAction*)sender();
-    if(act == NULL) return;
-    TableColDisplayStatus sts = act->data().value<TableColDisplayStatus>();
-    int col = sts.mColIndex;
-    if(ui->hqtbl->isColumnHidden(col) && isDisplay)
-    {
-        mDisplayCol++;
-        ui->hqtbl->setColumnHidden(col, false);
-    } else if((!ui->hqtbl->isColumnHidden(col)) && (!isDisplay))
-    {
-        mDisplayCol--;
-        ui->hqtbl->setColumnHidden(col, true);
-    }
-    mTargetSize.setWidth(mDisplayCol * mSecSize);
-    setTargetSize(mTargetSize);
-}
-
-void Dialog::setStockMarket()
-{
-    //if(mStockThread) mStockThread->setActive(false);
-    if(mMergeThread)
-    {
-        mMergeThread->setActive(true);
-        QAction *act = (QAction*)sender();
-        if(act == NULL) return;
-        qDebug()<<"mkt_type:"<<act->data().toInt();
-        MktType type = (MktType)(act->data().toInt());
-        if(type != MKT_JJ && type != MKT_ZXG)
-        {
-            mMergeThread->setMktType((MktType)(act->data().toInt()));
-        } else
-        {
-            qDebug()<<mHSFoundsList;
-            if(type ==MKT_JJ)mMergeThread->setSelfCodesList(mHSFoundsList);
-            else mMergeThread->setSelfCodesList(mFavStkList);
-            mMergeThread->setMktType(MKT_OTHER);
-        }
-    }
-
-}
-
 
 void Dialog::on_zjlxBtn_clicked()
 {
@@ -472,60 +380,11 @@ void Dialog::updateHqTable(const StockDataList& pDataList)
 //    pDlg->updateBlockTable(pDataList);
 //}
 
-void Dialog::updateBlockTable(const BlockDataList& pDataList)
+void Dialog::updateBlockTable(const BlockDataVList& pDataList)
 {
     ui->blocktbl->setDataList(pDataList);
-#if 0
-    ui->blocktbl->setRowCount(pDataList.count());
-
-    int i=0;
-    foreach (BlockData data, pDataList) {
-        mBlockStkList[data.code] = data.stklist;
-        int k =0;
-        ui->blocktbl->setRowHeight(i, 20);
-        ui->blocktbl->setItem(i, k++, new HqTableWidgetItem(data.name));
-
-        //ui->blocktbl->setItem(i, k++, new QTableWidgetItem(QString::number(data.mktkap)));
-        QString tempStr = QString("%1%2%");
-        QString up = QStringLiteral("↑");
-        QString down = QStringLiteral("↓");
-        if(mBlockDataMap[data.code].changePer > data.changePer)
-        {
-            ui->blocktbl->setItem(i, k++, new HqTableWidgetItem(tempStr.arg(down).arg(QString::number(data.changePer, 'f', 2))));
-        } else if(mBlockDataMap[data.code].changePer < data.changePer)
-        {
-            ui->blocktbl->setItem(i, k++, new HqTableWidgetItem(tempStr.arg(up).arg(QString::number(data.changePer, 'f', 2))));
-        } else
-        {
-            ui->blocktbl->setItem(i, k++, new HqTableWidgetItem(tempStr.arg("").arg(QString::number(data.changePer, 'f', 2))));
-        }
-        //mBlockMap[data.code] = data.changePer;
-        QVariant val;
-        val.setValue(data);
-        ui->blocktbl->item(i, 0)->setData(Qt::UserRole, val);
-        i++;
-
-    }
-    mBlockDataMap = map;
-#endif
-
 }
 
-#if 0
-void Dialog::on_blocktbl_itemDoubleClicked(QTableWidgetItem *item)
-{
-    if(item == NULL) return;
-    QTableWidgetItem *wkItem = item;
-    if(wkItem->column() != 0){
-        wkItem = ui->blocktbl->item(item->row(), 0);
-    }
-    BlockData data = wkItem->data(Qt::UserRole).value<BlockData>();
-    qDebug()<<"code:"<<data.code<<" name:"<<data.name;
-    //int code = wkItem->data(Qt::UserRole).toInt();
-    qDebug()<<"code:"<<data.stklist;
-   displayBlockDetailInfoInTable(data.stklist);
-}
-#endif
 
 void Dialog::displayBlockDetailInfoInTable(const QStringList& stklist)
 {
@@ -924,6 +783,8 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
     connect(ui->hqtbl, SIGNAL(signalSetStockMarket(int)), mMergeThread, SLOT(setMktType(int)));
     connect(ui->hqtbl, SIGNAL(signalSetSortType(int)), mMergeThread, SLOT(setSortType(int)));
     connect(ui->hqtbl, SIGNAL(signalDisplayPage(int)), mMergeThread, SLOT(setDisplayPage(int)));
+    connect(ui->hqtbl, SIGNAL(signalSetDisplayBlockDetail(QStringList)), mMergeThread, SLOT(setSelfCodesList(QStringList)));
+    connect(ui->blocktbl, SIGNAL(signalDisplayBlockDetailCodesList(QStringList)), mMergeThread, SLOT(setSelfCodesList(QStringList)));
     mMergeThread->setStkList(mAllStkList);
     mMergeThread->setSelfCodesList(mFavStkList);
     mMergeThread->setActive(true);
@@ -932,7 +793,9 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
     //板块行情初始化
     //mCurBlockType = BLOCK_HY;
     mBlockMgr = new QEastMoneyBlockMangagerThread();
-    connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataList)), this, SLOT(updateBlockTable(BlockDataList)));
+    connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataVList)), this, SLOT(updateBlockTable(BlockDataVList)));
+    connect(ui->blocktbl, SIGNAL(signalSetSortType(int)), mBlockMgr, SLOT(reverseSortRule()));
+
     mBlockMgr->start();
 
     //查询接口初始化

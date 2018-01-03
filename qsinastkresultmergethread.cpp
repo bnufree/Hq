@@ -559,6 +559,7 @@ void QSinaStkResultMergeThread::SortResultList(StockDataList &result, const Stoc
 void QSinaStkResultMergeThread::setSelfCodesList(const QStringList &list)
 {
     mSelfCodesList = list;
+    mMktType = MKT_OTHER;
     //qDebug()<<"selfcodes:"<<mSelfCodesList;
 }
 

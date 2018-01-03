@@ -9,6 +9,7 @@
 
 class BlockData;
 typedef QList<BlockData*>       BlockDataList;
+typedef QList<BlockData>        BlockDataVList;
 Q_DECLARE_METATYPE(BlockDataList)
 
 typedef enum BlockType
@@ -27,6 +28,8 @@ public:
     ~BlockData();
     //static BlockDataList BlockDataListFromCodesList(const QStringList& codes);
     //static QStringList   BlockCodsListFromBlockData(const BlockDataList& list);
+    static bool sortByChangeDesc(const BlockData& d1, const BlockData& d2);
+    static bool sortByChangeAsc(const BlockData& d1, const BlockData& d2);
 public:
     QString             mName;
     QString             mCode;

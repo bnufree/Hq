@@ -43,6 +43,10 @@ void HqTableWidget::setHeaders(const TableColDataList &list)
         act->setChecked(mColDataList[i].mIsDisplay);
         connect(act, SIGNAL(triggered(bool)), this, SLOT(slotSetColDisplay(bool)));
         menu->addAction(act);
+        if(!mColDataList[i].mIsDisplay)
+        {
+            this->setColumnHidden(i, true);
+        }
     }
 
     insertContextMenu(menu);
