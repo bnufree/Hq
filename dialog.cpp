@@ -508,7 +508,7 @@ void Dialog::on_searchTxt_textChanged(const QString &arg1)
 {
     if(mSearchThread)
     {
-        mSearchThread->signalSetSearchString(arg1);
+        mSearchThread->slotRecvSearchString(arg1);
     }
 
 }
@@ -800,7 +800,7 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
 
     //查询接口初始化
     mSearchThread = new QSinaSearchThread(this);
-    connect(mSearchThread, SIGNAL(sendSearchResult(QStringList)), this, SLOT(displayBlockDetailInfoInTable(QStringList)));
+    connect(mSearchThread, SIGNAL(sendSearchResult(QStringList)), mMergeThread, SLOT(setSelfCodesList(QStringList)));
 }
 
 void Dialog::on_HSGTBTN_clicked()

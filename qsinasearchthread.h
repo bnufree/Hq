@@ -10,7 +10,7 @@ class QSinaSearchThread : public QObject
 public:
     explicit QSinaSearchThread(QObject *parent = 0);
     ~QSinaSearchThread();
-private slots:
+public slots:
     void slotRecvSearchString(const QString& text);
     void slotRecvHttpContent(const QByteArray& bytes);
     void slotSearchCmdFinished();
