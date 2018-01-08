@@ -56,7 +56,8 @@ SOURCES += main.cpp\
     dbservices/hqdbdatabase.cpp \
     dbservices/dbservices.cpp \
     utils/hqutils.cpp \
-    history/qsinasharevolinfothread.cpp
+    history/qsinasharevolinfothread.cpp \
+    history/qsharehistorydialog.cpp
 
 HEADERS  += dialog.h \
     stockdata.h \
@@ -103,13 +104,15 @@ HEADERS  += dialog.h \
     dbservices/dbservices.h \
     dbservices/hqdatadefines.h \
     utils/hqutils.h \
-    history/qsinasharevolinfothread.h
+    history/qsinasharevolinfothread.h \
+    history/qsharehistorydialog.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \
     qindexframe.ui \
     qeastmoneyhsgtdialog.ui \
-    exchange/qexchangefiledlg.ui
+    exchange/qexchangefiledlg.ui \
+    history/qsharehistorydialog.ui
 
 RESOURCES += \
     image.qrc
