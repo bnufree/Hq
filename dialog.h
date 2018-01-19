@@ -68,16 +68,10 @@ public slots:
     void setTargetSize(const QSize& size);
 
     void updateBlockTable(const BlockDataVList& pDataList);
-    void recvShareBlockDataMap(const QMap<QString, QStringList>& map);
-    void displayBlockRealtimeInfo();
     void updateHqTable(const StockDataList& pDataList);
-    void displayBlockDetailInfoInTable(const QStringList& stklist);
-    void editFavorite();
     void setDlgShow(QSystemTrayIcon::ActivationReason val);
     void slotUpdate(int cur, int total);
-    void hqMenuOpt();
     void slotUpdateMsg(const QString& msg);
-    void slotUpdateIndex(const StockDataList& pDataList);
     void slotSystemTrayMenuClicked();
     void slotWhetherDisplay();
     void slotRestartMyself();
@@ -87,9 +81,6 @@ public slots:
     void slotDisplayStockMini();
     void slotUpdateStockCodesList(const QStringList& list);
     void slotTodayHSGUpdated();
-    void slotHistoryDataFinish();
-    void slotUpdateFavList(const QStringList& list);
-    //void slotStartRealInfo();
 
 private slots:
     void on_zjlxBtn_clicked();
@@ -102,25 +93,11 @@ private slots:
 
     void on_minBtn_clicked();
 
-//    void on_blocktbl_itemDoubleClicked(QTableWidgetItem *item);
-
-//    void on_blocktbl_customContextMenuRequested(const QPoint &pos);
-
-//    void on_hqtbl_customContextMenuRequested(const QPoint &pos);
-
     void on_searchTxt_textChanged(const QString &arg1);
 
     void on_DateMgrBtn_clicked();
 
-//    void on_hqtbl_itemDoubleClicked(QTableWidgetItem *item);
-
-//    void on_hqtbl_itemEntered(QTableWidgetItem *item);
-
     void on_MainDialog_customContextMenuRequested(const QPoint &pos);
-
-//    void on_hqtbl_itemClicked(QTableWidgetItem *item);
-
-//    void on_blocktbl_itemClicked(QTableWidgetItem *item);
 
     void on_HSGTBTN_clicked();
 
@@ -131,11 +108,6 @@ private:
     QEastMoneyBlockMangagerThread        *mBlockMgr;
     QSinaStkResultMergeThread     *mMergeThread;
     QSinaSearchThread             *mSearchThread;
-    QMap<QString, double> mStockMap;
-    //QMap<QString, double> mBlockMap;
-    QMap<QString, BlockData> mBlockDataMap;
-    QMap<QString, QStringList> mBlockStkList;
-    QMap<QString, BlockDataList>mShareBlockList;
     QStringList           mFavStkList;
     QStringList           mHSFoundsList;
     QStringList           mAllStkList;
