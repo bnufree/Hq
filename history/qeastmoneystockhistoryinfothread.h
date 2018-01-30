@@ -1,24 +1,20 @@
 ﻿#ifndef QEASTMONEYSTOCKHISTORYINFOTHREAD_H
 #define QEASTMONEYSTOCKHISTORYINFOTHREAD_H
 
-#include <QThread>
 #include <QStringList>
 #include <QDate>
+#include <QRunnable>
 
-
-class QEastmoneyStockHistoryInfoThread : public QThread
+class QEastmoneyStockHistoryInfoThread : public QRunnable
 {
-    Q_OBJECT
 public:
-    explicit QEastmoneyStockHistoryInfoThread(const QString& code, QObject *parent = 0);
+    explicit QEastmoneyStockHistoryInfoThread(const QString& code);
     ~QEastmoneyStockHistoryInfoThread();
     QString getCode();
-signals:
-protected:
+public:
     void run();
 private:
     QString         mCode;
-    QThread         mWorkThread;
 };
 
 #endif // QEASTMONEYSTOCKHISTORYINFOTHREAD_H

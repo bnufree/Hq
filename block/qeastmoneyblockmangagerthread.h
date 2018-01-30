@@ -14,7 +14,7 @@ class QEastMoneyBlockMangagerThread : public QObject
 public:
     explicit QEastMoneyBlockMangagerThread(QObject *parent = 0);
     ~QEastMoneyBlockMangagerThread();
-    void    setCurBlockType(int type);
+
 
 signals:
     void signalBlockDataListUpdated(const BlockDataVList& list);
@@ -24,6 +24,7 @@ public slots:
     void slotStartRunMgr();
     void slotUpdateBlockInfo();    
     void    reverseSortRule();
+    void    setCurBlockType(int type);
 private:
     QList<QEastMoneyBlockThread*>  mWorkThreadList;
     int             mCurBlockType;

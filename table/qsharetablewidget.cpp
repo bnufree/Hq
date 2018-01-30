@@ -46,7 +46,7 @@ void QShareTablewidget::setDataList(const StockDataList &list)
         this->setItemText(i, k++, data.mName);
         this->setItemText(i, k++, QString("").sprintf("%.2f", data.mCur));
         double val = mStockMap[data.mCode];
-        QString flag = val > data.mChgPercent ? QStringLiteral("↑") : val < data.mChgPercent ? QStringLiteral("↓") : "";
+        QString flag = val < data.mChgPercent ? QStringLiteral("↑") : val > data.mChgPercent ? QStringLiteral("↓") : "";
         this->setItemText(i, k++, QString("%1%2%").arg(flag).arg(QString::number(data.mChgPercent, 'f', 2)));
         mStockMap[data.mCode] = data.mChgPercent;
         if(data.mMoney >= 1000){
@@ -194,8 +194,8 @@ void QShareTablewidget::slotCustomContextMenuRequested(const QPoint &pos)
                 QMenu *wk = act->menu();
                 wk->clear();
                 QList<BlockData*> blocklist = table_item->data(Qt::UserRole+1).value<QList<BlockData*>>();
-                //qDebug()<<"blocklist:"<<blocklist<<" code:"<<item->data(Qt::UserRole).toString();
                 foreach (BlockData* block, blocklist) {
+                    if(block->mName.length() == 0) continue;
                     QAction *act = new QAction(this);
                     act->setText(QString("%1:%2%").arg(block->mName).arg(block->mChangePer));
                     act->setData(block->mShareCodeList);

@@ -116,6 +116,11 @@ void HqInfoService::initShareData()
     mDataBase.getShareDataList(mStkRealInfo);
 }
 
+void HqInfoService::saveShares()
+{
+    mDataBase.saveShareDataList(mStkRealInfo);
+}
+
 
 HqInfoService *HqInfoService::instance()
 {

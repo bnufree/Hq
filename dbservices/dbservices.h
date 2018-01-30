@@ -32,6 +32,7 @@ public:
     BlockData*   getBlockDataOfCode(const QString& code);
     void         setBlockData(BlockData* data);
     void         setShareBlock(const QString& code, const QString& block);
+    void         saveShares();
 
 signals:
     //开始创建数据库需要的表信息，初始化数据库

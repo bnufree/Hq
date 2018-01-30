@@ -177,7 +177,7 @@ void Dialog::on_closeBtn_clicked()
 
 void Dialog::closeEvent(QCloseEvent *event)
 {
-    this->hide();
+    DATA_SERVICE->saveShares();
 }
 
 void Dialog::on_srchBtn_clicked()
@@ -381,13 +381,14 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
     mMergeThread->setStkList(mAllStkList);
     mMergeThread->setSelfCodesList(mFavStkList);
     mMergeThread->setActive(true);
-    mMergeThread->setMktType(MKT_ALL);
+    mMergeThread->setMktType(MKT_ZXG);
     mMergeThread->start();
     //板块行情初始化
     //mCurBlockType = BLOCK_HY;
     mBlockMgr = new QEastMoneyBlockMangagerThread();
     connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataVList)), this, SLOT(updateBlockTable(BlockDataVList)));
     connect(ui->blocktbl, SIGNAL(signalSetSortType(int)), mBlockMgr, SLOT(reverseSortRule()));
+    connect(ui->blocktbl, SIGNAL(signalSetBlockType(int)), mBlockMgr, SLOT(setCurBlockType(int)));
 
     mBlockMgr->start();
 

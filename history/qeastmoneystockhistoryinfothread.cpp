@@ -5,9 +5,9 @@
 #include "qhttpget.h"
 #include "utils/hqutils.h"
 
-QEastmoneyStockHistoryInfoThread::QEastmoneyStockHistoryInfoThread(const QString& code, QObject *parent) :
+QEastmoneyStockHistoryInfoThread::QEastmoneyStockHistoryInfoThread(const QString& code) :
     mCode(code),
-    QThread(parent)
+    QRunnable()
 {
     mCode = code;
     if(mCode.length() > 6)

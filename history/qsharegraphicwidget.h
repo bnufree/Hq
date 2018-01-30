@@ -2,6 +2,7 @@
 #define QSHAREGRAPHICWIDGET_H
 
 #include <QWidget>
+#include <QDate>
 
 enum ShareGraphicType
 {
