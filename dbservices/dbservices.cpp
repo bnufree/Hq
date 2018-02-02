@@ -118,7 +118,7 @@ void HqInfoService::initShareData()
 
 void HqInfoService::saveShares()
 {
-    mDataBase.saveShareDataList(mStkRealInfo);
+    //mDataBase.saveShareDataList(mStkRealInfo);
 }
 
 
@@ -542,5 +542,6 @@ void HqInfoService::slotSetFavCode(const QString &code)
     if(data)
     {
         data->mIsFavCode = !data->mIsFavCode;
+        mDataBase.updateShareData(data);
     }
 }

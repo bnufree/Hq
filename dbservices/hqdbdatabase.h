@@ -34,6 +34,7 @@ public:
     //个股
     bool getShareDataList(QMap<QString, StockData*>& pShareMap);
     bool saveShareDataList(const QMap<QString, StockData*>& pShareMap );
+    bool updateShareData(StockData* data);
     bool addShare(const StockData& data, const QString& table);
     bool deleteShare(const QString& table, const QString& col = QString(), const QVariant& val = QVariant());
     bool addHistoryDataList(const QString& code, const StockDataList& list);

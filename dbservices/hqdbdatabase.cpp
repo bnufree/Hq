@@ -316,6 +316,25 @@ bool HQDBDataBase::getShareDataList(QMap<QString, StockData*>& pShareMap)
     return true;
 }
 
+bool HQDBDataBase::updateShareData(StockData *data)
+{
+    if(!data) return false;
+    QSqlDatabase::database().transaction();
+    //先删除对应的code
+    if(!deleteShare(HQ_SHARE_TABLE, HQ_TABLE_COL_CODE, data->mCode));
+    {
+        QSqlDatabase::database().rollback();
+        return false;
+    }
+    if(!addShare(*data, HQ_SHARE_TABLE))
+    {
+        QSqlDatabase::database().rollback();
+        return false;
+    }
+    QSqlDatabase::database().commit();
+    return true;
+}
+
 bool HQDBDataBase::saveShareDataList(const QMap<QString, StockData *>& pShareMap)
 {
     QSqlDatabase::database().transaction();
@@ -411,7 +430,13 @@ double HQDBDataBase::getMultiDaysChangePercent(const QString &code, HISTORY_CHAN
         return change;
     }
     change = 1.0;
+    int i=0;
     while (mSQLQuery.next()) {
+        i++;
+        if(code.contains("300104"))
+        {
+            qDebug()<<++i<<mSQLQuery.value(0).toDouble();
+        }
         change *= mSQLQuery.value(0).toDouble();
     }
     change = (change -1) * 100;
