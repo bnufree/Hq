@@ -100,6 +100,7 @@ void HqInfoService::initSignalSlot()
     connect(this, SIGNAL(signalRecvShareHistoryInfos(QString,StockDataList)), this, SLOT(slotRecvShareHistoryInfos(QString,StockDataList)));
     connect(this, SIGNAL(signalUpdateShareinfoWithHistory(QString)), this, SLOT(slotUpdateShareinfoWithHistory(QString)));
     connect(this, SIGNAL(signalUpdateShareFinanceInfo(FinDataList)), this, SLOT(slotUpdateShareFinanceInfo(FinDataList)));
+    connect(this, SIGNAL(signalQueryShareForeignVol(QString)), this, SLOT(slotQueryShareForeignVol(QString)));
 }
 
 
@@ -544,4 +545,11 @@ void HqInfoService::slotSetFavCode(const QString &code)
         data->mIsFavCode = !data->mIsFavCode;
         mDataBase.updateShareData(data);
     }
+}
+
+void HqInfoService::slotQueryShareForeignVol(const QString& code)
+{
+    StockDataList list;
+    mDataBase.getHistoryDataOfCode(list, code);
+    emit signalSendShareForeignVol(list);
 }

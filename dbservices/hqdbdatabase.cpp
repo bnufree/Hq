@@ -424,19 +424,13 @@ double HQDBDataBase::getMultiDaysChangePercent(const QString &code, HISTORY_CHAN
     QMutexLocker locker(&mSQlMutex);
     QString table = HISTORY_TABLE(code);
     QString col = HQ_TABLE_COL_CHANGE_PERCENT;
-    if(!mSQLQuery.exec(tr("select 1+%1/100 from %2 order by date desc limit %3").arg(col).arg(table).arg(type)))
+    if(!mSQLQuery.exec(tr("select 1+%1 * 0.01 from %2 order by date desc limit %3").arg(col).arg(table).arg(type)))
     {
         qDebug()<<errMsg();
         return change;
     }
     change = 1.0;
-    int i=0;
     while (mSQLQuery.next()) {
-        i++;
-        if(code.contains("300104"))
-        {
-            qDebug()<<++i<<mSQLQuery.value(0).toDouble();
-        }
         change *= mSQLQuery.value(0).toDouble();
     }
     change = (change -1) * 100;
@@ -484,6 +478,31 @@ bool HQDBDataBase::getLastForeignVol(qint64 &vol, qint64 &vol_chg, const QString
         vol_chg = list[0] - list[1];
     }
 
+    return true;
+}
+
+bool HQDBDataBase::getHistoryDataOfCode(StockDataList& list, const QString &code)
+{
+    list.clear();
+    QMutexLocker locker(&mSQlMutex);
+    QString table = HISTORY_TABLE(code);
+    if(!mSQLQuery.exec(tr("select * from %1 order by date desc limit 100").arg(table)))
+    {
+        qDebug()<<errMsg();
+        return false;
+    }
+    while (mSQLQuery.next()) {
+        StockData data;
+        data.mCode = mSQLQuery.value(HQ_TABLE_COL_CODE).toString();
+        data.mName = mSQLQuery.value(HQ_TABLE_COL_NAME).toString();
+        data.mClose = mSQLQuery.value(HQ_TABLE_COL_CLOSE).toDouble();
+        data.mChgPercent = mSQLQuery.value(HQ_TABLE_COL_CHANGE_PERCENT).toDouble();
+        data.mForeignVol = mSQLQuery.value(HQ_TABLE_COL_HSGT_HAVE).toLongLong();
+        data.mForeignCap = data.mClose * data.mForeignVol;
+        data.mDate = mSQLQuery.value(HQ_TABLE_COL_DATE).toDate();
+        list.append(data);
+    }
+    if(list.length() == 0) return false;
     return true;
 }
 

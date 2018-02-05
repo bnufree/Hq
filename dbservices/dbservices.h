@@ -48,6 +48,8 @@ signals:
     void signalSendTop10ChinaStockInfos(const QList<ChinaShareExchange>& list);
     void signalRecvTop10ChinaStockInfos(const QList<ChinaShareExchange>& list);
     void signalQueryTop10ChinaStockInfos(const QDate& date = QDate(), const QString& share = QString(), int market = 0);
+    void signalQueryShareForeignVol(const QString& code);
+    void signalSendShareForeignVol(const StockDataList& list);
     //历史数据写入数据库
     void signalRecvShareHistoryInfos(const QString& code, const StockDataList& list);
     void signalQueryShareHistoryLastDate(const QString& code);
@@ -81,6 +83,7 @@ public slots:
     void slotUpdateShareAmountByForeigner();
     void slotUpdateShareFinanceInfo(const FinDataList& list);
     void slotSetFavCode(const QString& code);
+    void slotQueryShareForeignVol(const QString& code);
 
 
 private:

@@ -1,4 +1,4 @@
-#ifndef QEASTMONEYHSGTDIALOG_H
+﻿#ifndef QEASTMONEYHSGTDIALOG_H
 #define QEASTMONEYHSGTDIALOG_H
 
 #include <QDialog>
@@ -17,7 +17,9 @@ public:
     ~QEastMoneyHSGTDialog();
 
 private slots:
+    void slotDisplayCode(const QString& code);
     void slotRecvTop10Infos(const QList<ChinaShareExchange>& list);
+    void slotRecvListInfo(const StockDataList& list);
     void on_SearchBTB_clicked();
 
     void on_MarketCHK_clicked(bool checked);

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>852</width>
+    <width>537</width>
     <height>406</height>
    </rect>
   </property>
@@ -152,42 +152,17 @@
      </column>
      <column>
       <property name="text">
-       <string>均价</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>总金额</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>外资买入</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>外资卖出</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>外资净额</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
        <string>持有量</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>市值</string>
+       <string>变化</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>外资成本</string>
+       <string>市值</string>
       </property>
      </column>
     </widget>

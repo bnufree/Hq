@@ -46,6 +46,7 @@ public:
     bool createDBTables();
     QDate getLastUpdateDateOfShareHistory(const QString &code);
     QString errMsg();
+    bool getHistoryDataOfCode(StockDataList& list, const QString &code);
 
 private:
     bool initSqlDB();

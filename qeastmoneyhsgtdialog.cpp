@@ -1,4 +1,4 @@
-#include "qeastmoneyhsgtdialog.h"
+﻿#include "qeastmoneyhsgtdialog.h"
 #include "ui_qeastmoneyhsgtdialog.h"
 
 QEastMoneyHSGTDialog::QEastMoneyHSGTDialog(QWidget *parent) :
@@ -14,6 +14,7 @@ QEastMoneyHSGTDialog::QEastMoneyHSGTDialog(QWidget *parent) :
     ui->DateEdit->setDate(QDate::currentDate());
     ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
     connect(DATA_SERVICE, SIGNAL(signalSendTop10ChinaStockInfos(QList<ChinaShareExchange>)), this, SLOT(slotRecvTop10Infos(QList<ChinaShareExchange>)));
+    connect(DATA_SERVICE, SIGNAL(signalSendShareForeignVol(StockDataList)), this, SLOT(slotRecvListInfo(StockDataList)));
 }
 
 QEastMoneyHSGTDialog::~QEastMoneyHSGTDialog()
@@ -77,6 +78,34 @@ void QEastMoneyHSGTDialog::on_tableWidget_doubleClicked(const QModelIndex &index
     {
         QString code = ui->tableWidget->item(row, 0)->data(Qt::UserRole+1).toString();
         emit DATA_SERVICE->signalQueryTop10ChinaStockInfos(QDate(), code, 0);
+    }
+
+}
+
+void QEastMoneyHSGTDialog::slotDisplayCode(const QString &code)
+{
+    emit DATA_SERVICE->signalQueryShareForeignVol(code);
+}
+
+void QEastMoneyHSGTDialog::slotRecvListInfo(const StockDataList& list)
+{
+    ui->tableWidget->setRowCount(list.count());
+    ui->tableWidget->sortByColumn(4);
+    int row = 0;
+    foreach (ChinaShareExchange info, list) {
+        int col = 0;
+        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(info.mDate.toString("yyyy-MM-dd")));
+        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(info.mCode));
+        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(info.mName));
+        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString::number(info.mCur)));
+        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString("").sprintf("%.2f%", info.mChgPercent)));
+        col++;
+        col++;
+        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString::number(info.mTop10Buy/10000)));
+        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString::number(info.mTop10Sell/10000)));
+        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString::number((info.mTop10Buy-info.mTop10Sell) /10000)));
+        ui->tableWidget->item(row, 0)->setData(Qt::UserRole+1, info.mCode);
+        row++;
     }
 
 }

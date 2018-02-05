@@ -205,6 +205,7 @@ void QShareTablewidget::slotCustomContextMenuRequested(const QPoint &pos)
             } else
             {
                 menu_item.mKey.setValue(stkCode);
+                act->setData(QVariant::fromValue(menu_item));
             }
         }
 
@@ -240,7 +241,12 @@ void QShareTablewidget::setDisplayBlockDetail()
 
 void QShareTablewidget::setDisplayHSHK()
 {
-
+    QAction *act = qobject_cast<QAction*> (sender());
+    if(act)
+    {
+        struMenu menu_item = act->data().value<struMenu>();
+        emit signalSetDisplayHSHK(menu_item.mKey.toString().right(6));
+    }
 }
 
 void QShareTablewidget::slotCellDoubleClicked(int row, int col)

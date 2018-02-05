@@ -17,11 +17,29 @@ struct  GRAPHIC_DATA{
     double          mRzye;
     double          mZjlx;
     double          mForVol;
-    double          mForVolChg;
     double          mMoney;
-    double          mVol;
 };
-typedef QList<GRAPHIC_DATA>         GRAPHIC_DATA_LIST;
+class GRAPHIC_DATA_LIST : public QList<GRAPHIC_DATA>
+{
+public:
+    GRAPHIC_DATA_LIST()
+    {
+        mMaxClose = 0.0;
+        mMaxRzye = 0.0;
+        mMaxZjlx = 0.0;
+        mMaxForeignVol = 0.0;
+        mMaxMoney = 0.0;
+        clear();
+    }
+
+public:
+    double      mMaxClose;
+    double      mMaxRzye;
+    double      mMaxZjlx;
+    double      mMaxForeignVol;
+    double      mMaxMoney;
+};
+
 
 class QShareGraphicWidget : public QWidget
 {
