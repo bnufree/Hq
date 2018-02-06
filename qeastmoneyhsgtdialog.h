@@ -16,7 +16,7 @@ public:
     explicit QEastMoneyHSGTDialog(QWidget *parent = 0);
     ~QEastMoneyHSGTDialog();
 
-private slots:
+public slots:
     void slotDisplayCode(const QString& code);
     void slotRecvTop10Infos(const QList<ChinaShareExchange>& list);
     void slotRecvListInfo(const StockDataList& list);

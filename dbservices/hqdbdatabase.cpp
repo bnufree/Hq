@@ -486,7 +486,7 @@ bool HQDBDataBase::getHistoryDataOfCode(StockDataList& list, const QString &code
     list.clear();
     QMutexLocker locker(&mSQlMutex);
     QString table = HISTORY_TABLE(code);
-    if(!mSQLQuery.exec(tr("select * from %1 order by date desc limit 100").arg(table)))
+    if(!mSQLQuery.exec(tr("select * from %1 order by date desc limit 1000").arg(table)))
     {
         qDebug()<<errMsg();
         return false;
@@ -500,7 +500,13 @@ bool HQDBDataBase::getHistoryDataOfCode(StockDataList& list, const QString &code
         data.mForeignVol = mSQLQuery.value(HQ_TABLE_COL_HSGT_HAVE).toLongLong();
         data.mForeignCap = data.mClose * data.mForeignVol;
         data.mDate = mSQLQuery.value(HQ_TABLE_COL_DATE).toDate();
+        if(list.size() > 0)
+        {
+            StockData& last = list[list.size() -1];
+            last.mForeignVolChg = last.mForeignVol - data.mForeignVol;
+        }
         list.append(data);
+
     }
     if(list.length() == 0) return false;
     return true;

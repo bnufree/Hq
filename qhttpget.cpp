@@ -132,4 +132,26 @@ QByteArray QHttpGet::getContentOfURL(const QString &url)
     return recv;
 }
 
+QByteArray QHttpGet::getContentOfURLWithPost(const QString &url, const QByteArray& post)
+{
+    QByteArray recv;
+    QNetworkAccessManager mgr;
+    QNetworkReply *reply = mgr.post(QNetworkRequest(url), post);
+    if(!reply) return recv;
+
+    QEventLoop subloop;
+    connect(reply, SIGNAL(finished()), &subloop, SLOT(quit()));
+    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), &subloop, SLOT(quit()));
+    subloop.exec();
+    if(reply->error() == QNetworkReply::NoError)
+    {
+        recv = reply->readAll();
+    }
+    reply->abort();
+    reply->close();
+    delete reply;
+    reply = 0;
+    return recv;
+}
+
 

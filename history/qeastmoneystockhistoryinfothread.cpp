@@ -99,6 +99,8 @@ void QEastmoneyStockHistoryInfoThread::run()
                     data.mForeignVol = obj.value("SHAREHOLDSUM").toVariant().toLongLong();
                     data.mClose = obj.value("CLOSEPRICE").toDouble();
                     data.mChgPercent =obj.value("ZDF").toDouble();
+                    data.mCode = obj.value("SCODE").toString();
+                    data.mName = obj.value("SNAME").toString();
                     list[dateStr] = data;
 
                 }

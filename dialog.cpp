@@ -373,6 +373,7 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
     mHSFoundsList = Profiles::instance()->value(STK_HSJJ_SEC, STK_ZXG_NAME).toStringList();
     mMergeThread = new QSinaStkResultMergeThread();
     connect(mMergeThread, SIGNAL(sendStkDataList(StockDataList)), this, SLOT(updateHqTable(StockDataList)));
+    connect(ui->hqtbl, SIGNAL(signalSetDisplayHSHK(QString)), this, SLOT(slotUpdateHSGTOfCode(QString)));
     connect(ui->hqtbl, SIGNAL(signalSetStockMarket(int)), mMergeThread, SLOT(setMktType(int)));
     connect(ui->hqtbl, SIGNAL(signalSetSortType(int)), mMergeThread, SLOT(setSortType(int)));
     connect(ui->hqtbl, SIGNAL(signalDisplayPage(int)), mMergeThread, SLOT(setDisplayPage(int)));
@@ -409,4 +410,12 @@ void Dialog::on_HSGTBTN_clicked()
 void Dialog::slotTodayHSGUpdated()
 {
     ui->HSGTBTN->setStyleSheet("background-color:red");
+}
+
+void Dialog::slotUpdateHSGTOfCode(const QString &code)
+{
+    QEastMoneyHSGTDialog *dlg = new QEastMoneyHSGTDialog ;
+    dlg->setModal(false);
+    dlg->slotDisplayCode(code);
+    dlg->show();
 }

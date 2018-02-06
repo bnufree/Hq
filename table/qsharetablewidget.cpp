@@ -180,6 +180,7 @@ void QShareTablewidget::slotCustomContextMenuRequested(const QPoint &pos)
         }
 
     }
+
     //自选股编辑
     QTableWidgetItem *table_item = this->itemAt(pos);
     qDebug()<<"item:"<<table_item;
@@ -207,6 +208,7 @@ void QShareTablewidget::slotCustomContextMenuRequested(const QPoint &pos)
                 menu_item.mKey.setValue(stkCode);
                 act->setData(QVariant::fromValue(menu_item));
             }
+            act->setVisible(true);
         }
 
     } else
