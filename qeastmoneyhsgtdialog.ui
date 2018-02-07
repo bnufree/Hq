@@ -152,17 +152,17 @@
      </column>
      <column>
       <property name="text">
-       <string>持有量</string>
+       <string>持有量(万)</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>变化</string>
+       <string>变化(万)</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>市值</string>
+       <string>市值(亿)</string>
       </property>
      </column>
     </widget>

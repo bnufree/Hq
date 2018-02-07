@@ -98,9 +98,9 @@ void QEastMoneyHSGTDialog::slotRecvListInfo(const StockDataList& list)
         ui->tableWidget->setItem(row, col++, new QTableWidgetItem(info.mName));
         ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString::number(info.mClose, 'f', 2)));
         ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString("").sprintf("%.2f%", info.mChgPercent)));
-        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString::number(info.mForeignVol)));
-        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString::number(info.mForeignVolChg)));
-        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString::number(info.mForeignCap)));
+        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString::number(info.mForeignVol/10000.0, 'f', 1)));
+        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString::number(info.mForeignVolChg/10000.0, 'f', 1)));
+        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString::number(info.mForeignCap/100000000.0, 'f', 2)));
         ui->tableWidget->item(row, 0)->setData(Qt::UserRole+1, info.mCode);
         row++;
     }
