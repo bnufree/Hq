@@ -1,21 +1,24 @@
 ﻿#ifndef QHKEXCHANGEVOLDATAPROCESS_H
 #define QHKEXCHANGEVOLDATAPROCESS_H
 
-#include <QObject>
+#include <QRunnable>
+#include <QDate>
 
-//\d{2}/\d{2}/\d{4}
-class QHKExchangeVolDataProcess : public QObject
+struct HKVOLDATA{
+    int mCode;
+    qint64  mVol;
+};
+class QHKExchangeVolDataProcess : public QRunnable
 {
-    Q_OBJECT
 public:
-    explicit QHKExchangeVolDataProcess(QObject *parent = 0);
+    explicit QHKExchangeVolDataProcess(const QDate& date);
+    ~QHKExchangeVolDataProcess() {}
 
-signals:
-
-public slots:
+public:
+    void run();
+    void getMktVolInfo(QList<HKVOLDATA>& list, const QDate& date, int mkt);
 private:
-    int         mMktType;
-    //QDate       mDate;
+    QDate       mDate;
 };
 
 #endif // QHKEXCHANGEVOLDATAPROCESS_H

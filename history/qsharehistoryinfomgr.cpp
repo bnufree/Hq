@@ -32,11 +32,6 @@ void QShareHistoryInfoMgr::slotShareFinanceInfoFinished()
     foreach (QString code, mCodesList) {
         QEastmoneyStockHistoryInfoThread* thread = new QEastmoneyStockHistoryInfoThread(code);
         pool.start(thread);
-//        QEventLoop loop;
-//        connect(thread, SIGNAL(finished()), &loop, SLOT(quit()));
-//        thread->start();
-//        loop.exec();
-//        delete thread;
     }
     pool.waitForDone();
      qDebug()<<QDateTime::currentDateTime();
