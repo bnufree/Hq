@@ -47,6 +47,7 @@ public:
 
 Dialog::Dialog(QWidget *parent) :
     QDialog(parent),mBlockMgr(NULL)/*,mStockThread(NULL)*/,mSearchThread(NULL),mDisplayCol(0),mMergeThread(0),
+    mShareHistoryMgr(0),
     ui(new Ui::MainDialog)
 {
     ui->setupUi(this);
@@ -349,7 +350,13 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
 {
     qDebug()<<"update code finshed:"<<list.length();
     //更新股本信息等
-    QShareHistoryInfoMgr* mgr = new QShareHistoryInfoMgr(list);
+    if(!mShareHistoryMgr)
+    {
+        mShareHistoryMgr = new QShareHistoryInfoMgr(list);
+        connect(mShareHistoryMgr, SIGNAL(signalUpdateHistoryMsg(QString)),
+                this, SLOT(slotUpdateMsg(QString)));
+    }
+    mShareHistoryMgr->signalGetFianceInfo();
     mAllStkList = list;
     //更新指数
     QIndexWidget *indexw = new QIndexWidget(this);
@@ -400,10 +407,14 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
 
 void Dialog::on_HSGTBTN_clicked()
 {
-    ui->HSGTBTN->setStyleSheet("background-color:transparent");
-    QEastMoneyHSGTDialog* dlg = new QEastMoneyHSGTDialog;
-    dlg->setModal(false);
-    dlg->show();
+//    ui->HSGTBTN->setStyleSheet("background-color:transparent");
+//    QEastMoneyHSGTDialog* dlg = new QEastMoneyHSGTDialog;
+//    dlg->setModal(false);
+//    dlg->show();
+    if(mShareHistoryMgr)
+    {
+        mShareHistoryMgr->signalUpdateAllShareFrom20170317();
+    }
 
 }
 

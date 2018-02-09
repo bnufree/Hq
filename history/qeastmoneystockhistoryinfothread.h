@@ -4,11 +4,13 @@
 #include <QStringList>
 #include <QDate>
 #include <QRunnable>
+#include <stockdata.h>
+#include <QObject>
 
 class QEastmoneyStockHistoryInfoThread : public QRunnable
 {
 public:
-    explicit QEastmoneyStockHistoryInfoThread(const QString& code, const QDate& date = QDate() );
+    explicit QEastmoneyStockHistoryInfoThread(const QString& code, const StockDataList& list, QObject* parent = 0,  const QDate& date = QDate() );
     ~QEastmoneyStockHistoryInfoThread();
     QString getCode();
 public:
@@ -16,6 +18,8 @@ public:
 private:
     QString         mCode;
     QDate           mStartDate;
+    StockDataList   mForeignVolList;
+    QObject         *mParent;
 };
 
 #endif // QEASTMONEYSTOCKHISTORYINFOTHREAD_H

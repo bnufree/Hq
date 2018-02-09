@@ -8,12 +8,13 @@
 #define     HK_URL      "http://sc.hkexnews.hk/TuniS/www.hkexnews.hk/sdw/search/mutualmarket_c.aspx?t=%1"
 #define     SAVE_DIR    QDir::currentPath() + "/hk/"
 
-QHKExchangeVolDataProcess::QHKExchangeVolDataProcess(const QDate& date) : QRunnable()
+QHKExchangeVolDataProcess::QHKExchangeVolDataProcess(const QDate& date, QObject* parent) : QRunnable()
 {
     mDate = date;
+    mParent = parent;
 }
 
-void QHKExchangeVolDataProcess::getMktVolInfo(QList<HKVOLDATA> &list, const QDate &date, int mkt)
+void QHKExchangeVolDataProcess::getMktVolInfo(StockDataList &list, const QDate &date, int mkt)
 {
     QString postVal = POST_VAL;
     postVal.replace("TODAY_DATE", QDate::currentDate().toString("yyyyMMdd"));
@@ -58,17 +59,18 @@ void QHKExchangeVolDataProcess::getMktVolInfo(QList<HKVOLDATA> &list, const QDat
             tmpCode.replace(0, 1, "60");
         }
         int code = tmpCode.toInt();
-        qDebug()<<"res:"<<codeExp.cap();
+        //qDebug()<<"res:"<<codeExp.cap();
         start_index += 5;
         start_index = volExp.indexIn(res, start_index);
         if(start_index >= 0)
         {
             qint64 vol = volExp.cap().remove(",").toLongLong();
-            qDebug()<<"res:"<<volExp.cap();
+            //qDebug()<<"res:"<<volExp.cap();
             start_index += volExp.cap().length();
-            HKVOLDATA data;
+            StockData data;
             data.mCode = code;
-            data.mVol = vol;
+            data.mForeignVol = vol;
+            data.mDate = mDate;
             list.append(data);
         } else
         {
@@ -83,44 +85,53 @@ void QHKExchangeVolDataProcess::getMktVolInfo(QList<HKVOLDATA> &list, const QDat
 void QHKExchangeVolDataProcess::run()
 {
     //分别取得各个市场的数据
-    QList<HKVOLDATA> list;
+    StockDataList list;
     for(int i=0; i<2; i++)
     {
         getMktVolInfo(list, mDate, i);
     }
-
-    //写入文件保存
-    QDir wkdir(SAVE_DIR);
-    if(!wkdir.exists())
+    if(list.size() > 0 && mParent)
     {
-        if(wkdir.mkpath(SAVE_DIR))
-        {
-            qDebug()<<"make path "<<SAVE_DIR<<" ok.";
-        } else
-        {
-            qDebug()<<"make path "<<SAVE_DIR<<" falied.";
-        }
-
+        QMetaObject::invokeMethod(mParent, "slotUpdateForignVolInfo", Qt::DirectConnection, Q_ARG(StockDataList, list));
     }
-    QString fileName = QString("%1%2.dat").arg(SAVE_DIR).arg(mDate.toString("yyyyMMdd"));
-    //将数据写入到文件
-    if(list.length() > 0)
+    if(mParent)
     {
-        FILE *fp = fopen(fileName.toStdString().data(), "wb+");
-        if(fp)
-        {
-            QDateTime wkDateTime;
-            wkDateTime.setDate(mDate);
-            qint64 cur =wkDateTime.addDays(-1).toMSecsSinceEpoch();
-            fwrite(&cur, sizeof(cur), 1, fp);
-            for(int i=0; i<list.size(); i++){
-                fwrite(&(list[i]), sizeof(HKVOLDATA), 1, fp);
-            }
-            //然后在移动到开头写入时间，保证是最新的
-            fseek(fp, 0, SEEK_SET);
-            cur = wkDateTime.toMSecsSinceEpoch();
-            fwrite(&cur, sizeof(cur), 1, fp);
-            fclose(fp);
-        }
+        QString msg = QStringLiteral("更新外资持股：") + mDate.toString("yyyy-MM-dd");
+        QMetaObject::invokeMethod(mParent, "signalUpdateHistoryMsg", Qt::DirectConnection, Q_ARG(QString,msg ));
     }
+
+//    //写入文件保存
+//    QDir wkdir(SAVE_DIR);
+//    if(!wkdir.exists())
+//    {
+//        if(wkdir.mkpath(SAVE_DIR))
+//        {
+//            qDebug()<<"make path "<<SAVE_DIR<<" ok.";
+//        } else
+//        {
+//            qDebug()<<"make path "<<SAVE_DIR<<" falied.";
+//        }
+
+//    }
+//    QString fileName = QString("%1%2.dat").arg(SAVE_DIR).arg(mDate.toString("yyyyMMdd"));
+//    //将数据写入到文件
+//    if(list.length() > 0)
+//    {
+//        FILE *fp = fopen(fileName.toStdString().data(), "wb+");
+//        if(fp)
+//        {
+//            QDateTime wkDateTime;
+//            wkDateTime.setDate(mDate);
+//            qint64 cur =wkDateTime.addDays(-1).toMSecsSinceEpoch();
+//            fwrite(&cur, sizeof(cur), 1, fp);
+//            for(int i=0; i<list.size(); i++){
+//                fwrite(&(list[i]), sizeof(HKVOLDATA), 1, fp);
+//            }
+//            //然后在移动到开头写入时间，保证是最新的
+//            fseek(fp, 0, SEEK_SET);
+//            cur = wkDateTime.toMSecsSinceEpoch();
+//            fwrite(&cur, sizeof(cur), 1, fp);
+//            fclose(fp);
+//        }
+//    }
 }

@@ -5,9 +5,11 @@
 #include "qhttpget.h"
 #include "utils/hqutils.h"
 
-QEastmoneyStockHistoryInfoThread::QEastmoneyStockHistoryInfoThread(const QString& code, const QDate& date) :
+QEastmoneyStockHistoryInfoThread::QEastmoneyStockHistoryInfoThread(const QString& code,const StockDataList& list,QObject* parent, const QDate& date) :
     mCode(code),
     mStartDate(date),
+    mForeignVolList(list),
+    mParent(parent),
     QRunnable()
 {
     mCode = code;
@@ -35,13 +37,42 @@ void QEastmoneyStockHistoryInfoThread::run()
         lastDate = DATA_SERVICE->getLastUpdateDateOfShareHistory(mCode);
     } else
     {
-        lastDate = QDate(2017,3,16);
+        lastDate = mStartDate.addDays(-1);
     }
     //检查日线数据是否需要更新
     QDate start = lastDate.addDays(1);
     QDate end = QDate::currentDate();
     if(start < end)
     {
+        if(mForeignVolList.size() == 0)
+        {
+            QString wkURL = QString("http://dcfm.eastmoney.com//em_mutisvcexpandinterface/api/js/get?"
+                                    "type=HSGTHDSTA&token=70f12f2f4f091e459a279469fe49eca5&filter="
+                                    "(SCODE='%1')(HDDATE>=^%2^)&st=HDDATE&sr=-1&p=1&ps=5000&js=(x)")
+                    .arg(mCode).arg(start.toString("yyyy-MM-dd"));
+            QJsonParseError err;
+            QJsonDocument doc = QJsonDocument::fromJson(QHttpGet::getContentOfURL(wkURL), &err);
+            if(err.error == QJsonParseError::NoError)
+            {
+                if(doc.isArray())
+                {
+                    //开始解析
+                    QJsonArray result = doc.array();
+                    for(int i=0; i<result.size(); i++)
+                    {
+                        QJsonObject obj = result.at(i).toObject();
+                        QString dateStr = obj.value("HDDATE").toString().left(10);
+                        StockData data;
+                        data.mDate = QDate::fromString(dateStr, "yyyy-MM-dd");
+                        if(HqUtils::isWeekend(data.mDate)) continue;
+                        data.mForeignVol = obj.value("SHAREHOLDSUM").toVariant().toLongLong();
+                        data.mCode = obj.value("SCODE").toString();
+                        mForeignVolList.append(data);
+
+                    }
+                }
+            }
+        }
         QString wkCode;
         if(mCode.left(1) == "6" || mCode.left(1) == "5")
         {
@@ -55,16 +86,29 @@ void QEastmoneyStockHistoryInfoThread::run()
                 .arg(wkCode).arg(start.toString("yyyyMMdd")).arg(end.toString("yyyyMMdd"));
         QString result = QString::fromLocal8Bit(QHttpGet::getContentOfURL(wkURL));
         QStringList lines = result.split("\r\n");
-        QMap<QString, StockData> list;
+        StockDataList list;
+        int index = 0;
         for(int i=1; i<lines.length(); i++)
         {
             QStringList cols = lines[i].split(",");
             if(cols.length() >= 15)
             {
+                bool found = false;
                 StockData data;
-                data.mDate = QDate::fromString(cols[0], "yyyy-MM-dd");
-                if(HqUtils::isWeekend(data.mDate)) continue;
-                data.mCode = cols[1].right(6);
+                QDate curDate = QDate::fromString(cols[0], "yyyy-MM-dd");
+                if(HqUtils::isWeekend(curDate)) continue;
+                for(; index<mForeignVolList.size(); index++)
+                {
+                    StockData tmpData = mForeignVolList[index];
+                    if(tmpData.mDate == curDate)
+                    {
+                        data.mForeignVol = tmpData.mForeignVol;
+                        found = true;
+                        break;
+                    }
+                }
+                data.mDate = curDate;
+                data.mCode = mCode;
                 data.mName = cols[2];
                 data.mCur = cols[3].toDouble();
                 if(data.mCur == 0) continue;
@@ -80,46 +124,28 @@ void QEastmoneyStockHistoryInfoThread::run()
                 double price = data.mCur;
                 data.mTotalShare = cols[13].toDouble() / price;
                 data.mMutableShare = cols[14].toDouble() / price;
-                list[data.mDate.toString("yyyy-MM-dd")] = data;
+                list.append(data);
             }
         }
-
-        //qDebug()<<mCode<<lastDate<<list.values().size();
-        //取得外资此股情况更新
-        QString wkURL = QString("http://dcfm.eastmoney.com//em_mutisvcexpandinterface/api/js/get?"
-                        "type=HSGTHDSTA&token=70f12f2f4f091e459a279469fe49eca5&filter="
-                        "(SCODE='%1')(HDDATE>=^%2^)&st=HDDATE&sr=-1&p=1&ps=5000&js=(x)")
-                .arg(mCode).arg(start.toString("yyyy-MM-dd"));
-        QJsonParseError err;
-        QJsonDocument doc = QJsonDocument::fromJson(QHttpGet::getContentOfURL(wkURL), &err);
-        if(err.error == QJsonParseError::NoError)
+        if(list.size() > 0)
         {
-            if(doc.isArray())
-            {
-                //开始解析
-                QJsonArray result = doc.array();
-                for(int i=0; i<result.size(); i++)
-                {
-                    QJsonObject obj = result.at(i).toObject();
-                    QString dateStr = obj.value("HDDATE").toString().left(10);
-                    StockData data;
-                    data.mDate = QDate::fromString(dateStr, "yyyy-MM-dd");
-                    if(HqUtils::isWeekend(data.mDate)) continue;
-                    data.mForeignVol = obj.value("SHAREHOLDSUM").toVariant().toLongLong();
-                    data.mClose = obj.value("CLOSEPRICE").toDouble();
-                    data.mChgPercent =obj.value("ZDF").toDouble();
-                    data.mCode = obj.value("SCODE").toString();
-                    data.mName = obj.value("SNAME").toString();
-                    list[dateStr] = data;
-
-                }
-            }
+            emit DATA_SERVICE->signalRecvShareHistoryInfos(mCode, list);
         }
-        emit DATA_SERVICE->signalRecvShareHistoryInfos(mCode, list.values());
+    }
+    emit DATA_SERVICE->signalUpdateShareinfoWithHistory(mCode);
+    QString msg = QStringLiteral("日线数据更新完成：");
+    msg += mCode;
+
+    qDebug()<<__FUNCTION__<<__LINE__<<msg;
+    if(mParent)
+    {
+        QMetaObject::invokeMethod(mParent, "signalUpdateHistoryMsg", Qt::DirectConnection, Q_ARG(QString,msg ));
     }
 
-    //查询数据库更新历史信息
-    emit DATA_SERVICE->signalUpdateShareinfoWithHistory(mCode.right(6));
+
+
+//    //查询数据库更新历史信息
+//    emit DATA_SERVICE->signalUpdateShareinfoWithHistory(mCode.right(6));
 }
 
 QString QEastmoneyStockHistoryInfoThread::getCode()

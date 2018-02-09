@@ -3,22 +3,21 @@
 
 #include <QRunnable>
 #include <QDate>
+#include <QObject>
+#include "stockdata.h"
 
-struct HKVOLDATA{
-    int mCode;
-    qint64  mVol;
-};
 class QHKExchangeVolDataProcess : public QRunnable
 {
 public:
-    explicit QHKExchangeVolDataProcess(const QDate& date);
+    explicit QHKExchangeVolDataProcess(const QDate& date, QObject* parent = 0);
     ~QHKExchangeVolDataProcess() {}
 
 public:
     void run();
-    void getMktVolInfo(QList<HKVOLDATA>& list, const QDate& date, int mkt);
+    void getMktVolInfo(StockDataList& list, const QDate& date, int mkt);
 private:
     QDate       mDate;
+    QObject*    mParent;
 };
 
 #endif // QHKEXCHANGEVOLDATAPROCESS_H

@@ -9,6 +9,8 @@
 #include "qsinasearchthread.h"
 #include "qsinastkresultmergethread.h"
 
+class QShareHistoryInfoMgr;
+
 typedef struct strColDisplay
 {
     QTableWidget*   mTable;
@@ -109,6 +111,7 @@ private:
     QEastMoneyBlockMangagerThread        *mBlockMgr;
     QSinaStkResultMergeThread     *mMergeThread;
     QSinaSearchThread             *mSearchThread;
+    QShareHistoryInfoMgr          *mShareHistoryMgr;
     QStringList           mFavStkList;
     QStringList           mHSFoundsList;
     QStringList           mAllStkList;

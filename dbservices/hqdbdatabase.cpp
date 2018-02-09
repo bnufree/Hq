@@ -245,7 +245,10 @@ bool HQDBDataBase::addHistoryDataList(const QString &code, const StockDataList &
             QSqlDatabase::database().rollback();
             return false;
         }
-        if(exist) continue;
+        if(exist)
+        {
+            deleteShare(HISTORY_TABLE(code), HQ_TABLE_COL_DATE, data.mDate);
+        }
         if(!addShare(data, HISTORY_TABLE(code)))
         {
             QSqlDatabase::database().rollback();
