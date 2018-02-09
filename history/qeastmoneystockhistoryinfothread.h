@@ -8,13 +8,14 @@
 class QEastmoneyStockHistoryInfoThread : public QRunnable
 {
 public:
-    explicit QEastmoneyStockHistoryInfoThread(const QString& code);
+    explicit QEastmoneyStockHistoryInfoThread(const QString& code, const QDate& date = QDate() );
     ~QEastmoneyStockHistoryInfoThread();
     QString getCode();
 public:
     void run();
 private:
     QString         mCode;
+    QDate           mStartDate;
 };
 
 #endif // QEASTMONEYSTOCKHISTORYINFOTHREAD_H

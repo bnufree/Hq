@@ -23,6 +23,7 @@ signals:
 
 public slots:
     void slotShareFinanceInfoFinished();
+    void slotUpdateAllShareFrom20170317();
 private:
     QThread             mWorkThread;
     QStringList         mCodesList;
