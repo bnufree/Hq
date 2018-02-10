@@ -35,3 +35,26 @@ QString HqUtils::prefixCode(const QString &code)
     if(type == SHARE_US) return "us";
     return "undefined";
 }
+
+bool HqUtils::isActiveTime(const QTime &time)
+{
+    int act_start1 = 9*60+15;
+    int act_end1 = 11*60+30;
+    int act_start2 = 13*60;
+    int act_end2 = 15*60;
+    int hour = time.hour();
+    int minute = time.minute();
+    int res = hour *60 + minute;
+    if((res >= act_start1 && res <= act_end1) || (res >= act_start2 && res <= act_end2))
+    {
+            return true;
+    }
+    return false;
+}
+
+bool HqUtils::isCurrentActive()
+{
+    QDateTime cur = QDateTime::currentDateTime();
+    if(isWeekend((cur.date()))) return false;
+    return isActiveTime(cur.time());
+}

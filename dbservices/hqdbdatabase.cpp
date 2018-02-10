@@ -234,10 +234,18 @@ bool HQDBDataBase::createShareTable()
 
     return createTable(HQ_SHARE_TABLE, colist);
 }
-bool HQDBDataBase::addHistoryDataList(const QString &code, const StockDataList &list)
+bool HQDBDataBase::addHistoryDataList(const QString &code, const StockDataList &list, bool deletedb)
 {
     if(!createStockHistoryInfoTable(code)) return false;
     QSqlDatabase::database().transaction();
+    if(deletedb)
+    {
+        if(!deleteShare(HISTORY_TABLE(code)))
+        {
+            QSqlDatabase::database().rollback();
+            return false;
+        }
+    }
     foreach (StockData data, list) {
         bool exist = false;
         if(!isRecordExist(exist, HISTORY_TABLE(code), HQ_TABLE_COL_DATE, data.mDate))

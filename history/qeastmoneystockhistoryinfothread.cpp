@@ -5,11 +5,12 @@
 #include "qhttpget.h"
 #include "utils/hqutils.h"
 
-QEastmoneyStockHistoryInfoThread::QEastmoneyStockHistoryInfoThread(const QString& code,const StockDataList& list,QObject* parent, const QDate& date) :
+QEastmoneyStockHistoryInfoThread::QEastmoneyStockHistoryInfoThread(const QString& code,const StockDataList& list, bool deldb, QObject* parent, const QDate& date) :
     mCode(code),
     mStartDate(date),
     mForeignVolList(list),
     mParent(parent),
+    mDelDB(deldb),
     QRunnable()
 {
     mCode = code;
@@ -97,7 +98,7 @@ void QEastmoneyStockHistoryInfoThread::run()
                 StockData data;
                 QDate curDate = QDate::fromString(cols[0], "yyyy-MM-dd");
                 if(HqUtils::isWeekend(curDate)) continue;
-                for(; index<mForeignVolList.size(); index++)
+                for(index = 0; index<mForeignVolList.size(); index++)
                 {
                     StockData tmpData = mForeignVolList[index];
                     if(tmpData.mDate == curDate)
@@ -129,7 +130,7 @@ void QEastmoneyStockHistoryInfoThread::run()
         }
         if(list.size() > 0)
         {
-            emit DATA_SERVICE->signalRecvShareHistoryInfos(mCode, list);
+            emit DATA_SERVICE->signalRecvShareHistoryInfos(mCode, list, mDelDB);
         }
     }
     emit DATA_SERVICE->signalUpdateShareinfoWithHistory(mCode);

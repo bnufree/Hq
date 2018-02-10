@@ -3,6 +3,7 @@
 
 #include <QDate>
 #include <QDebug>
+#include <QDateTime>
 enum SHARE_TYPE{
     SHARE_UNDEFINE = -1,
     SHARE_SH = 0,
@@ -22,6 +23,8 @@ public:
     static bool isWeekend(const QDate& date);
     static SHARE_TYPE shareType(const QString& code);
     static QString prefixCode(const QString& code);
+    static bool isCurrentActive();
+    static bool isActiveTime(const QTime& time);
 };
 
 #endif // HQUTILS_H

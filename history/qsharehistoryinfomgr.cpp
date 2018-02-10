@@ -41,7 +41,7 @@ void QShareHistoryInfoMgr::slotShareFinanceInfoFinished()
     //开始更新日线数据
     emit signalUpdateHistoryMsg(QStringLiteral("开始更新日线数据..."));
     foreach (QString code, mCodesList) {
-        QEastmoneyStockHistoryInfoThread* thread = new QEastmoneyStockHistoryInfoThread(code, StockDataList(), this);
+        QEastmoneyStockHistoryInfoThread* thread = new QEastmoneyStockHistoryInfoThread(code, StockDataList(),false, this);
         pool.start(thread);
     }
     pool.waitForDone();
@@ -55,9 +55,9 @@ void QShareHistoryInfoMgr::slotShareFinanceInfoFinished()
     emit signalHistoryDataFinished();
 }
 
-void QShareHistoryInfoMgr::slotUpdateForignVolInfo(const StockDataList &list)
+void QShareHistoryInfoMgr::slotUpdateForignVolInfo(const StockDataList &list, const QDate& date)
 {
-    qDebug()<<__FUNCTION__<<__LINE__<<list.size();
+    qDebug()<<__FUNCTION__<<__LINE__<<list.size()<<date;
     foreach (StockData data, list) {
         StockDataList &wklist = mShareInfoMap[data.mCode];
         wklist.append(data);
@@ -86,7 +86,7 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFrom20170317()
     emit signalUpdateHistoryMsg(QStringLiteral("开始更新日线数据..."));
     //开始更新日线数据
     foreach (QString code, mCodesList) {
-        QEastmoneyStockHistoryInfoThread* thread = new QEastmoneyStockHistoryInfoThread(code, mShareInfoMap[code], this, QDate(2017,03,17));
+        QEastmoneyStockHistoryInfoThread* thread = new QEastmoneyStockHistoryInfoThread(code, mShareInfoMap[code], true, this, QDate(2017,03,17));
         pool.start(thread);
     }
     pool.waitForDone();

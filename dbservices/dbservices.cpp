@@ -97,7 +97,7 @@ void HqInfoService::initSignalSlot()
 {
     connect(this, SIGNAL(signalInitDBTables()), this, SLOT(slotInitDBTables()));
     connect(this, SIGNAL(signalUpdateStockCodesList(QStringList)), this, SLOT(slotUpdateStockCodesList(QStringList)));
-    connect(this, SIGNAL(signalRecvShareHistoryInfos(QString,StockDataList)), this, SLOT(slotRecvShareHistoryInfos(QString,StockDataList)));
+    connect(this, SIGNAL(signalRecvShareHistoryInfos(QString,StockDataList, bool)), this, SLOT(slotRecvShareHistoryInfos(QString,StockDataList, bool)));
     connect(this, SIGNAL(signalUpdateShareinfoWithHistory(QString)), this, SLOT(slotUpdateShareinfoWithHistory(QString)));
     connect(this, SIGNAL(signalUpdateShareFinanceInfo(FinDataList)), this, SLOT(slotUpdateShareFinanceInfo(FinDataList)));
     connect(this, SIGNAL(signalQueryShareForeignVol(QString)), this, SLOT(slotQueryShareForeignVol(QString)));
@@ -240,10 +240,10 @@ bool HqInfoService::queryTop10ChinaShareInfos(QList<ChinaShareExchange>& list, c
     return true;
 }
 
-void HqInfoService::slotRecvShareHistoryInfos(const QString& code, const StockDataList &list)
+void HqInfoService::slotRecvShareHistoryInfos(const QString& code, const StockDataList &list, bool deletedb)
 {
     //更新到数据库
-    if(!mDataBase.addHistoryDataList(code, list))
+    if(!mDataBase.addHistoryDataList(code, list, deletedb))
     {
         qDebug()<<mDataBase.errMsg();
     }

@@ -411,10 +411,11 @@ void Dialog::on_HSGTBTN_clicked()
 //    QEastMoneyHSGTDialog* dlg = new QEastMoneyHSGTDialog;
 //    dlg->setModal(false);
 //    dlg->show();
-    if(mShareHistoryMgr)
+    if(!mShareHistoryMgr)
     {
-        mShareHistoryMgr->signalUpdateAllShareFrom20170317();
+        return;
     }
+    mShareHistoryMgr->signalUpdateAllShareFrom20170317();
 
 }
 

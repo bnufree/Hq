@@ -4,6 +4,7 @@
 #include <QDateTime>
 #include "qexchangedatamanage.h"
 #include "dbservices/dbservices.h"
+#include "utils/hqutils.h"
 
 
 QSinaStkInfoThread::QSinaStkInfoThread(QObject *parent) : QObject(parent), mHttp(0)

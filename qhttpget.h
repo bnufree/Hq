@@ -13,6 +13,7 @@ public:
     explicit QHttpGet(const QString& url = QString(), bool sequential = false, QObject *parent = 0);
     ~QHttpGet();
     void setUrl(const QString& url);
+    void setSequential(bool sts);
     //void startGet();
     void setUpdateInterval(int secs);           //刷新间隔
     QByteArray static getContentOfURL(const QString& url);

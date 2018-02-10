@@ -90,14 +90,20 @@ void QHKExchangeVolDataProcess::run()
     {
         getMktVolInfo(list, mDate, i);
     }
-    if(list.size() > 0 && mParent)
-    {
-        QMetaObject::invokeMethod(mParent, "slotUpdateForignVolInfo", Qt::DirectConnection, Q_ARG(StockDataList, list));
-    }
     if(mParent)
     {
+        QMetaObject::invokeMethod(mParent,\
+                                  "slotUpdateForignVolInfo",\
+                                  Qt::DirectConnection,\
+                                  Q_ARG(StockDataList, list),\
+                                  Q_ARG(QDate, mDate)\
+                                  );
         QString msg = QStringLiteral("更新外资持股：") + mDate.toString("yyyy-MM-dd");
-        QMetaObject::invokeMethod(mParent, "signalUpdateHistoryMsg", Qt::DirectConnection, Q_ARG(QString,msg ));
+        QMetaObject::invokeMethod(mParent,\
+                                  "signalUpdateHistoryMsg",\
+                                  Qt::DirectConnection,\
+                                  Q_ARG(QString,msg )\
+                                  );
     }
 
 //    //写入文件保存

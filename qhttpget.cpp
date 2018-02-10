@@ -2,12 +2,18 @@
 #include <QDebug>
 #include <QThread>
 #include <QEventLoop>
+#include "utils/hqutils.h"
 
 QHttpGet::QHttpGet(const QString& url, bool sequential, QObject *parent) :
     QThread(parent),mMgr(0), mUrl(url), mReply(0), mIsSequential(sequential), mUpdateTimer(0)
 {
     mMgr = new QNetworkAccessManager;
     mInertVal = 3;
+}
+
+void QHttpGet::setSequential(bool sts)
+{
+    mIsSequential = sts;
 }
 
 QHttpGet::~QHttpGet()
@@ -61,6 +67,8 @@ void QHttpGet::run()
 {
     if(mUrl.length() == 0) return;
     QNetworkAccessManager mgr;
+    bool active = true;
+    QByteArray recv;
     do{
         if(mReply)
         {
@@ -68,27 +76,42 @@ void QHttpGet::run()
             mReply->close();
             delete mReply;
         }
-        mReply = mgr.get(QNetworkRequest(mUrl));
-        if(mReply)
+        if(active)
         {
-            QEventLoop subloop;
-            connect(mReply, SIGNAL(finished()), &subloop, SLOT(quit()));
-            connect(mReply, SIGNAL(error(QNetworkReply::NetworkError)), &subloop, SLOT(quit()));
-            subloop.exec();
-            if(mReply->error() == QNetworkReply::NoError)
+            mReply = mgr.get(QNetworkRequest(mUrl));
+            if(mReply)
             {
-                emit signalSendHttpConent(mReply->readAll());
-            } else
-            {
-                qDebug()<<"networkreply error:"<<mReply->error();
+                QEventLoop subloop;
+                connect(mReply, SIGNAL(finished()), &subloop, SLOT(quit()));
+                connect(mReply, SIGNAL(error(QNetworkReply::NetworkError)), &subloop, SLOT(quit()));
+                subloop.exec();
+                if(mReply->error() == QNetworkReply::NoError)
+                {
+                    recv = mReply->readAll();
+                } else
+                {
+                    qDebug()<<"networkreply error:"<<mReply->error();
+                }
+                mReply->abort();
+                mReply->close();
+                delete mReply;
+                mReply = 0;
+                //QThread::run();
             }
-            mReply->abort();
-            mReply->close();
-            delete mReply;
-            mReply = 0;
-            //QThread::run();
         }
         QThread::sleep(mInertVal);
+        if(!HqUtils::isCurrentActive())
+        {
+            active = false;
+        } else
+        {
+            active = true;
+        }
+        if(recv.size() >=0)
+        {
+            emit signalSendHttpConent(recv);
+        }
+
     } while(mIsSequential);
     //QThread::run();
 }

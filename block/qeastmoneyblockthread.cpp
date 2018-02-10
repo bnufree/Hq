@@ -11,6 +11,7 @@
 #include "qeastmoneyblocksharethread.h"
 #include "qhttpget.h"
 #include "dbservices/dbservices.h"
+#include "utils/hqutils.h"
 
 #define     BLOCK_NMAE          "name"
 #define     BLOCK_CODE          "codes"
@@ -142,10 +143,18 @@ void QEastMoneyBlockThread::slotUpdateBlockShare()
         thread->start();
     }
     //开始更新实时板块信息
+    bool active = true;
     while(1)
     {
-        slotUpdateBlockInfos();
+        if(active) slotUpdateBlockInfos();
         QThread::sleep(3);
+        if(!HqUtils::isCurrentActive())
+        {
+            active = false;
+        } else
+        {
+            active = true;
+        }
     }
 }
 

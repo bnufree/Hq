@@ -37,7 +37,7 @@ public:
     bool updateShareData(StockData* data);
     bool addShare(const StockData& data, const QString& table);
     bool deleteShare(const QString& table, const QString& col = QString(), const QVariant& val = QVariant());
-    bool addHistoryDataList(const QString& code, const StockDataList& list);
+    bool addHistoryDataList(const QString& code, const StockDataList& list, bool deletedb);
     bool isRecordExist(bool& exist, const QString& table, const QString& col, const QVariant& val);
     double getMultiDaysChangePercent(const QString &code, HISTORY_CHANGEPERCENT type );
     double getLastMoney(const QString& code);

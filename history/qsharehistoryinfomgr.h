@@ -31,7 +31,7 @@ public slots:
     void slotGetFinanceInfo();
     void slotShareFinanceInfoFinished();
     void slotUpdateAllShareFrom20170317();
-    void slotUpdateForignVolInfo(const StockDataList& list);
+    void slotUpdateForignVolInfo(const StockDataList& list, const QDate& date);
 private:
     QThread             mWorkThread;
     QStringList         mCodesList;

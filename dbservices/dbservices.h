@@ -51,7 +51,7 @@ signals:
     void signalQueryShareForeignVol(const QString& code);
     void signalSendShareForeignVol(const StockDataList& list);
     //历史数据写入数据库
-    void signalRecvShareHistoryInfos(const QString& code, const StockDataList& list);
+    void signalRecvShareHistoryInfos(const QString& code, const StockDataList& list, bool deletedb);
     void signalQueryShareHistoryLastDate(const QString& code);
     void signalSendShareHistoryLastDate(const QString& code, const QDate& date);
     //基本信息相关的数据库操作
@@ -68,7 +68,7 @@ signals:
 public slots:
     void slotInitDBTables();
     void slotUpdateStockCodesList(const QStringList& list);
-    void slotRecvShareHistoryInfos(const QString& code, const StockDataList& list);
+    void slotRecvShareHistoryInfos(const QString& code, const StockDataList& list, bool deleteDB);
     //void slotUpdateShareHistoryInfos(const QMap<QString, StockDataList> map);
     bool slotAddHistoryData(const StockData& data);
     void initBlockData(int type = 0);
