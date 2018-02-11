@@ -24,7 +24,7 @@ void QHKExchangeVolDataProcess::getMktVolInfo(StockDataList &list, const QDate &
     QByteArray value = QHttpGet::getContentOfURLWithPost(QString(HK_URL).arg(mkt == 0? "sh":"sz"), postVal.toLatin1());
     QString res = QString::fromUtf8(value).remove(QRegularExpression("[\\s]"));
     res.remove(QRegularExpression("[\\s]"));
-    qDebug()<<"start analysis!!!!!!!!!!!!!!";
+//    qDebug()<<"start analysis!!!!!!!!!!!!!!";
     int start_index = 0;
     QRegExp codeExp("7[07]{1}[0-9]{3}|9[0-9]{4}");
     //QRegExp nameExp("[\u4e00-\u9fa5A-Z]{1,}");
@@ -40,7 +40,7 @@ void QHKExchangeVolDataProcess::getMktVolInfo(StockDataList &list, const QDate &
     {
         return;
     }
-    qDebug()<<resDate<<mDate;
+ //   qDebug()<<resDate<<mDate;
     if(resDate != date) return;
 
     while ( (start_index = codeExp.indexIn(res, start_index)) >= 0) {
@@ -68,7 +68,7 @@ void QHKExchangeVolDataProcess::getMktVolInfo(StockDataList &list, const QDate &
             //qDebug()<<"res:"<<volExp.cap();
             start_index += volExp.cap().length();
             StockData data;
-            data.mCode = code;
+            data.mCode = tmpCode;
             data.mForeignVol = vol;
             data.mDate = mDate;
             list.append(data);
@@ -78,7 +78,7 @@ void QHKExchangeVolDataProcess::getMktVolInfo(StockDataList &list, const QDate &
         }
     }
 
-    qDebug()<<"end analysis!!!!!!!!!!!!!!";
+ //   qDebug()<<"end analysis!!!!!!!!!!!!!!";
     return;
 }
 
@@ -106,38 +106,39 @@ void QHKExchangeVolDataProcess::run()
                                   );
     }
 
-//    //写入文件保存
-//    QDir wkdir(SAVE_DIR);
-//    if(!wkdir.exists())
-//    {
-//        if(wkdir.mkpath(SAVE_DIR))
-//        {
-//            qDebug()<<"make path "<<SAVE_DIR<<" ok.";
-//        } else
-//        {
-//            qDebug()<<"make path "<<SAVE_DIR<<" falied.";
-//        }
+    //写入文件保存
+    QDir wkdir(SAVE_DIR);
+    if(!wkdir.exists())
+    {
+        if(wkdir.mkpath(SAVE_DIR))
+        {
+            qDebug()<<"make path "<<SAVE_DIR<<" ok.";
+        } else
+        {
+            qDebug()<<"make path "<<SAVE_DIR<<" falied.";
+        }
 
-//    }
-//    QString fileName = QString("%1%2.dat").arg(SAVE_DIR).arg(mDate.toString("yyyyMMdd"));
-//    //将数据写入到文件
-//    if(list.length() > 0)
-//    {
-//        FILE *fp = fopen(fileName.toStdString().data(), "wb+");
-//        if(fp)
-//        {
-//            QDateTime wkDateTime;
-//            wkDateTime.setDate(mDate);
-//            qint64 cur =wkDateTime.addDays(-1).toMSecsSinceEpoch();
-//            fwrite(&cur, sizeof(cur), 1, fp);
-//            for(int i=0; i<list.size(); i++){
-//                fwrite(&(list[i]), sizeof(HKVOLDATA), 1, fp);
-//            }
-//            //然后在移动到开头写入时间，保证是最新的
-//            fseek(fp, 0, SEEK_SET);
-//            cur = wkDateTime.toMSecsSinceEpoch();
-//            fwrite(&cur, sizeof(cur), 1, fp);
-//            fclose(fp);
-//        }
-//    }
+    }
+    QString fileName = QString("%1%2.dat").arg(SAVE_DIR).arg(mDate.toString("yyyyMMdd"));
+    //将数据写入到文件
+    if(list.length() > 0)
+    {
+        FILE *fp = fopen(fileName.toStdString().data(), "wb+");
+        if(fp)
+        {
+            QDateTime wkDateTime;
+            wkDateTime.setDate(mDate);
+            qint64 cur =wkDateTime.addDays(-1).toMSecsSinceEpoch();
+            fwrite(&cur, sizeof(cur), 1, fp);
+            for(int i=0; i<list.size(); i++){
+                fwrite(&(list[i].mCode), sizeof(QString), 1, fp);
+                fwrite(&(list[i].mForeignVol), sizeof(qint64), 1, fp);
+            }
+            //然后在移动到开头写入时间，保证是最新的
+            fseek(fp, 0, SEEK_SET);
+            cur = wkDateTime.toMSecsSinceEpoch();
+            fwrite(&cur, sizeof(cur), 1, fp);
+            fclose(fp);
+        }
+    }
 }

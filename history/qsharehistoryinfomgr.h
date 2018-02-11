@@ -6,6 +6,8 @@
 #include <QStringList>
 #include <stockdata.h>
 #include <QMap>
+#include <QMutex>
+#include <QThreadPool>
 
 class QEastmoneyStockHistoryInfoThread;
 
@@ -15,6 +17,7 @@ class QShareHistoryInfoMgr : public QObject
 public:
     explicit QShareHistoryInfoMgr(const QStringList& codes, QObject *parent = 0);
     bool isWorking();
+    ~QShareHistoryInfoMgr();
 
 signals:
     void signalGetFianceInfo();
@@ -32,10 +35,15 @@ public slots:
     void slotShareFinanceInfoFinished();
     void slotUpdateAllShareFrom20170317();
     void slotUpdateForignVolInfo(const StockDataList& list, const QDate& date);
+    void slotUpdateShareHistoryProcess(const QString& code);
 private:
     QThread             mWorkThread;
     QStringList         mCodesList;
     QMap<QString, StockDataList>    mShareInfoMap;
+    QMutex              mShareInfoMutex;
+    QMutex              mShareHistoryMutex;
+    int                 mCurCnt;
+    QThreadPool         mPool;
 };
 
 #endif // QSHAREHISTORYINFOMGR_H

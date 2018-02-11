@@ -30,7 +30,14 @@ void QEastmoneyStockHistoryInfoThread::run()
     if(mCode.left(1) == "5" || mCode.left(1) == "1")
     {
          QRegExp exp("(510(050|300|900|500))|(1599(15|20))");
-         if(!exp.exactMatch(mCode)) return;
+         if(!exp.exactMatch(mCode))
+         {
+             if(mParent)
+             {
+                 QMetaObject::invokeMethod(mParent, "slotUpdateShareHistoryProcess", Qt::DirectConnection, Q_ARG(QString,mCode ));
+             }
+             return;
+         }
     }
     QDate lastDate;
     if(mStartDate.isNull())
@@ -137,16 +144,11 @@ void QEastmoneyStockHistoryInfoThread::run()
     QString msg = QStringLiteral("日线数据更新完成：");
     msg += mCode;
 
-    qDebug()<<__FUNCTION__<<__LINE__<<msg;
+    //qDebug()<<__FUNCTION__<<__LINE__<<msg;
     if(mParent)
     {
-        QMetaObject::invokeMethod(mParent, "signalUpdateHistoryMsg", Qt::DirectConnection, Q_ARG(QString,msg ));
+        QMetaObject::invokeMethod(mParent, "slotUpdateShareHistoryProcess", Qt::DirectConnection, Q_ARG(QString,mCode ));
     }
-
-
-
-//    //查询数据库更新历史信息
-//    emit DATA_SERVICE->signalUpdateShareinfoWithHistory(mCode.right(6));
 }
 
 QString QEastmoneyStockHistoryInfoThread::getCode()
