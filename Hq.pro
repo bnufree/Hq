@@ -19,7 +19,6 @@ SOURCES += main.cpp\
         dialog.cpp \
     stockdata.cpp \
     dataexchange.cpp \
-    profiles.cpp \
     qsinastkinfothread.cpp \
     qsinasearchthread.cpp \
     qsinastkresultmergethread.cpp \
@@ -59,12 +58,12 @@ SOURCES += main.cpp\
     history/qsinasharevolinfothread.cpp \
     history/qsharehistorydialog.cpp \
     history/qsharegraphicwidget.cpp \
-    history/qhkexchangevoldataprocess.cpp
+    history/qhkexchangevoldataprocess.cpp \
+    utils/profiles.cpp
 
 HEADERS  += dialog.h \
     stockdata.h \
     dataexchange.h \
-    profiles.h \
     qsinastkinfothread.h \
     qsinasearchthread.h \
     qsinastkresultmergethread.h \
@@ -109,7 +108,8 @@ HEADERS  += dialog.h \
     history/qsinasharevolinfothread.h \
     history/qsharehistorydialog.h \
     history/qsharegraphicwidget.h \
-    history/qhkexchangevoldataprocess.h
+    history/qhkexchangevoldataprocess.h \
+    utils/profiles.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

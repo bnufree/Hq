@@ -4,6 +4,7 @@
 #include <QDate>
 #include <QList>
 #include <QObject>
+#include <QMap>
 #include "block/blockdata.h"
 
 struct zjlxData{
@@ -68,6 +69,12 @@ class StockData : public StockBaseData
 {
 public:
     StockData();
+    StockData(const QString& code, const QDate& date):StockBaseData()
+    {
+        mCode = code;
+        mDate = date;
+    }
+
     ~StockData();
     static bool sortByPerDesc(const StockData& d1, const StockData& d2);
     static bool sortByPerAsc(const StockData& d1, const StockData& d2);
@@ -120,7 +127,7 @@ public:
 
     bool operator ==(const StockData& data)
     {
-        return this->mCode == data.mCode;
+        return this->mCode == data.mCode && this->mDate == data.mDate;
     }
 
 public:
@@ -163,5 +170,31 @@ public:
 
 Q_DECLARE_METATYPE(StockData)
 
-typedef QList<StockData> StockDataList;
+class StockDataList : public QList<StockData>
+{
+public:
+    inline StockDataList() {}
+    StockData &valueOfDate(const QDate& date)
+    {
+        if(!mDataIndexMap.contains(date))
+        {
+            StockData data;
+            data.mDate = date;
+            data.mCode = "UNDEF";
+            append(data);
+        }
+        return (*this)[mDataIndexMap.value(date)];
+    }
+
+    void append(const StockData& data)
+    {
+        if(this->contains(data)) return;
+        QList<StockData>::append(data);
+        mDataIndexMap[data.mDate] = this->size();
+    }
+
+private:
+    QMap<QDate, int>        mDataIndexMap;
+}
+
 #endif // STOCKDATA_H

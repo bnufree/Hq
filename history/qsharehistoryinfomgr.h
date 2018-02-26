@@ -33,7 +33,7 @@ signals:
 public slots:
     void slotGetFinanceInfo();
     void slotShareFinanceInfoFinished();
-    void slotUpdateAllShareFrom20170317();
+    void slotUpdateAllShareFromLastUpdateDate();
     void slotUpdateForignVolInfo(const StockDataList& list, const QDate& date);
     void slotUpdateShareHistoryProcess(const QString& code);
 private:
@@ -44,6 +44,7 @@ private:
     QMutex              mShareHistoryMutex;
     int                 mCurCnt;
     QThreadPool         mPool;
+    QDate               mLastUpdateDate;
 };
 
 #endif // QSHAREHISTORYINFOMGR_H

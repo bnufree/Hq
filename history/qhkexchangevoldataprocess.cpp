@@ -105,6 +105,7 @@ void QHKExchangeVolDataProcess::run()
                                   Q_ARG(QString,msg )\
                                   );
     }
+#if 0
 
     //写入文件保存
     QDir wkdir(SAVE_DIR);
@@ -141,4 +142,5 @@ void QHKExchangeVolDataProcess::run()
             fclose(fp);
         }
     }
+#endif
 }
