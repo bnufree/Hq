@@ -2,11 +2,14 @@
 #include <QDebug>
 #include <QDateTime>
 #include <QRegularExpression>
+#include <QRegExp>
 #include <QFile>
 #include <QDir>
 #include "dbservices/dbservices.h"
+#include "utils/hqutils.h"
+#include <QTextCodec>
 
-#define STOCK_CODE_FILE  "stock.data"
+#define STOCK_CODE_FILE  "share.dat"
 QEastMonyStockCodesThread::QEastMonyStockCodesThread(QObject *parent) : QObject(parent)
 {
     mHttp = new QHttpGet(QString("http://quote.eastmoney.com/stocklist.html"));
@@ -24,31 +27,32 @@ QEastMonyStockCodesThread::~QEastMonyStockCodesThread()
     mThread.deleteLater();
 }
 
-bool QEastMonyStockCodesThread::writeCodes(const QStringList &codes)
+bool QEastMonyStockCodesThread::writeCodes(const StockDataList &list)
 {
     FILE *fp = fopen(STOCK_CODE_FILE, "wb+");
     if(fp)
     {
-        qint64 cur = QDateTime::currentMSecsSinceEpoch();
+        qint64 cur = QDateTime::currentDateTime().addDays(-1).toMSecsSinceEpoch();
         fwrite(&cur, sizeof(cur), 1, fp);
-        int *stks = new int[codes.length()+1];
-        *stks = codes.length();
-        int i=1;
-        foreach (QString code, codes) {
-            *(stks+i) = code.right(6).toInt();
-            i++;
+        int size = list.size();
+        fwrite(&size, sizeof(size), 1, fp);
+        for(int i=0; i<list.size(); i++){
+            HqUtils::writeString2File(list[i].mCode, fp);
+            HqUtils::writeString2File(list[i].mName, fp);
+            HqUtils::writeString2File(list[i].mPY, fp);
         }
-        fwrite(stks, sizeof(int), codes.length() + 1, fp);
 
+        //更新时间到最新，移动到开头写入时间，保证是最新的
+        fseek(fp, 0, SEEK_SET);
+        cur = QDateTime::currentMSecsSinceEpoch();
+        fwrite(&cur, sizeof(cur), 1, fp);
         fclose(fp);
-        delete []stks;
-
     }
 
     return true;
 }
 
-bool QEastMonyStockCodesThread::getCodesFromFile(QStringList& codes)
+bool QEastMonyStockCodesThread::getCodesFromFile(StockDataList& codes)
 {
     codes.clear();
     if(!QFile::exists(STOCK_CODE_FILE)) return false;
@@ -66,15 +70,27 @@ bool QEastMonyStockCodesThread::getCodesFromFile(QStringList& codes)
         {
             file.read((char*)(&totalNum), sizeof(int));
             //qDebug()<<"total num:"<<totalNum;
+            int count = 0;
+            QStringList list;
             while (!file.atEnd() ) {
-                int code = 0;
-                file.read((char*)(&code), sizeof(int));
-                if(code > 500000)
+                int size = 0;
+                file.read((char*)(&size), sizeof(int));
+                if(size > 0)
                 {
-                    codes.append(QString("").sprintf("s_sh%06d", code));
-                } else
+                    list.append(QString::fromUtf8(file.read(size)));
+                }
+                count++;
+                if(count == 3)
                 {
-                    codes.append(QString("").sprintf("s_sz%06d", code));
+                    if(list.length() == 3)
+                    {
+                        StockData data;
+                        data.mCode = list[0];
+                        data.mName = list[1];
+                        data.mPY = list[2];
+                        codes.append(data);
+                    }
+                    list.clear();
                 }
             }
         }
@@ -95,7 +111,7 @@ void QEastMonyStockCodesThread::run()
     QTime t = QDateTime::currentDateTime().time();
     t.start();
 
-    QStringList list;
+    StockDataList list;
     if(getCodesFromFile(list))
     {
         slotRecvAllCodes(list);
@@ -107,24 +123,44 @@ void QEastMonyStockCodesThread::run()
 
 void QEastMonyStockCodesThread::slotRecvHttpContent(const QByteArray &bytes)
 {
-    QStringList list;
-    QString result = QString::fromUtf8(bytes.data());
+    StockDataList list;
+    QTextCodec *gbkCodec = QTextCodec::codecForName("UTF8");
+    QString result = QString::fromLocal8Bit(bytes.data());
+    QRegExp reg(">([\u4e00-\u9fa5A-Z0-9]{1,})\\(([0-9]{6})\\)<");
+    QRegExp reg_code("60[013][0-9]{3}|300[0-9]{3}|00[012][0-9]{3}|510[0-9]{3}|1599[0-9]{2}");
     int index = 0;
-    while((index = result.indexOf(QRegularExpression(tr("s[hz](60[013][0-9]{3}|300[0-9]{3}|00[012][0-9]{3}|510[0-9]{3}|1599[0-9]{2})")), index)) >= 0)
+    while((index = reg.indexIn(result, index)) >= 0)
     {
-        QString code = result.mid(index, 8);
-        if(!list.contains(code)) list.append("s_"+code);
-        index = index+8;
+        QString name = reg.cap(1);
+        QString code = reg.cap(2);
+        if(reg_code.exactMatch(code))
+        {
+            StockData data;
+            data.mCode = code;
+            data.mName = name;
+            data.mPY = HqUtils::GetFirstLetter(gbkCodec->toUnicode( data.mName.toStdString().data()));
+            list.append(data);
+        }
+        index += reg.matchedLength();
     }
-
     writeCodes(list);
     slotRecvAllCodes(list);
 }
 
-void QEastMonyStockCodesThread::slotRecvAllCodes(const QStringList &list)
+void QEastMonyStockCodesThread::slotRecvAllCodes(const StockDataList &list)
 {
-    mCodesList = list;
-    emit DATA_SERVICE->signalUpdateStockCodesList(list);
+    mCodesList.clear();
+    foreach (StockData data, list) {
+        int code = data.mCode.toInt();
+        if(code > 500000)
+        {
+            mCodesList.append(QString("").sprintf("s_sh%06d", code));
+        } else
+        {
+            mCodesList.append(QString("").sprintf("s_sz%06d", code));
+        }
+    }
+    emit DATA_SERVICE->signalUpdateStockCodesList(mCodesList);
 }
 
 void QEastMonyStockCodesThread::slotDBInitFinished()

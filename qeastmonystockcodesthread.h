@@ -4,6 +4,7 @@
 #include <QThread>
 #include "qhttpget.h"
 
+class StockDataList;
 class QEastMonyStockCodesThread : public QObject
 {
     Q_OBJECT
@@ -12,8 +13,9 @@ public:
     ~QEastMonyStockCodesThread();
 
 protected:
-    bool getCodesFromFile(QStringList& codes);
-    bool writeCodes(const QStringList& codes);
+    bool getCodesFromFile(StockDataList& codes);
+    bool writeCodes(const StockDataList& codes);
+
 
 signals:
     void start();
@@ -22,7 +24,7 @@ signals:
 public slots:
     void run();
     void slotRecvHttpContent(const QByteArray& bytes);
-    void slotRecvAllCodes(const QStringList& list);
+    void slotRecvAllCodes(const StockDataList& list);
     void slotDBInitFinished();
 private:
     QHttpGet    *mHttp;

@@ -1,6 +1,6 @@
 ﻿#include "qeastmoneyblockthread.h"
 #include <QDebug>
-#include "profiles.h"
+//#include "profiles.h"
 #include <QDateTime>
 #include "stkinfofilemanage.h"
 #include <QJsonDocument>

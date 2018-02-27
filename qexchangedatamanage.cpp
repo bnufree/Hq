@@ -1,5 +1,5 @@
-#include "qexchangedatamanage.h"
-#include "profiles.h"
+﻿#include "qexchangedatamanage.h"
+#include "utils/profiles.h"
 
 QExchangeDataManage* QExchangeDataManage::minstance = 0;
 QExchangeDataManage::QExchangeDataDeleter QExchangeDataManage::delobj;

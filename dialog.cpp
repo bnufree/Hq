@@ -2,7 +2,7 @@
 #include "ui_dialog.h"
 #include <QDebug>
 #include <QMenu>
-//#include "profiles.h"
+#include "utils/profiles.h"
 #include "stkmktcap.h"
 #include <QDateTime>
 #include "qexchangedatemangagedialog.h"

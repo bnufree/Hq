@@ -1,7 +1,7 @@
-#include "qexchangedatemangagedialog.h"
+﻿#include "qexchangedatemangagedialog.h"
 #include "ui_qexchangedatemangagedialog.h"
 #include <QDebug>
-#include "profiles.h"
+#include "utils/profiles.h"
 
 QExchangeDateMangageDialog::QExchangeDateMangageDialog(QWidget *parent) :
     QDialog(parent),

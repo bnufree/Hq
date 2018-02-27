@@ -48,7 +48,7 @@ void QShareHistoryInfoMgr::slotShareFinanceInfoFinished()
     emit signalUpdateHistoryMsg(QStringLiteral("开始更新日线数据..."));
     mCurCnt = 0;
     foreach (QString code, mCodesList) {
-        QEastmoneyStockHistoryInfoThread* thread = new QEastmoneyStockHistoryInfoThread(code, StockDataList(),false, this);
+        QEastmoneyStockHistoryInfoThread* thread = new QEastmoneyStockHistoryInfoThread(code, QDate(),0, this);
         mPool.start(thread);
     }
     mPool.waitForDone();
@@ -97,7 +97,7 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromLastUpdateDate()
     //开始更新日线数据
     foreach (QString code, mCodesList) {
         StockDataList list = mShareInfoMap[code.right(6)];
-        QEastmoneyStockHistoryInfoThread* thread = new QEastmoneyStockHistoryInfoThread(code, list, true, this, mLastUpdateDate.addDays(1));
+        QEastmoneyStockHistoryInfoThread* thread = new QEastmoneyStockHistoryInfoThread(code, mLastUpdateDate, &(mShareInfoMap[code.right(6)]), this);
         mPool.start(thread);
     }
     mPool.waitForDone();
@@ -116,6 +116,7 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromLastUpdateDate()
          }
 
      }
+#if 0
      QString fileName = QString("%1%2.dat").arg(SAVE_DIR).arg(mDate.toString("yyyyMMdd"));
      //将数据写入到文件
      if(list.length() > 0)
@@ -138,5 +139,6 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromLastUpdateDate()
              fclose(fp);
          }
      }
-     Profiles::instance()->setValue("UPDATE", "DATE", QDate::currentDate().addDays(-1))
+#endif
+     Profiles::instance()->setValue("UPDATE", "DATE", QDate::currentDate().addDays(-1));
 }

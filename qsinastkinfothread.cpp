@@ -1,6 +1,6 @@
 ﻿#include "qsinastkinfothread.h"
 #include <QDebug>
-#include "profiles.h"
+//#include "profiles.h"
 #include <QDateTime>
 #include "qexchangedatamanage.h"
 #include "dbservices/dbservices.h"

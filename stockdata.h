@@ -43,6 +43,7 @@ public:
 public:
     QString         mName;
     QString         mCode;
+    QString         mPY;
     double          mCur;
     double          mChg;
     double          mChgPercent;
@@ -174,6 +175,13 @@ class StockDataList : public QList<StockData>
 {
 public:
     inline StockDataList() {}
+    inline StockDataList(const QList<StockData>& list)
+    {
+        foreach (StockData data, list) {
+            append(data);
+        }
+    }
+
     StockData &valueOfDate(const QDate& date)
     {
         if(!mDataIndexMap.contains(date))
@@ -193,8 +201,17 @@ public:
         mDataIndexMap[data.mDate] = this->size();
     }
 
+    StockDataList& operator =(const QList<StockData>& list)
+    {
+        foreach (StockData data, list) {
+            append(data);
+        }
+
+        return (*this);
+    }
+
 private:
     QMap<QDate, int>        mDataIndexMap;
-}
+};
 
 #endif // STOCKDATA_H

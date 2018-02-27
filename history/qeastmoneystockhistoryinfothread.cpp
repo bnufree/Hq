@@ -80,12 +80,12 @@ void QEastmoneyStockHistoryInfoThread::run()
                 double price = data.mCur;
                 data.mTotalShare = cols[13].toDouble() / price;
                 data.mMutableShare = cols[14].toDouble() / price;
-                list.append(data);
+                //list.append(data);
             }
         }
-        if(list.size() > 0)
+        if(mHistoryListPtr->size() > 0)
         {
-            emit DATA_SERVICE->signalRecvShareHistoryInfos(mCode, list, mDelDB);
+            emit DATA_SERVICE->signalRecvShareHistoryInfos(mCode, *mHistoryListPtr, true);
         }
     }
     emit DATA_SERVICE->signalUpdateShareinfoWithHistory(mCode);

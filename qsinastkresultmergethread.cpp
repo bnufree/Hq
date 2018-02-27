@@ -2,7 +2,7 @@
 #include <QtConcurrent>
 #include <QFuture>
 #include "qsinastkinfothread.h"
-#include "profiles.h"
+//#include "profiles.h"
 #include <QDebug>
 #include "qexchangedatamanage.h"
 

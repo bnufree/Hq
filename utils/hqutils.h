@@ -17,14 +17,14 @@ class HqUtils
 {
 
 public:
-
-
     HqUtils();
     static bool isWeekend(const QDate& date);
     static SHARE_TYPE shareType(const QString& code);
     static QString prefixCode(const QString& code);
     static bool isCurrentActive();
     static bool isActiveTime(const QTime& time);
+    static QString GetFirstLetter( const QString& unicode );
+    static bool writeString2File(const QString& str, FILE *fp);
 };
 
 #endif // HQUTILS_H
