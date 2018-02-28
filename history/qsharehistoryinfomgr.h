@@ -27,13 +27,13 @@ signals:
     void signalHistoryDataFinished();
     void signalUpdateProcess(int cur, int total);
     void signalUpdateAmountProcess(const QString& date);
-    void signalUpdateAllShareFrom20170317();
+    void signalUpdateAllShareFromDate(bool deldb, const QDate& date);
     void signalUpdateHistoryMsg(const QString& msg);
 
 public slots:
     void slotGetFinanceInfo();
     void slotShareFinanceInfoFinished();
-    void slotUpdateAllShareFromLastUpdateDate();
+    void slotUpdateAllShareFromDate(bool deldb, const QDate& date = QDate(2017,3,17));
     void slotUpdateForignVolInfo(const StockDataList& list, const QDate& date);
     void slotUpdateShareHistoryProcess(const QString& code);
 private:

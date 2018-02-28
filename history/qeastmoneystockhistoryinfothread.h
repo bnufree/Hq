@@ -10,7 +10,7 @@
 class QEastmoneyStockHistoryInfoThread : public QRunnable
 {
 public:
-    explicit QEastmoneyStockHistoryInfoThread(const QString& code, const QDate& date, StockDataList* list = 0, QObject* parent = 0);
+    explicit QEastmoneyStockHistoryInfoThread(const QString& code, const QDate& date, const QString& dir, bool deldb, StockDataList* list = 0, QObject* parent = 0);
     ~QEastmoneyStockHistoryInfoThread();
     QString getCode();
 public:
@@ -20,6 +20,8 @@ private:
     QDate           mStartDate;
     StockDataList*   mHistoryListPtr;
     QObject         *mParent;
+    QString         mSaveDir;
+    bool            mDelDB;
 };
 
 #endif // QEASTMONEYSTOCKHISTORYINFOTHREAD_H

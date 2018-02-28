@@ -415,7 +415,7 @@ void Dialog::on_HSGTBTN_clicked()
     {
         return;
     }
-    mShareHistoryMgr->signalUpdateAllShareFrom20170317();
+    mShareHistoryMgr->signalUpdateAllShareFromDate(true, QDate(2017,3,17));
 
 }
 

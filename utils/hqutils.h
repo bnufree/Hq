@@ -25,6 +25,8 @@ public:
     static bool isActiveTime(const QTime& time);
     static QString GetFirstLetter( const QString& unicode );
     static bool writeString2File(const QString& str, FILE *fp);
+    static QString  date2Str(const QDate& date);
+    static QDate    dateFromStr(const QString& str);
 };
 
 #endif // HQUTILS_H

@@ -5,6 +5,7 @@
 #include <QList>
 #include <QObject>
 #include <QMap>
+#include <QDebug>
 #include "block/blockdata.h"
 
 struct zjlxData{
@@ -191,6 +192,7 @@ public:
             data.mCode = "UNDEF";
             append(data);
         }
+        //qDebug()<<date<<mDataIndexMap.value(date)<<this->size();
         return (*this)[mDataIndexMap.value(date)];
     }
 
@@ -198,7 +200,7 @@ public:
     {
         if(this->contains(data)) return;
         QList<StockData>::append(data);
-        mDataIndexMap[data.mDate] = this->size();
+        mDataIndexMap[data.mDate] = this->size() - 1;
     }
 
     StockDataList& operator =(const QList<StockData>& list)

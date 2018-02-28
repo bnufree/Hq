@@ -5,11 +5,13 @@
 #include "qhttpget.h"
 #include "utils/hqutils.h"
 
-QEastmoneyStockHistoryInfoThread::QEastmoneyStockHistoryInfoThread(const QString& code, const QDate& date, StockDataList* list, QObject* parent) :
+QEastmoneyStockHistoryInfoThread::QEastmoneyStockHistoryInfoThread(const QString& code, const QDate& date, const QString& dir,bool deldb, StockDataList* list, QObject* parent) :
     mCode(code),
     mStartDate(date),
+    mSaveDir(dir),
     mHistoryListPtr(list),
     mParent(parent),
+    mDelDB(deldb),
     QRunnable()
 {
     mCode = code;
@@ -27,7 +29,7 @@ QEastmoneyStockHistoryInfoThread::~QEastmoneyStockHistoryInfoThread()
 void QEastmoneyStockHistoryInfoThread::run()
 {
     QDate start = mStartDate;
-    QDate end = QDate::currentDate();
+    QDate end = QDate::currentDate().addDays(-1);
 
     if(!mHistoryListPtr) goto FUNC_END;
 
@@ -85,10 +87,36 @@ void QEastmoneyStockHistoryInfoThread::run()
         }
         if(mHistoryListPtr->size() > 0)
         {
-            emit DATA_SERVICE->signalRecvShareHistoryInfos(mCode, *mHistoryListPtr, true);
+            emit DATA_SERVICE->signalRecvShareHistoryInfos(mCode, *mHistoryListPtr, mDelDB);
         }
     }
     emit DATA_SERVICE->signalUpdateShareinfoWithHistory(mCode);
+
+#if 0
+     QString fileName = QString("%1%2.dat").arg(SAVE_DIR).arg(mDate.toString("yyyyMMdd"));
+     //将数据写入到文件
+     if(list.length() > 0)
+     {
+         FILE *fp = fopen(fileName.toStdString().data(), "wb+");
+         if(fp)
+         {
+             QDateTime wkDateTime;
+             wkDateTime.setDate(mDate);
+             qint64 cur =wkDateTime.addDays(-1).toMSecsSinceEpoch();
+             fwrite(&cur, sizeof(cur), 1, fp);
+             for(int i=0; i<list.size(); i++){
+                 fwrite(&(list[i].mCode), sizeof(QString), 1, fp);
+                 fwrite(&(list[i].mForeignVol), sizeof(qint64), 1, fp);
+             }
+             //然后在移动到开头写入时间，保证是最新的
+             fseek(fp, 0, SEEK_SET);
+             cur = wkDateTime.toMSecsSinceEpoch();
+             fwrite(&cur, sizeof(cur), 1, fp);
+             fclose(fp);
+         }
+     }
+#endif
+
 FUNC_END:
     if(mParent)
     {

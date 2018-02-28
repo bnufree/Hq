@@ -2,6 +2,8 @@
 #include <QTextCodec>
 #include <Windows.h>
 
+
+#define         DATE_STR_FORMAT         "yyyy-MM-dd"
 HqUtils::HqUtils()
 {
 
@@ -123,6 +125,16 @@ bool HqUtils::writeString2File(const QString &str, FILE *fp)
     fwrite(&size, sizeof(size), 1, fp);
     fwrite(bytes.data(), size, 1, fp);
     return true;
+}
+
+QString  HqUtils::date2Str(const QDate& date)
+{
+    return date.toString(DATE_STR_FORMAT);
+}
+
+QDate  HqUtils::dateFromStr(const QString& str)
+{
+    return QDate::fromString(str, DATE_STR_FORMAT);
 }
 
 
