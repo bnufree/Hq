@@ -40,7 +40,7 @@ void QEastmoneyStockHistoryInfoThread::run()
          if(!exp.exactMatch(mCode))goto FUNC_END;
     }
     //检查日线数据是否需要更新    
-    if(start < end)
+    if(start <= end)
     {
         QString wkCode;
         if(mCode.left(1) == "6" || mCode.left(1) == "5")
@@ -82,6 +82,7 @@ void QEastmoneyStockHistoryInfoThread::run()
                 double price = data.mCur;
                 data.mTotalShare = cols[13].toDouble() / price;
                 data.mMutableShare = cols[14].toDouble() / price;
+                data.mClose = data.mCur;
                 //list.append(data);
             }
         }

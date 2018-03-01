@@ -1,8 +1,9 @@
-#ifndef QEASTMONEYSHAREFHSPTHREAD_H
+﻿#ifndef QEASTMONEYSHAREFHSPTHREAD_H
 #define QEASTMONEYSHAREFHSPTHREAD_H
 
 #include <QObject>
 
+class StockDataList;
 class QEastMoneyShareFHSPThread : public QObject
 {
     Q_OBJECT
@@ -14,7 +15,7 @@ signals:
 
 public slots:
     void updateFHSPFiles();
-    void updateFHSPInfoWithDate(const QString& date);
+    void updateFHSPInfoWithDate(StockDataList& list, const QString& date);
 };
 
 #endif // QEASTMONEYSHAREFHSPTHREAD_H

@@ -1,5 +1,6 @@
 ﻿#include "qsharetablewidget.h"
 #include <QDebug>
+#include "utils/hqutils.h"
 
 QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
 {
@@ -44,7 +45,7 @@ void QShareTablewidget::setDataList(const StockDataList &list)
         this->setRowHeight(i, 20);
         this->setItemText(i, k++, data.mCode, Qt::AlignRight);
         this->setItemText(i, k++, data.mName);
-        this->setItemText(i, k++, QString("").sprintf("%.2f", data.mCur));
+        this->setItemText(i, k++, HqUtils::double2Str(data.mCur));
         double val = mStockMap[data.mCode];
         QString flag = val < data.mChgPercent ? QStringLiteral("↑") : val > data.mChgPercent ? QStringLiteral("↓") : "";
         this->setItemText(i, k++, QString("%1%2%").arg(flag).arg(QString::number(data.mChgPercent, 'f', 2)));

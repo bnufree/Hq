@@ -137,4 +137,15 @@ QDate  HqUtils::dateFromStr(const QString& str)
     return QDate::fromString(str, DATE_STR_FORMAT);
 }
 
+QString HqUtils::double2Str(double val)
+{
+    QString wkval = QString::number(val, 'f', 3);
+    if(wkval.lastIndexOf("0") == wkval.length() -1)
+    {
+        return QString::number(val, 'f', 2);
+    }
+
+    return wkval;
+}
+
 

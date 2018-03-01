@@ -33,7 +33,6 @@ SOURCES += main.cpp\
     qindexframe.cpp \
     qindexwidget.cpp \
     qeastmonystockcodesthread.cpp \
-    qeastmoneysharefhspthread.cpp \
     qhttpget.cpp \
     qeastmoneynorthboundthread.cpp \
     qeastmoneyhsgtdialog.cpp \
@@ -59,7 +58,8 @@ SOURCES += main.cpp\
     history/qsharehistorydialog.cpp \
     history/qsharegraphicwidget.cpp \
     history/qhkexchangevoldataprocess.cpp \
-    utils/profiles.cpp
+    utils/profiles.cpp \
+    history/qeastmoneysharefhspthread.cpp
 
 HEADERS  += dialog.h \
     stockdata.h \
@@ -80,7 +80,6 @@ HEADERS  += dialog.h \
     qindexframe.h \
     qindexwidget.h \
     qeastmonystockcodesthread.h \
-    qeastmoneysharefhspthread.h \
     qhttpget.h \
     qeastmoneynorthboundthread.h \
     qeastmoneyhsgtdialog.h \
@@ -109,7 +108,8 @@ HEADERS  += dialog.h \
     history/qsharehistorydialog.h \
     history/qsharegraphicwidget.h \
     history/qhkexchangevoldataprocess.h \
-    utils/profiles.h
+    utils/profiles.h \
+    history/qeastmoneysharefhspthread.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

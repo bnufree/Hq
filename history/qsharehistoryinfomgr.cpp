@@ -47,7 +47,7 @@ void QShareHistoryInfoMgr::slotShareFinanceInfoFinished()
     //开始更新日线数据
     QDate date = mLastUpdateDate.addDays(1);
     slotUpdateAllShareFromDate(false, date);
-    Profiles::instance()->setDefault("UPDATE", "DATE", HqUtils::date2Str(QDate::currentDate().addDays(-1)));
+    Profiles::instance()->setValue("UPDATE", "DATE", HqUtils::date2Str(QDate::currentDate().addDays(-1)));
 }
 
 void QShareHistoryInfoMgr::slotUpdateForignVolInfo(const StockDataList &list, const QDate& date)

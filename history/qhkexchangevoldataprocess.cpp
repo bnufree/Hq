@@ -105,7 +105,7 @@ void QHKExchangeVolDataProcess::run()
                                   Q_ARG(QString,msg )\
                                   );
     }
-#if 0
+#if 1
 
     //写入文件保存
     QDir wkdir(SAVE_DIR);
@@ -124,7 +124,7 @@ void QHKExchangeVolDataProcess::run()
     //将数据写入到文件
     if(list.length() > 0)
     {
-        FILE *fp = fopen(fileName.toStdString().data(), "wb+");
+        FILE *fp = fopen(fileName.toStdString().data(), "w+");
         if(fp)
         {
             QDateTime wkDateTime;
@@ -132,8 +132,9 @@ void QHKExchangeVolDataProcess::run()
             qint64 cur =wkDateTime.addDays(-1).toMSecsSinceEpoch();
             fwrite(&cur, sizeof(cur), 1, fp);
             for(int i=0; i<list.size(); i++){
-                fwrite(&(list[i].mCode), sizeof(QString), 1, fp);
-                fwrite(&(list[i].mForeignVol), sizeof(qint64), 1, fp);
+                fprintf(fp, "%s%ld", list[i].mCode.toStdString().data(), list[i].mForeignVol);
+                //fwrite(&(list[i].mCode), sizeof(QString), 1, fp);
+                //fwrite(&(list[i].mForeignVol), sizeof(qint64), 1, fp);
             }
             //然后在移动到开头写入时间，保证是最新的
             fseek(fp, 0, SEEK_SET);

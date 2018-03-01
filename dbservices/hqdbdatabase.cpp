@@ -247,6 +247,7 @@ bool HQDBDataBase::addHistoryDataList(const QString &code, const StockDataList &
         }
     }
     foreach (StockData data, list) {
+        if(data.mMoney < 10000) continue;
         bool exist = false;
         if(!isRecordExist(exist, HISTORY_TABLE(code), HQ_TABLE_COL_DATE, data.mDate))
         {

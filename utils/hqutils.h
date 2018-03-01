@@ -27,6 +27,7 @@ public:
     static bool writeString2File(const QString& str, FILE *fp);
     static QString  date2Str(const QDate& date);
     static QDate    dateFromStr(const QString& str);
+    static QString  double2Str(double val);
 };
 
 #endif // HQUTILS_H

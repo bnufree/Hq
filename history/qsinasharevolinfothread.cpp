@@ -3,6 +3,7 @@
 #include "dbservices/dbservices.h"
 #include "utils/hqutils.h"
 #include <QFile>
+#include <QMap>
 
 #define STOCK_FINANCE_FILE  "stock-financial.data"
 
@@ -16,7 +17,7 @@ QSinaShareVolInfoThread::QSinaShareVolInfoThread(const QStringList& codes,QObjec
 
 void QSinaShareVolInfoThread::run()
 {
-    FinDataList sharelist;
+    QMap<int, FINANCE_DATA> sharelist;
     //检查本地文件是否已经更新过
     bool updatedFromFile = false;
     if(QFile::exists(STOCK_FINANCE_FILE))
@@ -36,7 +37,7 @@ void QSinaShareVolInfoThread::run()
                         FINANCE_DATA data;
                         int res = file.read((char*)(&data), sizeof(FINANCE_DATA));
                         if(res<sizeof(FINANCE_DATA)) break;
-                        sharelist.append(data);
+                        sharelist[data.mCode] = data;
                         //qDebug()<<data.mCode<<data.mMGSY<<data.mTotalShare<<data.mJZCSYL;
                     }
                     updatedFromFile = true;
@@ -79,14 +80,16 @@ void QSinaShareVolInfoThread::run()
                         data.mTotalShare = qint64(list[9].toDouble() * 10000);
                         data.mMutalShare = qint64(list[10].toDouble() * 10000);
                         data.mJZCSYL = round(list[18].toDouble()*100);
-                        sharelist.append(data);
+                        sharelist[data.mCode] = data;
                         //qDebug()<<data.mCode<<data.mMGSY<<data.mTotalShare<<data.mJZCSYL;
                     }
                 }
             }
         }
+        //获取分红参数
+        updateFHSPInfoWithDate(sharelist, "2017-12-31");
         //将数据写入到文件
-        if(sharelist.length() > 0)
+        if(sharelist.size() > 0)
         {
             FILE *fp = fopen(STOCK_FINANCE_FILE, "wb+");
             if(fp)
@@ -95,8 +98,10 @@ void QSinaShareVolInfoThread::run()
                 qint64 cur = QDateTime::currentDateTime().addDays(-1).toMSecsSinceEpoch();
                 fwrite(&cur, sizeof(cur), 1, fp);
                 //qDebug()<<"sizeof:"<<sizeof(FINANCE_DATA);
-                for(int i=0; i<sharelist.size(); i++){
-                    fwrite(&(sharelist[i]), sizeof(FINANCE_DATA), 1, fp);
+                foreach (int key, sharelist.keys()) {
+                    FINANCE_DATA data = sharelist.value(key);
+//                    qDebug()<<data.mCode<<data.mSZBL<<data.mXJFH<<data.mMGSY<<data.mJZCSYL;
+                    fwrite(&data, sizeof(FINANCE_DATA), 1, fp);
                 }
                 //然后在移动到开头写入时间，保证是最新的
                 fseek(fp, 0, SEEK_SET);
@@ -106,6 +111,56 @@ void QSinaShareVolInfoThread::run()
             }
         }
     }
-    emit DATA_SERVICE->signalUpdateShareFinanceInfo(sharelist);
+    emit DATA_SERVICE->signalUpdateShareFinanceInfo(sharelist.values());
     qDebug()<<"update financial info end!!!!!!!!!!";
 }
+
+void QSinaShareVolInfoThread::updateFHSPInfoWithDate(QMap<int, FINANCE_DATA>& map, const QString &date)
+{
+    //wkdate = 2016-12-31
+    qDebug()<<__FUNCTION__<<__LINE__;
+    QString url("http://data.eastmoney.com/DataCenter_V3/yjfp/getlist.ashx?js=var vWLdLOFe&pagesize=5000&page=1&sr=-1&sortType=SZZBL&mtk=%C8%AB%B2%BF%B9%C9%C6%B1&filter=(ReportingPeriod=^%1^)&rt=49499306");
+    QString wkURL = url.arg(date);
+    //结果分析
+    QString result = QString::fromUtf8(QHttpGet::getContentOfURL(wkURL));
+    int startindex = -1, endindex = -1;
+    startindex = result.indexOf("[{");
+    endindex = result.indexOf("}]");
+    if(startindex < 0 || endindex < 0)
+    {
+        qDebug()<<__FUNCTION__<<__LINE__;
+        return;
+    }
+    endindex += 2;
+    QString hqStr = result.mid(startindex, endindex - startindex);
+
+    QJsonParseError err;
+    QJsonDocument doc = QJsonDocument::fromJson(hqStr.toUtf8().data(), &err);
+    if(err.error != QJsonParseError::NoError)
+    {
+        qDebug()<<__FUNCTION__<<__LINE__;
+        return;
+    }
+
+    if(!doc.isArray())
+    {
+        qDebug()<<"json with wrong format.";
+        qDebug()<<__FUNCTION__<<__LINE__;
+        return;
+    }
+    qDebug()<<__FUNCTION__<<__LINE__;
+    QJsonArray array = doc.array();
+    for(int i=0; i<array.count(); i++)
+    {
+        QJsonValue value = array.at(i);
+        if(!value.isObject()) continue;
+        QJsonObject subobj = value.toObject();
+        //开始解析角色信息数据
+        FINANCE_DATA &data = map[subobj.value("Code").toString().toInt()];
+        data.mSZBL = subobj.value("SZZBL").toString().toDouble()*10;
+        data.mXJFH = subobj.value("XJFH").toString().toDouble()/10 * 10000;
+        data.mGQDJR = QDateTime(HqUtils::dateFromStr(subobj.value("GQDJR").toString().left(10))).toMSecsSinceEpoch();
+        data.mYAGGR = QDateTime(HqUtils::dateFromStr(subobj.value("YAGGR").toString().left(10))).toMSecsSinceEpoch();
+    }
+}
+

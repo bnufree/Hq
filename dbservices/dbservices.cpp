@@ -365,6 +365,10 @@ void HqInfoService::slotUpdateShareFinanceInfo(const FinDataList &list)
             res->mTotalShare = data.mTotalShare;
             res->mMutableShare = data.mMutalShare;
             res->mJZCSYL = data.mJZCSYL * 0.01;
+            res->mXJFH = data.mXJFH * 0.0001;
+            res->mSZZG = data.mSZBL * 0.1;
+            res->mYAGGR = QDateTime::fromMSecsSinceEpoch(data.mYAGGR).date();
+            res->mGQDJR = QDateTime::fromMSecsSinceEpoch(data.mGQDJR).date();
         }
     }
 }
