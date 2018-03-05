@@ -4,15 +4,16 @@
 #include <QThread>
 #include <QMap>
 
-struct FINANCE_DATA;
+class StockData;
 class QSinaShareVolInfoThread : public QThread
 {
     Q_OBJECT
 public:
     explicit QSinaShareVolInfoThread(const QStringList& codes, QObject *parent = 0);
 protected:
+    void run2();
     void run();
-    void updateFHSPInfoWithDate(QMap<int, FINANCE_DATA>& map, const QString &date);
+    void updateFHSPInfoWithDate(QMap<QString, StockData>& map, const QString &date);
 signals:
 
 public slots:

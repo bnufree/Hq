@@ -18,8 +18,7 @@ QShareHistoryInfoMgr::QShareHistoryInfoMgr(const QStringList& codes, QObject *pa
     connect(this, SIGNAL(signalUpdateAllShareFromDate(bool,QDate)), this, SLOT(slotUpdateAllShareFromDate(bool,QDate)));
     this->moveToThread(&mWorkThread);
     mWorkThread.start();
-    Profiles::instance()->setDefault("UPDATE", "DATE", HqUtils::date2Str(QDate(2017,3,16)));
-    mLastUpdateDate = HqUtils::dateFromStr(Profiles::instance()->value("UPDATE", "DATE").toString());
+
 }
 
 QShareHistoryInfoMgr::~QShareHistoryInfoMgr()
@@ -45,9 +44,9 @@ void QShareHistoryInfoMgr::slotShareFinanceInfoFinished()
     }
     qDebug()<<QDateTime::currentDateTime();
     //开始更新日线数据
-    QDate date = mLastUpdateDate.addDays(1);
-    slotUpdateAllShareFromDate(false, date);
-    Profiles::instance()->setValue("UPDATE", "DATE", HqUtils::date2Str(QDate::currentDate().addDays(-1)));
+    QDate date = DATA_SERVICE->getLastUpdateDateOfHistoryInfo();
+    slotUpdateAllShareFromDate(false, date.addDays(1));
+    //Profiles::instance()->setValue("UPDATE", "DATE", HqUtils::date2Str(QDate::currentDate().addDays(-1)));
 }
 
 void QShareHistoryInfoMgr::slotUpdateForignVolInfo(const StockDataList &list, const QDate& date)

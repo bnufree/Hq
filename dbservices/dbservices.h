@@ -15,6 +15,7 @@ protected:
     HqInfoService(QObject *parent = 0);
     ~HqInfoService();
 
+    QDate  getLastUpdateDateOfTable(const QString& table);
 public:
     bool   isDBInitOk();
     friend class CGarbo;
@@ -25,7 +26,8 @@ public:
     QStringList  getExchangeCodeList();
     QDate  getLastUpdateDateOfHSGT();
     QDate  getLastUpdateDateOfHSGTVol();
-    QDate  getLastUpdateDateOfShareHistory(const QString& code);
+    QDate  getLastUpdateDateOfBasicInfo();
+    QDate  getLastUpdateDateOfHistoryInfo();
     bool   GetHistoryInfoWithDate(const QString& table, const QDate& date, double& close, double& money, qint64& total_share, qint64& mutalble_share);
     double   GetMultiDaysChangePercent(const QString& table, int days);
     void   GetForeignVolChange(const QString& code, qint64& cur, qint64& pre);
@@ -39,7 +41,7 @@ signals:
     void signalInitDBTables();
     void signalDbInitFinished();
     void signalUpdateStockCodesList(const QStringList& codes);
-    void signalUpdateShareFinanceInfo(const FinDataList& list);
+    void signalUpdateShareBasicInfo(const StockDataList& list);
 
     //从数据库查询板块信息
     void signalQueryBlockInfo(int type = 1);
@@ -75,13 +77,13 @@ public slots:
     void initShareData();
     void slotRecvTop10ChinaStockInfos(const QList<ChinaShareExchange>& list);
     void slotQueryTop10ChinaStockInfos(const QDate& date = QDate(), const QString& share = QString(), int market = 0);
-    void slotQueryShareHistoryLastDate(const QString& code);
+//    void slotQueryShareHistoryLastDate(const QString& code);
     void slotUpdateShareinfoWithHistory(const QString& code);
     void slotUpdateHistoryChange(const QString& code);
     void slotUpdateStkProfitList(const StockDataList& list);
     void slotAddShareAmoutByForeigner(const StockDataList& list);
     void slotUpdateShareAmountByForeigner();
-    void slotUpdateShareFinanceInfo(const FinDataList& list);
+    void slotUpdateShareBasicInfo(const StockDataList& list);
     void slotSetFavCode(const QString& code);
     void slotQueryShareForeignVol(const QString& code);
 

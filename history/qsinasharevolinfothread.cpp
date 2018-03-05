@@ -5,7 +5,7 @@
 #include <QFile>
 #include <QMap>
 
-#define STOCK_FINANCE_FILE  "stock-financial.data"
+#define STOCK_FINANCE_FILE  "share_financial.dat"
 
 //文件结构更新时间+所有的信息
 
@@ -15,7 +15,7 @@ QSinaShareVolInfoThread::QSinaShareVolInfoThread(const QStringList& codes,QObjec
 }
 
 
-void QSinaShareVolInfoThread::run()
+void QSinaShareVolInfoThread::run2()
 {
     QMap<int, FINANCE_DATA> sharelist;
     //检查本地文件是否已经更新过
@@ -87,7 +87,7 @@ void QSinaShareVolInfoThread::run()
             }
         }
         //获取分红参数
-        updateFHSPInfoWithDate(sharelist, "2017-12-31");
+        //updateFHSPInfoWithDate(sharelist, "2017-12-31");
         //将数据写入到文件
         if(sharelist.size() > 0)
         {
@@ -111,11 +111,11 @@ void QSinaShareVolInfoThread::run()
             }
         }
     }
-    emit DATA_SERVICE->signalUpdateShareFinanceInfo(sharelist.values());
+    //emit DATA_SERVICE->signalUpdateShareFinanceInfo(sharelist.values());
     qDebug()<<"update financial info end!!!!!!!!!!";
 }
 
-void QSinaShareVolInfoThread::updateFHSPInfoWithDate(QMap<int, FINANCE_DATA>& map, const QString &date)
+void QSinaShareVolInfoThread::updateFHSPInfoWithDate(QMap<QString, StockData>& map, const QString &date)
 {
     //wkdate = 2016-12-31
     qDebug()<<__FUNCTION__<<__LINE__;
@@ -156,11 +156,61 @@ void QSinaShareVolInfoThread::updateFHSPInfoWithDate(QMap<int, FINANCE_DATA>& ma
         if(!value.isObject()) continue;
         QJsonObject subobj = value.toObject();
         //开始解析角色信息数据
-        FINANCE_DATA &data = map[subobj.value("Code").toString().toInt()];
-        data.mSZBL = subobj.value("SZZBL").toString().toDouble()*10;
-        data.mXJFH = subobj.value("XJFH").toString().toDouble()/10 * 10000;
-        data.mGQDJR = QDateTime(HqUtils::dateFromStr(subobj.value("GQDJR").toString().left(10))).toMSecsSinceEpoch();
-        data.mYAGGR = QDateTime(HqUtils::dateFromStr(subobj.value("YAGGR").toString().left(10))).toMSecsSinceEpoch();
+        StockData &data = map[subobj.value("Code").toString()];
+        data.mSZZG = subobj.value("SZZBL").toString().toDouble();
+        data.mXJFH = subobj.value("XJFH").toString().toDouble()/10;
+        data.mGQDJR = HqUtils::dateFromStr(subobj.value("GQDJR").toString().left(10));
+        data.mYAGGR = HqUtils::dateFromStr(subobj.value("YAGGR").toString().left(10));
     }
+}
+
+
+void QSinaShareVolInfoThread::run()
+{
+    //检查当前的更新日期
+    QDate date = DATA_SERVICE->getLastUpdateDateOfBasicInfo();
+    if(date == HqUtils::latestActiveDay()) return;
+    //联网更新
+    QMap<QString, StockData> shareList;
+    int pos = 0;
+    int section = 200;
+    while(pos < mShareCodesList.length())
+    {
+        QStringList sublist = mShareCodesList.mid(pos, section);
+        pos += section;
+        if(sublist.length() > 0)
+        {
+            QStringList wklist;
+            foreach (QString code, sublist) {
+                code = code.right(6);
+                wklist.append(HqUtils::prefixCode(code) + code+ "_i");
+            }
+            QString url = QString("http://hq.sinajs.cn/?list=%1").arg(wklist.join(","));
+            QString result = QString::fromUtf8(QHttpGet::getContentOfURL(url));
+            //按行进行分割
+            QStringList rows = result.split(QRegExp("[\\r\\n]"));
+            foreach (QString row, rows) {
+                QStringList list = row.split(QRegExp("[,\" ;]"));
+                if(list.length() > 20)
+                {
+                    StockData data;
+                    data.mCode = list[1].mid(9,6);
+                    data.mPY = list[3].toUpper();
+                    data.mMGSY = list[6].toDouble();
+                    data.mMGJZC = list[7].toDouble();
+                    data.mTotalShare = qint64(list[9].toDouble() * 10000);
+                    data.mMutableShare = qint64(list[10].toDouble() * 10000);
+                    data.mJZCSYL = list[18].toDouble();
+                    shareList[data.mCode] = data;
+                }
+            }
+        }
+    }
+    //获取分红参数
+    updateFHSPInfoWithDate(shareList, "2017-12-31");
+    emit DATA_SERVICE->signalUpdateShareBasicInfo(shareList.values());
+    qDebug()<<"update financial info end!!!!!!!!!!";
+
+    return;
 }
 

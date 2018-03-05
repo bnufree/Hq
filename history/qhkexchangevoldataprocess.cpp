@@ -82,13 +82,93 @@ void QHKExchangeVolDataProcess::getMktVolInfo(StockDataList &list, const QDate &
     return;
 }
 
+void QHKExchangeVolDataProcess::getMktVolInfo(StockDataList &list, const QDate& date,const QString &fileName)
+{
+    if(!QFile::exists(fileName)) return;
+    //读取文件
+    QFile file(fileName);
+    if(!file.open(QIODevice::ReadOnly)) return;
+    int size = file.size();
+    int totalNum = 0;
+    if(size > sizeof(qint64) + sizeof(int))
+    {
+        qint64 lastupdate = 0;
+        file.read((char*)(&lastupdate), sizeof(qint64));
+        if(QDateTime::fromMSecsSinceEpoch(lastupdate).date() == date)
+        {
+            file.read((char*)(&totalNum), sizeof(int));
+            int count = 0;
+            StockData data;
+            while (!file.atEnd() ) {
+                count++;
+                if(count == 1)
+                {
+                    int code = 0;
+                    file.read((char*)(&code), sizeof(int));
+                    data.mCode = QString("").sprintf("%06d", code);
+                } else if(count == 2)
+                {
+                    qint64 vol = 0;
+                    file.read((char*)(&vol), sizeof(qint64));
+                    data.mVol = vol;
+                    count = 0;
+                    list.append(data);
+                }
+            }
+        }
+    }
+    file.close();
+    return ;
+}
+
 void QHKExchangeVolDataProcess::run()
 {
+    QDir wkdir(SAVE_DIR);
+    if(!wkdir.exists())
+    {
+        if(wkdir.mkpath(SAVE_DIR))
+        {
+            qDebug()<<"make path "<<SAVE_DIR<<" ok.";
+        } else
+        {
+            qDebug()<<"make path "<<SAVE_DIR<<" falied.";
+        }
+
+    }
+    QString fileName = QString("%1%2.dat").arg(SAVE_DIR).arg(mDate.toString("yyyyMMdd"));
     //分别取得各个市场的数据
     StockDataList list;
-    for(int i=0; i<2; i++)
+    //检查文件是否存在，存在的话直接从文件读取
+    getMktVolInfo(list, mDate, fileName);
+    if(list.length() == 0)
     {
-        getMktVolInfo(list, mDate, i);
+        for(int i=0; i<2; i++)
+        {
+            getMktVolInfo(list, mDate, i);
+        }
+        //写入文件保存
+        //将数据写入到文件
+        if(list.length() > 0)
+        {
+            FILE *fp = fopen(fileName.toStdString().data(), "wb+");
+            if(fp)
+            {
+                QDateTime wkDateTime;
+                wkDateTime.setDate(mDate);
+                qint64 cur =wkDateTime.addDays(-1).toMSecsSinceEpoch();
+                fwrite(&cur, sizeof(cur), 1, fp);
+                for(int i=0; i<list.size(); i++){
+                    //fprintf(fp, "%s%ld", list[i].mCode.toStdString().data(), list[i].mForeignVol);
+                    fwrite(&(list[i].mCode.toInt()), sizeof(int), 1, fp);
+                    fwrite(&(list[i].mForeignVol), sizeof(qint64), 1, fp);
+                }
+                //然后在移动到开头写入时间，保证是最新的
+                fseek(fp, 0, SEEK_SET);
+                cur = wkDateTime.toMSecsSinceEpoch();
+                fwrite(&cur, sizeof(cur), 1, fp);
+                fclose(fp);
+            }
+        }
     }
     if(mParent)
     {
@@ -105,43 +185,4 @@ void QHKExchangeVolDataProcess::run()
                                   Q_ARG(QString,msg )\
                                   );
     }
-#if 1
-
-    //写入文件保存
-    QDir wkdir(SAVE_DIR);
-    if(!wkdir.exists())
-    {
-        if(wkdir.mkpath(SAVE_DIR))
-        {
-            qDebug()<<"make path "<<SAVE_DIR<<" ok.";
-        } else
-        {
-            qDebug()<<"make path "<<SAVE_DIR<<" falied.";
-        }
-
-    }
-    QString fileName = QString("%1%2.dat").arg(SAVE_DIR).arg(mDate.toString("yyyyMMdd"));
-    //将数据写入到文件
-    if(list.length() > 0)
-    {
-        FILE *fp = fopen(fileName.toStdString().data(), "w+");
-        if(fp)
-        {
-            QDateTime wkDateTime;
-            wkDateTime.setDate(mDate);
-            qint64 cur =wkDateTime.addDays(-1).toMSecsSinceEpoch();
-            fwrite(&cur, sizeof(cur), 1, fp);
-            for(int i=0; i<list.size(); i++){
-                fprintf(fp, "%s%ld", list[i].mCode.toStdString().data(), list[i].mForeignVol);
-                //fwrite(&(list[i].mCode), sizeof(QString), 1, fp);
-                //fwrite(&(list[i].mForeignVol), sizeof(qint64), 1, fp);
-            }
-            //然后在移动到开头写入时间，保证是最新的
-            fseek(fp, 0, SEEK_SET);
-            cur = wkDateTime.toMSecsSinceEpoch();
-            fwrite(&cur, sizeof(cur), 1, fp);
-            fclose(fp);
-        }
-    }
-#endif
 }

@@ -27,9 +27,11 @@ public:
     static bool isActiveTime(const QTime& time);
     static QString GetFirstLetter( const QString& unicode );
     static bool writeString2File(const QString& str, FILE *fp);
+    static bool writeInt2File(int val, FILE* fp);
     static QString  date2Str(const QDate& date);
     static QDate    dateFromStr(const QString& str);
     static QString  double2Str(double val);
+    static QDate    latestActiveDay();
 
 public:
     static QStringList        mDatesList;

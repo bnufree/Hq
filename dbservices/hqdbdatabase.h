@@ -15,6 +15,17 @@ enum HISTORY_CHANGEPERCENT{
     DAYS_YEARS = 240,
 };
 
+struct HQ_QUERY_CONDITION{
+    QString  col;
+    QVariant val;
+
+    HQ_QUERY_CONDITION(const QString colStr, const QVariant& val1)
+    {
+        col = colStr;
+        val = val1;
+    }
+};
+
 class HQDBDataBase : public QObject
 {
     Q_OBJECT
@@ -23,6 +34,7 @@ public:
     ~HQDBDataBase();
     QString getErrorString();
     QDate getLastUpdateDateOfTable(const QString &table);
+    bool  updateDateOfTable(const QString& table);
     bool isDBOK();
     //板块
     bool getBlockDataList(QMap<QString, BlockData*>& pBlockMap, int type = 0);
@@ -32,27 +44,28 @@ public:
     bool deleteBlock(const QString& code);
     bool isBlockExist(const QString& code);
     //个股
-    bool getShareDataList(QMap<QString, StockData*>& pShareMap);
-    bool saveShareDataList(const QMap<QString, StockData*>& pShareMap );
-    bool updateShareData(StockData* data);
-    bool addShare(const StockData& data, const QString& table);
+    bool getBasicShareDataList(QMap<QString, StockData*>& pShareMap);
+    bool updateBasicShareDataList(QList<StockData*> dataList);
+    bool updateBasicShare(const StockData& data, bool exist);
+    bool updateHistoryShare(const StockData& data, bool exist);
     bool deleteShare(const QString& table, const QString& col = QString(), const QVariant& val = QVariant());
-    bool addHistoryDataList(const QString& code, const StockDataList& list, bool deletedb);
-    bool isRecordExist(bool& exist, const QString& table, const QString& col, const QVariant& val);
+    bool updateHistoryDataList(const StockDataList& list);
+    bool isRecordExist(bool& exist, const QString& table, const QList<HQ_QUERY_CONDITION>& list);
+    bool deleteRecord(const QString& table, const QList<HQ_QUERY_CONDITION>& list);
     double getMultiDaysChangePercent(const QString &code, HISTORY_CHANGEPERCENT type );
     double getLastMoney(const QString& code);
     bool   getLastForeignVol(qint64& vol, qint64& vol_chg, const QString& code);
 
     bool createDBTables();
-    QDate getLastUpdateDateOfShareHistory(const QString &code);
     QString errMsg();
     bool getHistoryDataOfCode(StockDataList& list, const QString &code);
 
 private:
     bool initSqlDB();
     bool createBlockTable();
-    bool createShareTable();
-    bool createStockHistoryInfoTable(const QString& code);
+    bool createShareBasicTable();
+    bool createGeneralTable();
+    bool createStockHistoryInfoTable();
     bool isTableExist(const QString &pTable);
     bool createTable(const QString& pTable, const TableColList& cols);
 

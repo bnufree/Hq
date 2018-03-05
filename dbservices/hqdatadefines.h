@@ -7,15 +7,18 @@
 #include "stockdata.h"
 
 //表名
-#define         HQ_SHARE_HISTORY_INFO_TABLE           "stock_"
+#define         HQ_SHARE_HISTORY_INFO_TABLE           "stock_history"
 #define         HQ_BLOCK_TABLE                      "block"
-#define         HQ_SHARE_TABLE                      "stock"
-
+#define         HQ_SHARE_BASIC_INFO_TABLE                      "stock_info"
+#define         HQ_HSGTOP10_TABLE                   "hsgTop10"
+#define         HQ_GENERAL_TABLE                    "general_info"
+#define         HQ_FINANCE_TABLE                    "finance"
 
 //列名
 #define         HQ_TABLE_COL_ID                 "id"
 #define         HQ_TABLE_COL_CODE               "code"
 #define         HQ_TABLE_COL_NAME               "name"
+#define         HQ_TABLE_COL_PY_ABBR            "abbr"
 #define         HQ_TABLE_COL_PROFIT             "profit"
 #define         HQ_TABLE_COL_TOTALMNT           "total_amount"
 #define         HQ_TABLE_COL_MUTAL              "mutable_amount"
@@ -34,6 +37,12 @@
 #define         HQ_TABLE_COL_SHARE_LIST         "share_list"
 #define         HQ_TABLE_COL_BLOCK_LIST         "block_list"
 #define         HQ_TABLE_COL_BLOCK_TYPE         "type"
+#define         HQ_TABLE_COL_TABLE_NM           "name"
+#define         HQ_TABLE_COL_MGSY               "MGSY"
+#define         HQ_TABLE_COL_JZCSYL             "JZCSYL"
+#define         HQ_TABLE_COL_YAGGR              "YAGGR"
+#define         HQ_TABLE_COL_GQDJR              "GQDJR"
+#define         HQ_TABLE_COL_FHSP               "FHSP"
 
 struct BlockBaseData{
     int                 mCode;

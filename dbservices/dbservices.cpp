@@ -99,7 +99,7 @@ void HqInfoService::initSignalSlot()
     connect(this, SIGNAL(signalUpdateStockCodesList(QStringList)), this, SLOT(slotUpdateStockCodesList(QStringList)));
     connect(this, SIGNAL(signalRecvShareHistoryInfos(QString,StockDataList, bool)), this, SLOT(slotRecvShareHistoryInfos(QString,StockDataList, bool)));
     connect(this, SIGNAL(signalUpdateShareinfoWithHistory(QString)), this, SLOT(slotUpdateShareinfoWithHistory(QString)));
-    connect(this, SIGNAL(signalUpdateShareFinanceInfo(FinDataList)), this, SLOT(slotUpdateShareFinanceInfo(FinDataList)));
+    connect(this, SIGNAL(signalUpdateShareBasicInfo(StockDataList)), this, SLOT(slotUpdateShareBasicInfo(StockDataList)));
     connect(this, SIGNAL(signalQueryShareForeignVol(QString)), this, SLOT(slotQueryShareForeignVol(QString)));
 }
 
@@ -114,7 +114,7 @@ void HqInfoService::initBlockData(int type)
 void HqInfoService::initShareData()
 {
     QMutexLocker locker(&mShareMutex);
-    mDataBase.getShareDataList(mStkRealInfo);
+    mDataBase.getBasicShareDataList(mStkRealInfo);
 }
 
 void HqInfoService::saveShares()
@@ -191,9 +191,19 @@ QDate HqInfoService::getLastUpdateDateOfHSGTVol()
     return date;
 }
 
-QDate HqInfoService::getLastUpdateDateOfShareHistory(const QString &code)
+QDate HqInfoService::getLastUpdateDateOfBasicInfo()
 {
-    return mDataBase.getLastUpdateDateOfShareHistory(code);
+    return getLastUpdateDateOfTable(HQ_SHARE_BASIC_INFO_TABLE);
+}
+
+QDate HqInfoService::getLastUpdateDateOfHistoryInfo()
+{
+    return getLastUpdateDateOfTable(HQ_SHARE_HISTORY_INFO_TABLE);
+}
+
+QDate HqInfoService::getLastUpdateDateOfTable(const QString& table)
+{
+    return mDataBase.getLastUpdateDateOfTable(table);
 }
 
 void HqInfoService::slotQueryTop10ChinaStockInfos(const QDate &date, const QString &share, int market)
@@ -243,7 +253,7 @@ bool HqInfoService::queryTop10ChinaShareInfos(QList<ChinaShareExchange>& list, c
 void HqInfoService::slotRecvShareHistoryInfos(const QString& code, const StockDataList &list, bool deletedb)
 {
     //更新到数据库
-    if(!mDataBase.addHistoryDataList(code, list, deletedb))
+    if(!mDataBase.updateHistoryDataList(list))
     {
         qDebug()<<mDataBase.errMsg();
     }
@@ -279,10 +289,10 @@ bool HqInfoService::slotAddHistoryData(const StockData &info)
 //    return mSqlQuery.exec();
 }
 
-void HqInfoService::slotQueryShareHistoryLastDate(const QString &code)
-{
-    emit signalSendShareHistoryLastDate(code, getLastUpdateDateOfShareHistory(code));
-}
+//void HqInfoService::slotQueryShareHistoryLastDate(const QString &code)
+//{
+//    emit signalSendShareHistoryLastDate(code, getLastUpdateDateOfShareHistory(code));
+//}
 
 
 bool HqInfoService::GetHistoryInfoWithDate(const QString &table, const QDate &date, double &close, double &money, qint64 &total_share, qint64 &mutalble_share)
@@ -352,25 +362,27 @@ StockData* HqInfoService::getBasicStkData(const QString &code)
 
 }
 
-void HqInfoService::slotUpdateShareFinanceInfo(const FinDataList &list)
+void HqInfoService::slotUpdateShareBasicInfo(const StockDataList &list)
 {
-    foreach (FINANCE_DATA data, list) {
-        QString code = QString("").sprintf("%06d", data.mCode);
-        StockData *res = mStkRealInfo[code];
-        //qDebug()<<__FUNCTION__<<code<<res;
+    //更新后台
+    foreach (StockData data, list) {
+        StockData *res = mStkRealInfo[data.mCode];
         if(res)
         {
-            res->mMGJZC = data.mMGJZC * 0.01;
-            res->mMGSY = data.mMGSY * 0.01;
+            res->mMGJZC = data.mMGJZC ;
+            res->mMGSY = data.mMGSY;
             res->mTotalShare = data.mTotalShare;
-            res->mMutableShare = data.mMutalShare;
-            res->mJZCSYL = data.mJZCSYL * 0.01;
-            res->mXJFH = data.mXJFH * 0.0001;
-            res->mSZZG = data.mSZBL * 0.1;
-            res->mYAGGR = QDateTime::fromMSecsSinceEpoch(data.mYAGGR).date();
-            res->mGQDJR = QDateTime::fromMSecsSinceEpoch(data.mGQDJR).date();
+            res->mMutableShare = data.mMutableShare;
+            res->mJZCSYL = data.mJZCSYL;
+            res->mXJFH = data.mXJFH;
+            res->mSZZG = data.mSZZG;
+            res->mYAGGR = data.mYAGGR;
+            res->mGQDJR = data.mGQDJR;
         }
     }
+
+    //更新数据库
+    mDataBase.updateBasicShareDataList(mStkRealInfo.values());
 }
 
 double HqInfoService::GetMultiDaysChangePercent(const QString &table, int days)
@@ -547,7 +559,7 @@ void HqInfoService::slotSetFavCode(const QString &code)
     if(data)
     {
         data->mIsFavCode = !data->mIsFavCode;
-        mDataBase.updateShareData(data);
+        mDataBase.updateBasicShareDataList(QList<StockData*>()<<data);
     }
 }
 

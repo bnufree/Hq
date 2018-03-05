@@ -15,6 +15,7 @@ public:
 public:
     void run();
     void getMktVolInfo(StockDataList& list, const QDate& date, int mkt);
+    void getMktVolInfo(StockDataList& list, const QDate& date, const QString& fileName);
 private:
     QDate       mDate;
     QObject*    mParent;

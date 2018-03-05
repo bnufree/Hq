@@ -134,6 +134,14 @@ bool HqUtils::writeString2File(const QString &str, FILE *fp)
     return true;
 }
 
+bool HqUtils::writeInt2File(int val, FILE *fp)
+{
+    if(!fp) return false;
+    //qDebug()<<"val:"<<val;
+    int wkval = val;
+    fwrite(&wkval, sizeof(int), 1, fp);
+    return true;
+}
 QString  HqUtils::date2Str(const QDate& date)
 {
     return date.toString(DATE_STR_FORMAT);
@@ -153,6 +161,17 @@ QString HqUtils::double2Str(double val)
     }
 
     return wkval;
+}
+
+QDate   HqUtils::latestActiveDay()
+{
+    QDate date = QDate::currentDate();
+    while(!activeDay(date))
+    {
+        date = date.addDays(-1);
+    }
+
+    return date;
 }
 
 
