@@ -159,7 +159,9 @@ void QHKExchangeVolDataProcess::run()
                 fwrite(&cur, sizeof(cur), 1, fp);
                 for(int i=0; i<list.size(); i++){
                     //fprintf(fp, "%s%ld", list[i].mCode.toStdString().data(), list[i].mForeignVol);
-                    fwrite(&(list[i].mCode.toInt()), sizeof(int), 1, fp);
+                    int code = list[i].mCode.toInt();
+                    //qint64 vol = list[i].mForeignVol;
+                    fwrite(&(code), sizeof(int), 1, fp);
                     fwrite(&(list[i].mForeignVol), sizeof(qint64), 1, fp);
                 }
                 //然后在移动到开头写入时间，保证是最新的

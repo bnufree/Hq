@@ -223,7 +223,11 @@ bool HQDBDataBase::createGeneralTable()
 
 bool HQDBDataBase::updateHistoryDataList(const StockDataList &list)
 {
-    if(!createStockHistoryInfoTable()) return false;
+    if(!createStockHistoryInfoTable())
+    {
+        qDebug()<<"create table history failed."<<getErrorString();
+        return false;
+    }
     QSqlDatabase::database().transaction();
     foreach (StockData data, list) {
         if(data.mMoney < 10000) continue;
@@ -441,7 +445,7 @@ bool HQDBDataBase::updateHistoryShare(const StockData &info, bool exist)
     {
         mSQLQuery.prepare(QString(" update %1 set "
                                   " %2=?, %3=?, %4=?, %5=?, %6=?, "
-                                  " %7=?, %8=?, %9=?, %10=?, %11=?, "
+                                  " %7=?, %8=?, %9=?, %10=?, %11=? "
                                   " where %12=? and %13=? ")\
                           .arg(HQ_SHARE_HISTORY_INFO_TABLE)\
                           .arg(HQ_TABLE_COL_NAME)\
@@ -540,7 +544,7 @@ double HQDBDataBase::getMultiDaysChangePercent(const QString &code, HISTORY_CHAN
     QString col = HQ_TABLE_COL_CHANGE_PERCENT;
     QString con = HQ_TABLE_COL_CODE;
     QString conVal = code;
-    if(!mSQLQuery.exec(tr("select 1+%1 * 0.01 from %2 where %3=%4 order by date desc limit %5").arg(col).arg(table).arg(con).arg(conVal).arg(type)))
+    if(!mSQLQuery.exec(tr("select 1+%1 * 0.01 from %2 where %3='%4' order by date desc limit %5").arg(col).arg(table).arg(con).arg(conVal).arg(type)))
     {
         qDebug()<<errMsg();
         return change;
@@ -561,7 +565,7 @@ double HQDBDataBase::getLastMoney(const QString &code)
     QString col = HQ_TABLE_COL_MONEY;
     QString con = HQ_TABLE_COL_CODE;
     QString conVal = code;
-    if(!mSQLQuery.exec(tr("select %1 from %2 where %3=%4 order by date desc limit 1").arg(col).arg(table).arg(con).arg(conVal)))
+    if(!mSQLQuery.exec(tr("select %1 from %2 where %3='%4' order by date desc limit 1").arg(col).arg(table).arg(con).arg(conVal)))
     {
         qDebug()<<errMsg();
         return change;
@@ -581,7 +585,7 @@ bool HQDBDataBase::getLastForeignVol(qint64 &vol, qint64 &vol_chg, const QString
     QString col = HQ_TABLE_COL_HSGT_HAVE;
     QString con = HQ_TABLE_COL_CODE;
     QString conVal = code;
-    if(!mSQLQuery.exec(tr("select %1 from %2 where %3=%4 order by date desc limit 2").arg(col).arg(table).arg(con).arg(conVal)))
+    if(!mSQLQuery.exec(tr("select %1 from %2 where %3='%4' order by date desc limit 2").arg(col).arg(table).arg(con).arg(conVal)))
     {
         qDebug()<<errMsg();
         return false;
