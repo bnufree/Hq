@@ -63,7 +63,7 @@ void QEastmoneyStockHistoryInfoThread::run()
             {
                 bool found = false;
                 QDate curDate = QDate::fromString(cols[0], "yyyy-MM-dd");
-                if(HqUtils::isWeekend(curDate)) continue;
+                if(!HqUtils::activeDay(curDate)) continue;
                 if(cols[3].toDouble() == 0) continue;
                 StockData &data = mHistoryListPtr->valueOfDate(curDate);
                 data.mDate = curDate;

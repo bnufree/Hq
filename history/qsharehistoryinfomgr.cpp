@@ -76,7 +76,7 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
     QDate wkDate = date;
     while(wkDate < QDate::currentDate())
     {
-        if(!HqUtils::isWeekend(wkDate))
+        if(HqUtils::activeDay(wkDate))
         {
             QHKExchangeVolDataProcess * process = new QHKExchangeVolDataProcess(wkDate, this);
             mPool.start(process);

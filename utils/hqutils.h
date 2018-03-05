@@ -4,6 +4,7 @@
 #include <QDate>
 #include <QDebug>
 #include <QDateTime>
+#include <QStringList>
 enum SHARE_TYPE{
     SHARE_UNDEFINE = -1,
     SHARE_SH = 0,
@@ -18,7 +19,8 @@ class HqUtils
 
 public:
     HqUtils();
-    static bool isWeekend(const QDate& date);
+    static bool weekend(const QDate& date);
+    static bool activeDay(const QDate& date);
     static SHARE_TYPE shareType(const QString& code);
     static QString prefixCode(const QString& code);
     static bool isCurrentActive();
@@ -28,6 +30,9 @@ public:
     static QString  date2Str(const QDate& date);
     static QDate    dateFromStr(const QString& str);
     static QString  double2Str(double val);
+
+public:
+    static QStringList        mDatesList;
 };
 
 #endif // HQUTILS_H

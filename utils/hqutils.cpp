@@ -1,17 +1,23 @@
 ﻿#include "hqutils.h"
 #include <QTextCodec>
 #include <Windows.h>
-
+#include "profiles.h"
 
 #define         DATE_STR_FORMAT         "yyyy-MM-dd"
+
+QStringList HqUtils::mDatesList = Profiles::instance()->value("DateManage", "Expired").toStringList();
 HqUtils::HqUtils()
 {
-
 }
 
-bool HqUtils::isWeekend(const QDate &date)
+bool HqUtils::weekend(const QDate &date)
 {
     return date.dayOfWeek() == 6 || date.dayOfWeek() == 7;
+}
+
+bool HqUtils::activeDay(const QDate &date)
+{
+    return (!weekend(date)) && (!HqUtils::mDatesList.contains(date2Str(date)));
 }
 
 SHARE_TYPE HqUtils::shareType(const QString &code)
@@ -59,7 +65,7 @@ bool HqUtils::isActiveTime(const QTime &time)
 bool HqUtils::isCurrentActive()
 {
     QDateTime cur = QDateTime::currentDateTime();
-    if(isWeekend((cur.date()))) return false;
+    if(!activeDay((cur.date()))) return false;
     return isActiveTime(cur.time());
 }
 

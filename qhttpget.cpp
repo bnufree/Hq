@@ -143,8 +143,16 @@ QByteArray QHttpGet::getContentOfURL(const QString &url)
     QEventLoop subloop;
     connect(reply, SIGNAL(finished()), &subloop, SLOT(quit()));
     connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), &subloop, SLOT(quit()));
+    QTimer timer;
+    timer.setSingleShot(true);
+    connect(&timer, SIGNAL(timeout()), &subloop, SLOT(quit()));
+    timer.start(10*1000);
     subloop.exec();
-    if(reply->error() == QNetworkReply::NoError)
+    if(timer.isActive())
+    {
+        timer.stop();
+    }
+    if(reply->error() == QNetworkReply::NoError && reply->isFinished())
     {
         recv = reply->readAll();
     }
@@ -165,8 +173,16 @@ QByteArray QHttpGet::getContentOfURLWithPost(const QString &url, const QByteArra
     QEventLoop subloop;
     connect(reply, SIGNAL(finished()), &subloop, SLOT(quit()));
     connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), &subloop, SLOT(quit()));
+    QTimer timer;
+    timer.setSingleShot(true);
+    connect(&timer, SIGNAL(timeout()), &subloop, SLOT(quit()));
+    timer.start(10*1000);
     subloop.exec();
-    if(reply->error() == QNetworkReply::NoError)
+    if(timer.isActive())
+    {
+        timer.stop();
+    }
+    if(reply->error() == QNetworkReply::NoError && reply->isFinished())
     {
         recv = reply->readAll();
     }
