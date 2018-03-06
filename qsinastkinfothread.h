@@ -4,7 +4,7 @@
 #include <QThread>
 #include <QList>
 #include <QMap>
-#include "stockdata.h"
+#include "dbservices/sharedata.h"
 #include "utils/comdatadefines.h"
 #include <QStringList>
 #include <QTimer>
@@ -19,7 +19,7 @@ public:
     ~QSinaStkInfoThread();
     int  getStkCount();
 signals:
-    void    sendStkDataList(const StockDataList& list);
+    void    sendStkDataList(const ShareDataList& list);
     void    signalSetStkList(const QStringList& list);
 public slots:
     void    setStkList(const QStringList& list);

@@ -44,12 +44,12 @@ public:
     bool deleteBlock(const QString& code);
     bool isBlockExist(const QString& code);
     //个股
-    bool getBasicShareDataList(QMap<QString, StockData*>& pShareMap);
-    bool updateBasicShareDataList(QList<StockData*> dataList);
-    bool updateBasicShare(const StockData& data, bool exist);
-    bool updateHistoryShare(const StockData& data, bool exist);
+    bool getBasicShareDataList(QMap<QString, ShareData*>& pShareMap);
+    bool updateBasicShareDataList(QList<ShareData*> dataList);
+    bool updateBasicShare(const ShareData& data, bool exist);
+    bool updateHistoryShare(const ShareData& data, bool exist);
     bool deleteShare(const QString& table, const QString& col = QString(), const QVariant& val = QVariant());
-    bool updateHistoryDataList(const StockDataList& list);
+    bool updateHistoryDataList(const ShareDataList& list);
     bool isRecordExist(bool& exist, const QString& table, const QList<HQ_QUERY_CONDITION>& list);
     bool deleteRecord(const QString& table, const QList<HQ_QUERY_CONDITION>& list);
     double getMultiDaysChangePercent(const QString &code, HISTORY_CHANGEPERCENT type );
@@ -58,14 +58,14 @@ public:
 
     bool createDBTables();
     QString errMsg();
-    bool getHistoryDataOfCode(StockDataList& list, const QString &code);
+    bool getHistoryDataOfCode(ShareDataList& list, const QString &code);
 
 private:
     bool initSqlDB();
     bool createBlockTable();
     bool createShareBasicTable();
     bool createGeneralTable();
-    bool createStockHistoryInfoTable();
+    bool createShareHistoryInfoTable();
     bool isTableExist(const QString &pTable);
     bool createTable(const QString& pTable, const TableColList& cols);
 

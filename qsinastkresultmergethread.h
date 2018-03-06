@@ -2,7 +2,7 @@
 #define QSINASTKRESULTMERGETHREAD_H
 
 #include <QThread>
-#include "stockdata.h"
+#include "dbservices/sharedata.h"
 #include <QStringList>
 #include <QWaitCondition>
 #include <QMap>
@@ -44,12 +44,12 @@ private slots:
     void        updateStkCodes(MKT_TYPE type);
     void        updateStkInfoList(const QList<QStringList>& pStkSectionList);
     //StockDataList   RealtimeInfo(const QStringList& codes);
-    void            SortResultList(StockDataList& result, const StockDataList& mid);
-    void         slotRevResList(const StockDataList& mid);
+    void            SortResultList(ShareDataList& result, const ShareDataList& mid);
+    void         slotRevResList(const ShareDataList& mid);
     void         slotRevZjlxData(const QList<zjlxData>& zjlist);
 
 signals:
-    void    sendStkDataList(const StockDataList& list);
+    void    sendStkDataList(const ShareDataList& list);
     void    sendStkinfoUpdateProgress(int cur, int total);
 private:
     QStringList                                             mStkCodesList;
@@ -62,7 +62,7 @@ private:
     QList<QSinaStkInfoThread*>                              mThreadList;
     QList<QStringList>                                      mSecCodesList;
     QMutex                                                  mSecCodesLock;
-    QMap<QString, StockData>                                mMidStkDataMapList;
+    QMap<QString, ShareData>                                mMidStkDataMapList;
     bool                                                    mActive;
     QMutex                                                  mListMutex;
     QStringList                                             mSelfCodesList;

@@ -20,7 +20,7 @@ public:
     bool   isDBInitOk();
     friend class CGarbo;
     static HqInfoService* instance();
-    StockData* getBasicStkData(const QString& code);
+    ShareData* getBasicStkData(const QString& code);
     double getProfit(const QString& code);
     foreignHolder amountForeigner(const QString& code);
     QStringList  getExchangeCodeList();
@@ -40,50 +40,50 @@ signals:
     //开始创建数据库需要的表信息，初始化数据库
     void signalInitDBTables();
     void signalDbInitFinished();
-    void signalUpdateStockCodesList(const QStringList& codes);
-    void signalUpdateShareBasicInfo(const StockDataList& list);
+    void signalUpdateShareCodesList(const QStringList& codes);
+    void signalUpdateShareBasicInfo(const ShareDataList& list);
 
     //从数据库查询板块信息
     void signalQueryBlockInfo(int type = 1);
     void signalRecvRealBlockInfo(const QList<BlockRealInfo>& list);
     void signalSendBlockInfoList(const QList<BlockRealInfo>& list);
-    void signalSendTop10ChinaStockInfos(const QList<ChinaShareExchange>& list);
-    void signalRecvTop10ChinaStockInfos(const QList<ChinaShareExchange>& list);
-    void signalQueryTop10ChinaStockInfos(const QDate& date = QDate(), const QString& share = QString(), int market = 0);
+    void signalSendTop10ChinaShareInfos(const QList<ChinaShareExchange>& list);
+    void signalRecvTop10ChinaShareInfos(const QList<ChinaShareExchange>& list);
+    void signalQueryTop10ChinaShareInfos(const QDate& date = QDate(), const QString& share = QString(), int market = 0);
     void signalQueryShareForeignVol(const QString& code);
-    void signalSendShareForeignVol(const StockDataList& list);
+    void signalSendShareForeignVol(const ShareDataList& list);
     //历史数据写入数据库
-    void signalRecvShareHistoryInfos(const QString& code, const StockDataList& list, bool deletedb);
+    void signalRecvShareHistoryInfos(const QString& code, const ShareDataList& list, bool deletedb);
     void signalQueryShareHistoryLastDate(const QString& code);
     void signalSendShareHistoryLastDate(const QString& code, const QDate& date);
     //基本信息相关的数据库操作
     void signalQueryAllShareBasicInfo();
-    void signalAddShareBasicInfo(const StockData& data);
-    void signalAddShareBasicInfoList(const StockDataList& list);
+    void signalAddShareBasicInfo(const ShareData& data);
+    void signalAddShareBasicInfoList(const ShareDataList& list);
     void signalUpdateShareinfoWithHistory(const QString& code);
     void signalUpdateStkBaseinfoWithHistoryFinished(const QString &code);
-    void signalUpdateStkProfitList(const StockDataList& list);
-    void signalInitStockRealInfos(const QStringList& codes);
+    void signalUpdateStkProfitList(const ShareDataList& list);
+    void signalInitShareRealInfos(const QStringList& codes);
     //沪港通持股写入数据据
-    void signalAddShareAmoutByForeigner(const StockDataList& list);
+    void signalAddShareAmoutByForeigner(const ShareDataList& list);
     void signalUpdateShareAmountByForeigner();
 public slots:
     void slotInitDBTables();
-    void slotUpdateStockCodesList(const QStringList& list);
-    void slotRecvShareHistoryInfos(const QString& code, const StockDataList& list, bool deleteDB);
-    //void slotUpdateShareHistoryInfos(const QMap<QString, StockDataList> map);
-    bool slotAddHistoryData(const StockData& data);
+    void slotUpdateShareCodesList(const QStringList& list);
+    void slotRecvShareHistoryInfos(const QString& code, const ShareDataList& list, bool deleteDB);
+    //void slotUpdateShareHistoryInfos(const QMap<QString, ShareDataList> map);
+    bool slotAddHistoryData(const ShareData& data);
     void initBlockData(int type = 0);
     void initShareData();
-    void slotRecvTop10ChinaStockInfos(const QList<ChinaShareExchange>& list);
-    void slotQueryTop10ChinaStockInfos(const QDate& date = QDate(), const QString& share = QString(), int market = 0);
+    void slotRecvTop10ChinaShareInfos(const QList<ChinaShareExchange>& list);
+    void slotQueryTop10ChinaShareInfos(const QDate& date = QDate(), const QString& share = QString(), int market = 0);
 //    void slotQueryShareHistoryLastDate(const QString& code);
     void slotUpdateShareinfoWithHistory(const QString& code);
     void slotUpdateHistoryChange(const QString& code);
-    void slotUpdateStkProfitList(const StockDataList& list);
-    void slotAddShareAmoutByForeigner(const StockDataList& list);
+    void slotUpdateStkProfitList(const ShareDataList& list);
+    void slotAddShareAmoutByForeigner(const ShareDataList& list);
     void slotUpdateShareAmountByForeigner();
-    void slotUpdateShareBasicInfo(const StockDataList& list);
+    void slotUpdateShareBasicInfo(const ShareDataList& list);
     void slotSetFavCode(const QString& code);
     void slotQueryShareForeignVol(const QString& code);
 
@@ -92,14 +92,14 @@ private:
     void initHistoryDates();
     void initSignalSlot();
     bool createHistoryTable(const QString& pTableName);
-    //bool createStockBaseInfoTable(const QString& code);
+    //bool createShareBaseInfoTable(const QString& code);
     //bool createBlockTable();
     bool createHSGTShareAmountTable();
     bool isActive();
     QString errMsg();
     //数据库查询指定日期的沪深股通的TOP10交易
     bool queryTop10ChinaShareInfos(QList<ChinaShareExchange>& list, const QDate& date = QDate(), const QString& share = QString(), int market = 0);
-    bool addTop10ChinaStockInfo(const ChinaShareExchange& info);
+    bool addTop10ChinaShareInfo(const ChinaShareExchange& info);
 
 private:    //本类使用的变量
     static HqInfoService *m_pInstance;
@@ -121,7 +121,7 @@ private:    //本类使用的变量
     static CGarbo s_Garbo; // 定义一个静态成员，在程序结束时，系统会调用它的析构函数
     QThread             m_threadWork;       //工作线程
     QStringList                 mNotExchangeDaysList;
-    QMap<QString, StockData*>    mStkRealInfo;
+    QMap<QString, ShareData*>    mStkRealInfo;
     QDate                       mLast3DaysDate;
     QDate                       mLast5DaysDate;
     QDate                       mLast10DaysDate;

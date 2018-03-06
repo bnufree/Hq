@@ -1,8 +1,8 @@
-#ifndef QEASTMONEYZJLXTHREAD_H
+﻿#ifndef QEASTMONEYZJLXTHREAD_H
 #define QEASTMONEYZJLXTHREAD_H
 
 #include <QThread>
-#include "stockdata.h"
+#include "dbservices/sharedata.h"
 #include "qhttpget.h"
 
 

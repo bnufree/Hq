@@ -1,32 +1,80 @@
-﻿#include "qeastmonystockcodesthread.h"
-#include <QDebug>
-#include <QDateTime>
-#include <QRegularExpression>
-#include <QRegExp>
-#include <QFile>
-#include <QDir>
-#include "dbservices/dbservices.h"
+﻿#include "qsharebasicinfoworker.h"
+#include "qsharecodeswork.h"
 #include "utils/hqutils.h"
-#include "utils/profiles.h"
-#include <QTextCodec>
-#include "qhttpget.h"
+#include "dbservices/hqdatadefines.h"
 
 #define STOCK_CODE_FILE  "share.dat"
-QEastMonyStockCodesThread::QEastMonyStockCodesThread(QObject *parent) : QObject(parent)
+
+QShareBasicInfoWorker::QShareBasicInfoWorker(QObject *parent) : QObject(parent)
+{
+    connect(this, SIGNAL(signalGetBasicInfo()), this, SLOT(slotGetBasicInfo()));
+    moveToThread(&mWorkThread);
+    mWorkThread.start();
+}
+
+void QShareBasicInfoWorker::slotGetBasicInfo()
+{
+    //从文件获取信息
+}
+
+bool QShareBasicInfoWorker::getInfosFromFile(BaseDataList &list)
+{
+
+}
+
+bool QShareBasicInfoWorker::getInfossFromWeb(BaseDataList &list)
+{
+
+}
+
+bool QShareBasicInfoWorker::writeInfos(const BaseDataList &list)
+{
+    FILE *fp = fopen(STOCK_CODE_FILE, "wb+");
+    if(fp)
+    {
+        qint64 cur = QDateTime(HqUtils::latestActiveDay().addDays(-1)).toMSecsSinceEpoch();
+        fwrite(&cur, sizeof(cur), 1, fp);
+        int size = list.size();
+        fwrite(&size, sizeof(size), 1, fp);
+        for(int i=0; i<list.size(); i++){
+            ShareData data = ShareDataList[i];
+            int val = list[i].toInt();
+            fwrite(&val, sizeof(int), 1, fp);
+            //HqUtils::writeInt2File(list[i].toInt(), fp);
+        }
+
+        //更新时间到最新，移动到开头写入时间，保证是最新的
+        fseek(fp, 0, SEEK_SET);
+        cur = QDateTime(HqUtils::latestActiveDay()).toMSecsSinceEpoch();
+        fwrite(&cur, sizeof(cur), 1, fp);
+        fclose(fp);
+    }
+
+    return true;
+}
+
+void QShareBasicInfoWorker::slotUpdateShareCodesList(const BaseDataList &list)
+{
+
+}
+
+
+#if 0
+#define STOCK_CODE_FILE  "share.dat"
+QShareCodesThread::QShareCodesThread(QObject *parent) : QObject(parent)
 {
     connect(DATA_SERVICE, SIGNAL(signalDbInitFinished()), this, SLOT(slotDBInitFinished()));
-    connect(this, SIGNAL(start()), this, SLOT(run()));
+    connect(this, SIGNAL(signalGetCode()), this, SLOT(slotGetCode());
     this->moveToThread(&mThread);
     mThread.start();
 }
 
-QEastMonyStockCodesThread::~QEastMonyStockCodesThread()
+QShareCodesThread::~QShareCodesThread()
 {
     mThread.quit();
-    mThread.deleteLater();
 }
 
-bool QEastMonyStockCodesThread::writeCodes(const QStringList &list)
+bool QShareCodesThread::writeCodes(const QStringList &list)
 {
     FILE *fp = fopen(STOCK_CODE_FILE, "wb+");
     if(fp)
@@ -51,7 +99,7 @@ bool QEastMonyStockCodesThread::writeCodes(const QStringList &list)
     return true;
 }
 
-bool QEastMonyStockCodesThread::getCodesFromFile(QStringList& codes)
+bool QShareCodesThread::getCodesFromFile(QStringList& codes)
 {
     codes.clear();
     if(!QFile::exists(STOCK_CODE_FILE)) return false;
@@ -84,7 +132,7 @@ bool QEastMonyStockCodesThread::getCodesFromFile(QStringList& codes)
     return false;
 }
 
-void QEastMonyStockCodesThread::run()
+void QShareCodesThread::slotGetCode()
 {
     QTime t = QDateTime::currentDateTime().time();
     t.start();
@@ -105,7 +153,7 @@ void QEastMonyStockCodesThread::run()
 }
 
 
-void QEastMonyStockCodesThread::slotRecvAllCodes(const QStringList &list)
+void QShareCodesThread::slotRecvAllCodes(const QStringList &list)
 {
     mCodesList.clear();
     Profiles::instance()->setDefault("UPDATE", "MODE", 1);
@@ -129,12 +177,12 @@ void QEastMonyStockCodesThread::slotRecvAllCodes(const QStringList &list)
     emit DATA_SERVICE->signalUpdateStockCodesList(mCodesList);
 }
 
-void QEastMonyStockCodesThread::slotDBInitFinished()
+void QShareCodesThread::slotDBInitFinished()
 {
     emit signalSendCodesList(mCodesList);
 }
 
-void QEastMonyStockCodesThread::getCodesFromURL(QStringList& list, const QString& URL)
+void QShareCodesThread::getCodesFromURL(QStringList& list, const QString& URL)
 {
     QTextCodec *gbkCodec = QTextCodec::codecForName("UTF8");
     QString result = QString::fromLocal8Bit(QHttpGet::getContentOfURL(URL));
@@ -157,5 +205,4 @@ void QEastMonyStockCodesThread::getCodesFromURL(QStringList& list, const QString
     }
     return;
 }
-
-
+#endif

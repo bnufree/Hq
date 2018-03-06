@@ -1,8 +1,8 @@
-﻿#include "stockdata.h"
+﻿#include "sharedata.h"
 
-StockData::StockData()
+ShareData::ShareData()
 {
-    qRegisterMetaType<StockDataList>("const StockDataList&");
+    qRegisterMetaType<ShareDataList>("const ShareDataList&");
     mIndexFlag = false;
     mProfit = 0;
     mForeignCap = 0.0;
@@ -36,258 +36,258 @@ StockData::StockData()
     mForeignVolChg = 0;
 }
 
-StockData::~StockData()
+ShareData::~ShareData()
 {
 
 }
 
-bool StockData::sortByPerDesc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByPerDesc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
     return d1.mChgPercent > d2.mChgPercent;
 }
 
-bool StockData::sortByPerAsc(const StockData &d1, const StockData &d2)
+bool ShareData::sortByPerAsc(const ShareData &d1, const ShareData &d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mChgPercent < d2.mChgPercent;
 }
 
-bool StockData::sortByCurDesc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByCurDesc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
     return d1.mCur > d2.mCur;
 }
 
-bool StockData::sortByCurAsc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByCurAsc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mCur < d2.mCur;
 }
 
-bool StockData::sortByMonDesc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByMonDesc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
     return d1.mMoney > d2.mMoney;
 }
 
-bool StockData::sortByMonAsc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByMonAsc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mMoney < d2.mMoney;
 }
 
-bool StockData::sortByHslDesc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByHslDesc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
     return d1.mHsl > d2.mHsl;
 }
 
-bool StockData::sortByHslAsc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByHslAsc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mHsl < d2.mHsl;
 }
 
-bool StockData::sortByMonRatioDesc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByMonRatioDesc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
     return d1.mMoneyRatio > d2.mMoneyRatio;
 }
 
-bool StockData::sortByMonRatioAsc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByMonRatioAsc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mMoneyRatio < d2.mMoneyRatio;
 }
 
-bool StockData::sortBy3DayChgAsc(const StockData &d1, const StockData &d2)
+bool ShareData::sortBy3DayChgAsc(const ShareData &d1, const ShareData &d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mLast3DaysChgPers < d2.mLast3DaysChgPers;
 }
 
-bool StockData::sortBy3DayChgDesc(const StockData &d1, const StockData &d2)
+bool ShareData::sortBy3DayChgDesc(const ShareData &d1, const ShareData &d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
     return d1.mLast3DaysChgPers > d2.mLast3DaysChgPers;
 }
 
-bool StockData::sortBy3DayZjlxAsc(const StockData &d1, const StockData &d2)
+bool ShareData::sortBy3DayZjlxAsc(const ShareData &d1, const ShareData &d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mZJLX < d2.mZJLX;
 }
 
-bool StockData::sortBy3DayZjlxDesc(const StockData &d1, const StockData &d2)
+bool ShareData::sortBy3DayZjlxDesc(const ShareData &d1, const ShareData &d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
     return d1.mZJLX > d2.mZJLX;
 }
 
-bool StockData::sortByGxlDesc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByGxlDesc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
     return d1.mGXL> d2.mGXL;
 }
 
-bool StockData::sortByGxlAsc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByGxlAsc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mGXL < d2.mGXL;
 }
 
-bool StockData::sortBySzzblDesc(const StockData& d1, const StockData& d2)
+bool ShareData::sortBySzzblDesc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
     return d1.mSZZG > d2.mSZZG;
 }
 
-bool StockData::sortBySzzblAsc(const StockData& d1, const StockData& d2)
+bool ShareData::sortBySzzblAsc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mSZZG < d2.mSZZG;
 }
 
-bool StockData::sortByGqdjrDesc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByGqdjrDesc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
     return d1.mGQDJR > d2.mGQDJR;
 }
 
-bool StockData::sortByGqdjrAsc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByGqdjrAsc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mGQDJR < d2.mGQDJR;
 }
 
-bool StockData::sortByTcapDesc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByTcapDesc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
     return d1.mTotalCap > d2.mTotalCap;
 }
 
-bool StockData::sortByTcapAsc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByTcapAsc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mTotalCap < d2.mTotalCap;
 }
 
-bool StockData::sortByMcapDesc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByMcapDesc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
     return d1.mMutalbleCap > d2.mMutalbleCap;
 }
 
-bool StockData::sortByMcapAsc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByMcapAsc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mMutalbleCap < d2.mMutalbleCap;
 }
 
-bool StockData::sortByProfitDesc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByProfitDesc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
     return d1.mProfit > d2.mProfit;
 }
 
-bool StockData::sortByProfitAsc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByProfitAsc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mProfit < d2.mProfit;
 }
 
-bool StockData::sortByForVolDesc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByForVolDesc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
     return d1.mForeignVol > d2.mForeignVol;
 }
 
-bool StockData::sortByForVolAsc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByForVolAsc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mForeignVol < d2.mForeignVol;
 }
 
-bool StockData::sortByForCapDesc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByForCapDesc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
     return d1.mForeignCap > d2.mForeignCap;
 }
 
-bool StockData::sortByForCapAsc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByForCapAsc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mForeignCap < d2.mForeignCap;
 }
 
-bool StockData::sortByForVolChgDesc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByForVolChgDesc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
     return d1.mForeignVolChg > d2.mForeignVolChg;
 }
 
-bool StockData::sortByForVolChgAsc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByForVolChgAsc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mForeignVolChg < d2.mForeignVolChg;
 }
 
-bool StockData::sortByForCapChgDesc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByForCapChgDesc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
     return d1.mForeignCapChg > d2.mForeignCapChg;
 }
 
-bool StockData::sortByForCapChgAsc(const StockData& d1, const StockData& d2)
+bool ShareData::sortByForCapChgAsc(const ShareData& d1, const ShareData& d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mForeignCapChg < d2.mForeignCapChg;
 }
 
-bool StockData::sortBy5DayChgAsc(const StockData &d1, const StockData &d2)
+bool ShareData::sortBy5DayChgAsc(const ShareData &d1, const ShareData &d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mLast5DaysChgPers < d2.mLast5DaysChgPers;
 }
 
-bool StockData::sortBy5DayChgDesc(const StockData &d1, const StockData &d2)
+bool ShareData::sortBy5DayChgDesc(const ShareData &d1, const ShareData &d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
     return d1.mLast5DaysChgPers > d2.mLast5DaysChgPers;
 }
 
-bool StockData::sortBy10DayChgAsc(const StockData &d1, const StockData &d2)
+bool ShareData::sortBy10DayChgAsc(const ShareData &d1, const ShareData &d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mLast10DaysChgPers < d2.mLast10DaysChgPers;
 }
 
-bool StockData::sortBy10DayChgDesc(const StockData &d1, const StockData &d2)
+bool ShareData::sortBy10DayChgDesc(const ShareData &d1, const ShareData &d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
     return d1.mLast10DaysChgPers > d2.mLast10DaysChgPers;
 }
 
-bool StockData::sortByMonthChgAsc(const StockData &d1, const StockData &d2)
+bool ShareData::sortByMonthChgAsc(const ShareData &d1, const ShareData &d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mLastMonthChgPers < d2.mLastMonthChgPers;
 }
 
-bool StockData::sortByMonthChgDesc(const StockData &d1, const StockData &d2)
+bool ShareData::sortByMonthChgDesc(const ShareData &d1, const ShareData &d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
     return d1.mLastMonthChgPers > d2.mLastMonthChgPers;
 }
 
-bool StockData::sortByYearChgAsc(const StockData &d1, const StockData &d2)
+bool ShareData::sortByYearChgAsc(const ShareData &d1, const ShareData &d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return !d1.mIndexFlag;
     return d1.mChgPersFromYear < d2.mChgPersFromYear;
 }
 
-bool StockData::sortByYearChgDesc(const StockData &d1, const StockData &d2)
+bool ShareData::sortByYearChgDesc(const ShareData &d1, const ShareData &d2)
 {
     if(d1.mIndexFlag ^ d2.mIndexFlag) return d1.mIndexFlag;
     return d1.mChgPersFromYear > d2.mChgPersFromYear;

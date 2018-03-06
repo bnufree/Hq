@@ -4,12 +4,12 @@
 #include <QObject>
 #include <QThread>
 #include <QStringList>
-#include <stockdata.h>
+#include <dbservices/sharedata.h>
 #include <QMap>
 #include <QMutex>
 #include <QThreadPool>
 
-class QEastmoneyStockHistoryInfoThread;
+class QEastmoneyShareHistoryInfoThread;
 
 class QShareHistoryInfoMgr : public QObject
 {
@@ -34,12 +34,12 @@ public slots:
     void slotGetFinanceInfo();
     void slotShareFinanceInfoFinished();
     void slotUpdateAllShareFromDate(bool deldb, const QDate& date = QDate(2017,3,17));
-    void slotUpdateForignVolInfo(const StockDataList& list, const QDate& date);
+    void slotUpdateForignVolInfo(const ShareDataList& list, const QDate& date);
     void slotUpdateShareHistoryProcess(const QString& code);
 private:
     QThread             mWorkThread;
     QStringList         mCodesList;
-    QMap<QString, StockDataList>    mShareInfoMap;
+    QMap<QString, ShareDataList>    mShareInfoMap;
     QMutex              mShareInfoMutex;
     QMutex              mShareHistoryMutex;
     int                 mCurCnt;

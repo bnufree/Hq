@@ -364,6 +364,7 @@ StockData* HqInfoService::getBasicStkData(const QString &code)
 
 void HqInfoService::slotUpdateShareBasicInfo(const StockDataList &list)
 {
+    qDebug()<<__FUNCTION__<<__LINE__;
     //更新后台
     foreach (StockData data, list) {
         StockData *res = mStkRealInfo[data.mCode];
@@ -378,11 +379,17 @@ void HqInfoService::slotUpdateShareBasicInfo(const StockDataList &list)
             res->mSZZG = data.mSZZG;
             res->mYAGGR = data.mYAGGR;
             res->mGQDJR = data.mGQDJR;
+            res->mPY = data.mPY;
         }
     }
 
     //更新数据库
-    mDataBase.updateBasicShareDataList(mStkRealInfo.values());
+    if(!mDataBase.updateBasicShareDataList(mStkRealInfo.values()))
+    {
+        qDebug()<<"error:"<<mDataBase.getErrorString();
+    }
+
+    qDebug()<<__FUNCTION__<<__LINE__;
 }
 
 double HqInfoService::GetMultiDaysChangePercent(const QString &table, int days)
@@ -559,7 +566,7 @@ void HqInfoService::slotSetFavCode(const QString &code)
     if(data)
     {
         data->mIsFavCode = !data->mIsFavCode;
-        mDataBase.updateBasicShareDataList(QList<StockData*>()<<data);
+        //mDataBase.updateBasicShareDataList(QList<StockData*>()<<data);
     }
 }
 

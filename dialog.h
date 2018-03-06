@@ -35,13 +35,13 @@ enum{
 typedef enum Display_Mode{
     E_DISPLAY_ALL = 0,
     E_DISPLAY_BLOCK = 1,
-    E_DISPLAY_STOCK_FULL,
-    E_DISPLAY_STOCK_MINI,
+    E_DISPLAY_Share_FULL,
+    E_DISPLAY_Share_MINI,
 }DISPLAY_MODE;
 
 struct HqTableMenuData
 {
-    QString mStockCode;
+    QString mShareCode;
     QString mBlockCode;
     int     mMenuCmd;
 };
@@ -55,7 +55,7 @@ class Dialog : public QDialog
 public:
     explicit Dialog(QWidget *parent = 0);
     ~Dialog();
-    //static void HQLISIINFOCBKFUNC(StockDataList& pDataList, void *pUser);
+    //static void HQLISIINFOCBKFUNC(ShareDataList& pDataList, void *pUser);
     //static void HQBLOCKINFOCBKFUNC(BlockDataList& pDataList, void *pUser);
 
 
@@ -70,7 +70,7 @@ public slots:
     void setTargetSize(const QSize& size);
 
     void updateBlockTable(const BlockDataVList& pDataList);
-    void updateHqTable(const StockDataList& pDataList);
+    void updateHqTable(const ShareDataList& pDataList);
     void setDlgShow(QSystemTrayIcon::ActivationReason val);
     void slotUpdate(int cur, int total);
     void slotUpdateMsg(const QString& msg);
@@ -79,9 +79,9 @@ public slots:
     void slotRestartMyself();
     void slotDisplayAll();
     void slotDisplayBlock();
-    void slotDisplayStockFull();
-    void slotDisplayStockMini();
-    void slotUpdateStockCodesList(const QStringList& list);
+    void slotDisplayShareFull();
+    void slotDisplayShareMini();
+    void slotUpdateShareCodesList(const QStringList& list);
     void slotTodayHSGUpdated();
     void slotUpdateHSGTOfCode(const QString& code);
 

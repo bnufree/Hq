@@ -4,12 +4,12 @@
 #include <QString>
 #include <QStringList>
 #include <QDate>
-#include "stockdata.h"
+#include "sharedata.h"
 
 //表名
-#define         HQ_SHARE_HISTORY_INFO_TABLE           "stock_history"
+#define         HQ_SHARE_HISTORY_INFO_TABLE           "Share_history"
 #define         HQ_BLOCK_TABLE                      "block"
-#define         HQ_SHARE_BASIC_INFO_TABLE                      "stock_info"
+#define         HQ_SHARE_BASIC_INFO_TABLE                      "Share_info"
 #define         HQ_HSGTOP10_TABLE                   "hsgTop10"
 #define         HQ_GENERAL_TABLE                    "general_info"
 #define         HQ_FINANCE_TABLE                    "finance"
@@ -44,6 +44,8 @@
 #define         HQ_TABLE_COL_GQDJR              "GQDJR"
 #define         HQ_TABLE_COL_FHSP               "FHSP"
 
+//typedef         ShareData               ShareData;
+//typedef         ShareDataList           ShareDataList;
 struct BlockBaseData{
     int                 mCode;
     int                 mType;              //
@@ -59,7 +61,7 @@ struct BlockRealInfo:public BlockBaseData{
     QDate               mDate;
 };
 
-class ChinaShareExchange:public StockData
+class ChinaShareExchange:public ShareData
 {
 public:
     QDate               mDate;

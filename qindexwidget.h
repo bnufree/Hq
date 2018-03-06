@@ -2,7 +2,7 @@
 #define QINDEXWIDGET_H
 
 #include <QWidget>
-#include "stockdata.h"
+#include "dbservices/sharedata.h"
 #include "qindexframe.h"
 #include <QMap>
 
@@ -17,7 +17,7 @@ public:
 signals:
 
 public slots:
-    void updateData(const StockDataList& list);
+    void updateData(const ShareDataList& list);
     void insetWidget(const QString& code);
 
 private:

@@ -48,7 +48,7 @@ bool HQDBDataBase::initSqlDB()
 QString HQDBDataBase::getErrorString()
 {
     QMutexLocker locker(&mSQlMutex);
-    return QString("Error Content: \n %1 \n %2").arg(mSQLQuery.lastQuery()).arg(mSQLQuery.lastError().text());
+    return QString("sql: \\n %1 \\n error:%2").arg(mSQLQuery.lastQuery()).arg(mSQLQuery.lastError().text());
 }
 
 bool HQDBDataBase::isTableExist(const QString &pTable)
@@ -199,8 +199,8 @@ bool HQDBDataBase::createShareBasicTable()
     TableColList colist;
     colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
     colist.append({HQ_TABLE_COL_CODE, "VARCHAR(6) NOT NULL"});
-    colist.append({HQ_TABLE_COL_NAME, "VARCHAR(100) NOT NULL"});
-    colist.append({HQ_TABLE_COL_PY_ABBR, "VARCHAR(10) NOT NULL"});
+    colist.append({HQ_TABLE_COL_NAME, "VARCHAR(100) NULL"});
+    colist.append({HQ_TABLE_COL_PY_ABBR, "VARCHAR(10) NULL"});
     colist.append({HQ_TABLE_COL_FAVORITE, "BOOL NULL"});
     colist.append({HQ_TABLE_COL_HSGT_TOP10, "BOOL NULL"});
     colist.append({HQ_TABLE_COL_TOTALMNT, "NUMERIC NULL"});
@@ -336,6 +336,7 @@ bool HQDBDataBase::updateBasicShareDataList(QList<StockData*> dataList)
     if(dataList.length() == 0) return false;
     QSqlDatabase::database().transaction();
     foreach (StockData* data, dataList) {
+        if(!data) continue;
         //检查记录是否存在
         bool exist = false;
         QList<HQ_QUERY_CONDITION> conList;
@@ -408,7 +409,18 @@ bool HQDBDataBase::updateBasicShare(const StockData& data, bool exist)
     mSQLQuery.addBindValue(data.mProfit);
     mSQLQuery.addBindValue(data.mBlockCodeList);
     mSQLQuery.addBindValue(data.mCode);
-    return mSQLQuery.exec();
+    if(!mSQLQuery.exec())
+    {
+        qDebug()<<data.mCode<<data.mName<<data.mPY;
+        qDebug()<<mSQLQuery.lastQuery()<<mSQLQuery.lastError()<<mSQLQuery.lastError().text();
+        return false;
+    }
+    if(!exist)
+    {
+        int id = mSQLQuery.lastInsertId().toInt();
+    }
+
+    return true;
 }
 
 bool HQDBDataBase::updateHistoryShare(const StockData &info, bool exist)
@@ -441,7 +453,7 @@ bool HQDBDataBase::updateHistoryShare(const StockData &info, bool exist)
     {
         mSQLQuery.prepare(QString(" update %1 set "
                                   " %2=?, %3=?, %4=?, %5=?, %6=?, "
-                                  " %7=?, %8=?, %9=?, %10=?, %11=?, "
+                                  " %7=?, %8=?, %9=?, %10=?, %11=?"
                                   " where %12=? and %13=? ")\
                           .arg(HQ_SHARE_HISTORY_INFO_TABLE)\
                           .arg(HQ_TABLE_COL_NAME)\

@@ -1,8 +1,8 @@
-#ifndef QSHARETABLEWIDGET_H
+﻿#ifndef QSHARETABLEWIDGET_H
 #define QSHARETABLEWIDGET_H
 
 #include "HqTableWidget.h"
-#include "stockdata.h"
+#include "dbservices/sharedata.h"
 
 class QShareTablewidget : public HqTableWidget
 {
@@ -13,7 +13,7 @@ private:
     void    initMenu();
 
 signals:
-    void    signalSetStockMarket(int mkt);
+    void    signalSetShareMarket(int mkt);
     void    signalSetDisplayMinuteGraph(const QString& code);
     void    signalSetDisplayDayGraph(const QString& code);
     void    signalSetDisplayBlockDetail(const QStringList& blockCodes);
@@ -21,16 +21,16 @@ signals:
     void    signalSetFavCode(const QString& code);
 
 public slots:
-    void    setDataList(const StockDataList& list);
+    void    setDataList(const ShareDataList& list);
     void    slotCustomContextMenuRequested(const QPoint &pos);
-    void    setStockMarket();
+    void    setShareMarket();
     void    setDisplayMinuteGraph();
     void    setDisplayDayGraph();
     void    setDisplayBlockDetail();
     void    setDisplayHSHK();
     void    slotCellDoubleClicked(int row, int col);
 private:
-    QMap<QString, double>   mStockMap;
+    QMap<QString, double>   mShareMap;
     QList<QAction*>         mCodesActionList;
 };
 

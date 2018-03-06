@@ -1,8 +1,8 @@
-#ifndef QEASTMONEYNORTHBOUNDTHREAD_H
+﻿#ifndef QEASTMONEYNORTHBOUNDTHREAD_H
 #define QEASTMONEYNORTHBOUNDTHREAD_H
 
 #include <QThread>
-#include "stockdata.h"
+#include "dbservices/sharedata.h"
 #include "qhttpget.h"
 
 class QEastmoneyNorthBoundThread : public QObject
@@ -16,7 +16,7 @@ public slots:
     void    run();
     void    slotRecvHttpContent(const QByteArray& bytes);
 signals:
-    void    signalUpdateNorthBoundList(const StockDataList& list);
+    void    signalUpdateNorthBoundList(const ShareDataList& list);
     void    start();
 private:
     QHttpGet        *mHttp;

@@ -17,7 +17,6 @@ DESTDIR = ../bin2/
 
 SOURCES += main.cpp\
         dialog.cpp \
-    stockdata.cpp \
     dataexchange.cpp \
     qsinastkinfothread.cpp \
     qsinasearchthread.cpp \
@@ -32,7 +31,6 @@ SOURCES += main.cpp\
     qeastmoneychinashareexchange.cpp \
     qindexframe.cpp \
     qindexwidget.cpp \
-    qeastmonystockcodesthread.cpp \
     qhttpget.cpp \
     qeastmoneynorthboundthread.cpp \
     qeastmoneyhsgtdialog.cpp \
@@ -59,10 +57,11 @@ SOURCES += main.cpp\
     history/qsharegraphicwidget.cpp \
     history/qhkexchangevoldataprocess.cpp \
     utils/profiles.cpp \
-    history/qeastmoneysharefhspthread.cpp
+    basic_info/qsharebasicinfoworker.cpp \
+    basic_info/qsharecodeswork.cpp \
+    dbservices/sharedata.cpp
 
 HEADERS  += dialog.h \
-    stockdata.h \
     dataexchange.h \
     qsinastkinfothread.h \
     qsinasearchthread.h \
@@ -79,7 +78,6 @@ HEADERS  += dialog.h \
     qeastmoneychinashareexchange.h \
     qindexframe.h \
     qindexwidget.h \
-    qeastmonystockcodesthread.h \
     qhttpget.h \
     qeastmoneynorthboundthread.h \
     qeastmoneyhsgtdialog.h \
@@ -109,7 +107,9 @@ HEADERS  += dialog.h \
     history/qsharegraphicwidget.h \
     history/qhkexchangevoldataprocess.h \
     utils/profiles.h \
-    history/qeastmoneysharefhspthread.h
+    basic_info/qsharebasicinfoworker.h \
+    basic_info/qsharecodeswork.h \
+    dbservices/sharedata.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

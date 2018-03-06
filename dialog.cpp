@@ -13,7 +13,7 @@
 #include <QDesktopWidget>
 #include <QResizeEvent>
 #include "qindexwidget.h"
-#include "qeastmonystockcodesthread.h"
+//#include "qsharecodesthread.h"
 #include "qeastmoneychinashareexchange.h"
 #include "qeastmoneynorthboundthread.h"
 #include "qeastmoneyhsgtdialog.h"
@@ -46,7 +46,7 @@ public:
 };
 
 Dialog::Dialog(QWidget *parent) :
-    QDialog(parent),mBlockMgr(NULL)/*,mStockThread(NULL)*/,mSearchThread(NULL),mDisplayCol(0),mMergeThread(0),
+    QDialog(parent),mBlockMgr(NULL)/*,mShareThread(NULL)*/,mSearchThread(NULL),mDisplayCol(0),mMergeThread(0),
     mShareHistoryMgr(0),
     ui(new Ui::MainDialog)
 {
@@ -83,12 +83,12 @@ Dialog::Dialog(QWidget *parent) :
     //更新记录
 
     QExchangeRecordWorker *work = new QExchangeRecordWorker;
-    connect(work, SIGNAL(signalSendStkProfitList(StockDataList)), DATA_SERVICE, SIGNAL(signalUpdateStkProfitList(StockDataList)));
+    connect(work, SIGNAL(signalSendStkProfitList(ShareDataList)), DATA_SERVICE, SIGNAL(signalUpdateStkProfitList(ShareDataList)));
     connect(work, SIGNAL(signalSendCodeList(QStringList)), this, SLOT(slotUpdateFavList(QStringList)));
     work->signalStartImport("test.xlsx");
 #endif
-   QEastMonyStockCodesThread *codesThread = new QEastMonyStockCodesThread;
-   connect(codesThread, SIGNAL(signalSendCodesList(QStringList)), this, SLOT(slotUpdateStockCodesList(QStringList)));
+   QEastMonyShareCodesThread *codesThread = new QEastMonyShareCodesThread;
+   connect(codesThread, SIGNAL(signalSendCodesList(QStringList)), this, SLOT(slotUpdateShareCodesList(QStringList)));
 //   connect(codesThread, SIGNAL(finished()), codesThread, SLOT(deleteLater()));
    codesThread->start();
     //创建快捷事件
@@ -99,7 +99,7 @@ Dialog::Dialog(QWidget *parent) :
     QShortcut *shotcut2 = new QShortcut(QKeySequence("Alt+S"), this);
     connect(shotcut2, SIGNAL(activated()), this, SLOT(slotDisplayBlock()));
     QShortcut *shotcut3 = new QShortcut(QKeySequence("Alt+D"), this);
-    connect(shotcut3, SIGNAL(activated()), this, SLOT(slotDisplayStockMini()));
+    connect(shotcut3, SIGNAL(activated()), this, SLOT(slotDisplayShareMini()));
 //    setHook(this);
     mInit = false;
 }
@@ -210,7 +210,7 @@ void Dialog::resizeEvent(QResizeEvent *event)
     QDialog::resizeEvent(event);
 }
 
-void Dialog::updateHqTable(const StockDataList& pDataList)
+void Dialog::updateHqTable(const ShareDataList& pDataList)
 {
     ui->hqtbl->setDataList(pDataList);
 }
@@ -289,17 +289,17 @@ void Dialog::slotDisplayBlock()
     setTargetSize(mTargetSize);
 }
 
-void Dialog::slotDisplayStockFull()
+void Dialog::slotDisplayShareFull()
 {
-    mDisplayMode = E_DISPLAY_STOCK_FULL;
+    mDisplayMode = E_DISPLAY_Share_FULL;
 }
 
 
-void Dialog::slotDisplayStockMini()
+void Dialog::slotDisplayShareMini()
 {
-    if(mDisplayMode != E_DISPLAY_STOCK_MINI)
+    if(mDisplayMode != E_DISPLAY_Share_MINI)
     {
-        mDisplayMode = E_DISPLAY_STOCK_MINI;
+        mDisplayMode = E_DISPLAY_Share_MINI;
     }
     ui->blocktbl->setVisible(false);
     ui->hqtbl->setVisible(true);
@@ -346,7 +346,7 @@ void Dialog::mouseMoveEvent(QMouseEvent *event)
 
 }
 
-void Dialog::slotUpdateStockCodesList(const QStringList &list)
+void Dialog::slotUpdateShareCodesList(const QStringList &list)
 {
     qDebug()<<"update code finshed:"<<list.length();
     //更新股本信息等
@@ -367,11 +367,11 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
         indexw->insetWidget(code);
     }
     mIndexThread = new QSinaStkInfoThread(0);
-    connect(mIndexThread, SIGNAL(sendStkDataList(StockDataList)), indexw, SLOT(updateData(StockDataList)));
+    connect(mIndexThread, SIGNAL(sendStkDataList(ShareDataList)), indexw, SLOT(updateData(ShareDataList)));
     connect(mIndexThread, SIGNAL(finished()), mIndexThread, SLOT(deleteLater()));
     mIndexThread->signalSetStkList(indexlist);
     QEastmoneyNorthBoundThread *north = new QEastmoneyNorthBoundThread();
-    connect(north, SIGNAL(signalUpdateNorthBoundList(StockDataList)), indexw, SLOT(updateData(StockDataList)));
+    connect(north, SIGNAL(signalUpdateNorthBoundList(ShareDataList)), indexw, SLOT(updateData(ShareDataList)));
     connect(north, SIGNAL(finished()), north, SLOT(deleteLater()));
     north->start();
     //行情中心初始化开始为自选股
@@ -379,9 +379,9 @@ void Dialog::slotUpdateStockCodesList(const QStringList &list)
     if(mFavStkList.length() == 0) mFavStkList = Profiles::instance()->value(STK_ZXG_SEC, STK_ZXG_NAME).toStringList();
     mHSFoundsList = Profiles::instance()->value(STK_HSJJ_SEC, STK_ZXG_NAME).toStringList();
     mMergeThread = new QSinaStkResultMergeThread();
-    connect(mMergeThread, SIGNAL(sendStkDataList(StockDataList)), this, SLOT(updateHqTable(StockDataList)));
+    connect(mMergeThread, SIGNAL(sendStkDataList(ShareDataList)), this, SLOT(updateHqTable(ShareDataList)));
     connect(ui->hqtbl, SIGNAL(signalSetDisplayHSHK(QString)), this, SLOT(slotUpdateHSGTOfCode(QString)));
-    connect(ui->hqtbl, SIGNAL(signalSetStockMarket(int)), mMergeThread, SLOT(setMktType(int)));
+    connect(ui->hqtbl, SIGNAL(signalSetShareMarket(int)), mMergeThread, SLOT(setMktType(int)));
     connect(ui->hqtbl, SIGNAL(signalSetSortType(int)), mMergeThread, SLOT(setSortType(int)));
     connect(ui->hqtbl, SIGNAL(signalDisplayPage(int)), mMergeThread, SLOT(setDisplayPage(int)));
     connect(ui->hqtbl, SIGNAL(signalSetDisplayBlockDetail(QStringList)), mMergeThread, SLOT(setSelfCodesList(QStringList)));

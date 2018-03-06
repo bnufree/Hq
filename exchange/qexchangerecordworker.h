@@ -1,9 +1,9 @@
-#ifndef QEXCHANGERECORDWORKER_H
+﻿#ifndef QEXCHANGERECORDWORKER_H
 #define QEXCHANGERECORDWORKER_H
 
 #include <QObject>
 #include <QThread>
-#include "stockdata.h"
+#include "dbservices/sharedata.h"
 class QExchangeRecordWorker : public QObject
 {
     Q_OBJECT
@@ -12,7 +12,7 @@ public:
 
 signals:
     void signalStartImport(const QString& file);
-    void signalSendStkProfitList(const StockDataList& list);
+    void signalSendStkProfitList(const ShareDataList& list);
     void signalSendCodeList(const QStringList& list);
 public slots:
     void slotStartImport(const QString& sFilePathName);
