@@ -6,7 +6,6 @@
 
 class QShareCodesWork : public QRunnable
 {
-    Q_OBJECT
 public:
     explicit QShareCodesWork(QObject *parent = 0);
     ~QShareCodesWork();

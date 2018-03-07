@@ -97,12 +97,16 @@ public:
         mGQDJR = 0;
         mYAGGR = 0;
         mProfit = 0.0;
+        mTop10Buy = 0;
+        mTop10Sell = 0;
     }
 
 public:
     //基本信息
     bool            mIsTop10;
     double          mProfit;
+    double          mTop10Buy;
+    double          mTop10Sell;
     qint64          mTotalShare;
     qint64          mMutalShare;
     //财务信息
@@ -121,10 +125,7 @@ typedef QList<ShareBaseData>     ShareBaseDataList;
 class ShareData : public ShareBaseData
 {
 public:
-    ShareData():ShareBaseData()
-    {
-
-    }
+    ShareData();
 
     ShareData(const QString& code, const QDate& date):ShareBaseData(code)
     {

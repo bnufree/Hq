@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QThread>
+#include <QMutex>
+#include "dbservices/sharedata.h"
 
 class ShareDataList;
 class QShareBasicInfoWorker : public QObject
@@ -15,14 +17,18 @@ signals:
     void signalGetBasicInfo();
 public slots:
     void slotGetBasicInfo();
-    void slotUpdateShareCodesList(const BaseDataList& list);
+    void slotUpdateShareCodesList(const ShareBaseDataList& list);
+    void slotUpdateShareFHSPList(const ShareBaseDataList &list);
+    void slotUpdateShareHsgtTop10List(const ShareBaseDataList &list);
 private:
-    bool getInfosFromFile(BaseDataList& list);
-    bool getInfossFromWeb(BaseDataList& list);
-    bool writeInfos(const BaseDataList& list);
+    bool getInfosFromFile(QMap<QString, ShareBaseData>& map);
+    bool getInfossFromWeb(QMap<QString, ShareBaseData>& map);
+    bool writeInfos(const ShareBaseDataList& list);
 private:
     QThread     mWorkThread;
-    BaseDataList       mShareDataList;
+    QMap<QString, ShareBaseData>        mShareBaseDataMap;
+    QMutex      mUpdateMutex;
+
 };
 
 #endif // QSHAREBASICINFOWORKER_H

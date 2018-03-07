@@ -14,7 +14,7 @@ QHKExchangeVolDataProcess::QHKExchangeVolDataProcess(const QDate& date, QObject*
     mParent = parent;
 }
 
-void QHKExchangeVolDataProcess::getMktVolInfo(StockDataList &list, const QDate &date, int mkt)
+void QHKExchangeVolDataProcess::getMktVolInfo(ShareDataList &list, const QDate &date, int mkt)
 {
     QString postVal = POST_VAL;
     postVal.replace("TODAY_DATE", QDate::currentDate().toString("yyyyMMdd"));
@@ -67,8 +67,8 @@ void QHKExchangeVolDataProcess::getMktVolInfo(StockDataList &list, const QDate &
             qint64 vol = volExp.cap().remove(",").toLongLong();
             //qDebug()<<"res:"<<volExp.cap();
             start_index += volExp.cap().length();
-            StockData data;
-            data.mCode = tmpCode;
+            ShareData data;
+            data.setCode(tmpCode);
             data.mForeignVol = vol;
             data.mDate = mDate;
             list.append(data);
@@ -82,7 +82,7 @@ void QHKExchangeVolDataProcess::getMktVolInfo(StockDataList &list, const QDate &
     return;
 }
 
-void QHKExchangeVolDataProcess::getMktVolInfo(StockDataList &list, const QDate& date,const QString &fileName)
+void QHKExchangeVolDataProcess::getMktVolInfo(ShareDataList &list, const QDate& date,const QString &fileName)
 {
     if(!QFile::exists(fileName)) return;
     //读取文件
@@ -98,14 +98,14 @@ void QHKExchangeVolDataProcess::getMktVolInfo(StockDataList &list, const QDate& 
         {
             file.read((char*)(&totalNum), sizeof(int));
             int count = 0;
-            StockData data;
+            ShareData data;
             while (!file.atEnd() ) {
                 count++;
                 if(count == 1)
                 {
                     int code = 0;
                     file.read((char*)(&code), sizeof(int));
-                    data.mCode = QString("").sprintf("%06d", code);
+                    data.setCode(QString("").sprintf("%06d", code));
                 } else if(count == 2)
                 {
                     qint64 vol = 0;
@@ -137,7 +137,7 @@ void QHKExchangeVolDataProcess::run()
     }
     QString fileName = QString("%1%2.dat").arg(SAVE_DIR).arg(mDate.toString("yyyyMMdd"));
     //分别取得各个市场的数据
-    StockDataList list;
+    ShareDataList list;
     //检查文件是否存在，存在的话直接从文件读取
     getMktVolInfo(list, mDate, fileName);
     if(list.length() == 0)
@@ -159,7 +159,7 @@ void QHKExchangeVolDataProcess::run()
                 fwrite(&cur, sizeof(cur), 1, fp);
                 for(int i=0; i<list.size(); i++){
                     //fprintf(fp, "%s%ld", list[i].mCode.toStdString().data(), list[i].mForeignVol);
-                    int code = list[i].mCode.toInt();
+                    int code = atoi(list[i].mCode);
                     fwrite(&code, sizeof(int), 1, fp);
                     fwrite(&(list[i].mForeignVol), sizeof(qint64), 1, fp);
                 }
@@ -176,7 +176,7 @@ void QHKExchangeVolDataProcess::run()
         QMetaObject::invokeMethod(mParent,\
                                   "slotUpdateForignVolInfo",\
                                   Qt::DirectConnection,\
-                                  Q_ARG(StockDataList, list),\
+                                  Q_ARG(ShareDataList, list),\
                                   Q_ARG(QDate, mDate)\
                                   );
         QString msg = QStringLiteral("更新外资持股：") + mDate.toString("yyyy-MM-dd");

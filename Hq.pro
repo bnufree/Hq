@@ -59,7 +59,9 @@ SOURCES += main.cpp\
     utils/profiles.cpp \
     basic_info/qsharebasicinfoworker.cpp \
     basic_info/qsharecodeswork.cpp \
-    dbservices/sharedata.cpp
+    dbservices/sharedata.cpp \
+    basic_info/qsharefhspwork.cpp \
+    basic_info/qsharehsgttop10work.cpp
 
 HEADERS  += dialog.h \
     dataexchange.h \
@@ -109,7 +111,9 @@ HEADERS  += dialog.h \
     utils/profiles.h \
     basic_info/qsharebasicinfoworker.h \
     basic_info/qsharecodeswork.h \
-    dbservices/sharedata.h
+    dbservices/sharedata.h \
+    basic_info/qsharefhspwork.h \
+    basic_info/qsharehsgttop10work.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

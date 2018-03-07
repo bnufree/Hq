@@ -5,7 +5,7 @@
 #include <QFile>
 #include <QMap>
 
-#define STOCK_FINANCE_FILE  "share_financial.dat"
+#define Share_FINANCE_FILE  "share_financial.dat"
 
 //文件结构更新时间+所有的信息
 
@@ -20,10 +20,10 @@ void QSinaShareVolInfoThread::run2()
     QMap<int, FINANCE_DATA> sharelist;
     //检查本地文件是否已经更新过
     bool updatedFromFile = false;
-    if(QFile::exists(STOCK_FINANCE_FILE))
+    if(QFile::exists(Share_FINANCE_FILE))
     {
         //读取文件
-        QFile file(STOCK_FINANCE_FILE);
+        QFile file(Share_FINANCE_FILE);
         if(file.open(QIODevice::ReadOnly))
         {
             int size = file.size();
@@ -91,7 +91,7 @@ void QSinaShareVolInfoThread::run2()
         //将数据写入到文件
         if(sharelist.size() > 0)
         {
-            FILE *fp = fopen(STOCK_FINANCE_FILE, "wb+");
+            FILE *fp = fopen(Share_FINANCE_FILE, "wb+");
             if(fp)
             {
                 //首先写入所有财务数据
@@ -115,7 +115,7 @@ void QSinaShareVolInfoThread::run2()
     qDebug()<<"update financial info end!!!!!!!!!!";
 }
 
-void QSinaShareVolInfoThread::updateFHSPInfoWithDate(QMap<QString, StockData>& map, const QString &date)
+void QSinaShareVolInfoThread::updateFHSPInfoWithDate(QMap<QString, ShareData>& map, const QString &date)
 {
     //wkdate = 2016-12-31
     qDebug()<<__FUNCTION__<<__LINE__;
@@ -156,11 +156,11 @@ void QSinaShareVolInfoThread::updateFHSPInfoWithDate(QMap<QString, StockData>& m
         if(!value.isObject()) continue;
         QJsonObject subobj = value.toObject();
         //开始解析角色信息数据
-        StockData &data = map[subobj.value("Code").toString()];
+        ShareData &data = map[subobj.value("Code").toString()];
         data.mSZZG = subobj.value("SZZBL").toString().toDouble();
         data.mXJFH = subobj.value("XJFH").toString().toDouble()/10;
-        data.mGQDJR = HqUtils::dateFromStr(subobj.value("GQDJR").toString().left(10));
-        data.mYAGGR = HqUtils::dateFromStr(subobj.value("YAGGR").toString().left(10));
+        data.mGQDJR = QDateTime(HqUtils::dateFromStr(subobj.value("GQDJR").toString().left(10))).toMSecsSinceEpoch();
+        data.mYAGGR = QDateTime(HqUtils::dateFromStr(subobj.value("YAGGR").toString().left(10))).toMSecsSinceEpoch();
     }
 }
 
@@ -171,7 +171,7 @@ void QSinaShareVolInfoThread::run()
     QDate date = DATA_SERVICE->getLastUpdateDateOfBasicInfo();
     if(date == HqUtils::latestActiveDay()) return;
     //联网更新
-    QMap<QString, StockData> shareList;
+    QMap<QString, ShareData> shareList;
     int pos = 0;
     int section = 200;
     while(pos < mShareCodesList.length())
@@ -193,13 +193,13 @@ void QSinaShareVolInfoThread::run()
                 QStringList list = row.split(QRegExp("[,\" ;]"));
                 if(list.length() > 20)
                 {
-                    StockData data;
-                    data.mCode = list[1].mid(9,6);
-                    data.mPY = list[3].toUpper();
+                    ShareData data;
+                    data.setCode(list[1].mid(9,6));
+                    data.setPY(list[3].toUpper());
                     data.mMGSY = list[6].toDouble();
                     data.mMGJZC = list[7].toDouble();
                     data.mTotalShare = qint64(list[9].toDouble() * 10000);
-                    data.mMutableShare = qint64(list[10].toDouble() * 10000);
+                    data.mMutalShare = qint64(list[10].toDouble() * 10000);
                     data.mJZCSYL = list[18].toDouble();
                     shareList[data.mCode] = data;
                 }

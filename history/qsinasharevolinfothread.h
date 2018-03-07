@@ -3,8 +3,8 @@
 
 #include <QThread>
 #include <QMap>
+class ShareData;
 
-class StockData;
 class QSinaShareVolInfoThread : public QThread
 {
     Q_OBJECT
@@ -13,7 +13,7 @@ public:
 protected:
     void run2();
     void run();
-    void updateFHSPInfoWithDate(QMap<QString, StockData>& map, const QString &date);
+    void updateFHSPInfoWithDate(QMap<QString, ShareData>& map, const QString &date);
 signals:
 
 public slots:

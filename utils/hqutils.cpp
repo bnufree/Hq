@@ -38,10 +38,8 @@ SHARE_TYPE HqUtils::shareType(const QString &code)
 QString HqUtils::prefixCode(const QString &code)
 {
     SHARE_TYPE type = shareType(code);
-    if(type == SHARE_SH) return "sh";
-    if(type == SHARE_SZ) return "sz";
-    if(type == SHARE_FOUND && code.left(1) == "5") return "sh";
-    if(type == SHARE_FOUND && code.left(1) == "1") return "sz";
+    if(type == SHARE_CHINA_SH || type == SHARE_CHINA_FUND_SH) return "sh";
+    if(type == SHARE_CHINA_SZ || type == SHARE_CHINA_FUND_SZ) return "sz";
     if(type == SHARE_HK) return "hk";
     if(type == SHARE_US) return "us";
     return "undefined";

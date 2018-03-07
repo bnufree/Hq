@@ -20,7 +20,7 @@ QShareCodesWork::~QShareCodesWork()
 
 void QShareCodesWork::run()
 {
-    BaseDataList list;
+    ShareBaseDataList list;
     QTextCodec *gbkCodec = QTextCodec::codecForName("UTF8");
     QString result = QString::fromLocal8Bit(QHttpGet::getContentOfURL("http://quote.eastmoney.com/stocklist.html"));
     QRegExp reg(">([\u4e00-\u9fa5A-Z0-9]{1,})\\(([0-9]{6})\\)<");
@@ -32,19 +32,18 @@ void QShareCodesWork::run()
         QString code = reg.cap(2);
         if(reg_code.exactMatch(code))
         {
-            BaseData data;
-            data.code = code.toInt();
-            QByteArray nameBytes = name.toUtf8();
-            QByteArray abbrPY = HqUtils::GetFirstLetter(gbkCodec->toUnicode( data.mName.toStdString().data())).toUtf8();
-            memcpy(data.name, nameBytes.data(), 20);
-            memcpy(data.abbr, abbrPY.data(), 10);
+            ShareBaseData data;
+            data.setCode(code);
+            data.setName(name);
+            QString PY = HqUtils::GetFirstLetter(gbkCodec->toUnicode( name.toStdString().data()));
+            data.setPY(PY);
             list.append(data);
         }
         index += reg.matchedLength();
     }
     if(list.length() > 0 && mParent)
     {
-        QMetaObject::invokeMethod(mParent, "slotUpdateShareCodesList", Qt::DirectConnection, Q_ARG(BaseDataList,list ));
+        QMetaObject::invokeMethod(mParent, "slotUpdateShareCodesList", Qt::DirectConnection, Q_ARG(ShareBaseDataList,list ));
     }
     return;
 }
