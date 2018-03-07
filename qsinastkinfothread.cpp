@@ -1,6 +1,5 @@
 ﻿#include "qsinastkinfothread.h"
 #include <QDebug>
-//#include "profiles.h"
 #include <QDateTime>
 #include "qexchangedatamanage.h"
 #include "dbservices/dbservices.h"
@@ -9,7 +8,6 @@
 
 QSinaStkInfoThread::QSinaStkInfoThread(QObject *parent) : QObject(parent), mHttp(0)
 {
-    qRegisterMetaType<StockDataList>("const StockDataList&");
     mStkList.clear();
     connect(this, SIGNAL(signalSetStkList(QStringList)), this, SLOT(setStkList(QStringList)));
 //    mUpdateTimer = new QTimer;
@@ -82,25 +80,22 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
     //先换行
     QStringList resultlist = result.split(QRegExp("[\\n|;]"), QString::SkipEmptyParts);
     //再分割具体的字段
-    StockDataList datalist;
+    ShareDataList datalist;
     foreach (QString detail, resultlist)
     {
         detail.replace(QRegExp("([a-z]{1,} )"), "");
         QStringList detailList = detail.split(QRegExp("[a-z|\"|\"|,|=|_]"), QString::SkipEmptyParts);
         if(detailList.length() < 7) continue;
         QString code = detailList[0];
-        StockData * data = DATA_SERVICE->getBasicStkData(code);
+        ShareData * data = DATA_SERVICE->getBasicStkData(code);
         if(!data) continue;
-        data->mName = detailList[1];
+        data->setName(detailList[1]);
         data->mCur = detailList[2].toDouble();
         data->mChg = detailList[3].toDouble();
         data->mChgPercent = detailList[4].toDouble();
         data->mVol = detailList[5].toInt() * 100;
         data->mMoney = detailList[6].toDouble();
         data->mHsl = 0.0;
-        if(data->mMutableShare > 0){
-            data->mHsl = data->mVol / (double)(data->mVol) * 100;
-        }
         data->mMoneyRatio = 0.0;
         if(data->mLastMoney> 0){
             data->mMoneyRatio = data->mMoney / data->mLastMoney;
@@ -114,10 +109,10 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
             data->mGXL = data->mXJFH / data->mCur;
         }
         data->mTotalCap = data->mCur * data->mTotalShare;
-        data->mMutalbleCap = data->mCur * data->mMutableShare;
-        if(data->mMutableShare > 0)
+        data->mMutalbleCap = data->mCur * data->mMutalShare;
+        if(data->mMutalShare > 0)
         {
-            data->mHsl = data->mVol / (double)(data->mMutableShare);
+            data->mHsl = data->mVol / (double)(data->mMutalShare);
         }
         if(data->mProfit == 0)
         {
@@ -125,7 +120,7 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
         }
         data->mForeignCap = data->mForeignVol * data->mCur ;
         data->mForeignCapChg = data->mForeignVolChg * data->mCur ;
-        data->mUpdateTime = QDateTime::currentDateTime().time();
+        data->mUpdateTime = QDateTime::currentMSecsSinceEpoch();
         datalist.append(*data);
     }
     emit sendStkDataList(datalist);

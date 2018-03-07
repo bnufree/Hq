@@ -13,8 +13,8 @@ QEastMoneyHSGTDialog::QEastMoneyHSGTDialog(QWidget *parent) :
     this->setAttribute(Qt::WA_DeleteOnClose);
     ui->DateEdit->setDate(QDate::currentDate());
     ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
-    connect(DATA_SERVICE, SIGNAL(signalSendTop10ChinaStockInfos(QList<ChinaShareExchange>)), this, SLOT(slotRecvTop10Infos(QList<ChinaShareExchange>)));
-    connect(DATA_SERVICE, SIGNAL(signalSendShareForeignVol(StockDataList)), this, SLOT(slotRecvListInfo(StockDataList)));
+    connect(DATA_SERVICE, SIGNAL(signalSendTop10ChinaShareInfos(QList<ChinaShareExchange>)), this, SLOT(slotRecvTop10Infos(QList<ChinaShareExchange>)));
+    connect(DATA_SERVICE, SIGNAL(signalSendShareForeignVol(ShareDataList)), this, SLOT(slotRecvListInfo(ShareDataList)));
 }
 
 QEastMoneyHSGTDialog::~QEastMoneyHSGTDialog()
@@ -30,7 +30,7 @@ void QEastMoneyHSGTDialog::on_SearchBTB_clicked()
     if(ui->DateCHK->isChecked()) date = ui->DateEdit->date();
     QString code;
     if(ui->CodeCHK->isChecked()) code = ui->NameEdit->text();
-    emit DATA_SERVICE->signalQueryTop10ChinaStockInfos(date, code, market);
+    emit DATA_SERVICE->signalQueryTop10ChinaShareInfos(date, code, market);
 }
 
 void QEastMoneyHSGTDialog::slotRecvTop10Infos(const QList<ChinaShareExchange> &list)
@@ -77,7 +77,7 @@ void QEastMoneyHSGTDialog::on_tableWidget_doubleClicked(const QModelIndex &index
     if(row >= 0)
     {
         QString code = ui->tableWidget->item(row, 0)->data(Qt::UserRole+1).toString();
-        emit DATA_SERVICE->signalQueryTop10ChinaStockInfos(QDate(), code, 0);
+        emit DATA_SERVICE->signalQueryTop10ChinaShareInfos(QDate(), code, 0);
     }
 
 }
@@ -87,11 +87,11 @@ void QEastMoneyHSGTDialog::slotDisplayCode(const QString &code)
     emit DATA_SERVICE->signalQueryShareForeignVol(code);
 }
 
-void QEastMoneyHSGTDialog::slotRecvListInfo(const StockDataList& list)
+void QEastMoneyHSGTDialog::slotRecvListInfo(const ShareDataList& list)
 {
     ui->tableWidget->setRowCount(list.count());
     int row = 0;
-    foreach (StockData info, list) {
+    foreach (ShareData info, list) {
         int col = 0;
         ui->tableWidget->setItem(row, col++, new QTableWidgetItem(info.mDate.toString("yyyy-MM-dd")));
         ui->tableWidget->setItem(row, col++, new QTableWidgetItem(info.mCode));

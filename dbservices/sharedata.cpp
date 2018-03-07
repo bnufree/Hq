@@ -1,6 +1,6 @@
 ﻿#include "sharedata.h"
 
-ShareData::ShareData()
+ShareData::ShareData():ShareBaseData()
 {
     qRegisterMetaType<ShareDataList>("const ShareDataList&");
     mIndexFlag = false;

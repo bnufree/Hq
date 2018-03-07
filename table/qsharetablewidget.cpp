@@ -36,20 +36,20 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
     initMenu();
 }
 
-void QShareTablewidget::setDataList(const StockDataList &list)
+void QShareTablewidget::setDataList(const ShareDataList &list)
 {
     prepareUpdateTable(list.size());
     int i = 0;
-    foreach (StockData data, list) {
+    foreach (ShareData data, list) {
         int k =0;
         this->setRowHeight(i, 20);
         this->setItemText(i, k++, data.mCode, Qt::AlignRight);
         this->setItemText(i, k++, data.mName);
         this->setItemText(i, k++, HqUtils::double2Str(data.mCur));
-        double val = mStockMap[data.mCode];
+        double val = mShareMap[data.mCode];
         QString flag = val < data.mChgPercent ? QStringLiteral("↑") : val > data.mChgPercent ? QStringLiteral("↓") : "";
         this->setItemText(i, k++, QString("%1%2%").arg(flag).arg(QString::number(data.mChgPercent, 'f', 2)));
-        mStockMap[data.mCode] = data.mChgPercent;
+        mShareMap[data.mCode] = data.mChgPercent;
         if(data.mMoney >= 1000){
             this->setItemText(i, k++, QString("").sprintf("%.2f", data.mMoney / 10000.0) + QStringLiteral("亿"));
         } else {
@@ -94,10 +94,10 @@ void QShareTablewidget::setDataList(const StockDataList &list)
             this->setItemText(i, k++, QString("").sprintf("%.0f", data.mForeignCapChg / 10000.0) + QStringLiteral("万"));
         }
         this->setItemText(i, k++, QString("").sprintf("%.2f",data.mHsl * 100));
-        this->setItemText(i, k++, data.mGQDJR.toString("yyyy-MM-dd"));
-        this->setItemText(i, k++, data.mYAGGR.toString("yyyy-MM-dd"));
-        this->setItemText(i, k++, data.mUpdateTime.toString("hh:mm:ss"));
-        this->updateFavShareIconOfRow(i, data.mIsFavCode);
+        this->setItemText(i, k++, QDateTime::fromMSecsSinceEpoch(data.mGQDJR).toString("yyyy-MM-dd"));
+        this->setItemText(i, k++, QDateTime::fromMSecsSinceEpoch(data.mYAGGR).toString("yyyy-MM-dd"));
+        this->setItemText(i, k++, QDateTime::fromMSecsSinceEpoch(data.mUpdateTime).toString("hh:mm:ss"));
+        this->updateFavShareIconOfRow(i, data.mIsFav);
         this->item(i, 0)->setData(Qt::UserRole, data.mCode);
         this->item(i, 0)->setData(Qt::UserRole+1, QVariant::fromValue(data.mBlockList));
         i++;
@@ -105,12 +105,12 @@ void QShareTablewidget::setDataList(const StockDataList &list)
     }
 }
 
-void QShareTablewidget::setStockMarket()
+void QShareTablewidget::setShareMarket()
 {
     QAction *act = (QAction*)sender();
     if(act == NULL) return;
     qDebug()<<"mkt_type:"<<act->data().toInt();
-    emit signalSetStockMarket(act->data().toInt());
+    emit signalSetShareMarket(act->data().toInt());
 }
 
 void QShareTablewidget::initMenu()
@@ -134,7 +134,7 @@ void QShareTablewidget::initMenu()
         QAction *act = new QAction(this);
         act->setText(item.mDisplayText);
         act->setData(item.mCmd);
-        connect(act, &QAction::triggered, this, &QShareTablewidget::setStockMarket);
+        connect(act, &QAction::triggered, this, &QShareTablewidget::setShareMarket);
         actlist.append(act);
     }
 

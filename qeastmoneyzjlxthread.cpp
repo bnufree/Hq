@@ -46,7 +46,7 @@ void QEastMoneyZjlxThread::slotRecvHttpContent(const QByteArray& bytes)
             zjlxData data;
             data.code = InfoList.at(1);
             data.zjlx = InfoList.at(5).toDouble();
-            StockData *pdata = DATA_SERVICE->getBasicStkData(data.code);
+            ShareData *pdata = DATA_SERVICE->getBasicStkData(data.code);
             if(pdata)pdata->mZJLX = data.zjlx;
             //qDebug()<<"list "<<list.length() +1<<" code:"<<data.code<<" zjlx:"<<data.zjlx<<endl;
             list.append(data);

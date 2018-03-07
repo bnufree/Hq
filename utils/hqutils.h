@@ -5,15 +5,8 @@
 #include <QDebug>
 #include <QDateTime>
 #include <QStringList>
-enum SHARE_TYPE{
-    SHARE_UNDEFINE = -1,
-    SHARE_SH = 0,
-    SHARE_SZ,
-    SHARE_US,
-    SHARE_HK,
-    SHARE_FOUND,
-};
 
+#include "dbservices/sharedata.h"
 class HqUtils
 {
 

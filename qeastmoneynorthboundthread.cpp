@@ -1,4 +1,4 @@
-#include "qeastmoneynorthboundthread.h"
+﻿#include "qeastmoneynorthboundthread.h"
 #include "qhttpget.h"
 #include "QRegExp"
 #include <QDebug>
@@ -59,13 +59,13 @@ void QEastmoneyNorthBoundThread::slotRecvHttpContent(const QByteArray &bytes)
     pure_in[0] = changeRMBString(hgt_pure_in) / 100000000;
     pure_in[1] = changeRMBString(sgt_pure_in) / 100000000;
 
-    StockDataList wklist;
+    ShareDataList wklist;
     for(int i=3; i<splitstr.length(); i++)
     {
         QStringList hgt = splitstr[i].split(",");
-        StockData data;
-        data.mCode = hgt[0];
-        data.mName = hgt[2];
+        ShareData data;
+        data.setCode(hgt[0]);
+        data.setName(hgt[2]);
         data.mChgPercent = hgt[3].left(hgt[3].length() -1).toDouble();
         data.mCur = pure_in[i-3];
         data.mChg = data.mCur / 130;

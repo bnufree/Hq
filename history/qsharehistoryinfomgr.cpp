@@ -49,12 +49,12 @@ void QShareHistoryInfoMgr::slotShareFinanceInfoFinished()
     //Profiles::instance()->setValue("UPDATE", "DATE", HqUtils::date2Str(QDate::currentDate().addDays(-1)));
 }
 
-void QShareHistoryInfoMgr::slotUpdateForignVolInfo(const StockDataList &list, const QDate& date)
+void QShareHistoryInfoMgr::slotUpdateForignVolInfo(const ShareDataList &list, const QDate& date)
 {
     qDebug()<<__FUNCTION__<<__LINE__<<list.size()<<date;
     QMutexLocker locker(&mShareInfoMutex);
-    foreach (StockData data, list) {
-        StockDataList &wklist = mShareInfoMap[data.mCode];
+    foreach (ShareData data, list) {
+        ShareDataList &wklist = mShareInfoMap[data.mCode];
         wklist.append(data);
     }
 }
@@ -101,8 +101,8 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
     mCurCnt = 0;
     //开始更新日线数据
     foreach (QString code, mCodesList) {
-        StockDataList *list = (StockDataList*)(&mShareInfoMap[code.right(6)]);
-        QEastmoneyStockHistoryInfoThread* thread = new QEastmoneyStockHistoryInfoThread(code, date, SAVE_DIR, deldb, list, this);
+        ShareDataList *list = (ShareDataList*)(&mShareInfoMap[code.right(6)]);
+        QEastmoneyShareHistoryInfoThread* thread = new QEastmoneyShareHistoryInfoThread(code, date, SAVE_DIR, deldb, list, this);
         mPool.start(thread);
     }
     mPool.waitForDone();

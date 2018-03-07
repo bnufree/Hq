@@ -221,11 +221,11 @@ bool HQDBDataBase::createGeneralTable()
     return createTable(HQ_GENERAL_TABLE, colist);
 }
 
-bool HQDBDataBase::updateHistoryDataList(const StockDataList &list)
+bool HQDBDataBase::updateHistoryDataList(const ShareDataList &list)
 {
-    if(!createStockHistoryInfoTable()) return false;
+    if(!createShareHistoryInfoTable()) return false;
     QSqlDatabase::database().transaction();
-    foreach (StockData data, list) {
+    foreach (ShareData data, list) {
         if(data.mMoney < 10000) continue;
         bool exist = false;
         QList<HQ_QUERY_CONDITION> conList;
@@ -252,7 +252,7 @@ bool HQDBDataBase::updateHistoryDataList(const StockDataList &list)
     return true;
 }
 
-bool HQDBDataBase::createStockHistoryInfoTable()
+bool HQDBDataBase::createShareHistoryInfoTable()
 {
     if(isTableExist(HQ_SHARE_HISTORY_INFO_TABLE)) return true;
     TableColList colist;
@@ -311,31 +311,31 @@ bool HQDBDataBase::updateDateOfTable(const QString &table)
     return mSQLQuery.exec();
 }
 
-bool HQDBDataBase::getBasicShareDataList(QMap<QString, StockData*>& pShareMap)
+bool HQDBDataBase::getBasicShareDataList(QMap<QString, ShareData*>& pShareMap)
 {
     QMutexLocker locker(&mSQlMutex);
     if(!mSQLQuery.exec(tr("select * from %1").arg(HQ_SHARE_BASIC_INFO_TABLE))) return false;
     while (mSQLQuery.next()) {
-        StockData *info = new StockData;
-        info->mCode = mSQLQuery.value(HQ_TABLE_COL_CODE).toString();
-        info->mName = mSQLQuery.value(HQ_TABLE_COL_NAME).toString();
-        info->mPY = mSQLQuery.value(HQ_TABLE_COL_PY_ABBR).toString();
-        info->mIsFavCode = mSQLQuery.value(HQ_TABLE_COL_FAVORITE).toBool();
-        info->mHSGTTop10 = mSQLQuery.value(HQ_TABLE_COL_HSGT_TOP10).toBool();
+        ShareData *info = new ShareData;
+        info->setCode(mSQLQuery.value(HQ_TABLE_COL_CODE).toString());
+        info->setName(mSQLQuery.value(HQ_TABLE_COL_NAME).toString());
+        info->setPY(mSQLQuery.value(HQ_TABLE_COL_PY_ABBR).toString());
+        info->mIsFav = mSQLQuery.value(HQ_TABLE_COL_FAVORITE).toBool();
+        info->mIsTop10= mSQLQuery.value(HQ_TABLE_COL_HSGT_TOP10).toBool();
         info->mTotalShare = mSQLQuery.value(HQ_TABLE_COL_TOTALMNT).toLongLong();
-        info->mMutableShare = mSQLQuery.value(HQ_TABLE_COL_MUTAL).toLongLong();
+        info->mMutalShare = mSQLQuery.value(HQ_TABLE_COL_MUTAL).toLongLong();
         info->mProfit = mSQLQuery.value(HQ_TABLE_COL_PROFIT).toDouble();
         info->mBlockCodeList = mSQLQuery.value(HQ_TABLE_COL_BLOCK_LIST).toStringList();
-        pShareMap[info->mCode.right(6)] = info;
+        pShareMap[QString::fromStdString(info->mCode)] = info;
     }
     return true;
 }
 
-bool HQDBDataBase::updateBasicShareDataList(QList<StockData*> dataList)
+bool HQDBDataBase::updateBasicShareDataList(QList<ShareData*> dataList)
 {
     if(dataList.length() == 0) return false;
     QSqlDatabase::database().transaction();
-    foreach (StockData* data, dataList) {
+    foreach (ShareData* data, dataList) {
         if(!data) continue;
         //检查记录是否存在
         bool exist = false;
@@ -363,7 +363,7 @@ bool HQDBDataBase::updateBasicShareDataList(QList<StockData*> dataList)
     return true;
 }
 
-bool HQDBDataBase::updateBasicShare(const StockData& data, bool exist)
+bool HQDBDataBase::updateBasicShare(const ShareData& data, bool exist)
 {
     QMutexLocker locker(&mSQlMutex);
     if(!exist)
@@ -402,10 +402,10 @@ bool HQDBDataBase::updateBasicShare(const StockData& data, bool exist)
     }
     mSQLQuery.addBindValue(data.mName);
     mSQLQuery.addBindValue(data.mPY);
-    mSQLQuery.addBindValue(data.mIsFavCode);
-    mSQLQuery.addBindValue(data.mHSGTTop10);
+    mSQLQuery.addBindValue(data.mIsFav);
+    mSQLQuery.addBindValue(data.mIsTop10);
     mSQLQuery.addBindValue(data.mTotalShare);
-    mSQLQuery.addBindValue(data.mMutableShare);
+    mSQLQuery.addBindValue(data.mMutalShare);
     mSQLQuery.addBindValue(data.mProfit);
     mSQLQuery.addBindValue(data.mBlockCodeList);
     mSQLQuery.addBindValue(data.mCode);
@@ -423,7 +423,7 @@ bool HQDBDataBase::updateBasicShare(const StockData& data, bool exist)
     return true;
 }
 
-bool HQDBDataBase::updateHistoryShare(const StockData &info, bool exist)
+bool HQDBDataBase::updateHistoryShare(const ShareData &info, bool exist)
 {
     QMutexLocker locker(&mSQlMutex);
     if(!exist)
@@ -479,7 +479,7 @@ bool HQDBDataBase::updateHistoryShare(const StockData &info, bool exist)
     mSQLQuery.addBindValue(info.mRZRQ);
     mSQLQuery.addBindValue(info.mForeignVol);
     mSQLQuery.addBindValue(info.mTotalShare);
-    mSQLQuery.addBindValue(info.mMutableShare);
+    mSQLQuery.addBindValue(info.mMutalShare);
     mSQLQuery.addBindValue(info.mCode);
     mSQLQuery.addBindValue(info.mDate);
     return mSQLQuery.exec();
@@ -613,7 +613,7 @@ bool HQDBDataBase::getLastForeignVol(qint64 &vol, qint64 &vol_chg, const QString
     return true;
 }
 
-bool HQDBDataBase::getHistoryDataOfCode(StockDataList& list, const QString &code)
+bool HQDBDataBase::getHistoryDataOfCode(ShareDataList& list, const QString &code)
 {
     list.clear();
     QMutexLocker locker(&mSQlMutex);
@@ -626,9 +626,9 @@ bool HQDBDataBase::getHistoryDataOfCode(StockDataList& list, const QString &code
         return false;
     }
     while (mSQLQuery.next()) {
-        StockData data;
-        data.mCode = mSQLQuery.value(HQ_TABLE_COL_CODE).toString();
-        data.mName = mSQLQuery.value(HQ_TABLE_COL_NAME).toString();
+        ShareData data;
+        data.setCode(mSQLQuery.value(HQ_TABLE_COL_CODE).toString());
+        data.setName(mSQLQuery.value(HQ_TABLE_COL_NAME).toString());
         data.mClose = mSQLQuery.value(HQ_TABLE_COL_CLOSE).toDouble();
         data.mChgPercent = mSQLQuery.value(HQ_TABLE_COL_CHANGE_PERCENT).toDouble();
         data.mForeignVol = mSQLQuery.value(HQ_TABLE_COL_HSGT_HAVE).toLongLong();
@@ -636,7 +636,7 @@ bool HQDBDataBase::getHistoryDataOfCode(StockDataList& list, const QString &code
         data.mDate = mSQLQuery.value(HQ_TABLE_COL_DATE).toDate();
         if(list.size() > 0)
         {
-            StockData& last = list[list.size() -1];
+            ShareData& last = list[list.size() -1];
             last.mForeignVolChg = last.mForeignVol - data.mForeignVol;
         }
         list.append(data);

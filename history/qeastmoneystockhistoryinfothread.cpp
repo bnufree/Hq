@@ -5,7 +5,7 @@
 #include "qhttpget.h"
 #include "utils/hqutils.h"
 
-QEastmoneyStockHistoryInfoThread::QEastmoneyStockHistoryInfoThread(const QString& code, const QDate& date, const QString& dir,bool deldb, StockDataList* list, QObject* parent) :
+QEastmoneyShareHistoryInfoThread::QEastmoneyShareHistoryInfoThread(const QString& code, const QDate& date, const QString& dir,bool deldb, ShareDataList* list, QObject* parent) :
     mCode(code),
     mStartDate(date),
     mSaveDir(dir),
@@ -21,12 +21,12 @@ QEastmoneyStockHistoryInfoThread::QEastmoneyStockHistoryInfoThread(const QString
     }
 }
 
-QEastmoneyStockHistoryInfoThread::~QEastmoneyStockHistoryInfoThread()
+QEastmoneyShareHistoryInfoThread::~QEastmoneyShareHistoryInfoThread()
 {
 
 }
 
-void QEastmoneyStockHistoryInfoThread::run()
+void QEastmoneyShareHistoryInfoThread::run()
 {
     QDate start = mStartDate;
     QDate end = QDate::currentDate().addDays(-1);
@@ -65,10 +65,10 @@ void QEastmoneyStockHistoryInfoThread::run()
                 QDate curDate = QDate::fromString(cols[0], "yyyy-MM-dd");
                 if(!HqUtils::activeDay(curDate)) continue;
                 if(cols[3].toDouble() == 0) continue;
-                StockData &data = mHistoryListPtr->valueOfDate(curDate);
+                ShareData &data = mHistoryListPtr->valueOfDate(curDate);
                 data.mDate = curDate;
-                data.mCode = mCode;
-                data.mName = cols[2];
+                data.setCode(mCode);
+                data.setName(cols[2]);
                 data.mCur = cols[3].toDouble();
                 data.mHigh = cols[4].toDouble();
                 data.mLow = cols[5].toDouble();
@@ -81,7 +81,7 @@ void QEastmoneyStockHistoryInfoThread::run()
                 data.mMoney = cols[12].toDouble();
                 double price = data.mCur;
                 data.mTotalShare = cols[13].toDouble() / price;
-                data.mMutableShare = cols[14].toDouble() / price;
+                data.mMutalShare= cols[14].toDouble() / price;
                 data.mClose = data.mCur;
                 //list.append(data);
             }
@@ -126,7 +126,7 @@ FUNC_END:
     return;
 }
 
-QString QEastmoneyStockHistoryInfoThread::getCode()
+QString QEastmoneyShareHistoryInfoThread::getCode()
 {
     return mCode;
 }

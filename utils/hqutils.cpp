@@ -24,14 +24,15 @@ SHARE_TYPE HqUtils::shareType(const QString &code)
 {
     if( code.length() == 6)
     {
-        if(code.left(1) == "6") return SHARE_SH;
-        if(code.left(1) == "0" || code.left(1) == "3") return SHARE_SZ;
-        if(code.left(1) == "5" || code.left(1) == "1") return SHARE_FOUND;
+        if(code.left(1) == "6") return SHARE_CHINA_SH;
+        if(code.left(1) == "0" || code.left(1) == "3") return SHARE_CHINA_SZ;
+        if(code.left(1) == "5") return SHARE_CHINA_FUND_SH;
+        if(code.left(1) == "1") return SHARE_CHINA_FUND_SZ;
     } else if(code.length() == 5)
     {
         return SHARE_HK;
     }
-    return SHARE_UNDEFINE;
+    return SHARE_UNDEFINED;
 }
 
 QString HqUtils::prefixCode(const QString &code)

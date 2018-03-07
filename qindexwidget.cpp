@@ -20,16 +20,16 @@ QIndexWidget::~QIndexWidget()
 
 void QIndexWidget::insetWidget(const QString &code)
 {
-    StockDataList list;
-    StockData data;
-    data.mCode = code.right(6);
+    ShareDataList list;
+    ShareData data;
+    data.setCode(code.right(6));
     list<<data;
     updateData(list);
 }
 
-void QIndexWidget::updateData(const StockDataList &list)
+void QIndexWidget::updateData(const ShareDataList &list)
 {
-    foreach (StockData data, list) {
+    foreach (ShareData data, list) {
         //qDebug()<<"data:"<<data.mCode<<" "<<data.mName<<" "<<data.mChg<<" "<<data.mChgPercent;
         QIndexFrame* w = NULL;
         if(mIndexWidgetMap.contains(data.mCode))

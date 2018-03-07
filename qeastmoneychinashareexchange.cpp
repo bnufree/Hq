@@ -1,4 +1,4 @@
-#include "qeastmoneychinashareexchange.h"
+﻿#include "qeastmoneychinashareexchange.h"
 #include "qhttpget.h"
 #include <QDebug>
 #include "dbservices/dbservices.h"
@@ -75,7 +75,7 @@ void QEastMoneyChinaShareExchange::run()
         getHGTTop10Share(wklist, wkDate);
         if(wklist.length() > 0)
         {
-            emit DATA_SERVICE->signalRecvTop10ChinaStockInfos(wklist);
+            emit DATA_SERVICE->signalRecvTop10ChinaShareInfos(wklist);
             lastDate = wkDate;
         }
         qDebug()<<"date:"<<wkDate<<" list len:"<<wklist.length();
@@ -91,7 +91,7 @@ void QEastMoneyChinaShareExchange::run()
         getHGTTop10Share(wklist, QDate::currentDate());
         if(wklist.length() > 0)
         {
-            emit DATA_SERVICE->signalRecvTop10ChinaStockInfos(wklist);
+            emit DATA_SERVICE->signalRecvTop10ChinaShareInfos(wklist);
             emit signalHSGTofTodayTop10Updated();
             break;
         }

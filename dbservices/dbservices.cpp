@@ -14,7 +14,7 @@ HqInfoService::HqInfoService(QObject *parent) :
     QObject(parent)
 {
     qRegisterMetaType<QList<ChinaShareExchange>>("const QList<ChinaShareExchange>&");
-    qRegisterMetaType<StockDataList>("const StockDataList&");
+    qRegisterMetaType<ShareDataList>("const ShareDataList&");
     qRegisterMetaType<FinDataList>("const FinDataList&");
     initSignalSlot();
     initHistoryDates();
@@ -96,10 +96,10 @@ void HqInfoService::initHistoryDates()
 void HqInfoService::initSignalSlot()
 {
     connect(this, SIGNAL(signalInitDBTables()), this, SLOT(slotInitDBTables()));
-    connect(this, SIGNAL(signalUpdateStockCodesList(QStringList)), this, SLOT(slotUpdateStockCodesList(QStringList)));
-    connect(this, SIGNAL(signalRecvShareHistoryInfos(QString,StockDataList, bool)), this, SLOT(slotRecvShareHistoryInfos(QString,StockDataList, bool)));
+    connect(this, SIGNAL(signalUpdateShareCodesList(QStringList)), this, SLOT(slotUpdateShareCodesList(QStringList)));
+    connect(this, SIGNAL(signalRecvShareHistoryInfos(QString,ShareDataList, bool)), this, SLOT(slotRecvShareHistoryInfos(QString,ShareDataList, bool)));
     connect(this, SIGNAL(signalUpdateShareinfoWithHistory(QString)), this, SLOT(slotUpdateShareinfoWithHistory(QString)));
-    connect(this, SIGNAL(signalUpdateShareBasicInfo(StockDataList)), this, SLOT(slotUpdateShareBasicInfo(StockDataList)));
+    connect(this, SIGNAL(signalUpdateShareBasicInfo(ShareDataList)), this, SLOT(slotUpdateShareBasicInfo(ShareDataList)));
     connect(this, SIGNAL(signalQueryShareForeignVol(QString)), this, SLOT(slotQueryShareForeignVol(QString)));
 }
 
@@ -144,12 +144,12 @@ bool HqInfoService::isActive()
     return true;
 }
 
-void HqInfoService::slotRecvTop10ChinaStockInfos(const QList<ChinaShareExchange>& list)
+void HqInfoService::slotRecvTop10ChinaShareInfos(const QList<ChinaShareExchange>& list)
 {
     //更新到数据库
     QSqlDatabase::database().transaction();
     foreach (ChinaShareExchange info, list) {
-        if(!addTop10ChinaStockInfo(info))
+        if(!addTop10ChinaShareInfo(info))
         {
 //            qDebug()<<"error:"<<mSqlQuery.lastError().text();
         }
@@ -157,7 +157,7 @@ void HqInfoService::slotRecvTop10ChinaStockInfos(const QList<ChinaShareExchange>
     QSqlDatabase::database().commit();
 }
 
-bool HqInfoService::addTop10ChinaStockInfo(const ChinaShareExchange &info)
+bool HqInfoService::addTop10ChinaShareInfo(const ChinaShareExchange &info)
 {
     return true;
 #if 0
@@ -206,11 +206,11 @@ QDate HqInfoService::getLastUpdateDateOfTable(const QString& table)
     return mDataBase.getLastUpdateDateOfTable(table);
 }
 
-void HqInfoService::slotQueryTop10ChinaStockInfos(const QDate &date, const QString &share, int market)
+void HqInfoService::slotQueryTop10ChinaShareInfos(const QDate &date, const QString &share, int market)
 {
     QList<ChinaShareExchange> list;
     queryTop10ChinaShareInfos(list,date, share, market);
-    emit signalSendTop10ChinaStockInfos(list);
+    emit signalSendTop10ChinaShareInfos(list);
 }
 
 bool HqInfoService::queryTop10ChinaShareInfos(QList<ChinaShareExchange>& list, const QDate& date, const QString& share, int market)
@@ -250,7 +250,7 @@ bool HqInfoService::queryTop10ChinaShareInfos(QList<ChinaShareExchange>& list, c
     return true;
 }
 
-void HqInfoService::slotRecvShareHistoryInfos(const QString& code, const StockDataList &list, bool deletedb)
+void HqInfoService::slotRecvShareHistoryInfos(const QString& code, const ShareDataList &list, bool deletedb)
 {
     //更新到数据库
     if(!mDataBase.updateHistoryDataList(list))
@@ -259,10 +259,10 @@ void HqInfoService::slotRecvShareHistoryInfos(const QString& code, const StockDa
     }
 }
 
-bool HqInfoService::slotAddHistoryData(const StockData &info)
+bool HqInfoService::slotAddHistoryData(const ShareData &info)
 {
     return true;
-    QString tableName = "stk" + info.mCode.right(6);
+    //QString tableName = "stk" + info.mCode.right(6);
 //    mSqlQuery.prepare(tr("insert into %1 ("
 //                         "name, close, open, high, low, "
 //                         "change, change_percent, vol, money, puremoney, "
@@ -322,7 +322,7 @@ bool HqInfoService::GetHistoryInfoWithDate(const QString &table, const QDate &da
 
 void HqInfoService::slotUpdateShareinfoWithHistory(const QString &code)
 {
-    StockData *data = mStkRealInfo[code.right(6)];
+    ShareData *data = mStkRealInfo[code.right(6)];
     if(data)
     {
         data->mLastMoney = mDataBase.getLastMoney(data->mCode);
@@ -348,13 +348,13 @@ void HqInfoService::slotUpdateHistoryChange(const QString &code)
 
 }
 
-StockData* HqInfoService::getBasicStkData(const QString &code)
+ShareData* HqInfoService::getBasicStkData(const QString &code)
 {
     QMutexLocker locker(&mShareMutex);
     if(!mStkRealInfo.contains(code.right(6)))
     {
-        StockData *data = new StockData;
-        data->mCode = code.right(6);
+        ShareData *data = new ShareData;
+        data->setCode(code.right(6));
         mStkRealInfo[code.right(6)] = data;
     }
 
@@ -362,24 +362,24 @@ StockData* HqInfoService::getBasicStkData(const QString &code)
 
 }
 
-void HqInfoService::slotUpdateShareBasicInfo(const StockDataList &list)
+void HqInfoService::slotUpdateShareBasicInfo(const ShareDataList &list)
 {
     qDebug()<<__FUNCTION__<<__LINE__;
     //更新后台
-    foreach (StockData data, list) {
-        StockData *res = mStkRealInfo[data.mCode];
+    foreach (ShareData data, list) {
+        ShareData *res = mStkRealInfo[data.mCode];
         if(res)
         {
             res->mMGJZC = data.mMGJZC ;
             res->mMGSY = data.mMGSY;
             res->mTotalShare = data.mTotalShare;
-            res->mMutableShare = data.mMutableShare;
+            res->mMutalShare = data.mMutalShare;
             res->mJZCSYL = data.mJZCSYL;
             res->mXJFH = data.mXJFH;
             res->mSZZG = data.mSZZG;
             res->mYAGGR = data.mYAGGR;
             res->mGQDJR = data.mGQDJR;
-            res->mPY = data.mPY;
+            res->setPY(QString::fromStdString(data.mPY));
         }
     }
 
@@ -437,20 +437,20 @@ void HqInfoService::GetForeignVolChange(const QString &code, qint64 &cur, qint64
 #endif
 }
 
-void HqInfoService::slotUpdateStkProfitList(const StockDataList &list)
+void HqInfoService::slotUpdateStkProfitList(const ShareDataList &list)
 {
-    foreach (StockData data, list) {
-        mStkProfitMap[data.mCode.right(6)] = data.mProfit;
+    foreach (ShareData data, list) {
+        mStkProfitMap[QString::fromStdString(data.mCode)] = data.mProfit;
     }
 }
 
-void HqInfoService::slotAddShareAmoutByForeigner(const StockDataList &list)
+void HqInfoService::slotAddShareAmoutByForeigner(const ShareDataList &list)
 {
 #if 0
     //先检查表表是否存在，不存在，就添加
     if(!isTableExist(HSGT_TABLE)) createHSGTShareAmountTable();
     QSqlDatabase::database().transaction();
-    foreach (StockData info, list) {
+    foreach (ShareData info, list) {
         mSqlQuery.prepare(tr("insert into %1 (code, vol, date) values ("
                           "?, ?, ?)").arg(HSGT_TABLE));
         mSqlQuery.addBindValue(info.mCode);
@@ -525,7 +525,7 @@ void   HqInfoService::setBlockData(BlockData *data)
 void   HqInfoService::setShareBlock(const QString &code, const QString &block)
 {
     QMutexLocker locker(&mShareMutex);
-    StockData *data = mStkRealInfo[code.right(6)];
+    ShareData *data = mStkRealInfo[code.right(6)];
     if(data)
     {
         if(!data->mBlockCodeList.contains(block))
@@ -541,14 +541,14 @@ void   HqInfoService::setShareBlock(const QString &code, const QString &block)
 }
 
 //从更新当前代码列表后，更新数据列表
-void  HqInfoService::slotUpdateStockCodesList(const QStringList &list)
+void  HqInfoService::slotUpdateShareCodesList(const QStringList &list)
 {
     QMutexLocker locker(&mShareMutex);
     foreach (QString code, list) {
         if(!mStkRealInfo.contains(code.right(6)))
         {
-            StockData *data = new StockData;
-            data->mCode = code.right(6);
+            ShareData *data = new ShareData;
+            data->setCode(code.right(6));
             mStkRealInfo[code.right(6)] = data;
             //qDebug()<<__FUNCTION__<<code<<data;
         }
@@ -562,17 +562,17 @@ void  HqInfoService::slotUpdateStockCodesList(const QStringList &list)
 void HqInfoService::slotSetFavCode(const QString &code)
 {
     QMutexLocker locker(&mShareMutex);
-    StockData* data = mStkRealInfo[code];
+    ShareData* data = mStkRealInfo[code];
     if(data)
     {
-        data->mIsFavCode = !data->mIsFavCode;
-        //mDataBase.updateBasicShareDataList(QList<StockData*>()<<data);
+        data->mIsFav = !data->mIsFav;
+        //mDataBase.updateBasicShareDataList(QList<ShareData*>()<<data);
     }
 }
 
 void HqInfoService::slotQueryShareForeignVol(const QString& code)
 {
-    StockDataList list;
+    ShareDataList list;
     mDataBase.getHistoryDataOfCode(list, code);
     emit signalSendShareForeignVol(list);
 }

@@ -13,91 +13,121 @@ struct zjlxData{
     double zjlx;
 };
 
+//定义基础的数据类型
+typedef enum data_type{
+    DATA_UNDEFINED = 0x00,
+    DATA_SHARE = 0x10,
+    DATA_BLOCK = 0x20,
+    DATA_RESERVED = 0x30,
+}DATA_TYPE;
+
 class BaseData
 {
 public:
     inline BaseData()
     {
-        isfav = 0;
-        ishsgt = 0;
-        total = 0;
-        mutal = 0;
-        code = 0;
+        mIsFav = 0;
+        mDataType = DATA_UNDEFINED;
+    }
+    inline BaseData(const QString& code, const QString& name, const QString& abbr, int type)
+    {
+        mIsFav = 0;
+        mDataType = type;
+        memcpy(mCode, code.toStdString().data(), 10);
+        memcpy(mName, name.toStdString().data(), 20);
+        memcpy(mPY, abbr.toStdString().data(), 10);
+    }
+
+    void setFav(bool fav)
+    {
+        mIsFav = fav;
+    }
+
+    void setCode(const QString& code)
+    {
+        memcpy(mCode, code.toStdString().data(), 10);
+    }
+
+    void setName(const QString& name)
+    {
+        memcpy(mName, name.toStdString().data(), 20);
+    }
+
+    void setPY(const QString& abbr)
+    {
+        memcpy(mPY, abbr.toStdString().data(), 10);
     }
 
 public:
-    bool     isfav;
-    bool     ishsgt;
-    int      code;
-    qint64   total;
-    qint64   mutal;
-    char     name[20];
-    char     abbr[10];
+    bool        mIsFav;
+    int         mDataType;
+    char        mCode[10];
+    char        mName[20];
+    char        mPY[10];
 };
 
-typedef QList<BaseData>     BaseDataList;
+typedef    enum     share_type
+{
+    SHARE_UNDEFINED = DATA_SHARE,
+    SHARE_CHINA_SH = DATA_SHARE + 1,
+    SHARE_CHINA_SZ,
+    SHARE_CHINA_FUND_SH,
+    SHARE_CHINA_FUND_SZ,
+    SHARE_INDEX_SH,
+    SHARE_INDEX_SZ,
+    SHARE_INDEX_HK,
+    SHARE_INDEX_US,
+    SHARE_HK,
+    SHARE_US,
+}SHARE_TYPE;
 
-class ShareBaseData
+class ShareBaseData : public BaseData
 {
 public:
-    ShareBaseData()
+    inline ShareBaseData(const QString& code = QString(), const QString& name= QString(), const QString& abbr= QString(), int type = SHARE_CHINA_SH):BaseData(code, name, abbr, type)
     {
-        mName = "";
-        mCode = "";
-        mCur = 0;
-        mChg = 0;
-        mChgPercent = 0;
-        mHigh = 0;
-        mLow = 0.0;
-        mOpen = 0.0;
-        mClose = 0.0;
-        mVol = 0.0;
-        mMoney = 0.0;
+        mIsTop10 = 0; //CHINA HK
         mTotalShare = 0;
-        mMutableShare = 0;
-        mZJLX = 0.0;
-        mRZRQ = 0.0;
-        mHSGTTop10Money = 0.0;
-        mHSGTTop10Vol = 0;
-        mHSGTTop10 = false;
-        mHSGTEstimateFlag = false;
-        mDate = QDate(2017,1,1);
-        mIsFavCode = false;
+        mMutalShare = 0;
+        mMGSY = 0.0;
+        mMGJZC = 0.0;
+        mJZCSYL = 0.0;
+        mSZZG = 0.0;
+        mXJFH = 0.0;
+        mGQDJR = 0;
+        mYAGGR = 0;
+        mProfit = 0.0;
     }
 
 public:
-    QString         mName;
-    QString         mCode;
-    QString         mPY;
-    double          mCur;
-    double          mChg;
-    double          mChgPercent;
-    double          mHigh;
-    double          mLow;
-    double          mOpen;
-    double          mClose;
-    qint64          mVol;
-    double          mMoney;
+    //基本信息
+    bool            mIsTop10;
+    double          mProfit;
     qint64          mTotalShare;
-    qint64          mMutableShare;
-    QDate           mDate;
-    double          mZJLX;
-    double          mRZRQ;
-    double          mHSGTTop10Money;
-    qint64          mHSGTTop10Vol;
-    bool            mHSGTTop10;
-    bool            mHSGTEstimateFlag;
-    bool            mIsFavCode;
-    QTime           mUpdateTime;
+    qint64          mMutalShare;
+    //财务信息
+    double          mMGSY;      //每股收益
+    double          mMGJZC;     //每股净资产
+    double          mJZCSYL;    //净资产收益率
+    //分红信息
+    double          mSZZG; //送转股比例
+    double          mXJFH;  //现金分红
+    qint64          mGQDJR; //股权登记日
+    qint64          mYAGGR; //预案公告日
 };
+
+typedef QList<ShareBaseData>     ShareBaseDataList;
 
 class ShareData : public ShareBaseData
 {
 public:
-    ShareData();
-    ShareData(const QString& code, const QDate& date):ShareBaseData()
+    ShareData():ShareBaseData()
     {
-        mCode = code;
+
+    }
+
+    ShareData(const QString& code, const QDate& date):ShareBaseData(code)
+    {
         mDate = date;
     }
 
@@ -157,9 +187,6 @@ public:
     }
 
 public:
-    double          mMax;
-    double          mMin;
-    double          mMoney;
     double          mHsl;
     double          mLastMoney;
     qint64          mLastVol;
@@ -173,25 +200,29 @@ public:
     double          mChgPersFromMonth;
     double          mLastClose;
     double          mMoneyRatio;
-    BlockDataList     mBlockList;
-    QStringList       mBlockCodeList;
     double          mZJLX;      //资金流向
-    double          mSZZG; //送转股比例
-    double          mXJFH;  //现金分红
     double          mGXL;   //股息率
-    QDate           mGQDJR; //股权登记日
-    QDate           mYAGGR; //预案公告日
     double          mTotalCap;
     double          mMutalbleCap;
-    bool            mIndexFlag;
-    double          mProfit;
     qint64          mForeignVol;
     qint64          mForeignVolChg;
     double          mForeignCap;
     double          mForeignCapChg;
-    double          mMGSY;      //每股收益
-    double          mMGJZC;     //每股净资产
-    double          mJZCSYL;    //净资产收益率
+    double          mCur;
+    double          mChg;
+    double          mChgPercent;
+    double          mHigh;
+    double          mLow;
+    double          mOpen;
+    double          mClose;
+    double          mMoney;
+    double          mRZRQ;
+    qint64          mVol;
+    qint64          mUpdateTime;
+    QDate           mDate;
+    BlockDataList     mBlockList;
+    QStringList       mBlockCodeList;
+
 };
 
 Q_DECLARE_METATYPE(ShareData)
@@ -211,9 +242,7 @@ public:
     {
         if(!mDataIndexMap.contains(date))
         {
-            ShareData data;
-            data.mDate = date;
-            data.mCode = "UNDEF";
+            ShareData data("UNDEF", date);
             append(data);
         }
         //qDebug()<<date<<mDataIndexMap.value(date)<<this->size();

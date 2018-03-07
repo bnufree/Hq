@@ -87,10 +87,10 @@ Dialog::Dialog(QWidget *parent) :
     connect(work, SIGNAL(signalSendCodeList(QStringList)), this, SLOT(slotUpdateFavList(QStringList)));
     work->signalStartImport("test.xlsx");
 #endif
-   QEastMonyShareCodesThread *codesThread = new QEastMonyShareCodesThread;
-   connect(codesThread, SIGNAL(signalSendCodesList(QStringList)), this, SLOT(slotUpdateShareCodesList(QStringList)));
-//   connect(codesThread, SIGNAL(finished()), codesThread, SLOT(deleteLater()));
-   codesThread->start();
+//   QEastMonyShareCodesThread *codesThread = new QEastMonyShareCodesThread;
+//   connect(codesThread, SIGNAL(signalSendCodesList(QStringList)), this, SLOT(slotUpdateShareCodesList(QStringList)));
+////   connect(codesThread, SIGNAL(finished()), codesThread, SLOT(deleteLater()));
+//   codesThread->start();
     //创建快捷事件
     QShortcut *shotcut = new QShortcut(QKeySequence("Alt+X"), this);  //隐藏
     connect(shotcut, SIGNAL(activated()), this, SLOT(slotWhetherDisplay()));

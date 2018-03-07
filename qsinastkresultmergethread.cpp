@@ -69,11 +69,11 @@ void QSinaStkResultMergeThread::run()
                 QStringList wklist = mStkCodesList.mid(i*thread_code, thread_code);
                 QSinaStkInfoThread *wkthread = new QSinaStkInfoThread();
                 mThreadList.append(wkthread);
-                connect(wkthread, SIGNAL(sendStkDataList(StockDataList)), this, SLOT(slotRevResList(StockDataList)));
+                connect(wkthread, SIGNAL(sendStkDataList(ShareDataList)), this, SLOT(slotRevResList(ShareDataList)));
                 wkthread->signalSetStkList(wklist);
             }
         }
-        StockDataList wklist;
+        ShareDataList wklist;
         mListMutex.lock();
         if(mMktType == MKT_ALL)
         {
@@ -115,7 +115,7 @@ void QSinaStkResultMergeThread::run()
         } else if(mMktType == MKT_ZXG)
         {
             foreach (QString key, mMidStkDataMapList.keys()) {
-                if(mMidStkDataMapList[key].mIsFavCode == true)
+                if(mMidStkDataMapList[key].mIsFav == true)
                 {
                     wklist.append(mMidStkDataMapList.value(key));
                 }
@@ -148,10 +148,10 @@ void QSinaStkResultMergeThread::run()
             {
                 if(mSortRule == -1)
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByPerDesc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByPerDesc);
                 } else
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByPerAsc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByPerAsc);
                 }
             }
 
@@ -159,10 +159,10 @@ void QSinaStkResultMergeThread::run()
             {
                 if(mSortRule == -1)
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByMonDesc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByMonDesc);
                 } else
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByMonAsc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByMonAsc);
                 }
             }
 
@@ -170,48 +170,48 @@ void QSinaStkResultMergeThread::run()
             {
                 if(mSortRule == -1)
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByCurDesc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByCurDesc);
                 } else
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByCurAsc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByCurAsc);
                 }
             }else if(mSortType == STK_DISPLAY_SORT_TYPE_HSL)
             {
                 if(mSortRule == -1)
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByHslDesc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByHslDesc);
                 } else
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByHslAsc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByHslAsc);
                 }
             }else if(mSortType == STK_DISPLAY_SORT_TYPE_MONEYR)
             {
                 if(mSortRule == -1)
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByMonRatioDesc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByMonRatioDesc);
                 } else
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByMonRatioAsc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByMonRatioAsc);
                 }
             }
             else if(mSortType == STK_DISPLAY_SORT_TYPE_LAST3)
             {
                 if(mSortRule == -1)
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortBy3DayChgDesc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortBy3DayChgDesc);
                 } else
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortBy3DayChgAsc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortBy3DayChgAsc);
                 }
             }
             else if(mSortType == STK_DISPLAY_SORT_TYPE_LAST5)
             {
                 if(mSortRule == -1)
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortBy5DayChgDesc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortBy5DayChgDesc);
                 } else
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortBy5DayChgAsc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortBy5DayChgAsc);
                 }
             }
 
@@ -219,10 +219,10 @@ void QSinaStkResultMergeThread::run()
             {
                 if(mSortRule == -1)
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortBy10DayChgDesc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortBy10DayChgDesc);
                 } else
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortBy10DayChgAsc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortBy10DayChgAsc);
                 }
             }
 
@@ -230,10 +230,10 @@ void QSinaStkResultMergeThread::run()
             {
                 if(mSortRule == -1)
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByMonthChgDesc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByMonthChgDesc);
                 } else
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByMonthChgAsc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByMonthChgAsc);
                 }
             }
 
@@ -241,10 +241,10 @@ void QSinaStkResultMergeThread::run()
             {
                 if(mSortRule == -1)
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByYearChgDesc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByYearChgDesc);
                 } else
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByYearChgAsc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByYearChgAsc);
                 }
             }
 
@@ -252,60 +252,60 @@ void QSinaStkResultMergeThread::run()
             {
                 if(mSortRule == -1)
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortBy3DayZjlxDesc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortBy3DayZjlxDesc);
                 } else
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortBy3DayZjlxAsc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortBy3DayZjlxAsc);
                 }
             }
             else if(mSortType == STK_DISPLAY_SORT_TYPE_GXL)
             {
                 if(mSortRule == -1)
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByGxlDesc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByGxlDesc);
                 } else
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByGxlAsc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByGxlAsc);
                 }
             }
             else if(mSortType == STK_DISPLAY_SORT_TYPE_SZZBL)
             {
                 if(mSortRule == -1)
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortBySzzblDesc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortBySzzblDesc);
                 } else
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortBySzzblAsc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortBySzzblAsc);
                 }
             }
             else if(mSortType == STK_DISPLAY_SORT_TYPE_GQDJR)
             {
                 if(mSortRule == -1)
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByGqdjrDesc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByGqdjrDesc);
                 } else
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByGqdjrAsc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByGqdjrAsc);
                 }
             }
             else if(mSortType == STK_DISPLAY_SORT_TYPE_TCAP)
             {
                 if(mSortRule == -1)
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByTcapDesc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByTcapDesc);
                 } else
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByTcapAsc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByTcapAsc);
                 }
             }
             else if(mSortType == STK_DISPLAY_SORT_TYPE_MCAP)
             {
                 if(mSortRule == -1)
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByMcapDesc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByMcapDesc);
                 } else
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByMcapAsc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByMcapAsc);
                 }
             }
 
@@ -313,30 +313,30 @@ void QSinaStkResultMergeThread::run()
             {
                 if(mSortRule == -1)
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByProfitDesc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByProfitDesc);
                 } else
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByProfitAsc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByProfitAsc);
                 }
             }
             else if(mSortType == STK_DISPLAY_SORT_TYPE_FOREIGN_VOL)
             {
                 if(mSortRule == -1)
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByForVolDesc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByForVolDesc);
                 } else
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByForVolAsc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByForVolAsc);
                 }
             }
             else if(mSortType == STK_DISPLAY_SORT_TYPE_FOREIGN_CAP)
             {
                 if(mSortRule == -1)
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByForCapDesc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByForCapDesc);
                 } else
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByForCapAsc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByForCapAsc);
                 }
             }
 
@@ -344,32 +344,32 @@ void QSinaStkResultMergeThread::run()
             {
                 if(mSortRule == -1)
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByForVolChgDesc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByForVolChgDesc);
                 } else
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByForVolChgAsc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByForVolChgAsc);
                 }
             }
             else if(mSortType == STK_DISPLAY_SORT_TYPE_FOREIGN_CAP_CHG)
             {
                 if(mSortRule == -1)
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByForCapChgDesc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByForCapChgDesc);
                 } else
                 {
-                    qSort(wklist.begin(), wklist.end(), StockData::sortByForCapChgAsc);
+                    qSort(wklist.begin(), wklist.end(), ShareData::sortByForCapChgAsc);
                 }
             }
 
             if(mActive)
             {
-                StockDataList mid = wklist.mid((mCurPage - 1) * mPageSize, mPageSize);
+                ShareDataList mid = wklist.mid((mCurPage - 1) * mPageSize, mPageSize);
                 //qDebug()<<"mid:"<<mid.length();
                 emit sendStkDataList(mid);
             }
         } else
         {
-            emit sendStkDataList(StockDataList());
+            emit sendStkDataList(ShareDataList());
         }
 
         sleep(1);
@@ -378,10 +378,10 @@ void QSinaStkResultMergeThread::run()
 
 }
 
-void QSinaStkResultMergeThread::slotRevResList(const StockDataList &mid)
+void QSinaStkResultMergeThread::slotRevResList(const ShareDataList &mid)
 {
     mListMutex.lock();
-    foreach (StockData data, mid) {
+    foreach (ShareData data, mid) {
         if(data.mCur < 0.1) continue;
         //if(data.mMoney < 10000) continue;
         mMidStkDataMapList[data.mCode] = data;
@@ -505,7 +505,7 @@ void QSinaStkResultMergeThread::stopUpdate()
 
 }
 
-void QSinaStkResultMergeThread::SortResultList(StockDataList &result, const StockDataList &mid)
+void QSinaStkResultMergeThread::SortResultList(ShareDataList &result, const ShareDataList &mid)
 {
 
 //    if(wklist.length())
@@ -515,10 +515,10 @@ void QSinaStkResultMergeThread::SortResultList(StockDataList &result, const Stoc
 //        {
 //            if(mSortRule == -1)
 //            {
-//                qSort(wklist.begin(), wklist.end(), StockData::sortByPerDesc);
+//                qSort(wklist.begin(), wklist.end(), ShareData::sortByPerDesc);
 //            } else
 //            {
-//                qSort(wklist.begin(), wklist.end(), StockData::sortByPerAsc);
+//                qSort(wklist.begin(), wklist.end(), ShareData::sortByPerAsc);
 //            }
 //        }
 
@@ -526,10 +526,10 @@ void QSinaStkResultMergeThread::SortResultList(StockDataList &result, const Stoc
 //        {
 //            if(mSortRule == -1)
 //            {
-//                qSort(wklist.begin(), wklist.end(), StockData::sortByMonDesc);
+//                qSort(wklist.begin(), wklist.end(), ShareData::sortByMonDesc);
 //            } else
 //            {
-//                qSort(wklist.begin(), wklist.end(), StockData::sortByMonAsc);
+//                qSort(wklist.begin(), wklist.end(), ShareData::sortByMonAsc);
 //            }
 //        }
 
@@ -537,10 +537,10 @@ void QSinaStkResultMergeThread::SortResultList(StockDataList &result, const Stoc
 //        {
 //            if(mSortRule == -1)
 //            {
-//                qSort(wklist.begin(), wklist.end(), StockData::sortByCurDesc);
+//                qSort(wklist.begin(), wklist.end(), ShareData::sortByCurDesc);
 //            } else
 //            {
-//                qSort(wklist.begin(), wklist.end(), StockData::sortByCurAsc);
+//                qSort(wklist.begin(), wklist.end(), ShareData::sortByCurAsc);
 //            }
 //        }
 //        emit sendStkDataList(wklist);
@@ -551,7 +551,7 @@ void QSinaStkResultMergeThread::SortResultList(StockDataList &result, const Stoc
 //}
 }
 
-//StockDataList QSinaStkResultMergeThread::RealtimeInfo(const QStringList& codes)
+//ShareDataList QSinaStkResultMergeThread::RealtimeInfo(const QStringList& codes)
 //{
 
 //}
