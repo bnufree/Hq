@@ -4,15 +4,8 @@
 #include <QThread>
 #include <QMap>
 #include <QList>
+#include "utils/blockdata.h"
 
-
-#include "blockdata.h"
-//typedef enum enBlockType
-//{
-//    BLOCK_DISTRICT = 1 ,
-//    BLOCK_INDUSTORY,
-//    BLOCK_CONCEPT,
-//}BLOCK_OPT_TYPE;
 
 typedef enum enBlockDisplayRule
 {

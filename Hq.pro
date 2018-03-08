@@ -28,7 +28,6 @@ SOURCES += main.cpp\
     qexchangedatamanage.cpp \
     qexchangedatemangagedialog.cpp \
     qglobalapplication.cpp \
-    qeastmoneychinashareexchange.cpp \
     qindexframe.cpp \
     qindexwidget.cpp \
     qhttpget.cpp \
@@ -44,7 +43,6 @@ SOURCES += main.cpp\
     table/qstktablewidgetitem.cpp \
     table/HqTableWidget.cpp \
     table/qsharetablewidget.cpp \
-    block/blockdata.cpp \
     block/qeastmoneyblockmangagerthread.cpp \
     block/qeastmoneyblocksharethread.cpp \
     block/qeastmoneyblockthread.cpp \
@@ -52,16 +50,17 @@ SOURCES += main.cpp\
     dbservices/hqdbdatabase.cpp \
     dbservices/dbservices.cpp \
     utils/hqutils.cpp \
-    history/qsinasharevolinfothread.cpp \
     history/qsharehistorydialog.cpp \
     history/qsharegraphicwidget.cpp \
     history/qhkexchangevoldataprocess.cpp \
     utils/profiles.cpp \
     basic_info/qsharebasicinfoworker.cpp \
     basic_info/qsharecodeswork.cpp \
-    dbservices/sharedata.cpp \
     basic_info/qsharefhspwork.cpp \
-    basic_info/qsharehsgttop10work.cpp
+    basic_info/qsharehsgttop10work.cpp \
+    basic_info/qsharefinancialinfowork.cpp \
+    utils/sharedata.cpp \
+    utils/blockdata.cpp
 
 HEADERS  += dialog.h \
     dataexchange.h \
@@ -77,7 +76,6 @@ HEADERS  += dialog.h \
     qglobalapplication.h \
 #    qthook.h \
     dbservices.h \
-    qeastmoneychinashareexchange.h \
     qindexframe.h \
     qindexwidget.h \
     qhttpget.h \
@@ -95,7 +93,6 @@ HEADERS  += dialog.h \
     utils/comdatadefines.h \
     table/HqTableWidget.h \
     table/qsharetablewidget.h \
-    block/blockdata.h \
     block/qeastmoneyblockmangagerthread.h \
     block/qeastmoneyblocksharethread.h \
     block/qeastmoneyblockthread.h \
@@ -104,16 +101,17 @@ HEADERS  += dialog.h \
     dbservices/dbservices.h \
     dbservices/hqdatadefines.h \
     utils/hqutils.h \
-    history/qsinasharevolinfothread.h \
     history/qsharehistorydialog.h \
     history/qsharegraphicwidget.h \
     history/qhkexchangevoldataprocess.h \
     utils/profiles.h \
     basic_info/qsharebasicinfoworker.h \
     basic_info/qsharecodeswork.h \
-    dbservices/sharedata.h \
     basic_info/qsharefhspwork.h \
-    basic_info/qsharehsgttop10work.h
+    basic_info/qsharehsgttop10work.h \
+    basic_info/qsharefinancialinfowork.h \
+    utils/sharedata.h \
+    utils/blockdata.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

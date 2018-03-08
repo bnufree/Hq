@@ -2,10 +2,11 @@
 #define QEASTMONEYZJLXTHREAD_H
 
 #include <QThread>
-#include "dbservices/sharedata.h"
-#include "qhttpget.h"
+//#include "dbservices/sharedata.h"
+//#include "qhttpget.h"
 
-
+struct  zjlxData;
+class   QHttpGet;
 class QEastMoneyZjlxThread : public QObject
 {
     Q_OBJECT

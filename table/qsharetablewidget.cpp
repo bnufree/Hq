@@ -1,6 +1,8 @@
 ﻿#include "qsharetablewidget.h"
 #include <QDebug>
 #include "utils/hqutils.h"
+#include "utils/sharedata.h"
+
 
 QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
 {

@@ -4,13 +4,12 @@
 #include <QThread>
 #include <QList>
 #include <QMap>
-#include "dbservices/sharedata.h"
 #include "utils/comdatadefines.h"
-#include <QStringList>
+//#include <QStringList>
 #include <QTimer>
 #include "qhttpget.h"
 
-
+class ShareDataList;
 class QSinaStkInfoThread : public QObject
 {
     Q_OBJECT
@@ -29,8 +28,6 @@ public slots:
 private:
     QStringList mStkList;
     QThread     mWorkThread;
-    //QMap<QString, StockData>    mDataMap;
-    //QTimer      *mUpdateTimer;
     QHttpGet    *mHttp;
 };
 

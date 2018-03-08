@@ -1,6 +1,5 @@
-#include "qsharefhspwork.h"
+﻿#include "qsharefhspwork.h"
 #include "qhttpget.h"
-#include "dbservices/sharedata.h"
 #include <QJsonDocument>
 #include <QJsonValue>
 #include <QJsonParseError>
@@ -8,6 +7,7 @@
 #include <QJsonObject>
 #include <QDebug>
 #include "utils/hqutils.h"
+#include "utils/sharedata.h"
 
 QShareFHSPWork::QShareFHSPWork(const QString& date, QObject *parent) : mDate(date), mParent(parent),QRunnable()
 {

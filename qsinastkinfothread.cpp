@@ -4,6 +4,7 @@
 #include "qexchangedatamanage.h"
 #include "dbservices/dbservices.h"
 #include "utils/hqutils.h"
+#include "utils/sharedata.h"
 
 
 QSinaStkInfoThread::QSinaStkInfoThread(QObject *parent) : QObject(parent), mHttp(0)
@@ -38,17 +39,18 @@ QSinaStkInfoThread::~QSinaStkInfoThread()
 
 void QSinaStkInfoThread::setStkList(const QStringList &list)
 {
-    mStkList = list;
-//    //取得配置文件保存的昨天的数据
-//    mDataMap.clear();
-//    foreach (QString wkcode, mStkList) {
-//        StockData& data = DATA_SERVICE->getBasicStkData(wkcode.right(6));
-//        data.mCode = wkcode.right(6);
-////        foreignHolder holder = DATA_SERVICE->amountForeigner(data.mCode);
-////        data.mForeignVol = holder.last;
-////        data.mForeignVolChg = holder.last - holder.previous;
-//        mDataMap[data.mCode] = data;
-//    }
+    foreach (QString code, list) {
+        if(code.length() == 6)
+        {
+            mStkList.append("s_"+ShareBaseData::prefixCode(code)+code);
+        } else if(code.length() == 8)
+        {
+            mStkList.append("s_"+code);
+        } else
+        {
+            mStkList.append(code);
+        }
+    }
     //开始更新
     QString url("http://hq.sinajs.cn/?list=%1");
     if(mStkList.length() > 0)
@@ -78,13 +80,15 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
 {
     QString result = QString::fromLocal8Bit(bytes.data());
     //先换行
-    QStringList resultlist = result.split(QRegExp("[\\n|;]"), QString::SkipEmptyParts);
+    QStringList resultlist = result.split(QRegExp("[\\n;]"), QString::SkipEmptyParts);
     //再分割具体的字段
     ShareDataList datalist;
     foreach (QString detail, resultlist)
     {
-        detail.replace(QRegExp("([a-z]{1,} )"), "");
-        QStringList detailList = detail.split(QRegExp("[a-z|\"|\"|,|=|_]"), QString::SkipEmptyParts);
+        qDebug()<<detail;
+        detail.replace("var hq_str_s_", "");
+        qDebug()<<detail;
+        QStringList detailList = detail.split(QRegExp("[\",=]"), QString::SkipEmptyParts);
         if(detailList.length() < 7) continue;
         QString code = detailList[0];
         ShareData * data = DATA_SERVICE->getBasicStkData(code);

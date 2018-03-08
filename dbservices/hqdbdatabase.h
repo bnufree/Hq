@@ -26,6 +26,10 @@ struct HQ_QUERY_CONDITION{
     }
 };
 
+class BlockData;
+class ShareData;
+class ShareDataList;
+
 class HQDBDataBase : public QObject
 {
     Q_OBJECT

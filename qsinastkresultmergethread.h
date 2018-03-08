@@ -2,7 +2,7 @@
 #define QSINASTKRESULTMERGETHREAD_H
 
 #include <QThread>
-#include "dbservices/sharedata.h"
+//#include "dbservices/sharedata.h"
 #include <QStringList>
 #include <QWaitCondition>
 #include <QMap>
@@ -10,7 +10,7 @@
 #include "qeastmoneyzjlxthread.h"
 #include "qsinastkinfothread.h"
 
-
+class ShareData;
 
 
 class QSinaStkResultMergeThread : public QThread

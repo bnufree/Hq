@@ -6,7 +6,6 @@
 #include <QDateTime>
 #include <QStringList>
 
-#include "dbservices/sharedata.h"
 class HqUtils
 {
 
@@ -14,7 +13,6 @@ public:
     HqUtils();
     static bool weekend(const QDate& date);
     static bool activeDay(const QDate& date);
-    static SHARE_TYPE shareType(const QString& code);
     static QString prefixCode(const QString& code);
     static bool isCurrentActive();
     static bool isActiveTime(const QTime& time);

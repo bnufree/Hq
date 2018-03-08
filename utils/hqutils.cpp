@@ -20,31 +20,6 @@ bool HqUtils::activeDay(const QDate &date)
     return (!weekend(date)) && (!HqUtils::mDatesList.contains(date2Str(date)));
 }
 
-SHARE_TYPE HqUtils::shareType(const QString &code)
-{
-    if( code.length() == 6)
-    {
-        if(code.left(1) == "6") return SHARE_CHINA_SH;
-        if(code.left(1) == "0" || code.left(1) == "3") return SHARE_CHINA_SZ;
-        if(code.left(1) == "5") return SHARE_CHINA_FUND_SH;
-        if(code.left(1) == "1") return SHARE_CHINA_FUND_SZ;
-    } else if(code.length() == 5)
-    {
-        return SHARE_HK;
-    }
-    return SHARE_UNDEFINED;
-}
-
-QString HqUtils::prefixCode(const QString &code)
-{
-    SHARE_TYPE type = shareType(code);
-    if(type == SHARE_CHINA_SH || type == SHARE_CHINA_FUND_SH) return "sh";
-    if(type == SHARE_CHINA_SZ || type == SHARE_CHINA_FUND_SZ) return "sz";
-    if(type == SHARE_HK) return "hk";
-    if(type == SHARE_US) return "us";
-    return "undefined";
-}
-
 bool HqUtils::isActiveTime(const QTime &time)
 {
     int act_start1 = 9*60+15;
@@ -73,6 +48,7 @@ QString HqUtils::GetFirstLetter( const QString& unicode )
 {
     QTextCodec *gbkCodec = QTextCodec::codecForName("GBK");
     char *strChs = gbkCodec->fromUnicode(unicode).toUpper().data();
+    qDebug()<<"chars:"<<QString::fromLocal8Bit(strChs);
     static int li_SecPosValue[] = {
         1601, 1637, 1833, 2078, 2274, 2302, 2433, 2594, 2787, 3106, 3212,
         3472, 3635, 3722, 3730, 3858, 4027, 4086, 4390, 4558, 4684, 4925, 5249

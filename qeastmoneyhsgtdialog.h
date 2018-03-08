@@ -18,7 +18,6 @@ public:
 
 public slots:
     void slotDisplayCode(const QString& code);
-    void slotRecvTop10Infos(const QList<ChinaShareExchange>& list);
     void slotRecvListInfo(const ShareDataList& list);
     void on_SearchBTB_clicked();
 

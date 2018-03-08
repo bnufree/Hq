@@ -6,7 +6,8 @@
 #include <QObject>
 #include <QMap>
 #include <QDebug>
-#include "block/blockdata.h"
+#include <QRegExp>
+#include "blockdata.h"
 
 struct zjlxData{
     QString code;
@@ -68,8 +69,8 @@ public:
 
 typedef    enum     share_type
 {
-    SHARE_UNDEFINED = DATA_SHARE,
-    SHARE_CHINA_SH = DATA_SHARE + 1,
+    SHARE_UNDEFINED = 0,
+    SHARE_CHINA_SH = 1,
     SHARE_CHINA_SZ,
     SHARE_CHINA_FUND_SH,
     SHARE_CHINA_FUND_SZ,
@@ -84,8 +85,12 @@ typedef    enum     share_type
 class ShareBaseData : public BaseData
 {
 public:
-    inline ShareBaseData(const QString& code = QString(), const QString& name= QString(), const QString& abbr= QString(), int type = SHARE_CHINA_SH):BaseData(code, name, abbr, type)
+    inline ShareBaseData(const QString& code = QString(), \
+                         const QString& name= QString(), \
+                         const QString& abbr= QString())\
+        :BaseData(code, name, abbr, DATA_SHARE)
     {
+        mShareType = shareType(code);
         mIsTop10 = 0; //CHINA HK
         mTotalShare = 0;
         mMutalShare = 0;
@@ -101,9 +106,43 @@ public:
         mTop10Sell = 0;
     }
 
+    //通过证券的代码来获取证券的类型(不包括指数)
+    SHARE_TYPE shareType(const QString &code)
+    {
+        QRegExp shShare("sh6[0-9]{5}");
+        QRegExp shIndex("sh")
+        if( code.left(2) == "sh")
+        {
+            if(code.left(1) == "6") return SHARE_CHINA_SH;
+            if
+                    if(code.left(1) == "0" || code.left(1) == "3") return SHARE_CHINA_SZ;
+                    if(code.left(1) == "5") return SHARE_CHINA_FUND_SH;
+                    if(code.left(1) == "1") return SHARE_CHINA_FUND_SZ;
+        } else if(code.length() == 5)
+        {
+            return SHARE_HK;
+        }
+        return SHARE_UNDEFINED;
+    }
+
+    QString prefixCode()
+    {
+        if(mShareType == SHARE_CHINA_SH || mShareType == SHARE_CHINA_FUND_SH) return "sh";
+        if(mShareType == SHARE_CHINA_SZ || mShareType == SHARE_CHINA_FUND_SZ) return "sz";
+        if(mShareType == SHARE_HK) return "hk";
+        if(mShareType == SHARE_US) return "us";
+        return "undefined";
+    }
+
+    QString key()
+    {
+        return prefixCode() + QString::fromStdString(mCode);
+    }
+
 public:
     //基本信息
     bool            mIsTop10;
+    SHARE_TYPE      mShareType;
     double          mProfit;
     double          mTop10Buy;
     double          mTop10Sell;
@@ -127,7 +166,7 @@ class ShareData : public ShareBaseData
 public:
     ShareData();
 
-    ShareData(const QString& code, const QDate& date):ShareBaseData(code)
+    ShareData(const QString& code, const QDate& date):ShareBaseData(SHARE_CHINA_SH, code)
     {
         mDate = date;
     }
@@ -184,7 +223,7 @@ public:
 
     bool operator ==(const ShareData& data)
     {
-        return this->mCode == data.mCode && this->mDate == data.mDate;
+        return this->mCode == data.mCode && this->mDate == data.mDate && this->mShareType == data.mShareType;
     }
 
 public:

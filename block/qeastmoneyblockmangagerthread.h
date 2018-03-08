@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QThread>
-#include "blockdata.h"
+#include "utils/blockdata.h"
 
 class QEastMoneyBlockThread;
 class QTimer;

@@ -4,7 +4,7 @@
 #include <QString>
 #include <QStringList>
 #include <QDate>
-#include "sharedata.h"
+//#include "sharedata.h"
 
 //表名
 #define         HQ_SHARE_HISTORY_INFO_TABLE           "Share_history"
@@ -59,18 +59,6 @@ struct BlockRealInfo:public BlockBaseData{
     double              mChangePercent;
     double              mZjlx;
     QDate               mDate;
-};
-
-class ChinaShareExchange:public ShareData
-{
-public:
-    QDate               mDate;
-    double              mTop10Buy;
-    double              mTop10Sell;
-    double              mTop10Vol;
-    double              mTop10TotalVol;
-    double              mTop10TotalCap;
-    double              mTop10AvgCost;
 };
 
 struct  foreignHolder{

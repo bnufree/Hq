@@ -1,7 +1,6 @@
 ﻿#include "qsharehistoryinfomgr.h"
 #include "qeastmoneystockhistoryinfothread.h"
 #include "dbservices/dbservices.h"
-#include "qsinasharevolinfothread.h"
 #include "../qeastmoneyhsgtshareamount.h"
 #include <QDebug>
 #include "qhkexchangevoldataprocess.h"
@@ -26,22 +25,9 @@ QShareHistoryInfoMgr::~QShareHistoryInfoMgr()
     mPool.clear();
 }
 
-void QShareHistoryInfoMgr::slotGetFinanceInfo()
-{
-    emit signalUpdateHistoryMsg(QStringLiteral("正在更新财务信息..."));
-    QSinaShareVolInfoThread * vols = new QSinaShareVolInfoThread(mCodesList);
-    connect(vols, SIGNAL(finished()), this, SLOT(slotShareFinanceInfoFinished()));
-    vols->start();
-}
 
 void QShareHistoryInfoMgr::slotShareFinanceInfoFinished()
-{
-    emit signalUpdateHistoryMsg(QStringLiteral("完成更新财务信息"));
-    QSinaShareVolInfoThread *t1 = qobject_cast<QSinaShareVolInfoThread*>(sender());
-    if(t1)
-    {
-        delete t1;
-    }
+{   
     qDebug()<<QDateTime::currentDateTime();
     //开始更新日线数据
     QDate date = DATA_SERVICE->getLastUpdateDateOfHistoryInfo();

@@ -47,10 +47,7 @@ signals:
     void signalQueryBlockInfo(int type = 1);
     void signalRecvRealBlockInfo(const QList<BlockRealInfo>& list);
     void signalSendBlockInfoList(const QList<BlockRealInfo>& list);
-    void signalSendTop10ChinaShareInfos(const QList<ChinaShareExchange>& list);
-    void signalRecvTop10ChinaShareInfos(const QList<ChinaShareExchange>& list);
-    void signalQueryTop10ChinaShareInfos(const QDate& date = QDate(), const QString& share = QString(), int market = 0);
-    void signalQueryShareForeignVol(const QString& code);
+     void signalQueryShareForeignVol(const QString& code);
     void signalSendShareForeignVol(const ShareDataList& list);
     //历史数据写入数据库
     void signalRecvShareHistoryInfos(const QString& code, const ShareDataList& list, bool deletedb);
@@ -75,8 +72,6 @@ public slots:
     bool slotAddHistoryData(const ShareData& data);
     void initBlockData(int type = 0);
     void initShareData();
-    void slotRecvTop10ChinaShareInfos(const QList<ChinaShareExchange>& list);
-    void slotQueryTop10ChinaShareInfos(const QDate& date = QDate(), const QString& share = QString(), int market = 0);
 //    void slotQueryShareHistoryLastDate(const QString& code);
     void slotUpdateShareinfoWithHistory(const QString& code);
     void slotUpdateHistoryChange(const QString& code);
@@ -97,9 +92,6 @@ private:
     bool createHSGTShareAmountTable();
     bool isActive();
     QString errMsg();
-    //数据库查询指定日期的沪深股通的TOP10交易
-    bool queryTop10ChinaShareInfos(QList<ChinaShareExchange>& list, const QDate& date = QDate(), const QString& share = QString(), int market = 0);
-    bool addTop10ChinaShareInfo(const ChinaShareExchange& info);
 
 private:    //本类使用的变量
     static HqInfoService *m_pInstance;

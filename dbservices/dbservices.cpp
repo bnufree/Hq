@@ -5,6 +5,7 @@
 #include "dbservices.h"
 #include "qexchangedatamanage.h"
 #include <QMap>
+#include "utils/sharedata.h"
 
 #define     HSGT_TABLE          "hsgvol"
 HqInfoService* HqInfoService::m_pInstance = 0;
@@ -13,7 +14,6 @@ QMutex HqInfoService::mutex;
 HqInfoService::HqInfoService(QObject *parent) :
     QObject(parent)
 {
-    qRegisterMetaType<QList<ChinaShareExchange>>("const QList<ChinaShareExchange>&");
     qRegisterMetaType<ShareDataList>("const ShareDataList&");
     qRegisterMetaType<FinDataList>("const FinDataList&");
     initSignalSlot();
@@ -144,36 +144,7 @@ bool HqInfoService::isActive()
     return true;
 }
 
-void HqInfoService::slotRecvTop10ChinaShareInfos(const QList<ChinaShareExchange>& list)
-{
-    //更新到数据库
-    QSqlDatabase::database().transaction();
-    foreach (ChinaShareExchange info, list) {
-        if(!addTop10ChinaShareInfo(info))
-        {
-//            qDebug()<<"error:"<<mSqlQuery.lastError().text();
-        }
-    }
-    QSqlDatabase::database().commit();
-}
 
-bool HqInfoService::addTop10ChinaShareInfo(const ChinaShareExchange &info)
-{
-    return true;
-#if 0
-    mSqlQuery.prepare("insert into hstop10 (id, name, close, change_percent, buy, sell, date) values ("
-                      "?, ?, ?, ?, ?, ?, ?)");
-    mSqlQuery.addBindValue(info.mCode);
-    mSqlQuery.addBindValue(info.mName);
-    mSqlQuery.addBindValue(info.mCur);
-    mSqlQuery.addBindValue(info.mChgPercent);
-    mSqlQuery.addBindValue(info.mTop10Buy);
-    mSqlQuery.addBindValue(info.mTop10Sell);
-    mSqlQuery.addBindValue(info.mDate);
-
-    return mSqlQuery.exec();
-#endif
-}
 
 QDate HqInfoService::getLastUpdateDateOfHSGT()
 {
@@ -206,49 +177,7 @@ QDate HqInfoService::getLastUpdateDateOfTable(const QString& table)
     return mDataBase.getLastUpdateDateOfTable(table);
 }
 
-void HqInfoService::slotQueryTop10ChinaShareInfos(const QDate &date, const QString &share, int market)
-{
-    QList<ChinaShareExchange> list;
-    queryTop10ChinaShareInfos(list,date, share, market);
-    emit signalSendTop10ChinaShareInfos(list);
-}
 
-bool HqInfoService::queryTop10ChinaShareInfos(QList<ChinaShareExchange>& list, const QDate& date, const QString& share, int market)
-{
-    QStringList filterList;
-    if((!date.isNull()) && date.isValid())
-    {
-        filterList.append(tr(" date = '%1' ").arg(date.toString("yyyy-MM-dd")));
-    }
-    if(!share.isEmpty())
-    {
-        QRegExp reg("[0-9]{1,6}");
-        if(reg.exactMatch(share))
-        {
-            filterList.append(tr(" id like '%%1%' ").arg(share));
-        } else
-        {
-            filterList.append(tr(" name like '%%1%' ").arg(share));
-        }
-    }
-#if 0
-   if(!mSqlQuery.exec(tr("select * from hstop10 %1 order by date desc, (buy-sell) desc").arg(filterList.length() > 0 ? " where " + filterList.join(" and ") : ""))) return false;
-    qDebug()<<mSqlQuery.lastQuery();
-    while (mSqlQuery.next()) {
-        ChinaShareExchange info;
-        info.mCode = mSqlQuery.value("id").toString();
-        info.mName = mSqlQuery.value("name").toString();
-        info.mCur = mSqlQuery.value("close").toDouble();
-        info.mChgPercent = mSqlQuery.value("change_percent").toDouble();
-        info.mTop10Buy = mSqlQuery.value("buy").toDouble();
-        info.mTop10Sell = mSqlQuery.value("sell").toDouble();
-        info.mDate = mSqlQuery.value("date").toDate();
-        list.append(info);
-    }
-#endif
-
-    return true;
-}
 
 void HqInfoService::slotRecvShareHistoryInfos(const QString& code, const ShareDataList &list, bool deletedb)
 {

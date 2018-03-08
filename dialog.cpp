@@ -13,8 +13,7 @@
 #include <QDesktopWidget>
 #include <QResizeEvent>
 #include "qindexwidget.h"
-//#include "qsharecodesthread.h"
-#include "qeastmoneychinashareexchange.h"
+#include "basic_info/qsharebasicinfoworker.h"
 #include "qeastmoneynorthboundthread.h"
 #include "qeastmoneyhsgtdialog.h"
 #include "./history/qsharehistoryinfomgr.h"
@@ -87,10 +86,9 @@ Dialog::Dialog(QWidget *parent) :
     connect(work, SIGNAL(signalSendCodeList(QStringList)), this, SLOT(slotUpdateFavList(QStringList)));
     work->signalStartImport("test.xlsx");
 #endif
-//   QEastMonyShareCodesThread *codesThread = new QEastMonyShareCodesThread;
-//   connect(codesThread, SIGNAL(signalSendCodesList(QStringList)), this, SLOT(slotUpdateShareCodesList(QStringList)));
-////   connect(codesThread, SIGNAL(finished()), codesThread, SLOT(deleteLater()));
-//   codesThread->start();
+   QShareBasicInfoWorker *basic_info = new QShareBasicInfoWorker;
+   connect(basic_info, SIGNAL(signalSendCodeFinished(QStringList)), this, SLOT(slotUpdateShareCodesList(QStringList)));
+   basic_info->signalGetBasicInfo();
     //创建快捷事件
     QShortcut *shotcut = new QShortcut(QKeySequence("Alt+X"), this);  //隐藏
     connect(shotcut, SIGNAL(activated()), this, SLOT(slotWhetherDisplay()));
@@ -356,7 +354,6 @@ void Dialog::slotUpdateShareCodesList(const QStringList &list)
         connect(mShareHistoryMgr, SIGNAL(signalUpdateHistoryMsg(QString)),
                 this, SLOT(slotUpdateMsg(QString)));
     }
-    mShareHistoryMgr->signalGetFianceInfo();
     mAllStkList = list;
     //更新指数
     QIndexWidget *indexw = new QIndexWidget(this);
@@ -374,6 +371,7 @@ void Dialog::slotUpdateShareCodesList(const QStringList &list)
     connect(north, SIGNAL(signalUpdateNorthBoundList(ShareDataList)), indexw, SLOT(updateData(ShareDataList)));
     connect(north, SIGNAL(finished()), north, SLOT(deleteLater()));
     north->start();
+    return;
     //行情中心初始化开始为自选股
     //读取自选
     if(mFavStkList.length() == 0) mFavStkList = Profiles::instance()->value(STK_ZXG_SEC, STK_ZXG_NAME).toStringList();

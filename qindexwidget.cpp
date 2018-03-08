@@ -2,6 +2,8 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QDebug>
+#include "utils/sharedata.h"
+
 
 QIndexWidget::QIndexWidget(QWidget *parent) : QWidget(parent)
 {

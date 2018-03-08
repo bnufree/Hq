@@ -2,6 +2,7 @@
 #include <QDebug>
 #include "qhttpget.h"
 #include "dbservices/dbservices.h"
+#include "utils/sharedata.h"
 
 QEastMoneyZjlxThread::QEastMoneyZjlxThread(QObject *parent) : QObject(parent)
 {

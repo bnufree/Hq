@@ -1,6 +1,5 @@
-#include "qsharehsgttop10work.h"
+﻿#include "qsharehsgttop10work.h"
 #include "qhttpget.h"
-#include "dbservices/sharedata.h"
 #include <QJsonDocument>
 #include <QJsonValue>
 #include <QJsonParseError>
@@ -8,6 +7,7 @@
 #include <QJsonObject>
 #include <QDebug>
 #include "utils/hqutils.h"
+#include "utils/sharedata.h"
 
 QShareHsgtTop10Work::QShareHsgtTop10Work(const QString& date, QObject *parent) : mDate(date), mParent(parent),QRunnable()
 {
@@ -23,7 +23,7 @@ QShareHsgtTop10Work::~QShareHsgtTop10Work()
 
 void QShareHsgtTop10Work::run()
 {
-    QString url = tr("http://dcfm.eastmoney.com//EM_MutiSvcExpandInterface/api/js/get?type=HSGTCJB&token=70f12f2f4f091e459a279469fe49eca5&filter=(DetailDate=^%1^)&js=(x)&sr=1&st=Rank&rt=50014200")
+    QString url = QString("http://dcfm.eastmoney.com//EM_MutiSvcExpandInterface/api/js/get?type=HSGTCJB&token=70f12f2f4f091e459a279469fe49eca5&filter=(DetailDate=^%1^)&js=(x)&sr=1&st=Rank&rt=50014200")
             .arg(mDate);
     QJsonParseError err;
     QJsonDocument doc = QJsonDocument::fromJson(QHttpGet().getContentOfURL(url), &err);

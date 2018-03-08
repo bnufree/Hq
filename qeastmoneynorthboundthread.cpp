@@ -2,6 +2,8 @@
 #include "qhttpget.h"
 #include "QRegExp"
 #include <QDebug>
+#include "utils/sharedata.h"
+
 
 QEastmoneyNorthBoundThread::QEastmoneyNorthBoundThread(QObject *parent):QObject(parent),mHttp(0)
 {

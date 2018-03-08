@@ -3,7 +3,8 @@
 
 #include <QObject>
 #include <QThread>
-#include "dbservices/sharedata.h"
+//#include "dbservices/sharedata.h"
+class ShareDataList;
 class QExchangeRecordWorker : public QObject
 {
     Q_OBJECT

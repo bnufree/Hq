@@ -1,6 +1,8 @@
 ﻿#include "hqdbdatabase.h"
 #include <QMutexLocker>
 #include <QDebug>
+#include "utils/blockdata.h"
+#include "utils/sharedata.h"
 
 #define     QDebug()            qDebug()<<__FUNCTION__<<__LINE__
 #define     HISTORY_TABLE(code) HQ_SHARE_HISTORY_INFO_TABLE + code.right(6)

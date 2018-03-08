@@ -2,7 +2,7 @@
 #define QBLOCKTABLEWIDGET_H
 
 #include "HqTableWidget.h"
-#include "block/blockdata.h"
+#include "utils/blockdata.h"
 
 class QBlockTableWidget : public HqTableWidget
 {

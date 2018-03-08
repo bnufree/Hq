@@ -4,12 +4,13 @@
 #include <QObject>
 #include <QThread>
 #include <QStringList>
-#include <dbservices/sharedata.h>
 #include <QMap>
 #include <QMutex>
 #include <QThreadPool>
+#include <QDate>
 
 class QEastmoneyShareHistoryInfoThread;
+class ShareDataList;
 
 class QShareHistoryInfoMgr : public QObject
 {
@@ -31,7 +32,6 @@ signals:
     void signalUpdateHistoryMsg(const QString& msg);
 
 public slots:
-    void slotGetFinanceInfo();
     void slotShareFinanceInfoFinished();
     void slotUpdateAllShareFromDate(bool deldb, const QDate& date = QDate(2017,3,17));
     void slotUpdateForignVolInfo(const ShareDataList& list, const QDate& date);

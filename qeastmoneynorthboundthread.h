@@ -2,9 +2,11 @@
 #define QEASTMONEYNORTHBOUNDTHREAD_H
 
 #include <QThread>
-#include "dbservices/sharedata.h"
+//#include "dbservices/sharedata.h"
 #include "qhttpget.h"
 
+class ShareDataList;
+class QHttpGet;
 class QEastmoneyNorthBoundThread : public QObject
 {
     Q_OBJECT

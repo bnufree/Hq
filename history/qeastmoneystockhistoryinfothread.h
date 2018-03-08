@@ -5,7 +5,7 @@
 #include <QDate>
 #include <QRunnable>
 #include <QObject>
-#include "dbservices/sharedata.h"
+#include "utils/sharedata.h"
 
 class QEastmoneyShareHistoryInfoThread : public QRunnable
 {

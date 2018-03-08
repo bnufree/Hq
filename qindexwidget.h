@@ -2,10 +2,11 @@
 #define QINDEXWIDGET_H
 
 #include <QWidget>
-#include "dbservices/sharedata.h"
+//#include "dbservices/sharedata.h"
 #include "qindexframe.h"
 #include <QMap>
 
+class ShareDataList;
 class QIndexWidget : public QWidget
 {
     Q_OBJECT

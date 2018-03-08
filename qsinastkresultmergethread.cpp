@@ -1,10 +1,7 @@
 ﻿#include "qsinastkresultmergethread.h"
-#include <QtConcurrent>
-#include <QFuture>
 #include "qsinastkinfothread.h"
-//#include "profiles.h"
 #include <QDebug>
-#include "qexchangedatamanage.h"
+#include "utils/sharedata.h"
 
 QSinaStkResultMergeThread::QSinaStkResultMergeThread(QObject *parent) : QThread(parent)
 {
