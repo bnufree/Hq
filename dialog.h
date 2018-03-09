@@ -4,12 +4,11 @@
 #include <QDialog>
 #include <QSystemTrayIcon>
 #include <QTableWidget>
-#include "block/qeastmoneyblockmangagerthread.h"
-#include "qsinastkinfothread.h"
-#include "qsinasearchthread.h"
-#include "qsinastkresultmergethread.h"
+#include "utils/blockdata.h"
+#include "utils/sharedata.h"
 
-class QShareHistoryInfoMgr;
+class HQTaskMagrCenter;
+class QIndexWidget;
 
 typedef struct strColDisplay
 {
@@ -68,11 +67,10 @@ protected:
     //void keyPressEvent(QKeyEvent *);
 public slots:
     void setTargetSize(const QSize& size);
-
+    void slotRecvIndexCodesList(const QStringList& list);
     void updateBlockTable(const BlockDataVList& pDataList);
     void updateHqTable(const ShareDataList& pDataList);
     void setDlgShow(QSystemTrayIcon::ActivationReason val);
-    void slotUpdate(int cur, int total);
     void slotUpdateMsg(const QString& msg);
     void slotSystemTrayMenuClicked();
     void slotWhetherDisplay();
@@ -81,7 +79,6 @@ public slots:
     void slotDisplayBlock();
     void slotDisplayShareFull();
     void slotDisplayShareMini();
-    void slotUpdateShareCodesList(const QStringList& list);
     void slotTodayHSGUpdated();
     void slotUpdateHSGTOfCode(const QString& code);
 
@@ -107,28 +104,20 @@ private slots:
 private:
     Ui::MainDialog *ui;
     QSystemTrayIcon *systemIcon;
-    QSinaStkInfoThread            *mIndexThread;
-    QEastMoneyBlockMangagerThread        *mBlockMgr;
-    QSinaStkResultMergeThread     *mMergeThread;
-    QSinaSearchThread             *mSearchThread;
-    QShareHistoryInfoMgr          *mShareHistoryMgr;
-    QStringList           mFavStkList;
-    QStringList           mHSFoundsList;
-    QStringList           mAllStkList;
-//    int                   mCurBlockType;
     int                   mDisplayMode;
     int                   mSecSize;
-    bool                  mInit;
     QSize                 mTargetSize;
-    QMenu                 *mHqCenterMenu;
-    QMenu                 *mHqHeaderMenu;
-    QMenu                 *mHqPageMenu;
-    QStringList           mHqHeaderList;
+//    QMenu                 *mHqCenterMenu;
+//    QMenu                 *mHqHeaderMenu;
+//    QMenu                 *mHqPageMenu;
+//    QStringList           mHqHeaderList;
     int                   mDisplayCol;
     QList<QAction*>       mHqColActList;
     QPoint   windowPos;
     QPoint   mousePos;
     QPoint   dPos;
+    HQTaskMagrCenter     *mTaskMgr;
+    QIndexWidget        *mIndexWidget;
 };
 
 #endif // DIALOG_H

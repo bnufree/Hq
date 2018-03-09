@@ -1,8 +1,6 @@
 ﻿#include "hqdbdatabase.h"
 #include <QMutexLocker>
 #include <QDebug>
-#include "utils/blockdata.h"
-#include "utils/sharedata.h"
 
 #define     QDebug()            qDebug()<<__FUNCTION__<<__LINE__
 #define     HISTORY_TABLE(code) HQ_SHARE_HISTORY_INFO_TABLE + code.right(6)
@@ -174,9 +172,11 @@ bool HQDBDataBase::deleteBlock(const QString& code)
 
 bool HQDBDataBase::createDBTables()
 {
+    qDebug()<<__FUNCTION__<<__LINE__;
     if(!createBlockTable()) return false;
     if(!createShareBasicTable()) return false;
-    if(createGeneralTable()) return false;
+    if(!createGeneralTable()) return false;
+    qDebug()<<__FUNCTION__<<__LINE__;
     return true;
 }
 
@@ -185,7 +185,7 @@ bool HQDBDataBase::createBlockTable()
     if(isTableExist(HQ_BLOCK_TABLE)) return true;
     TableColList colist;
     colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
-    colist.append({HQ_TABLE_COL_CODE, "VARCHAR(6) NOT NULL"});
+    colist.append({HQ_TABLE_COL_CODE, "VARCHAR(10) NOT NULL"});
     colist.append({HQ_TABLE_COL_NAME, "VARCHAR(100) NOT NULL"});
     colist.append({HQ_TABLE_COL_CLOSE, "NUMERIC NULL"});
     colist.append({HQ_TABLE_COL_CHANGE_PERCENT, "NUMERIC NULL"});
@@ -200,7 +200,7 @@ bool HQDBDataBase::createShareBasicTable()
     if(isTableExist(HQ_SHARE_BASIC_INFO_TABLE)) return true;
     TableColList colist;
     colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
-    colist.append({HQ_TABLE_COL_CODE, "VARCHAR(6) NOT NULL"});
+    colist.append({HQ_TABLE_COL_CODE, "VARCHAR(10) NOT NULL"});
     colist.append({HQ_TABLE_COL_NAME, "VARCHAR(100) NULL"});
     colist.append({HQ_TABLE_COL_PY_ABBR, "VARCHAR(10) NULL"});
     colist.append({HQ_TABLE_COL_FAVORITE, "BOOL NULL"});
@@ -223,21 +223,29 @@ bool HQDBDataBase::createGeneralTable()
     return createTable(HQ_GENERAL_TABLE, colist);
 }
 
-bool HQDBDataBase::updateHistoryDataList(const ShareDataList &list)
+bool HQDBDataBase::updateHistoryDataList(const ShareDataList &list, bool delDB)
 {
     if(!createShareHistoryInfoTable()) return false;
     QSqlDatabase::database().transaction();
-    foreach (ShareData data, list) {
-        if(data.mMoney < 10000) continue;
-        bool exist = false;
-        QList<HQ_QUERY_CONDITION> conList;
-        conList.append(HQ_QUERY_CONDITION(HQ_TABLE_COL_CODE, data.mCode));
-        conList.append(HQ_QUERY_CONDITION(HQ_TABLE_COL_DATE, data.mDate));
-        if(!isRecordExist(exist, HQ_SHARE_HISTORY_INFO_TABLE, conList))
+    if(delDB)
+    {
+        if(!deleteRecord(HQ_SHARE_HISTORY_INFO_TABLE))
         {
             QSqlDatabase::database().rollback();
             return false;
         }
+    }
+    foreach (ShareData data, list) {
+        if(data.mMoney < 10000) continue;
+        bool exist = false;
+//        QList<HQ_QUERY_CONDITION> conList;
+//        conList.append(HQ_QUERY_CONDITION(HQ_TABLE_COL_CODE, data.mCode));
+//        conList.append(HQ_QUERY_CONDITION(HQ_TABLE_COL_DATE, data.mDate));
+//        if(!isRecordExist(exist, HQ_SHARE_HISTORY_INFO_TABLE, conList))
+//        {
+//            QSqlDatabase::database().rollback();
+//            return false;
+//        }
         if(!updateHistoryShare(data, exist))
         {
             QSqlDatabase::database().rollback();
@@ -349,6 +357,35 @@ bool HQDBDataBase::updateBasicShareDataList(QList<ShareData*> dataList)
             return false;
         }
         if(!updateBasicShare(*data, exist))
+        {
+            QSqlDatabase::database().rollback();
+            return false;
+        }
+    }
+
+    //更新日期
+    if(!updateDateOfTable(HQ_SHARE_BASIC_INFO_TABLE))
+    {
+        QSqlDatabase::database().rollback();
+        return false;
+    }
+    QSqlDatabase::database().commit();
+    return true;
+}
+
+bool HQDBDataBase::clearAndUpdateBasicShareDataList(QList<ShareData*> dataList)
+{
+    qDebug()<<__FUNCTION__<<__LINE__<<dataList.size();
+    if(dataList.length() == 0) return false;
+    QSqlDatabase::database().transaction();
+    if(!deleteRecord(HQ_SHARE_BASIC_INFO_TABLE))
+    {
+        QSqlDatabase::database().rollback();
+        return false;
+    }
+    foreach (ShareData* data, dataList) {
+        if(!data) continue;
+        if(!updateBasicShare(*data, false))
         {
             QSqlDatabase::database().rollback();
             return false;
@@ -650,7 +687,7 @@ bool HQDBDataBase::getHistoryDataOfCode(ShareDataList& list, const QString &code
 
 QString HQDBDataBase::errMsg()
 {
-    return QString("sql:%1\nerr:%2").arg(mSQLQuery.lastQuery()).arg(mSQLQuery.lastError().text());
+    return QString("sql:%1\\nerr:%2").arg(mSQLQuery.lastQuery()).arg(mSQLQuery.lastError().text());
 }
 
 

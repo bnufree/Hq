@@ -21,7 +21,6 @@ public:
     ~QShareHistoryInfoMgr();
 
 signals:
-    void signalGetFianceInfo();
     void signalGetCodesFinished(const QStringList& list);
     void signalSetHistoryCodeList(const QStringList& list);
     void signalStartGetHistory();
@@ -30,12 +29,15 @@ signals:
     void signalUpdateAmountProcess(const QString& date);
     void signalUpdateAllShareFromDate(bool deldb, const QDate& date);
     void signalUpdateHistoryMsg(const QString& msg);
+    void signalUpdateHistoryFinished();
 
 public slots:
-    void slotShareFinanceInfoFinished();
+    void slotStartGetHistory();
     void slotUpdateAllShareFromDate(bool deldb, const QDate& date = QDate(2017,3,17));
     void slotUpdateForignVolInfo(const ShareDataList& list, const QDate& date);
     void slotUpdateShareHistoryProcess(const QString& code);
+    void slotDbUpdateHistoryFinished();
+    void slotUpdateShareHistoryInfoFinished(const QString& code);
 private:
     QThread             mWorkThread;
     QStringList         mCodesList;

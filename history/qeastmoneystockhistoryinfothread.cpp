@@ -86,12 +86,12 @@ void QEastmoneyShareHistoryInfoThread::run()
                 //list.append(data);
             }
         }
-        if(mHistoryListPtr->size() > 0)
-        {
-            emit DATA_SERVICE->signalRecvShareHistoryInfos(mCode, *mHistoryListPtr, mDelDB);
-        }
+//        if(mHistoryListPtr->size() > 0)
+//        {
+//            emit DATA_SERVICE->signalRecvShareHistoryInfos(mCode, *mHistoryListPtr, mDelDB);
+//        }
     }
-    emit DATA_SERVICE->signalUpdateShareinfoWithHistory(mCode);
+//    emit DATA_SERVICE->signalUpdateShareinfoWithHistory(mCode);
 
 #if 0
      QString fileName = QString("%1%2.dat").arg(SAVE_DIR).arg(mDate.toString("yyyyMMdd"));

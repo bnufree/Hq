@@ -61,7 +61,7 @@ void QShareFHSPWork::run()
         QJsonObject subobj = value.toObject();
         //开始解析角色信息数据
         ShareBaseData data;
-        data.setCode(subobj.value("Code").toString());
+        data.setCode(ShareBaseData::fullCode(subobj.value("Code").toString()));
         data.mSZZG = subobj.value("SZZBL").toString().toDouble();
         data.mXJFH = subobj.value("XJFH").toString().toDouble()/10;
         data.mGQDJR = QDateTime(HqUtils::dateFromStr(subobj.value("GQDJR").toString().left(10))).toMSecsSinceEpoch();

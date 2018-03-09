@@ -60,7 +60,8 @@ SOURCES += main.cpp\
     basic_info/qsharehsgttop10work.cpp \
     basic_info/qsharefinancialinfowork.cpp \
     utils/sharedata.cpp \
-    utils/blockdata.cpp
+    utils/blockdata.cpp \
+    hqtaskmagrcenter.cpp
 
 HEADERS  += dialog.h \
     dataexchange.h \
@@ -111,7 +112,8 @@ HEADERS  += dialog.h \
     basic_info/qsharehsgttop10work.h \
     basic_info/qsharefinancialinfowork.h \
     utils/sharedata.h \
-    utils/blockdata.h
+    utils/blockdata.h \
+    hqtaskmagrcenter.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

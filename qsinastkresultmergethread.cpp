@@ -76,64 +76,23 @@ void QSinaStkResultMergeThread::run()
         {
             //全部进行排序，不过滤
             wklist = mMidStkDataMapList.values();
-        } else if(mMktType == MKT_SH)
+        } else
         {
             foreach (QString key, mMidStkDataMapList.keys()) {
-                if(key.left(1) == "6" || key.left(1) == "5")
+                ShareData data = mMidStkDataMapList.value(key);
+                bool sts = (mMktType == MKT_SH && data.mShareType == SHARE_CHINA_SH)||\
+                        (mMktType == MKT_SZ && (data.mShareType == SHARE_CHINA_SZ_ZB ||\
+                                                data.mShareType == SHARE_CHINA_SZ_ZXB || data.mShareType == SHARE_CHINA_SZ_CYB)) ||\
+                        (mMktType == MKT_ZXB && data.mShareType == SHARE_CHINA_SZ_ZXB)||\
+                        (mMktType == MKT_CYB && data.mShareType == SHARE_CHINA_SZ_CYB)||\
+                        (mMktType == MKT_ZXG && data.mIsFav)||\
+                        (mMktType == MKT_JJ && (data.mShareType == SHARE_CHINA_FUND_SH || data.mShareType == SHARE_CHINA_FUND_SZ))||\
+                        (mMktType == MKT_OTHER && mSelfCodesList.contains(data.mCode));
+                if(sts)
                 {
-                    wklist.append(mMidStkDataMapList.value(key));
+                    wklist.append(data);
                 }
             }
-
-        }else if(mMktType == MKT_SZ)
-        {
-            foreach (QString key, mMidStkDataMapList.keys()) {
-                if(key.left(1) == "0" || key.left(1) == "3")
-                    wklist.append(mMidStkDataMapList.value(key));
-            }
-        }
-        else if(mMktType == MKT_ZXB)
-        {
-            foreach (QString key, mMidStkDataMapList.keys()) {
-                if(key.left(3) == "002")
-                    wklist.append(mMidStkDataMapList.value(key));
-            }
-
-        }
-        else if(mMktType == MKT_CYB)
-        {
-            foreach (QString key, mMidStkDataMapList.keys()) {
-                if(key.left(1) == "3")
-                {
-                    wklist.append(mMidStkDataMapList.value(key));
-                }
-            }
-
-        } else if(mMktType == MKT_ZXG)
-        {
-            foreach (QString key, mMidStkDataMapList.keys()) {
-                if(mMidStkDataMapList[key].mIsFav == true)
-                {
-                    wklist.append(mMidStkDataMapList.value(key));
-                }
-            }
-        } else if(mMktType == MKT_OTHER)
-        {
-            foreach (QString key, mSelfCodesList) {
-                if(mMidStkDataMapList.contains(key.right(6)))
-                    wklist.append(mMidStkDataMapList.value(key.right(6)));
-            }
-
-
-        } else if(mMktType == MKT_JJ)
-        {
-            foreach (QString key, mMidStkDataMapList.keys()) {
-                if(key.left(1) == "5" || key.left(1) == "1")
-                {
-                    wklist.append(mMidStkDataMapList.value(key));
-                }
-            }
-
         }
         mListMutex.unlock();
         mTotalPage = (wklist.length() + mPageSize -1) / mPageSize;

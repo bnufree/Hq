@@ -38,8 +38,8 @@ void QShareHsgtTop10Work::run()
         int market_type = obj.value("MarketType").toInt();
         if(market_type == 2 || market_type == 4) continue;
         ShareBaseData data;
-        data.setCode(obj.value("Code").toString());
-        if(data.mCode[0] == '6')
+        data.setCode(ShareBaseData::fullCode(obj.value("Code").toString()));
+        if(data.mCode[2] == '6')
         {
             //上海
             data.mTop10Buy = obj.value("HGTMRJE").toDouble();

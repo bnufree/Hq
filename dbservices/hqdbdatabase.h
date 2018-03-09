@@ -5,6 +5,8 @@
 #include <QtSql>
 #include <QMutex>
 #include "hqdatadefines.h"
+#include "utils/blockdata.h"
+#include "utils/sharedata.h"
 
 enum HISTORY_CHANGEPERCENT{
     DAYS_3 = 3,
@@ -26,9 +28,6 @@ struct HQ_QUERY_CONDITION{
     }
 };
 
-class BlockData;
-class ShareData;
-class ShareDataList;
 
 class HQDBDataBase : public QObject
 {
@@ -48,14 +47,16 @@ public:
     bool deleteBlock(const QString& code);
     bool isBlockExist(const QString& code);
     //个股
+    //基本信息更新
     bool getBasicShareDataList(QMap<QString, ShareData*>& pShareMap);
     bool updateBasicShareDataList(QList<ShareData*> dataList);
     bool updateBasicShare(const ShareData& data, bool exist);
+    bool clearAndUpdateBasicShareDataList(QList<ShareData*> dataList);
     bool updateHistoryShare(const ShareData& data, bool exist);
     bool deleteShare(const QString& table, const QString& col = QString(), const QVariant& val = QVariant());
-    bool updateHistoryDataList(const ShareDataList& list);
+    bool updateHistoryDataList(const ShareDataList& list, bool delDB);
     bool isRecordExist(bool& exist, const QString& table, const QList<HQ_QUERY_CONDITION>& list);
-    bool deleteRecord(const QString& table, const QList<HQ_QUERY_CONDITION>& list);
+    bool deleteRecord(const QString& table, const QList<HQ_QUERY_CONDITION>& list = QList<HQ_QUERY_CONDITION>());
     double getMultiDaysChangePercent(const QString &code, HISTORY_CHANGEPERCENT type );
     double getLastMoney(const QString& code);
     bool   getLastForeignVol(qint64& vol, qint64& vol_chg, const QString& code);

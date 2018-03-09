@@ -34,11 +34,12 @@ void QShareCodesWork::run()
         if(reg_code.exactMatch(code))
         {
             ShareBaseData data;
-            data.setCode(code);
+            data.setCode(ShareBaseData::fullCode(code));
             data.setName(name);
+            data.setShareType(ShareBaseData::shareType(code));
             //QString PY = HqUtils::GetFirstLetter(utf8->toUnicode( name.toStdString().data()));
-            //qDebug()<<"Name:"<<name<<" PY:"<<PY;
-            //data.setPY(PY);
+            //data.setPY(PY);            
+            qDebug()<<data.mCode<<data.mName<<data.mShareType<<data.shareTypeString();
             list.append(data);
         }
         index += reg.matchedLength();
