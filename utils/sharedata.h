@@ -85,7 +85,7 @@ typedef    enum     share_type
 class ShareBaseData : public BaseData
 {
 public:
-    inline ShareBaseData(const QString& code = QString(), \
+    inline ShareBaseData(const QString& code, \
                          const QString& name= QString(), \
                          const QString& abbr= QString())\
         :BaseData(code, name, abbr, DATA_SHARE)
@@ -109,15 +109,12 @@ public:
     //通过证券的代码来获取证券的类型(不包括指数)
     SHARE_TYPE shareType(const QString &code)
     {
-        QRegExp shShare("sh6[0-9]{5}");
-        QRegExp shIndex("sh")
-        if( code.left(2) == "sh")
+        if(code.length() == 6)
         {
             if(code.left(1) == "6") return SHARE_CHINA_SH;
-            if
-                    if(code.left(1) == "0" || code.left(1) == "3") return SHARE_CHINA_SZ;
-                    if(code.left(1) == "5") return SHARE_CHINA_FUND_SH;
-                    if(code.left(1) == "1") return SHARE_CHINA_FUND_SZ;
+            if(code.left(1) == "0" || code.left(1) == "3") return SHARE_CHINA_SZ;
+            if(code.left(1) == "5") return SHARE_CHINA_FUND_SH;
+            if(code.left(1) == "1") return SHARE_CHINA_FUND_SZ;
         } else if(code.length() == 5)
         {
             return SHARE_HK;
@@ -164,9 +161,10 @@ typedef QList<ShareBaseData>     ShareBaseDataList;
 class ShareData : public ShareBaseData
 {
 public:
-    ShareData();
+    inline ShareData():ShareBaseData(""){}
+    ShareData(const QString& code);
 
-    ShareData(const QString& code, const QDate& date):ShareBaseData(SHARE_CHINA_SH, code)
+    ShareData(const QString& code, const QDate& date):ShareBaseData(code)
     {
         mDate = date;
     }
