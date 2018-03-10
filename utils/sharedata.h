@@ -14,6 +14,15 @@ struct zjlxData{
     double zjlx;
 };
 
+#define         SH_FUND_REG         "(sh){0,1}5[0-9]{5}"
+#define         SH_INDEX_REG        "sh0[0-9]{5}"
+#define         SZ_FUND_REG         "(sz){0,1}1[0-9]{5}"
+#define         SZ_INDEX_REG        "sz399[0-9]{3}"
+#define         SH_SHARE_REG        "(sh){0,1}6[0-9]{5}"
+#define         SZZB_SHARE_REG        "(sz){0,1}(00[01]{1}[0-9]{3})"
+#define         SZZXB_SHARE_REG        "(sz){0,1}(002[0-9]{3})"
+#define         SZCYB_SHARE_REG        "(sz){0,1}(30[0-9]{4})"
+#define         HK_SHARE_REG        "(hk){0,1}\\d{5}"
 //定义基础的数据类型
 typedef enum data_type{
     DATA_UNDEFINED = 0x00,
@@ -30,6 +39,24 @@ public:
         mIsFav = 0;
         mDataType = DATA_UNDEFINED;
     }
+    inline BaseData(bool isfav, int dataType, const char* code, const char* name, const char* py)
+    {
+        this->mIsFav = isfav;
+        this->mDataType = dataType;
+        memcpy(this->mCode, code, 10);
+        memcpy(this->mName, name, 20);
+        memcpy(this->mPY, py, 10);
+    }
+
+    inline BaseData(const BaseData& data)
+    {
+        this->mIsFav = data.mIsFav;
+        this->mDataType = data.mDataType;
+        memcpy(this->mCode, data.mCode, 10);
+        memcpy(this->mName, data.mName, 20);
+        memcpy(this->mPY, data.mPY, 10);
+    }
+
     inline BaseData(const QString& code, const QString& name, const QString& abbr, int type)
     {
         mIsFav = 0;
@@ -71,7 +98,9 @@ typedef    enum     share_type
 {
     SHARE_UNDEFINED = 0,
     SHARE_CHINA_SH = 1,
-    SHARE_CHINA_SZ,
+    SHARE_CHINA_SZ_ZB,
+    SHARE_CHINA_SZ_ZXB,
+    SHARE_CHINA_SZ_CYB,
     SHARE_CHINA_FUND_SH,
     SHARE_CHINA_FUND_SZ,
     SHARE_INDEX_SH,
@@ -85,12 +114,31 @@ typedef    enum     share_type
 class ShareBaseData : public BaseData
 {
 public:
-    inline ShareBaseData(const QString& code, \
+    inline ShareBaseData(const ShareBaseData& data):\
+        BaseData(data.mIsFav, data.mDataType, data.mCode, data.mName, data.mPY)
+    {
+        mShareType = data.mShareType;
+        mIsTop10 = data.mIsTop10;
+        mTotalShare = data.mTotalShare;
+        mMutalShare = data.mMutalShare;
+        mMGSY = data.mMGSY;
+        mMGJZC = data.mMGJZC;
+        mJZCSYL = data.mJZCSYL;
+        mSZZG = data.mSZZG;
+        mXJFH = data.mXJFH;
+        mGQDJR = data.mGQDJR;
+        mYAGGR = data.mYAGGR;
+        mProfit = data.mProfit;
+        mTop10Buy = data.mTop10Buy;
+        mTop10Sell = data.mTop10Sell;
+    }
+
+    inline ShareBaseData(const QString& code = QString(), \
                          const QString& name= QString(), \
                          const QString& abbr= QString())\
         :BaseData(code, name, abbr, DATA_SHARE)
     {
-        mShareType = shareType(code);
+        mShareType = SHARE_UNDEFINED;
         mIsTop10 = 0; //CHINA HK
         mTotalShare = 0;
         mMutalShare = 0;
@@ -106,34 +154,94 @@ public:
         mTop10Sell = 0;
     }
 
-    //通过证券的代码来获取证券的类型(不包括指数)
-    SHARE_TYPE shareType(const QString &code)
+    void setShareType(SHARE_TYPE type)
     {
-        if(code.length() == 6)
-        {
-            if(code.left(1) == "6") return SHARE_CHINA_SH;
-            if(code.left(1) == "0" || code.left(1) == "3") return SHARE_CHINA_SZ;
-            if(code.left(1) == "5") return SHARE_CHINA_FUND_SH;
-            if(code.left(1) == "1") return SHARE_CHINA_FUND_SZ;
-        } else if(code.length() == 5)
-        {
-            return SHARE_HK;
+        mShareType = type;
+    }
+
+    QString shareTypeString()
+    {
+        QString res = QStringLiteral("未定义");
+        switch (mShareType) {
+        case SHARE_CHINA_SH:
+            res = QStringLiteral("上证A股");
+            break;
+        case SHARE_CHINA_SZ_ZB:
+            res = QStringLiteral("深证主板");
+            break;
+        case SHARE_CHINA_SZ_ZXB:
+            res = QStringLiteral("深证中小");
+            break;
+        case SHARE_CHINA_SZ_CYB:
+            res = QStringLiteral("深证创业");
+            break;
+        case SHARE_INDEX_SH:
+            res = QStringLiteral("上证指数");
+            break;
+        case SHARE_INDEX_SZ:
+            res = QStringLiteral("深圳指数");
+            break;
+        case SHARE_CHINA_FUND_SH:
+            res = QStringLiteral("上证基金");
+            break;
+        case SHARE_CHINA_FUND_SZ:
+            res = QStringLiteral("深圳基金");
+            break;
+        case SHARE_HK:
+            res = QStringLiteral("港股");
+            break;
+        default:
+            break;
+>>>>>>> dd59966114f651cc2d52ef00e4a13b6ce3240d8b
         }
+
+        return res;
+    }
+
+    //通过证券的代码来获取证券的类型(不包括指数,指数需要强制指定)
+    static SHARE_TYPE shareType(const QString &src)
+    {
+        QRegExp shShare(SH_SHARE_REG);
+        QRegExp szZBShare(SZZB_SHARE_REG);
+        QRegExp szZXBShare(SZZXB_SHARE_REG);
+        QRegExp szCYBShare(SZCYB_SHARE_REG);
+        QRegExp hkShare(HK_SHARE_REG);
+        QRegExp shFund(SH_FUND_REG);
+        QRegExp szFund(SZ_FUND_REG);
+        QRegExp shIndex(SH_INDEX_REG);
+        QRegExp szIndex(SZ_INDEX_REG);
+
+        if(shShare.exactMatch(src)) return SHARE_CHINA_SH;
+        if(szZBShare.exactMatch(src)) return SHARE_CHINA_SZ_ZB;
+        if(szZXBShare.exactMatch(src)) return SHARE_CHINA_SZ_ZXB;
+        if(szCYBShare.exactMatch(src)) return SHARE_CHINA_SZ_CYB;
+        if(shIndex.exactMatch(src)) return SHARE_INDEX_SH;
+        if(szIndex.exactMatch(src)) return SHARE_INDEX_SZ;
+        if(shFund.exactMatch(src)) return SHARE_CHINA_FUND_SH;
+        if(szFund.exactMatch(src)) return SHARE_CHINA_FUND_SZ;
+        if(hkShare.exactMatch(src)) return SHARE_HK;
         return SHARE_UNDEFINED;
     }
 
-    QString prefixCode()
+    static QString prefixCode(const QString&  code)
     {
-        if(mShareType == SHARE_CHINA_SH || mShareType == SHARE_CHINA_FUND_SH) return "sh";
-        if(mShareType == SHARE_CHINA_SZ || mShareType == SHARE_CHINA_FUND_SZ) return "sz";
-        if(mShareType == SHARE_HK) return "hk";
-        if(mShareType == SHARE_US) return "us";
+        SHARE_TYPE type = shareType(code);
+        if(type == SHARE_CHINA_SH || type == SHARE_CHINA_FUND_SH) return "sh";
+        if(type == SHARE_CHINA_SZ_ZB || type == SHARE_CHINA_SZ_ZXB ||type == SHARE_CHINA_SZ_CYB ||type == SHARE_CHINA_FUND_SZ) return "sz";
+        if(type == SHARE_HK) return "hk";
+        if(type == SHARE_US) return "us";
         return "undefined";
     }
 
-    QString key()
+    static QString fullCode(const QString& src)
     {
-        return prefixCode() + QString::fromStdString(mCode);
+        QRegExp numexp("\\d{5,}");
+        if(numexp.exactMatch(src))
+        {
+            return prefixCode(src)+src;
+        }
+
+        return src;
     }
 
 public:
@@ -161,9 +269,12 @@ typedef QList<ShareBaseData>     ShareBaseDataList;
 class ShareData : public ShareBaseData
 {
 public:
-    inline ShareData():ShareBaseData(""){}
-    ShareData(const QString& code);
 
+    ShareData();
+    ShareData(const ShareBaseData& data):ShareBaseData(data)
+    {
+
+    }
     ShareData(const QString& code, const QDate& date):ShareBaseData(code)
     {
         mDate = date;
@@ -292,6 +403,13 @@ public:
         if(this->contains(data)) return;
         QList<ShareData>::append(data);
         mDataIndexMap[data.mDate] = this->size() - 1;
+    }
+
+    void append(const ShareDataList& list)
+    {
+        foreach (ShareData data, list) {
+            append(data);
+        }
     }
 
     ShareDataList& operator =(const QList<ShareData>& list)

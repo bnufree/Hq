@@ -85,9 +85,9 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
     ShareDataList datalist;
     foreach (QString detail, resultlist)
     {
-        qDebug()<<detail;
+        //qDebug()<<detail;
         detail.replace("var hq_str_s_", "");
-        qDebug()<<detail;
+        //qDebug()<<detail;
         QStringList detailList = detail.split(QRegExp("[\",=]"), QString::SkipEmptyParts);
         if(detailList.length() < 7) continue;
         QString code = detailList[0];

@@ -30,7 +30,7 @@ void QShareFinancialInfoWork::run()
         if(list.length() > 20)
         {
             ShareBaseData data;
-            data.setCode(list[1].mid(9,6));
+            data.setCode(ShareBaseData::fullCode(list[1].mid(9,6)));
             data.setPY(list[3].toUpper());
             data.mMGSY = list[6].toDouble();
             data.mMGJZC = list[7].toDouble();

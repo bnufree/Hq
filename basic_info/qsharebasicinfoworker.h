@@ -14,7 +14,7 @@ public:
 
 signals:
     void signalGetBasicInfo();
-    void signalSendCodeFinished(const QStringList& codes);
+    void signalBaseDataListFinished(const QStringList& codes, const ShareBaseDataList& list);
 public slots:
     void slotGetBasicInfo();
     void slotUpdateShareCodesList(const ShareBaseDataList& list);

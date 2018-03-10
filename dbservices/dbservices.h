@@ -41,7 +41,7 @@ signals:
     void signalInitDBTables();
     void signalDbInitFinished();
     void signalUpdateShareCodesList(const QStringList& codes);
-    void signalUpdateShareBasicInfo(const ShareDataList& list);
+    void signalUpdateShareBasicInfo(const ShareBaseDataList& list);
 
     //从数据库查询板块信息
     void signalQueryBlockInfo(int type = 1);
@@ -50,23 +50,31 @@ signals:
      void signalQueryShareForeignVol(const QString& code);
     void signalSendShareForeignVol(const ShareDataList& list);
     //历史数据写入数据库
+    void signalRecvAllShareHistoryInfos(const ShareDataList& list, bool deletedb);
     void signalRecvShareHistoryInfos(const QString& code, const ShareDataList& list, bool deletedb);
     void signalQueryShareHistoryLastDate(const QString& code);
     void signalSendShareHistoryLastDate(const QString& code, const QDate& date);
+    void signalUpdateHistoryInfoFinished();
+    void signalUpdateShareHistoryFinished(const QString &code);
     //基本信息相关的数据库操作
     void signalQueryAllShareBasicInfo();
     void signalAddShareBasicInfo(const ShareData& data);
     void signalAddShareBasicInfoList(const ShareDataList& list);
     void signalUpdateShareinfoWithHistory(const QString& code);
-    void signalUpdateStkBaseinfoWithHistoryFinished(const QString &code);
     void signalUpdateStkProfitList(const ShareDataList& list);
     void signalInitShareRealInfos(const QStringList& codes);
+    void signalSetFavCode(const QString& code);
     //沪港通持股写入数据据
     void signalAddShareAmoutByForeigner(const ShareDataList& list);
     void signalUpdateShareAmountByForeigner();
+    //实时数据查询信息获取
+    void signalSearchCodesOfText(const QString& text);
+    void signalSendSearchCodesOfText(const QStringList& codes);
+
 public slots:
     void slotInitDBTables();
     void slotUpdateShareCodesList(const QStringList& list);
+    void slotRecvAllShareHistoryInfos(const ShareDataList& list, bool deletedb);
     void slotRecvShareHistoryInfos(const QString& code, const ShareDataList& list, bool deleteDB);
     //void slotUpdateShareHistoryInfos(const QMap<QString, ShareDataList> map);
     bool slotAddHistoryData(const ShareData& data);
@@ -78,10 +86,9 @@ public slots:
     void slotUpdateStkProfitList(const ShareDataList& list);
     void slotAddShareAmoutByForeigner(const ShareDataList& list);
     void slotUpdateShareAmountByForeigner();
-    void slotUpdateShareBasicInfo(const ShareDataList& list);
+    void slotUpdateShareBasicInfo(const ShareBaseDataList& list);
     void slotSetFavCode(const QString& code);
     void slotQueryShareForeignVol(const QString& code);
-
 
 private:
     void initHistoryDates();
