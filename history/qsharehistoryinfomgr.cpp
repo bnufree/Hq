@@ -1,5 +1,6 @@
 ﻿#include "qsharehistoryinfomgr.h"
-#include "qeastmoneystockhistoryinfothread.h"
+#include "qsharehistoryinfothread.h"
+#include "qsharehistoryfilework.h"
 #include "dbservices/dbservices.h"
 #include "../qeastmoneyhsgtshareamount.h"
 #include <QDebug>
@@ -43,14 +44,22 @@ void QShareHistoryInfoMgr::slotUpdateForignVolInfo(const ShareDataList &list, co
     qDebug()<<__FUNCTION__<<__LINE__<<list.size()<<date;
     QMutexLocker locker(&mShareInfoMutex);
     foreach (ShareData data, list) {
-        ShareDataList &wklist = mShareInfoMap[data.mCode];
-        wklist.append(data);
+        ShareDataList &wklist = mShareInfoMap[date];
+        ShareData &wkdata = wklist.valueOfDate(date, data.mCode);
+        wkdata.mForeignVol = data.mForeignVol;
     }
 }
 
-void QShareHistoryInfoMgr::slotUpdateShareHistoryProcess(const QString &code)
+void QShareHistoryInfoMgr::slotUpdateShareHistoryProcess(const ShareDataList& list)
 {
     QMutexLocker locker(&mShareHistoryMutex);
+    //将历史数据更新到map
+    foreach (ShareData data, list) {
+        QDate date = QDateTime::fromMSecsSinceEpoch(data.mTime).date();
+        ShareDataList &wklist = mShareInfoMap[date];
+        wklist.append(data);
+
+    }
     emit signalUpdateHistoryMsg(QString("%1:%2/%3").\
                                 arg(QStringLiteral("更新日线数据")).\
                                 arg(++mCurCnt).\
@@ -60,19 +69,7 @@ void QShareHistoryInfoMgr::slotUpdateShareHistoryProcess(const QString &code)
 
 void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& date)
 {
-    emit signalUpdateHistoryMsg(QStringLiteral("开始更新外资持股数据..."));
-    QDate wkDate = date;
-    while(wkDate < HqUtils::latestActiveDay())
-    {
-        if(HqUtils::activeDay(wkDate))
-        {
-            QHKExchangeVolDataProcess * process = new QHKExchangeVolDataProcess(wkDate, this);
-            mPool.start(process);
-        }
-        wkDate = wkDate.addDays(1);
-    }
-    mPool.waitForDone();
-
+    //开始更新日线数据
     emit signalUpdateHistoryMsg(QStringLiteral("开始更新日线数据..."));
     //创建文件保存的目录
     QDir wkdir(SAVE_DIR);
@@ -88,18 +85,59 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
 
     }
     mCurCnt = 0;
-    //开始更新日线数据
     foreach (QString code, mCodesList) {
-        ShareDataList *list = (ShareDataList*)(&mShareInfoMap[code.right(6)]);
-        QEastmoneyShareHistoryInfoThread* thread = new QEastmoneyShareHistoryInfoThread(code, date, SAVE_DIR, deldb, list, this);
+        QShareHistoryInfoThread* thread = new QShareHistoryInfoThread(code, date, this);
         mPool.start(thread);
     }
     mPool.waitForDone();
-    emit signalUpdateHistoryMsg(QStringLiteral("开始将日线数据写入到数据库..."));
-    foreach (QString key, mShareInfoMap.keys()) {
-        emit DATA_SERVICE->signalRecvShareHistoryInfos(key, ShareDataList(mShareInfoMap[key], deldb));
+
+    emit signalUpdateHistoryMsg(QStringLiteral("开始更新外资持股数据..."));
+    QDate wkDate = date;
+    while(wkDate < HqUtils::latestActiveDay())
+    {
+        if(HqUtils::activeDay(wkDate))
+        {
+            QHKExchangeVolDataProcess * process = new QHKExchangeVolDataProcess(wkDate, this);
+            mPool.start(process);
+        }
+        wkDate = wkDate.addDays(1);
     }
-    //DATA_SERVICE->signalRecvAllShareHistoryInfos(list, deldb);
+    mPool.waitForDone();
+    emit signalUpdateHistoryMsg(QStringLiteral("开始将日线数据写入文件"));
+
+    wkDate = date;
+    while(wkDate < HqUtils::latestActiveDay())
+    {
+        QString fileName = QString("%1%2.dat").arg(SAVE_DIR).arg(wkDate.toString("yyyyMMdd"));
+        ShareDataList list = mShareInfoMap[wkDate];
+        if(list.size() > 0)
+        {
+            QShareHistoryFileWork * process = new QShareHistoryFileWork(FILE_WRITE, fileName, list, this);
+            mPool.start(process);
+        }
+        wkDate = wkDate.addDays(1);
+    }
+
+
+    emit signalUpdateHistoryMsg(QStringLiteral("开始读入日线数据"));
+    wkDate = QDate(2017,3,17);
+    while(wkDate < HqUtils::latestActiveDay())
+    {
+        QString fileName = QString("%1%2.dat").arg(SAVE_DIR).arg(wkDate.toString("yyyyMMdd"));
+        QShareHistoryFileWork * process = new QShareHistoryFileWork(FILE_WRITE, fileName, ShareDataList(), this);
+        mPool.start(process);
+        wkDate = wkDate.addDays(1);
+    }
+
+}
+
+void QShareHistoryInfoMgr::slotUpdateReadHistoryInfo(const ShareDataList &list)
+{
+
+}
+
+void QShareHistoryInfoMgr::slotUpdateWriteHistoryInfo(const ShareDataList &list)
+{
 
 }
 

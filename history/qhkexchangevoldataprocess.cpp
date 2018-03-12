@@ -70,7 +70,7 @@ void QHKExchangeVolDataProcess::getMktVolInfo(ShareDataList &list, const QDate &
             ShareData data;
             data.setCode(tmpCode);
             data.mForeignVol = vol;
-            data.mDate = mDate;
+            data.mTime = QDateTime(mDate).toMSecsSinceEpoch();
             list.append(data);
         } else
         {
@@ -99,6 +99,7 @@ void QHKExchangeVolDataProcess::getMktVolInfo(ShareDataList &list, const QDate& 
             file.read((char*)(&totalNum), sizeof(int));
             int count = 0;
             ShareData data;
+            data.mTime = QDateTime(date).toMSecsSinceEpoch();
             while (!file.atEnd() ) {
                 count++;
                 if(count == 1)

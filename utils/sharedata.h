@@ -412,9 +412,9 @@ public:
         }
     }
 
-    ShareData &valueOfDate(const QDate& date)
+    ShareData &valueOfDate(const QDate& date, const QString& code)
     {
-        qint64 key = QDateTime(date).toMSecsSinceEpoch();
+        QString key = QString("%1_%2").arg(QDateTime(date).toMSecsSinceEpoch()).arg(ShareBaseData::fullCode(code));
         if(!mDataIndexMap.contains(key))
         {
             ShareData data("UNDEF", date);
@@ -428,7 +428,8 @@ public:
     {
         if(this->contains(data)) return;
         QList<ShareData>::append(data);
-        mDataIndexMap[data.mTime] = this->size() - 1;
+        QString key = QString("%1_%2").arg(data.mTime).arg(ShareBaseData::fullCode(data.mCode));
+        mDataIndexMap[key] = this->size() - 1;
     }
 
     void append(const ShareDataList& list)
@@ -448,7 +449,7 @@ public:
     }
 
 private:
-    QMap<qint64, int>        mDataIndexMap;
+    QMap<QString, int>        mDataIndexMap; //key = time+code(sh600036)
 };
 
 #endif // SHAREDATA_H

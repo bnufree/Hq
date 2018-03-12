@@ -33,7 +33,6 @@ SOURCES += main.cpp\
     qhttpget.cpp \
     qeastmoneynorthboundthread.cpp \
     qeastmoneyhsgtdialog.cpp \
-    history/qeastmoneystockhistoryinfothread.cpp \
     history/qsharehistoryinfomgr.cpp \
 #    webfile/weberror.cpp \
 #    webfile/webfile.cpp \
@@ -61,7 +60,10 @@ SOURCES += main.cpp\
     basic_info/qsharefinancialinfowork.cpp \
     utils/sharedata.cpp \
     utils/blockdata.cpp \
-    hqtaskmagrcenter.cpp
+    hqtaskmagrcenter.cpp \
+    history/qsharehistoryinfothread.cpp \
+    history/qsharehistorycounterwork.cpp \
+    history/qsharehistoryfilework.cpp
 
 HEADERS  += dialog.h \
     dataexchange.h \
@@ -82,7 +84,6 @@ HEADERS  += dialog.h \
     qhttpget.h \
     qeastmoneynorthboundthread.h \
     qeastmoneyhsgtdialog.h \
-    history/qeastmoneystockhistoryinfothread.h \
     history/qsharehistoryinfomgr.h \
 #    webfile/debugout.h \
 #    webfile/weberror.h \
@@ -113,7 +114,10 @@ HEADERS  += dialog.h \
     basic_info/qsharefinancialinfowork.h \
     utils/sharedata.h \
     utils/blockdata.h \
-    hqtaskmagrcenter.h
+    hqtaskmagrcenter.h \
+    history/qsharehistoryinfothread.h \
+    history/qsharehistorycounterwork.h \
+    history/qsharehistoryfilework.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

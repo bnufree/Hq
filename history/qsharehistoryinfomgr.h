@@ -35,13 +35,16 @@ public slots:
     void slotStartGetHistory();
     void slotUpdateAllShareFromDate(bool deldb, const QDate& date = QDate(2017,3,17));
     void slotUpdateForignVolInfo(const ShareDataList& list, const QDate& date);
-    void slotUpdateShareHistoryProcess(const QString& code);
+    void slotUpdateShareHistoryProcess(const ShareDataList& list);
     void slotDbUpdateHistoryFinished();
     void slotUpdateShareHistoryInfoFinished(const QString& code);
+    void slotUpdateReadHistoryInfo(const ShareDataList& list);
+    void slotUpdateWriteHistoryInfo(const ShareDataList& list);
+
 private:
     QThread             mWorkThread;
     QStringList         mCodesList;
-    QMap<QString, ShareDataList>    mShareInfoMap;
+    QMap<QDate, ShareDataList>    mShareInfoMap;
     QMutex              mShareInfoMutex;
     QMutex              mShareHistoryMutex;
     int                 mCurCnt;

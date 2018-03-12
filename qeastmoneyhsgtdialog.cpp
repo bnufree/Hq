@@ -71,7 +71,7 @@ void QEastMoneyHSGTDialog::slotRecvListInfo(const ShareDataList& list)
     int row = 0;
     foreach (ShareData info, list) {
         int col = 0;
-        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(info.mDate.toString("yyyy-MM-dd")));
+        ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QDateTime::fromMSecsSinceEpoch(info.mTime).toString("yyyy-MM-dd")));
         ui->tableWidget->setItem(row, col++, new QTableWidgetItem(info.mCode));
         ui->tableWidget->setItem(row, col++, new QTableWidgetItem(info.mName));
         ui->tableWidget->setItem(row, col++, new QTableWidgetItem(QString::number(info.mClose, 'f', 2)));

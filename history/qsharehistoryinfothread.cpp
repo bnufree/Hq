@@ -1,17 +1,13 @@
-﻿#include "qeastmoneystockhistoryinfothread.h"
+﻿#include "qsharehistoryinfothread.h"
 #include <QDateTime>
 #include <QDebug>
-#include "dbservices/dbservices.h"
 #include "qhttpget.h"
 #include "utils/hqutils.h"
 
-QEastmoneyShareHistoryInfoThread::QEastmoneyShareHistoryInfoThread(const QString& code, const QDate& date, const QString& dir,bool deldb, ShareDataList* list, QObject* parent) :
+QShareHistoryInfoThread::QShareHistoryInfoThread(const QString& code, const QDate& date, QObject* parent) :
     mCode(code),
     mStartDate(date),
-    mSaveDir(dir),
-    mHistoryListPtr(list),
     mParent(parent),
-    mDelDB(deldb),
     QRunnable()
 {
     mCode = code;
@@ -21,17 +17,16 @@ QEastmoneyShareHistoryInfoThread::QEastmoneyShareHistoryInfoThread(const QString
     }
 }
 
-QEastmoneyShareHistoryInfoThread::~QEastmoneyShareHistoryInfoThread()
+QShareHistoryInfoThread::~QShareHistoryInfoThread()
 {
 
 }
 
-void QEastmoneyShareHistoryInfoThread::run()
+void QShareHistoryInfoThread::run()
 {
     QDate start = mStartDate;
     QDate end = QDate::currentDate().addDays(-1);
-
-    if(!mHistoryListPtr) goto FUNC_END;
+    ShareDataList list;
 
     //只更新基本几只ETF
     if(mCode.left(1) == "5" || mCode.left(1) == "1")
@@ -65,7 +60,7 @@ void QEastmoneyShareHistoryInfoThread::run()
                 QDate curDate = QDate::fromString(cols[0], "yyyy-MM-dd");
                 if(!HqUtils::activeDay(curDate)) continue;
                 if(cols[3].toDouble() == 0) continue;
-                ShareData &data = mHistoryListPtr->valueOfDate(curDate);
+                ShareData data;
                 data.mTime = QDateTime(curDate).toMSecsSinceEpoch();
                 data.setCode(mCode);
                 data.setName(cols[2]);
@@ -83,50 +78,22 @@ void QEastmoneyShareHistoryInfoThread::run()
                 data.mTotalShare = cols[13].toDouble() / price;
                 data.mMutalShare= cols[14].toDouble() / price;
                 data.mClose = data.mCur;
-                //list.append(data);
+                list.append(data);
             }
         }
-        if(mHistoryListPtr->size() > 0)
-        {
-            //emit DATA_SERVICE->signalRecvShareHFistoryInfos(mCode, *mHistoryListPtr, mDelDB);
-        }
     }
-    //emit DATA_SERVICE->signalUpdateShareinfoWithHistory(mCode);
-
-#if 0
-     QString fileName = QString("%1%2.dat").arg(SAVE_DIR).arg(mDate.toString("yyyyMMdd"));
-     //将数据写入到文件
-     if(list.length() > 0)
-     {
-         FILE *fp = fopen(fileName.toStdString().data(), "wb+");
-         if(fp)
-         {
-             QDateTime wkDateTime;
-             wkDateTime.setDate(mDate);
-             qint64 cur =wkDateTime.addDays(-1).toMSecsSinceEpoch();
-             fwrite(&cur, sizeof(cur), 1, fp);
-             for(int i=0; i<list.size(); i++){
-                 fwrite(&(list[i].mCode), sizeof(QString), 1, fp);
-                 fwrite(&(list[i].mForeignVol), sizeof(qint64), 1, fp);
-             }
-             //然后在移动到开头写入时间，保证是最新的
-             fseek(fp, 0, SEEK_SET);
-             cur = wkDateTime.toMSecsSinceEpoch();
-             fwrite(&cur, sizeof(cur), 1, fp);
-             fclose(fp);
-         }
-     }
-#endif
 
 FUNC_END:
     if(mParent)
     {
-        QMetaObject::invokeMethod(mParent, "slotUpdateShareHistoryProcess", Qt::DirectConnection, Q_ARG(QString,mCode ));
+        QMetaObject::invokeMethod(mParent,\
+                                  "slotUpdateShareHistoryProcess",\
+                                  Qt::DirectConnection, Q_ARG(ShareDataList,list ));
     }
     return;
 }
 
-QString QEastmoneyShareHistoryInfoThread::getCode()
+QString QShareHistoryInfoThread::getCode()
 {
     return mCode;
 }
