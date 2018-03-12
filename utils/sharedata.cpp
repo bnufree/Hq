@@ -1,6 +1,6 @@
 ﻿#include "sharedata.h"
 
-ShareData::ShareData(const QString& code):ShareBaseData(code)
+ShareData::ShareData():ShareBaseData()
 {
     qRegisterMetaType<ShareDataList>("const ShareDataList&");
     mProfit = 0;

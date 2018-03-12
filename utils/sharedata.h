@@ -192,7 +192,6 @@ public:
             break;
         default:
             break;
->>>>>>> dd59966114f651cc2d52ef00e4a13b6ce3240d8b
         }
 
         return res;
