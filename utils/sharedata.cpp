@@ -20,7 +20,10 @@ ShareData::ShareData():ShareBaseData()
     mChgPersFromYear = 0.0;
     mLastClose = 0.0;
     mMoneyRatio = 0.0;
-    mBlockList.clear();
+    for(int i=0; i<20; i++)
+    {
+        mBlockCode[i] = 0;
+    }
     mZJLX = 0.0;
     mGXL = 0.0;
     mTotalCap = 0;
@@ -243,3 +246,14 @@ bool ShareData::sortByYearChgDesc(const ShareData &d1, const ShareData &d2)
 {
     return d1.mChgPersFromYear > d2.mChgPersFromYear;
 }
+
+bool ShareData::sortByDateAsc(const ShareData &d1, const ShareData &d2)
+{
+    return d1.mTime < d2.mTime;
+}
+
+bool ShareData::sortByDateDesc(const ShareData &d1, const ShareData &d2)
+{
+    return d1.mTime > d2.mTime;
+}
+

@@ -106,7 +106,8 @@ void HqInfoService::initSignalSlot()
     connect(this, SIGNAL(signalInitDBTables()), this, SLOT(slotInitDBTables()));
     connect(this, SIGNAL(signalUpdateShareCodesList(QStringList)), this, SLOT(slotUpdateShareCodesList(QStringList)));
     connect(this, SIGNAL(signalRecvShareHistoryInfos(QString,ShareDataList, bool)), this, SLOT(slotRecvShareHistoryInfos(QString,ShareDataList, bool)));
-    connect(this, SIGNAL(signalUpdateShareinfoWithHistory(QString)), this, SLOT(slotUpdateShareinfoWithHistory(QString)));
+    connect(this, SIGNAL(signalUpdateShareinfoWithHistory(QString,double,double,double,double,double,double, qint64, qint64)),\
+            this, SLOT(slotUpdateShareinfoWithHistory(QString,double,double,double,double,double,double, qint64, qint64)));
     connect(this, SIGNAL(signalUpdateShareBasicInfo(ShareBaseDataList)), this, SLOT(slotUpdateShareBasicInfo(ShareBaseDataList)));
     connect(this, SIGNAL(signalQueryShareForeignVol(QString)), this, SLOT(slotQueryShareForeignVol(QString)));
     connect(this, SIGNAL(signalRecvAllShareHistoryInfos(ShareDataList,bool)), this, SLOT(slotRecvAllShareHistoryInfos(ShareDataList,bool)));
@@ -271,25 +272,27 @@ bool HqInfoService::GetHistoryInfoWithDate(const QString &table, const QDate &da
     return false;
 }
 
-void HqInfoService::slotUpdateShareinfoWithHistory(const QString &code)
+void HqInfoService::slotUpdateShareinfoWithHistory(const QString& code,\
+                                                   double lastMoney,\
+                                                   double last3Change,\
+                                                   double last5Change,\
+                                                   double last10Change,\
+                                                   double lastMonthChange,\
+                                                   double lastYearChange,\
+                                                   qint64 vol,\
+                                                   qint64 vol_chnage)
 {
     ShareData *data = mStkRealInfo[ShareBaseData::fullCode(code.right(6))];
     if(data)
     {
-        data->mLastMoney = mDataBase.getLastMoney(data->mCode);
-        data->mLast3DaysChgPers = mDataBase.getMultiDaysChangePercent(data->mCode, DAYS_3);
-        data->mLast5DaysChgPers = mDataBase.getMultiDaysChangePercent(data->mCode, DAYS_5);
-        data->mLast10DaysChgPers = mDataBase.getMultiDaysChangePercent(data->mCode, DAYS_10);
-        data->mLastMonthChgPers = mDataBase.getMultiDaysChangePercent(data->mCode, DAYS_MONTH);
-        data->mChgPersFromYear = mDataBase.getMultiDaysChangePercent(data->mCode, DAYS_YEARS);
-        qint64 vol, vol_chg = 0;
-        if(mDataBase.getLastForeignVol(vol, vol_chg, data->mCode))
-        {
-            data->mForeignVol = vol;
-            data->mForeignVolChg = vol_chg;
-        }
-//        data->mLastClose = last_close;
-//        data->mProfit = mStkProfitMap[data->mCode];
+        data->mLastMoney = lastMoney;
+        data->mLast3DaysChgPers = last3Change;
+        data->mLast5DaysChgPers = last5Change;
+        data->mLast10DaysChgPers = last10Change;
+        data->mLastMonthChgPers = lastMonthChange;
+        data->mChgPersFromYear = lastYearChange;
+        data->mForeignVol = vol;
+        data->mForeignVolChg = vol_chnage;
     }
     emit signalUpdateShareHistoryFinished(code);
 }

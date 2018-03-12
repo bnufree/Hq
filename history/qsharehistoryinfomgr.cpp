@@ -1,6 +1,7 @@
 ﻿#include "qsharehistoryinfomgr.h"
 #include "qsharehistoryinfothread.h"
 #include "qsharehistoryfilework.h"
+#include "qsharehistorycounterwork.h"
 #include "dbservices/dbservices.h"
 #include "../qeastmoneyhsgtshareamount.h"
 #include <QDebug>
@@ -106,6 +107,7 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
     emit signalUpdateHistoryMsg(QStringLiteral("开始将日线数据写入文件"));
 
     wkDate = date;
+    mCurCnt = 0;
     while(wkDate < HqUtils::latestActiveDay())
     {
         QString fileName = QString("%1%2.dat").arg(SAVE_DIR).arg(wkDate.toString("yyyyMMdd"));
@@ -117,37 +119,55 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
         }
         wkDate = wkDate.addDays(1);
     }
+    mPool.waitForDone();
+    mShareInfoMap.clear();
 
 
     emit signalUpdateHistoryMsg(QStringLiteral("开始读入日线数据"));
+    mCurCnt = 0;
     wkDate = QDate(2017,3,17);
     while(wkDate < HqUtils::latestActiveDay())
     {
         QString fileName = QString("%1%2.dat").arg(SAVE_DIR).arg(wkDate.toString("yyyyMMdd"));
-        QShareHistoryFileWork * process = new QShareHistoryFileWork(FILE_WRITE, fileName, ShareDataList(), this);
+        QShareHistoryFileWork * process = new QShareHistoryFileWork(FILE_READ, fileName, ShareDataList(), this);
         mPool.start(process);
         wkDate = wkDate.addDays(1);
     }
+    mPool.waitForDone();
+
+    emit signalUpdateHistoryMsg(QStringLiteral("开始进行日线数据统计"));
+    foreach(QString code, mShareInfoHistoryMap.keys())
+    {
+        QShareHistoryCounterWork * process = new QShareHistoryCounterWork(code, mShareInfoHistoryMap[code], this);
+        mPool.start(process);
+    }
+    mPool.waitForDone();
 
 }
 
 void QShareHistoryInfoMgr::slotUpdateReadHistoryInfo(const ShareDataList &list)
 {
-
+    foreach (ShareData data, list) {
+        ShareDataList &wklist = mShareInfoHistoryMap[data.mCode];
+        wklist.append(data);
+    }
+    mCurCnt++;
+    emit signalUpdateHistoryMsg(QStringLiteral("读入日线文件：%1/%2").arg(mCurCnt).arg(300));
 }
 
 void QShareHistoryInfoMgr::slotUpdateWriteHistoryInfo(const ShareDataList &list)
 {
-
+    mCurCnt++;
+    emit signalUpdateHistoryMsg(QStringLiteral("写入日线文件：%1/%2").arg(mCurCnt).arg(mShareInfoMap.size()));
 }
 
 void QShareHistoryInfoMgr::slotDbUpdateHistoryFinished()
 {
-    QStringList keys(mShareInfoMap.keys());
-    foreach (QString key, keys) {
-        emit DATA_SERVICE->signalUpdateShareinfoWithHistory(key);
-    }
-    Profiles::instance()->setValue("UPDATE", "DATE", HqUtils::date2Str(HqUtils::latestActiveDay().addDays(-1)));
+//    QStringList keys(mShareInfoMap.keys());
+//    foreach (QString key, keys) {
+//        emit DATA_SERVICE->signalUpdateShareinfoWithHistory(key);
+//    }
+//    Profiles::instance()->setValue("UPDATE", "DATE", HqUtils::date2Str(HqUtils::latestActiveDay().addDays(-1)));
 }
 
 void QShareHistoryInfoMgr::slotUpdateShareHistoryInfoFinished(const QString &code)
@@ -155,9 +175,9 @@ void QShareHistoryInfoMgr::slotUpdateShareHistoryInfoFinished(const QString &cod
     static int num = 0;
     num++;
     emit signalUpdateHistoryMsg(QString("%1:%2/%3").\
-                                arg(QStringLiteral("更新开始信息")).\
+                                arg(QStringLiteral("统计历史信息")).\
                                 arg(num).\
-                                arg(mShareInfoMap.count()));
+                                arg(mShareInfoHistoryMap.count()));
 
 
     if(num == mShareInfoMap.count())

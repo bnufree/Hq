@@ -50,6 +50,7 @@ private:
     int                 mCurCnt;
     QThreadPool         mPool;
     QDate               mLastUpdateDate;
+    QMap<QString, ShareDataList>  mShareInfoHistoryMap;
 };
 
 #endif // QSHAREHISTORYINFOMGR_H

@@ -329,6 +329,9 @@ public:
     static bool sortByForCapChgDesc(const ShareData& d1, const ShareData& d2);
     static bool sortByForCapChgAsc(const ShareData& d1, const ShareData& d2);
 
+    static bool sortByDateDesc(const ShareData& d1, const ShareData& d2);
+    static bool sortByDateAsc(const ShareData& d1, const ShareData& d2);
+
     bool operator ==(const ShareData& data)
     {
         return this->mCode == data.mCode && this->mTime == data.mTime && this->mShareType == data.mShareType;

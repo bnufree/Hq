@@ -335,7 +335,7 @@ bool HQDBDataBase::getBasicShareDataList(QMap<QString, ShareData*>& pShareMap)
         info->mTotalShare = mSQLQuery.value(HQ_TABLE_COL_TOTALMNT).toLongLong();
         info->mMutalShare = mSQLQuery.value(HQ_TABLE_COL_MUTAL).toLongLong();
         info->mProfit = mSQLQuery.value(HQ_TABLE_COL_PROFIT).toDouble();
-        info->mBlockCodeList = mSQLQuery.value(HQ_TABLE_COL_BLOCK_LIST).toStringList();
+        //info->mBlockCodeList = mSQLQuery.value(HQ_TABLE_COL_BLOCK_LIST).toStringList();
         pShareMap[QString::fromStdString(info->mCode)] = info;
     }
     return true;
@@ -446,7 +446,7 @@ bool HQDBDataBase::updateBasicShare(const ShareData& data, bool exist)
     mSQLQuery.addBindValue(data.mTotalShare);
     mSQLQuery.addBindValue(data.mMutalShare);
     mSQLQuery.addBindValue(data.mProfit);
-    mSQLQuery.addBindValue(data.mBlockCodeList);
+    mSQLQuery.addBindValue("data.mBlockCodeList");
     mSQLQuery.addBindValue(data.mCode);
     if(!mSQLQuery.exec())
     {
@@ -520,7 +520,7 @@ bool HQDBDataBase::updateHistoryShare(const ShareData &info, bool exist)
     mSQLQuery.addBindValue(info.mTotalShare);
     mSQLQuery.addBindValue(info.mMutalShare);
     mSQLQuery.addBindValue(info.mCode);
-    mSQLQuery.addBindValue(info.mDate);
+    mSQLQuery.addBindValue(info.mTime);
     return mSQLQuery.exec();
 }
 
@@ -672,7 +672,7 @@ bool HQDBDataBase::getHistoryDataOfCode(ShareDataList& list, const QString &code
         data.mChgPercent = mSQLQuery.value(HQ_TABLE_COL_CHANGE_PERCENT).toDouble();
         data.mForeignVol = mSQLQuery.value(HQ_TABLE_COL_HSGT_HAVE).toLongLong();
         data.mForeignCap = data.mClose * data.mForeignVol;
-        data.mDate = mSQLQuery.value(HQ_TABLE_COL_DATE).toDate();
+        data.mTime = QDateTime(mSQLQuery.value(HQ_TABLE_COL_DATE).toDate()).toMSecsSinceEpoch();
         if(list.size() > 0)
         {
             ShareData& last = list[list.size() -1];

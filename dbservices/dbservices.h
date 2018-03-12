@@ -60,7 +60,15 @@ signals:
     void signalQueryAllShareBasicInfo();
     void signalAddShareBasicInfo(const ShareData& data);
     void signalAddShareBasicInfoList(const ShareDataList& list);
-    void signalUpdateShareinfoWithHistory(const QString& code);
+    void signalUpdateShareinfoWithHistory(const QString& code,\
+                                          double lastMoney,\
+                                          double last3Change,\
+                                          double last5Change,\
+                                          double last10Change,\
+                                          double lastMonthChange,\
+                                          double lastYearChange,\
+                                          qint64 vol,\
+                                          qint64 vol_chnage);
     void signalUpdateStkProfitList(const ShareDataList& list);
     void signalInitShareRealInfos(const QStringList& codes);
     void signalSetFavCode(const QString& code);
@@ -81,7 +89,15 @@ public slots:
     void initBlockData(int type = 0);
     void initShareData();
 //    void slotQueryShareHistoryLastDate(const QString& code);
-    void slotUpdateShareinfoWithHistory(const QString& code);
+    void slotUpdateShareinfoWithHistory(const QString& code,\
+                                        double lastMoney,\
+                                        double last3Change,\
+                                        double last5Change,\
+                                        double last10Change,\
+                                        double lastMonthChange,\
+                                        double lastYearChange,\
+                                        qint64 vol,\
+                                        qint64 vol_chnage);
     void slotUpdateHistoryChange(const QString& code);
     void slotUpdateStkProfitList(const ShareDataList& list);
     void slotAddShareAmoutByForeigner(const ShareDataList& list);
