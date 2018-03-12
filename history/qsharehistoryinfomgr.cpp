@@ -96,11 +96,10 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
     }
     mPool.waitForDone();
     emit signalUpdateHistoryMsg(QStringLiteral("开始将日线数据写入到数据库..."));
-    ShareDataList list;
     foreach (QString key, mShareInfoMap.keys()) {
-        list.append(mShareInfoMap.value(key));
+        emit DATA_SERVICE->signalRecvShareHistoryInfos(key, ShareDataList(mShareInfoMap[key], deldb));
     }
-    DATA_SERVICE->signalRecvAllShareHistoryInfos(list, deldb);
+    //DATA_SERVICE->signalRecvAllShareHistoryInfos(list, deldb);
 
 }
 

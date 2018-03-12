@@ -493,15 +493,15 @@ void   HqInfoService::setShareBlock(const QString &code, const QString &block)
     ShareData *data = mStkRealInfo[code.right(6)];
     if(data)
     {
-        if(!data->mBlockCodeList.contains(block))
+        if(!data->isContainsBlock(block.toInt()))
         {
-            data->mBlockCodeList.append(block);
+            data->appendBlock(block.toInt());
         }
-        BlockData* blockptr = mBlockDataMap[block];
-        if(blockptr && (!data->mBlockList.contains(blockptr)))
-        {
-            data->mBlockList.append(blockptr);
-        }
+//        BlockData* blockptr = mBlockDataMap[block];
+//        if(blockptr && (!data->mBlockList.contains(blockptr)))
+//        {
+//            data->mBlockList.append(blockptr);
+//        }
     }
 }
 
