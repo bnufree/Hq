@@ -66,7 +66,7 @@ void QEastmoneyShareHistoryInfoThread::run()
                 if(!HqUtils::activeDay(curDate)) continue;
                 if(cols[3].toDouble() == 0) continue;
                 ShareData &data = mHistoryListPtr->valueOfDate(curDate);
-                data.mDate = curDate;
+                data.mTime = QDateTime(curDate).toMSecsSinceEpoch();
                 data.setCode(mCode);
                 data.setName(cols[2]);
                 data.mCur = cols[3].toDouble();
@@ -86,12 +86,12 @@ void QEastmoneyShareHistoryInfoThread::run()
                 //list.append(data);
             }
         }
-//        if(mHistoryListPtr->size() > 0)
-//        {
-//            emit DATA_SERVICE->signalRecvShareHistoryInfos(mCode, *mHistoryListPtr, mDelDB);
-//        }
+        if(mHistoryListPtr->size() > 0)
+        {
+            //emit DATA_SERVICE->signalRecvShareHFistoryInfos(mCode, *mHistoryListPtr, mDelDB);
+        }
     }
-//    emit DATA_SERVICE->signalUpdateShareinfoWithHistory(mCode);
+    //emit DATA_SERVICE->signalUpdateShareinfoWithHistory(mCode);
 
 #if 0
      QString fileName = QString("%1%2.dat").arg(SAVE_DIR).arg(mDate.toString("yyyyMMdd"));

@@ -98,10 +98,11 @@ void QShareTablewidget::setDataList(const ShareDataList &list)
         this->setItemText(i, k++, QString("").sprintf("%.2f",data.mHsl * 100));
         this->setItemText(i, k++, QDateTime::fromMSecsSinceEpoch(data.mGQDJR).toString("yyyy-MM-dd"));
         this->setItemText(i, k++, QDateTime::fromMSecsSinceEpoch(data.mYAGGR).toString("yyyy-MM-dd"));
-        this->setItemText(i, k++, QDateTime::fromMSecsSinceEpoch(data.mUpdateTime).toString("hh:mm:ss"));
+        this->setItemText(i, k++, QDateTime::fromMSecsSinceEpoch(data.mTime).toString("hh:mm:ss"));
         this->updateFavShareIconOfRow(i, data.mIsFav);
         this->item(i, 0)->setData(Qt::UserRole, data.mCode);
-        this->item(i, 0)->setData(Qt::UserRole+1, QVariant::fromValue(data.mBlockList));
+//        this->item(i, 0)->setData(Qt::UserRole+1, QVariant::fromValue(data.mBlockList));
+        this->item(i, 0)->setData(Qt::UserRole+1, QVariant::fromValue((void*)data.mBlockCode));
         i++;
 
     }

@@ -124,7 +124,7 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
         }
         data->mForeignCap = data->mForeignVol * data->mCur ;
         data->mForeignCapChg = data->mForeignVolChg * data->mCur ;
-        data->mUpdateTime = QDateTime::currentMSecsSinceEpoch();
+//        data->mUpdateTime = QDateTime::currentMSecsSinceEpoch();
         datalist.append(*data);
     }
     emit sendStkDataList(datalist);

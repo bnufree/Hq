@@ -276,7 +276,7 @@ public:
     }
     ShareData(const QString& code, const QDate& date):ShareBaseData(code)
     {
-        mDate = date;
+        mTime = QDateTime(date).toMSecsSinceEpoch();
     }
 
     ~ShareData();
@@ -331,7 +331,36 @@ public:
 
     bool operator ==(const ShareData& data)
     {
-        return this->mCode == data.mCode && this->mDate == data.mDate && this->mShareType == data.mShareType;
+        return this->mCode == data.mCode && this->mTime == data.mTime && this->mShareType == data.mShareType;
+    }
+
+    bool appendBlock(int code)
+    {
+        bool sts = false;
+        for(int i=0; i<20; i++)
+        {
+            if(mBlockCode[i] == 0)
+            {
+                mBlockCode[i] =code;
+                sts = true;
+                break;
+            }
+        }
+        return sts;
+    }
+
+    bool isContainsBlock(int code)
+    {
+        bool exist = false;
+        for(int i=0; i<20; i++)
+        {
+            if(mBlockCode[i] == code)
+            {
+                exist = true;
+                break;
+            }
+        }
+        return exist;
     }
 
 public:
@@ -365,12 +394,9 @@ public:
     double          mClose;
     double          mMoney;
     double          mRZRQ;
-    qint64          mVol;
-    qint64          mUpdateTime;
-    QDate           mDate;
-    BlockDataList     mBlockList;
-    QStringList       mBlockCodeList;
-
+    qint64          mVol;    
+    qint64          mTime;
+    int             mBlockCode[20];
 };
 
 Q_DECLARE_METATYPE(ShareData)
@@ -388,20 +414,21 @@ public:
 
     ShareData &valueOfDate(const QDate& date)
     {
-        if(!mDataIndexMap.contains(date))
+        qint64 key = QDateTime(date).toMSecsSinceEpoch();
+        if(!mDataIndexMap.contains(key))
         {
             ShareData data("UNDEF", date);
             append(data);
         }
         //qDebug()<<date<<mDataIndexMap.value(date)<<this->size();
-        return (*this)[mDataIndexMap.value(date)];
+        return (*this)[mDataIndexMap.value(key)];
     }
 
     void append(const ShareData& data)
     {
         if(this->contains(data)) return;
         QList<ShareData>::append(data);
-        mDataIndexMap[data.mDate] = this->size() - 1;
+        mDataIndexMap[data.mTime] = this->size() - 1;
     }
 
     void append(const ShareDataList& list)
@@ -421,7 +448,7 @@ public:
     }
 
 private:
-    QMap<QDate, int>        mDataIndexMap;
+    QMap<qint64, int>        mDataIndexMap;
 };
 
 #endif // SHAREDATA_H
