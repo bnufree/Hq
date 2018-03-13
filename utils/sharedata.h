@@ -272,11 +272,12 @@ public:
     ShareData();
     ShareData(const ShareBaseData& data):ShareBaseData(data)
     {
-
+        mClose = 0.0;
     }
     ShareData(const QString& code, const QDate& date):ShareBaseData(code)
     {
         mTime = QDateTime(date).toMSecsSinceEpoch();
+        mClose = 0.0;
     }
 
     ~ShareData();
@@ -420,7 +421,7 @@ public:
         QString key = QString("%1_%2").arg(QDateTime(date).toMSecsSinceEpoch()).arg(ShareBaseData::fullCode(code));
         if(!mDataIndexMap.contains(key))
         {
-            ShareData data("UNDEF", date);
+            ShareData data(code, date);
             append(data);
         }
         //qDebug()<<date<<mDataIndexMap.value(date)<<this->size();

@@ -104,6 +104,7 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
         if(data->mLastMoney> 0){
             data->mMoneyRatio = data->mMoney / data->mLastMoney;
         }
+        //qDebug()<<data->mCode<<data->mName<<data->mMoney<<data->mLastMoney<<data->mMoneyRatio;
         if(data->mCur == 0)
         {
             data->mCur = data->mLastClose;

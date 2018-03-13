@@ -149,4 +149,19 @@ QDate   HqUtils::latestActiveDay()
     return date;
 }
 
+int   HqUtils::activeDaysNum(const QDate &start)
+{
+    int num = 0;
+    QDate wkdate = start;
+    while (wkdate < latestActiveDay()) {
+        if(activeDay(wkdate))
+        {
+            num++;
+        }
+        wkdate = wkdate.addDays(1);
+    }
+
+    return num;
+}
+
 

@@ -72,6 +72,10 @@ void QHKExchangeVolDataProcess::getMktVolInfo(ShareDataList &list, const QDate &
             data.mForeignVol = vol;
             data.mTime = QDateTime(mDate).toMSecsSinceEpoch();
             list.append(data);
+            if(date == QDate(2017,3,17))
+            {
+                qDebug()<<"code:"<<QString::fromStdString(data.mCode)<<date<<data.mForeignVol;
+            }
         } else
         {
             break;
@@ -89,14 +93,12 @@ void QHKExchangeVolDataProcess::getMktVolInfo(ShareDataList &list, const QDate& 
     QFile file(fileName);
     if(!file.open(QIODevice::ReadOnly)) return;
     int size = file.size();
-    int totalNum = 0;
     if(size > sizeof(qint64) + sizeof(int))
     {
         qint64 lastupdate = 0;
         file.read((char*)(&lastupdate), sizeof(qint64));
         if(QDateTime::fromMSecsSinceEpoch(lastupdate).date() == date)
         {
-            file.read((char*)(&totalNum), sizeof(int));
             int count = 0;
             ShareData data;
             data.mTime = QDateTime(date).toMSecsSinceEpoch();
@@ -136,6 +138,15 @@ void QHKExchangeVolDataProcess::run()
         }
 
     }
+//    if(mParent)
+//    {
+//        QString msg = QStringLiteral("正在更新外资持股：") + mDate.toString("yyyy-MM-dd");
+//        QMetaObject::invokeMethod(mParent,\
+//                                  "signalUpdateHistoryMsg",\
+//                                  Qt::DirectConnection,\
+//                                  Q_ARG(QString,msg )\
+//                                  );
+//    }
     QString fileName = QString("%1%2.dat").arg(SAVE_DIR).arg(mDate.toString("yyyyMMdd"));
     //分别取得各个市场的数据
     ShareDataList list;
@@ -143,10 +154,31 @@ void QHKExchangeVolDataProcess::run()
     getMktVolInfo(list, mDate, fileName);
     if(list.length() == 0)
     {
-        for(int i=0; i<2; i++)
-        {
-            getMktVolInfo(list, mDate, i);
+        ShareDataList shlist, szlist;
+        int errorNUm = 0;
+        while (shlist.size() == 0 && szlist.size() == 0) {
+            errorNUm++;
+            getMktVolInfo(shlist, mDate, 0);
+            getMktVolInfo(szlist, mDate, 1);
+            if(errorNUm == 3)
+            {
+                break;
+            }
+
         }
+
+        if((shlist.size() == 0) ^ (szlist.size() == 0))
+        {
+            while (shlist.size() == 0) {
+                getMktVolInfo(shlist, mDate, 0);
+            }
+            while (szlist.size() == 0) {
+                getMktVolInfo(szlist, mDate, 1);
+            }
+        }
+        qDebug()<<mDate<<shlist.size()<<szlist.size();
+        list.append(shlist);
+        list.append(szlist);
         //写入文件保存
         //将数据写入到文件
         if(list.length() > 0)
@@ -161,8 +193,10 @@ void QHKExchangeVolDataProcess::run()
                 for(int i=0; i<list.size(); i++){
                     //fprintf(fp, "%s%ld", list[i].mCode.toStdString().data(), list[i].mForeignVol);
                     int code = atoi(list[i].mCode);
+                    qint64 vol = list[i].mForeignVol;
                     fwrite(&code, sizeof(int), 1, fp);
-                    fwrite(&(list[i].mForeignVol), sizeof(qint64), 1, fp);
+                    fwrite(&(vol), sizeof(qint64), 1, fp);
+                    qDebug()<<"write code:"<<code<<vol;
                 }
                 //然后在移动到开头写入时间，保证是最新的
                 fseek(fp, 0, SEEK_SET);
@@ -180,11 +214,6 @@ void QHKExchangeVolDataProcess::run()
                                   Q_ARG(ShareDataList, list),\
                                   Q_ARG(QDate, mDate)\
                                   );
-        QString msg = QStringLiteral("更新外资持股：") + mDate.toString("yyyy-MM-dd");
-        QMetaObject::invokeMethod(mParent,\
-                                  "signalUpdateHistoryMsg",\
-                                  Qt::DirectConnection,\
-                                  Q_ARG(QString,msg )\
-                                  );
+
     }
 }

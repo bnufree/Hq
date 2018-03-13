@@ -1,4 +1,4 @@
-#include "qsharehistorycounterwork.h"
+﻿#include "qsharehistorycounterwork.h"
 #include "dbservices/dbservices.h"
 
 QShareHistoryCounterWork::QShareHistoryCounterWork(const QString& code,const ShareDataList& list, QObject* parent)
@@ -23,6 +23,8 @@ void QShareHistoryCounterWork::run()
     double last10Change = 0.0;
     double lastMonthChange = 0.0;
     double lastYearChange = 0.0;
+    qint64 vol_change = 0;
+    qint64 vol = 0;
 
     if(size > 0)
     {
@@ -32,40 +34,45 @@ void QShareHistoryCounterWork::run()
         for(int i=0; i<5; i++)
         {
             ShareData curData;
-            if(size >= day[i])
+            if(size >= day[i]+1)
             {
-                curData = mList[day[i] -1];
+                curData = mList[day[i]];
             } else
             {
                 curData = mList[size-1];
             }
+            if(mCode == "600804")
+            {
+                qDebug()<<"array size:"<<size<<i<<lastMoney<<lastColse<<curData.mClose<<QDateTime::fromMSecsSinceEpoch(curData.mTime);
+            }
             if(i==0)
             {
-                last3Change = (lastColse - curData.mClose) / curData.mClose;
+                last3Change = (lastColse - curData.mClose) *100.0 / curData.mClose;
             }else if(i==1)
             {
-                last5Change = (lastColse - curData.mClose) / curData.mClose;
+                last5Change = (lastColse - curData.mClose)*100.0 / curData.mClose;
             }else if(i==2)
             {
-                last10Change = (lastColse - curData.mClose) / curData.mClose;
+                last10Change = (lastColse - curData.mClose)*100.0 / curData.mClose;
             }else if(i==3)
             {
-                lastMonthChange = (lastColse - curData.mClose) / curData.mClose;
+                lastMonthChange = (lastColse - curData.mClose)*100.0 / curData.mClose;
             }else if(i==4)
             {
-                lastYearChange = (lastColse - curData.mClose) / curData.mClose;
+                lastYearChange = (lastColse - curData.mClose)*100.0 / curData.mClose;
             }
         }
 
-        qint64 vol_change = mList[0].mForeignVol;
-        qint64 vol = vol_change;
+        vol = mList[0].mForeignVol;
+        vol_change = vol;
         if(size >=2)
         {
             vol_change -= mList[1].mForeignVol;
         }
-
-        DATA_SERVICE->signalUpdateShareinfoWithHistory(mCode, lastMoney, last3Change, last5Change, last10Change, lastMonthChange, lastYearChange, vol, vol_change);
     }
+    DATA_SERVICE->signalUpdateShareinfoWithHistory(mCode, lastMoney, last3Change, last5Change, last10Change, lastMonthChange, lastYearChange, vol, vol_change);
+
+ //   qDebug()<<mCode<<lastMoney<<last3Change<<last5Change<<last10Change<<lastMonthChange<<lastYearChange<<vol<<vol_change;
 
     if(mParent)
     {

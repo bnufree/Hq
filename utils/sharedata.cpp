@@ -30,6 +30,7 @@ ShareData::ShareData():ShareBaseData()
     mMutalbleCap = 0;
     mForeignCapChg = 0.0;
     mForeignVolChg = 0;
+    mClose = 0.0;
 }
 
 ShareData::~ShareData()

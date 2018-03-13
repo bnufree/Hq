@@ -23,6 +23,7 @@ public:
     static QDate    dateFromStr(const QString& str);
     static QString  double2Str(double val);
     static QDate    latestActiveDay();
+    static int      activeDaysNum(const QDate& start);
 
 public:
     static QStringList        mDatesList;

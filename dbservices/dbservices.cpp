@@ -285,7 +285,7 @@ void HqInfoService::slotUpdateShareinfoWithHistory(const QString& code,\
     ShareData *data = mStkRealInfo[ShareBaseData::fullCode(code.right(6))];
     if(data)
     {
-        data->mLastMoney = lastMoney;
+        data->mLastMoney = lastMoney * 0.0001;
         data->mLast3DaysChgPers = last3Change;
         data->mLast5DaysChgPers = last5Change;
         data->mLast10DaysChgPers = last10Change;

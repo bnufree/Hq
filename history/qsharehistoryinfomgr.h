@@ -44,13 +44,16 @@ public slots:
 private:
     QThread             mWorkThread;
     QStringList         mCodesList;
-    QMap<QDate, ShareDataList>    mShareInfoMap;
+    QMap<QString, ShareDataList>    mShareInfoMap;
     QMutex              mShareInfoMutex;
     QMutex              mShareHistoryMutex;
     int                 mCurCnt;
     QThreadPool         mPool;
     QDate               mLastUpdateDate;
     QMap<QString, ShareDataList>  mShareInfoHistoryMap;
+    int                 mHistoryFileNum;
+    int                 mCountCodeNum;
+    QStringList         mDates;
 };
 
 #endif // QSHAREHISTORYINFOMGR_H
