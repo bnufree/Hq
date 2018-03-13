@@ -43,8 +43,8 @@ void HqInfoService::slotInitDBTables()
     qDebug()<<__FUNCTION__<<__LINE__;
     if(mDataBase.createDBTables())
     {
-        initBlockData();
-        initShareData();
+        //initBlockData();
+        //initShareData();
         emit signalDbInitFinished();
     } else
     {
@@ -112,6 +112,7 @@ void HqInfoService::initSignalSlot()
     connect(this, SIGNAL(signalQueryShareForeignVol(QString)), this, SLOT(slotQueryShareForeignVol(QString)));
     connect(this, SIGNAL(signalRecvAllShareHistoryInfos(ShareDataList,bool)), this, SLOT(slotRecvAllShareHistoryInfos(ShareDataList,bool)));
     connect(this, SIGNAL(signalSetFavCode(QString)), this, SLOT(slotSetFavCode(QString)));
+    connect(this, SIGNAL(signalSearchCodesOfText(QString)), this, SLOT(slotSearchCodesOfText(QString)));
 }
 
 
@@ -119,6 +120,17 @@ void HqInfoService::initBlockData(int type)
 {
     QMutexLocker locker(&mBlockMutex);
     mDataBase.getBlockDataList(mBlockDataMap, type);
+}
+
+void HqInfoService::slotSearchCodesOfText(const QString &text)
+{
+    QStringList list;
+    if(!mDataBase.getSimilarCodeOfText(list, text))
+    {
+        //qDebug()<<"error:"<<mDataBase.errMsg();
+    }
+    //qDebug()<<"codes:"<<list;
+    emit signalSendSearchCodesOfText(list);
 }
 
 //从数据库中获取已经保存的数据

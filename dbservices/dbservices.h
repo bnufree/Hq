@@ -80,6 +80,7 @@ signals:
     void signalSendSearchCodesOfText(const QStringList& codes);
 
 public slots:
+    void slotSearchCodesOfText(const QString &text);
     void slotInitDBTables();
     void slotUpdateShareCodesList(const QStringList& list);
     void slotRecvAllShareHistoryInfos(const ShareDataList& list, bool deletedb);

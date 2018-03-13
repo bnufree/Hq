@@ -224,7 +224,7 @@ void Dialog::on_searchTxt_textChanged(const QString &arg1)
 {
     if(mTaskMgr)
     {
-        mTaskMgr->signalSearchCodesOfText(arg1);
+        mTaskMgr->signalSearchCodesOfText(arg1.toUpper());
     }
 
 }

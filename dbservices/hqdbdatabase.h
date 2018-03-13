@@ -64,6 +64,7 @@ public:
     bool createDBTables();
     QString errMsg();
     bool getHistoryDataOfCode(ShareDataList& list, const QString &code);
+    bool getSimilarCodeOfText(QStringList& codes, const QString& text);
 
 private:
     bool initSqlDB();

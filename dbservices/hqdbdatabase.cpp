@@ -73,6 +73,34 @@ bool HQDBDataBase::createTable(const QString &pTable, const TableColList& cols)
     return mSQLQuery.exec(sql);
 }
 
+bool HQDBDataBase::getSimilarCodeOfText(QStringList &codes, const QString &text)
+{
+    QMutexLocker locker(&mSQlMutex);
+    QRegExp num("[0-9]{1,6}");
+    QRegExp alpha("[A-Z]{1,6}");
+    bool sts = false;
+    if(num.exactMatch(text.toUpper()))
+    {
+        sts = mSQLQuery.exec(QString("select %1 from %2 where %3 like '%%4%' limit 10")\
+                             .arg(HQ_TABLE_COL_CODE)\
+                             .arg(HQ_SHARE_BASIC_INFO_TABLE)\
+                             .arg(HQ_TABLE_COL_CODE)\
+                             .arg(text));
+    }else {
+        sts = mSQLQuery.exec(QString("select %1 from %2 where %3 like '%%4%' limit 10")\
+                             .arg(HQ_TABLE_COL_CODE)\
+                             .arg(HQ_SHARE_BASIC_INFO_TABLE)\
+                             .arg(HQ_TABLE_COL_PY_ABBR)\
+                             .arg(text));
+    }
+    if(!sts) return false;
+    while (mSQLQuery.next()) {
+        codes.append(mSQLQuery.value(0).toString());
+    }
+
+    return true;
+}
+
 bool HQDBDataBase::getBlockDataList(QMap<QString, BlockData*>& pBlockMap, int type)
 {
     QMutexLocker locker(&mSQlMutex);
