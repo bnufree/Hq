@@ -491,7 +491,15 @@ foreignHolder HqInfoService::amountForeigner(const QString &code)
 BlockData*  HqInfoService::getBlockDataOfCode(const QString &code)
 {
     QMutexLocker locker(&mBlockMutex);
-    return mBlockDataMap.value(code, 0);
+    BlockData* data= mBlockDataMap.value(code, 0);
+    if(!data)
+    {
+        data = new BlockData;
+        data->mCode = code;
+        data->mIsFav = false;
+        mBlockDataMap[code] = data;
+    }
+    return data;
 
 }
 
@@ -502,10 +510,16 @@ void   HqInfoService::setBlockData(BlockData *data)
     mBlockDataMap[data->mCode] = data;
 }
 
+void   HqInfoService::setBlockShareCodes(const QString &block, const QStringList &codes)
+{
+    QMutexLocker locker(&mBlockMutex);
+    mBlockDataMap[block]->mShareCodeList = codes;
+}
+
 void   HqInfoService::setShareBlock(const QString &code, const QString &block)
 {
     QMutexLocker locker(&mShareMutex);
-    ShareData *data = mStkRealInfo[code.right(6)];
+    ShareData *data = mStkRealInfo[ShareBaseData::fullCode(code.right(6))];
     if(data)
     {
         if(!data->isContainsBlock(block.toInt()))
@@ -542,7 +556,7 @@ void  HqInfoService::slotUpdateShareCodesList(const QStringList &list)
 void HqInfoService::slotSetFavCode(const QString &code)
 {
     QMutexLocker locker(&mShareMutex);
-    ShareData* data = mStkRealInfo[code];
+    ShareData* data = mStkRealInfo[ShareBaseData::fullCode(code)];
     if(data)
     {
         data->mIsFav = !data->mIsFav;
@@ -555,4 +569,9 @@ void HqInfoService::slotQueryShareForeignVol(const QString& code)
     ShareDataList list;
     mDataBase.getHistoryDataOfCode(list, code);
     emit signalSendShareForeignVol(list);
+}
+
+BlockDataPList HqInfoService::getAllBlock()
+{
+    return mBlockDataMap.values();
 }

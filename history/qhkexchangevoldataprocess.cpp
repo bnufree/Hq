@@ -26,7 +26,7 @@ void QHKExchangeVolDataProcess::getMktVolInfo(ShareDataList &list, const QDate &
     res.remove(QRegularExpression("[\\s]"));
 //    qDebug()<<"start analysis!!!!!!!!!!!!!!";
     int start_index = 0;
-    QRegExp codeExp("7[07]{1}[0-9]{3}|9[0-9]{4}");
+    QRegExp codeExp("7[072]{1}[0-9]{3}|9[0-9]{4}");
     //QRegExp nameExp("[\u4e00-\u9fa5A-Z]{1,}");
     QRegExp volExp("([0-9]{1,3},){1,}[0-9]{1,}");
     QRegExp dateExp("\\d{2}/\\d{2}/\\d{4}");
@@ -72,7 +72,7 @@ void QHKExchangeVolDataProcess::getMktVolInfo(ShareDataList &list, const QDate &
             data.mForeignVol = vol;
             data.mTime = QDateTime(mDate).toMSecsSinceEpoch();
             list.append(data);
-            if(date == QDate(2017,3,17))
+            if(date == QDate(2018,3,14))
             {
                 qDebug()<<"code:"<<QString::fromStdString(data.mCode)<<date<<data.mForeignVol;
             }
@@ -117,6 +117,7 @@ void QHKExchangeVolDataProcess::getMktVolInfo(ShareDataList &list, const QDate& 
                     count = 0;
                     list.append(data);
                 }
+                qDebug()<<data.mCode<<data.mVol;
             }
         }
     }

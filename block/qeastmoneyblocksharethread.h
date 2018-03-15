@@ -1,22 +1,19 @@
-#ifndef QEASTMONEYBLOCKSHARETHREAD_H
+﻿#ifndef QEASTMONEYBLOCKSHARETHREAD_H
 #define QEASTMONEYBLOCKSHARETHREAD_H
 
 #include <QObject>
-#include <QThread>
+#include <QRunnable>
 
-class QEastMoneyBlockShareThread : public QThread
+class QEastMoneyBlockShareThread : public QRunnable
 {
-    Q_OBJECT
 public:
     explicit QEastMoneyBlockShareThread(const QString& pBlockCode, QObject *parent = 0);
     ~QEastMoneyBlockShareThread();
-
-signals:
-    void    signalUpdateBlockShareCodeList(const QString& pBlockCode, const QStringList& pShareCodesList);
-protected:
+public:
     void    run();
 private:
     QString     mBlockCode;
+    QObject*    mParent;
 };
 
 #endif // QEASTMONEYBLOCKSHARETHREAD_H

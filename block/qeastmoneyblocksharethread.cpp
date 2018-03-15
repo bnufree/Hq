@@ -1,9 +1,11 @@
 ﻿#include "qeastmoneyblocksharethread.h"
-#include <QRegularExpression>
+#include <QRegExp>
 #include "qhttpget.h"
 #include <QDebug>
 #include "dbservices/dbservices.h"
-QEastMoneyBlockShareThread::QEastMoneyBlockShareThread(const QString& pBlockCode, QObject *parent) : QThread(parent)
+
+QEastMoneyBlockShareThread::QEastMoneyBlockShareThread(const QString& pBlockCode, QObject *parent) :\
+    mParent(parent),QRunnable()
 {
     mBlockCode = pBlockCode;
 }
@@ -24,15 +26,18 @@ void QEastMoneyBlockShareThread::run()
 
 
     int index = 0;
-    while((index = result.indexOf(QRegularExpression(tr("[12]{1},(60[013][0-9]{3}|300[0-9]{3}|00[012][0-9]{3})")), index)) >= 0)
+    QRegExp exp("[12]{1},(60[013][0-9]{3}|300[0-9]{3}|00[012][0-9]{3})");
+    while((index = exp.indexIn(result, index)) >= 0)
     {
-        QString code = result.mid(index, 8);
-        code.left(1) == "1"? code.replace(0, 2, "s_sh"):code.replace(0, 2, "s_sz");
-        index = index+8;
+        QString code = exp.cap(1);
+        index += exp.matchedLength();
         sharecodeslist.append(code);
         DATA_SERVICE->setShareBlock(code, mBlockCode);
     }
+    if(sharecodeslist.length() > 0)
+    {
+        DATA_SERVICE->setBlockShareCodes(mBlockCode, sharecodeslist);
+    }
 
-    emit signalUpdateBlockShareCodeList(mBlockCode, sharecodeslist);
 }
 

@@ -8,9 +8,10 @@
 #include <QDate>
 
 class BlockData;
-typedef QList<BlockData*>       BlockDataList;
+typedef QList<BlockData*>       BlockDataPList;
 typedef QList<BlockData>        BlockDataVList;
-Q_DECLARE_METATYPE(BlockDataList)
+Q_DECLARE_METATYPE(BlockDataPList)
+Q_DECLARE_METATYPE(BlockDataVList)
 
 typedef enum BlockType
 {

@@ -3,34 +3,43 @@
 ShareData::ShareData():ShareBaseData()
 {
     qRegisterMetaType<ShareDataList>("const ShareDataList&");
-    mProfit = 0;
-    mForeignCap = 0.0;
-    mForeignVol = 0;
-    mMoney = 0.0;
-    mHsl = 0.0;
-    mLastMoney = 0.0;
-    mLastVol = 0;
-    mLastChgPer = 0.0;
-    mLast3DaysChgPers = 0.0;
-    mLast5DaysChgPers = 0.0;
-    mLast10DaysChgPers = 0.0;
-    mLastMonthChgPers = 0.0;
-    mChgPersFromMonth = 0.0;
-    mChgPersFromWeek = 0.0;
-    mChgPersFromYear = 0.0;
-    mLastClose = 0.0;
-    mMoneyRatio = 0.0;
+    mClose = 0.0;
     for(int i=0; i<20; i++)
     {
         mBlockCode[i] = 0;
     }
-    mZJLX = 0.0;
-    mGXL = 0.0;
+    mHsl = 0.0;
+    mLastMoney = 0.0;
+    mLastVol = 0;
+    mLastChgPer = 0;
+    mLast3DaysChgPers = 0;
+    mLast5DaysChgPers = 0;
+    mLast10DaysChgPers = 0;
+    mLastMonthChgPers = 0;
+    mChgPersFromYear = 0;
+    mChgPersFromWeek = 0;
+    mChgPersFromMonth = 0;
+    mLastClose = 0;
+    mMoneyRatio = 0;
+    mZJLX = 0;     //资金流向
+    mGXL = 0;   //股息率
     mTotalCap = 0;
     mMutalbleCap = 0;
-    mForeignCapChg = 0.0;
+    mForeignVol = 0;
     mForeignVolChg = 0;
-    mClose = 0.0;
+    mForeignCap = 0;
+    mForeignCapChg = 0;
+    mCur = 0;
+    mChg = 0;
+    mChgPercent = 0;
+    mHigh = 0;
+    mLow = 0;
+    mOpen = 0;
+    mClose = 0;
+    mMoney = 0;
+    mRZRQ = 0;
+    mVol = 0;
+    mTime = 0;
 }
 
 ShareData::~ShareData()

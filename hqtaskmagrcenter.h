@@ -42,6 +42,7 @@ public slots:
     void        slotUpdateHSGTOfCode(const QString& code);
     void        reverseSortRule();
     void        setCurBlockType(int type);
+    void        setDisplayChinaTop10();
 private:
     QThread                     mWorkThread;
     QList<QObject*>             mRealWorkObjList;

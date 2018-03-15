@@ -20,7 +20,7 @@ signals:
     void signalBlockDataListUpdated(const BlockDataVList& list);
     void start();
 public slots:
-    void slotRecvBlockDataList(const BlockDataList& list);
+    void slotRecvBlockDataList(const BlockDataPList& list);
     void slotStartRunMgr();
     void slotUpdateBlockInfo();    
     void    reverseSortRule();
@@ -30,7 +30,7 @@ private:
     int             mCurBlockType;
     QThread         mWorkThread;
     QTimer          *mWorkTimer;
-    BlockDataList   mBlockDataList;
+    BlockDataPList   mBlockDataList;
     int             mBlockRule;
 };
 

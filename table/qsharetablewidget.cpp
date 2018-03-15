@@ -2,6 +2,7 @@
 #include <QDebug>
 #include "utils/hqutils.h"
 #include "utils/sharedata.h"
+#include "dbservices/dbservices.h"
 
 
 QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
@@ -18,7 +19,7 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
     datalist.append(TableColData(QStringLiteral("5日变动"), STK_DISPLAY_SORT_TYPE_LAST5));
     datalist.append(TableColData(QStringLiteral("10日变动"), STK_DISPLAY_SORT_TYPE_LAST10));
     datalist.append(TableColData(QStringLiteral("月变动"), STK_DISPLAY_SORT_TYPE_LAST_MONTH));
-    datalist.append(TableColData(QStringLiteral("年变动"), STK_DISPLAY_SORT_TYPE_LAST_YEAR));
+    datalist.append(TableColData(QStringLiteral("年变动"), STK_DISPLAY_SORT_TYPE_LAST_YEAR,false));
     datalist.append(TableColData(QStringLiteral("资金流"), STK_DISPLAY_SORT_TYPE_ZJLX));
     datalist.append(TableColData(QStringLiteral("股息率%"), STK_DISPLAY_SORT_TYPE_GXL, false));
     datalist.append(TableColData(QStringLiteral("送转"), STK_DISPLAY_SORT_TYPE_SZZBL, false));
@@ -32,7 +33,7 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
     datalist.append(TableColData(QStringLiteral("换手率%"), STK_DISPLAY_SORT_TYPE_HSL));
     datalist.append(TableColData(QStringLiteral("登记日"), STK_DISPLAY_SORT_TYPE_GQDJR, false));
     datalist.append(TableColData(QStringLiteral("公告日"), STK_DISPLAY_SORT_TYPE_YAGGR, false));
-    datalist.append(TableColData(QStringLiteral("时间"), STK_DISPLAY_SORT_TYPE_NONE));
+    datalist.append(TableColData(QStringLiteral("时间"), STK_DISPLAY_SORT_TYPE_NONE,false));
 
     setHeaders(datalist);
     initMenu();
@@ -102,7 +103,7 @@ void QShareTablewidget::setDataList(const ShareDataList &list)
         this->updateFavShareIconOfRow(i, data.mIsFav);
         this->item(i, 0)->setData(Qt::UserRole, data.mCode);
 //        this->item(i, 0)->setData(Qt::UserRole+1, QVariant::fromValue(data.mBlockList));
-        this->item(i, 0)->setData(Qt::UserRole+1, QVariant::fromValue((void*)data.mBlockCode));
+        this->item(i, 0)->setData(Qt::UserRole+1, data.getBlockCodesList());
         i++;
 
     }
@@ -155,6 +156,7 @@ void QShareTablewidget::slotCustomContextMenuRequested(const QPoint &pos)
         itemlist.append(struMenu(QStringLiteral("分时图"), INFO_MINUTE_GRAPH));
         itemlist.append(struMenu(QStringLiteral("日线图"), INFO_K_GRAPH));
         itemlist.append(struMenu(QStringLiteral("沪深港通"), INFO_HSHK));
+        itemlist.append(struMenu(QStringLiteral("陆股通TOP10"), INFO_CHINA_TOP10));
         itemlist.append(struMenu(QStringLiteral("所属板块"), INFO_BLOCK_LIST));
 
         foreach (struMenu menu_item, itemlist) {
@@ -175,6 +177,9 @@ void QShareTablewidget::slotCustomContextMenuRequested(const QPoint &pos)
                 } else if(menu_item.mCmd == INFO_HSHK)
                 {
                     connect(act, &QAction::triggered, this, &QShareTablewidget::setDisplayHSHK);
+                } else if(menu_item.mCmd == INFO_CHINA_TOP10)
+                {
+                    connect(act, &QAction::triggered, this, &QShareTablewidget::signalDisplayChinaTop10);
                 }
 
                 insertContextMenu(act);
@@ -185,7 +190,7 @@ void QShareTablewidget::slotCustomContextMenuRequested(const QPoint &pos)
 
     }
 
-    //自选股编辑
+    //板块菜单
     QTableWidgetItem *table_item = this->itemAt(pos);
     qDebug()<<"item:"<<table_item;
     if(table_item)
@@ -198,8 +203,11 @@ void QShareTablewidget::slotCustomContextMenuRequested(const QPoint &pos)
             {
                 QMenu *wk = act->menu();
                 wk->clear();
-                QList<BlockData*> blocklist = table_item->data(Qt::UserRole+1).value<QList<BlockData*>>();
-                foreach (BlockData* block, blocklist) {
+                QStringList list = table_item->data(Qt::UserRole+1).toStringList();
+                foreach (QString code, list)
+                {
+                    qDebug()<<stkCode<<code;
+                    BlockData *block = DATA_SERVICE->getBlockDataOfCode(code);
                     if(block->mName.length() == 0) continue;
                     QAction *act = new QAction(this);
                     act->setText(QString("%1:%2%").arg(block->mName).arg(block->mChangePer));
@@ -257,9 +265,12 @@ void QShareTablewidget::setDisplayHSHK()
 
 void QShareTablewidget::slotCellDoubleClicked(int row, int col)
 {
-    QTableWidgetItem *item = this->item(row, 0);
-    if(!item) return;
-    QString code = item->data(Qt::UserRole).toString();
-    emit signalSetFavCode(code);
+    if(col == 0)
+    {
+        QTableWidgetItem *item = this->item(row, 0);
+        if(!item) return;
+        QString code = item->data(Qt::UserRole).toString();
+        emit signalSetFavCode(code);
+    }
     return;
 }

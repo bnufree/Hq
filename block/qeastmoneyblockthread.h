@@ -25,11 +25,11 @@ public:
     void    reverseSortRule();
     void    stop();
 signals:
-    void    sendBlockDataList(const BlockDataList& list);
+    void    sendBlockDataList(const BlockDataPList& list);
     void    sendStkinfoUpdateProgress(int cur, int total);
     void    signalUpdateMsg(const QString& msg);
     void    start();
-    void    sendShareBlockDataMap(const QMap<QString, BlockDataList>& map);
+    void    sendShareBlockDataMap(const QMap<QString, BlockDataPList>& map);
 public slots:
     void    slotUpdateBlockShare();
     void    slotUpdateBlockInfos();

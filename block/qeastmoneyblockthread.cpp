@@ -12,6 +12,7 @@
 #include "qhttpget.h"
 #include "dbservices/dbservices.h"
 #include "utils/hqutils.h"
+#include <QThreadPool>
 
 #define     BLOCK_NMAE          "name"
 #define     BLOCK_CODE          "codes"
@@ -37,8 +38,8 @@ QEastMoneyBlockThread::QEastMoneyBlockThread(int pBlockID, QObject *parent) : QO
     }
     mSortRule = -1;
     mBlockDataList.clear();
-    qRegisterMetaType<BlockDataList>("const BlockDataList&");
-    qRegisterMetaType<QMap<QString, BlockDataList>>("const QMap<QString, BlockDataList>&");
+    qRegisterMetaType<BlockDataPList>("const BlockDataPList&");
+    qRegisterMetaType<QMap<QString, BlockDataPList>>("const QMap<QString, BlockDataPList>&");
     qRegisterMetaType<QMap<QString, BlockData*>>("const QMap<QString, BlockData*>&");
     qRegisterMetaType<BlockDataVList>("const BlockDataVList&");
     this->moveToThread(&mWorkthread);
@@ -69,7 +70,7 @@ void QEastMoneyBlockThread::slotUpdateBlockInfos()
     QString wkURL = url.arg(blockthread[mWebBlockType]).arg(mWebBlockType).arg(mSortRule).arg(QDateTime::currentDateTime().toMSecsSinceEpoch());
 
     //开始解析数据
-    BlockDataList list;
+    BlockDataPList list;
     QByteArray bytes = QHttpGet::getContentOfURL(wkURL);
     QString result = QString::fromUtf8(bytes.data());
     //qDebug()<<"result:"<<result.split(QRegularExpression("[\(\[|\]\)|\"]"));
@@ -90,7 +91,7 @@ void QEastMoneyBlockThread::slotUpdateBlockInfos()
         index += (rx.matchedLength()+2);
     }
     //qDebug()<<__FUNCTION__<<__LINE__<<mBlockDataList.values().length();
-    emit sendBlockDataList(list);
+    //emit sendBlockDataList(list);
     return;
 }
 
@@ -101,9 +102,9 @@ void QEastMoneyBlockThread::slotUpdateBlockShareCodeList(const QString &pBlockCo
 
 void QEastMoneyBlockThread::slotBlockShareThreadFinished()
 {
-    QEastMoneyBlockShareThread * thread = static_cast<QEastMoneyBlockShareThread*>(sender());
-    if(!thread) return;
-    thread->deleteLater();
+//    QEastMoneyBlockShareThread * thread = static_cast<QEastMoneyBlockShareThread*>(sender());
+//    if(!thread) return;
+//    thread->deleteLater();
 }
 
 void QEastMoneyBlockThread::stop()
@@ -136,11 +137,12 @@ void QEastMoneyBlockThread::slotUpdateBlockShare()
         index += 6;
     }
     //开始根据板块代码，获取板块内的所有shares
+    QThreadPool pool;
+    pool.setMaxThreadCount(8);
+    pool.setExpiryTimeout(-1);
     foreach (QString key, mBlockDataList.keys()) {
         QEastMoneyBlockShareThread *thread = new QEastMoneyBlockShareThread(key);
-        connect(thread, SIGNAL(signalUpdateBlockShareCodeList(QString,QStringList)), this, SLOT(slotUpdateBlockShareCodeList(QString,QStringList)));
-        connect(thread, SIGNAL(finished()), this, SLOT(slotBlockShareThreadFinished()));
-        thread->start();
+        pool.start(thread);
     }
     //开始更新实时板块信息
     bool active = true;

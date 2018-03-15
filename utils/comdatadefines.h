@@ -52,6 +52,7 @@ typedef enum MktType
     MKT_HK_HSGQ,    //恒生国企
     MKT_HK_GGT,        //港股通（）
     MKT_ZXG,        //自选股
+    MKT_LGT_TOP10,
     MKT_OTHER,      //保留
 }MKT_TYPE;
 
@@ -70,6 +71,7 @@ typedef enum Share_Detail_Info
     INFO_HSHK,
     INFO_BLOCK_LIST,
     INFO_STOCK_LIST,
+    INFO_CHINA_TOP10,
 }STK_DETAIL;
 
 struct  struMenu{

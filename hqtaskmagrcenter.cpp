@@ -74,6 +74,11 @@ void HQTaskMagrCenter::slotUpdateHSGTOfCode(const QString &code)
 
 }
 
+void HQTaskMagrCenter::setDisplayChinaTop10()
+{
+    if(mShareInfoMergeThread) mShareInfoMergeThread->setDisplayChinaTop10();
+}
+
 void HQTaskMagrCenter::reverseSortRule()
 {
     if(mBlockMgr)   mBlockMgr->reverseSortRule();

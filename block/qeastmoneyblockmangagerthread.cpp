@@ -2,6 +2,7 @@
 #include "qeastmoneyblockthread.h"
 #include <QDebug>
 #include <QTimer>
+#include "dbservices/dbservices.h"
 
 QEastMoneyBlockMangagerThread::QEastMoneyBlockMangagerThread(QObject *parent) : QObject(parent)
 {
@@ -58,7 +59,7 @@ void QEastMoneyBlockMangagerThread::reverseSortRule()
     qDebug()<<__FUNCTION__<<mBlockRule;
 }
 
-void QEastMoneyBlockMangagerThread::slotRecvBlockDataList(const BlockDataList &list)
+void QEastMoneyBlockMangagerThread::slotRecvBlockDataList(const BlockDataPList &list)
 {
     foreach (BlockData* data, list) {
         if(mBlockDataList.contains(data)) continue;
@@ -70,7 +71,9 @@ void QEastMoneyBlockMangagerThread::slotRecvBlockDataList(const BlockDataList &l
 void QEastMoneyBlockMangagerThread::slotUpdateBlockInfo()
 {
     BlockDataVList wklist;
-    foreach (BlockData *data, mBlockDataList) {
+    BlockDataPList plist = DATA_SERVICE->getAllBlock();
+
+    foreach (BlockData *data, plist) {
         if(data->mBlockType & mCurBlockType)
         {
             wklist.append(*data);

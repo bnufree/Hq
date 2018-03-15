@@ -38,6 +38,7 @@ void QBlockTableWidget::slotCellDoubleClicked(int row, int col)
     }
 
     QStringList codes = item->data(Qt::UserRole).toStringList();
+    qDebug()<<"block codes:"<<codes;
     emit signalDisplayBlockDetailCodesList(codes);
 
 }

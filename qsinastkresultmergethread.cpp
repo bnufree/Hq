@@ -86,8 +86,9 @@ void QSinaStkResultMergeThread::run()
                         (mMktType == MKT_ZXB && data.mShareType == SHARE_CHINA_SZ_ZXB)||\
                         (mMktType == MKT_CYB && data.mShareType == SHARE_CHINA_SZ_CYB)||\
                         (mMktType == MKT_ZXG && data.mIsFav)||\
+                        (mMktType == MKT_LGT_TOP10 && data.mIsTop10) ||\
                         (mMktType == MKT_JJ && (data.mShareType == SHARE_CHINA_FUND_SH || data.mShareType == SHARE_CHINA_FUND_SZ))||\
-                        (mMktType == MKT_OTHER && mSelfCodesList.contains(data.mCode));
+                        (mMktType == MKT_OTHER && mSelfCodesList.contains(QString::fromStdString(data.mCode).right(6)));
                 if(sts)
                 {
                     wklist.append(data);
@@ -580,5 +581,10 @@ void QSinaStkResultMergeThread::setDisplayPage(int val)
         displayLast();
     }
 
+}
+
+void QSinaStkResultMergeThread::setDisplayChinaTop10()
+{
+    setMktType( MKT_LGT_TOP10);
 }
 

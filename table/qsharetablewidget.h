@@ -19,6 +19,7 @@ signals:
     void    signalSetDisplayBlockDetail(const QStringList& blockCodes);
     void    signalSetDisplayHSHK(const QString& code);
     void    signalSetFavCode(const QString& code);
+    void    signalDisplayChinaTop10();
 
 public slots:
     void    setDataList(const ShareDataList& list);

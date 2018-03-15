@@ -40,6 +40,7 @@ public slots:
     void        setActive(bool active);
     void        setSelfCodesList(const QStringList& list );
     void        setDisplayPage(int val);
+    void        setDisplayChinaTop10();
 private slots:
     void        updateStkCodes(MKT_TYPE type);
     void        updateStkInfoList(const QList<QStringList>& pStkSectionList);
