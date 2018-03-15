@@ -71,7 +71,6 @@ typedef enum Share_Detail_Info
     INFO_HSHK,
     INFO_BLOCK_LIST,
     INFO_STOCK_LIST,
-    INFO_CHINA_TOP10,
 }STK_DETAIL;
 
 struct  struMenu{

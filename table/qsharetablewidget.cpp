@@ -46,7 +46,7 @@ void QShareTablewidget::setDataList(const ShareDataList &list)
     foreach (ShareData data, list) {
         int k =0;
         this->setRowHeight(i, 20);
-        this->setItemText(i, k++, data.mCode, Qt::AlignRight);
+        this->setItemText(i, k++, QString::fromStdString(data.mCode).right(6), Qt::AlignRight);
         this->setItemText(i, k++, data.mName);
         this->setItemText(i, k++, HqUtils::double2Str(data.mCur));
         double val = mShareMap[data.mCode];
@@ -133,6 +133,7 @@ void QShareTablewidget::initMenu()
     itemlist.append(struMenu(QStringLiteral("恒指"), MKT_HK_HSZS));
     itemlist.append(struMenu(QStringLiteral("恒生国企"), MKT_HK_HSGQ));
     itemlist.append(struMenu(QStringLiteral("港股通"), MKT_HK_GGT));
+    itemlist.append(struMenu(QStringLiteral("陆股通TOP10"), MKT_LGT_TOP10));
 
     foreach (struMenu item, itemlist) {
         QAction *act = new QAction(this);
@@ -155,8 +156,7 @@ void QShareTablewidget::slotCustomContextMenuRequested(const QPoint &pos)
         QList<struMenu> itemlist;
         itemlist.append(struMenu(QStringLiteral("分时图"), INFO_MINUTE_GRAPH));
         itemlist.append(struMenu(QStringLiteral("日线图"), INFO_K_GRAPH));
-        itemlist.append(struMenu(QStringLiteral("沪深港通"), INFO_HSHK));
-        itemlist.append(struMenu(QStringLiteral("陆股通TOP10"), INFO_CHINA_TOP10));
+        itemlist.append(struMenu(QStringLiteral("沪深港通"), INFO_HSHK));        
         itemlist.append(struMenu(QStringLiteral("所属板块"), INFO_BLOCK_LIST));
 
         foreach (struMenu menu_item, itemlist) {
@@ -177,9 +177,6 @@ void QShareTablewidget::slotCustomContextMenuRequested(const QPoint &pos)
                 } else if(menu_item.mCmd == INFO_HSHK)
                 {
                     connect(act, &QAction::triggered, this, &QShareTablewidget::setDisplayHSHK);
-                } else if(menu_item.mCmd == INFO_CHINA_TOP10)
-                {
-                    connect(act, &QAction::triggered, this, &QShareTablewidget::signalDisplayChinaTop10);
                 }
 
                 insertContextMenu(act);
