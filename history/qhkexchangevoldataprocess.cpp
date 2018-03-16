@@ -28,7 +28,7 @@ void QHKExchangeVolDataProcess::getMktVolInfo(ShareDataList &list, const QDate &
     int start_index = 0;
     QRegExp codeExp("7[072]{1}[0-9]{3}|9[0-9]{4}");
     //QRegExp nameExp("[\u4e00-\u9fa5A-Z]{1,}");
-    QRegExp volExp("([0-9]{1,3},){1,}[0-9]{1,}");
+    QRegExp volExp(">(([0-9]{1,3},){0,}[0-9]{1,})<");
     QRegExp dateExp("\\d{2}/\\d{2}/\\d{4}");
 
     start_index = dateExp.indexIn(res, start_index);
@@ -64,7 +64,7 @@ void QHKExchangeVolDataProcess::getMktVolInfo(ShareDataList &list, const QDate &
         start_index = volExp.indexIn(res, start_index);
         if(start_index >= 0)
         {
-            qint64 vol = volExp.cap().remove(",").toLongLong();
+            qint64 vol = volExp.cap(1).remove(",").toLongLong();
             //qDebug()<<"res:"<<volExp.cap();
             start_index += volExp.cap().length();
             ShareData data;
@@ -72,12 +72,13 @@ void QHKExchangeVolDataProcess::getMktVolInfo(ShareDataList &list, const QDate &
             data.mForeignVol = vol;
             data.mTime = QDateTime(mDate).toMSecsSinceEpoch();
             list.append(data);
-            if(date == QDate(2018,3,14))
+            if(date == QDate(2018,3,15))
             {
-                qDebug()<<"code:"<<QString::fromStdString(data.mCode)<<date<<data.mForeignVol;
+                //qDebug()<<"code:"<<QString::fromStdString(data.mCode)<<date<<data.mForeignVol;
             }
         } else
         {
+            //qDebug()<<"code:"<<tmpCode<<"not found";
             break;
         }
     }

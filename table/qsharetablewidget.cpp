@@ -203,7 +203,7 @@ void QShareTablewidget::slotCustomContextMenuRequested(const QPoint &pos)
                 QStringList list = table_item->data(Qt::UserRole+1).toStringList();
                 foreach (QString code, list)
                 {
-                    qDebug()<<stkCode<<code;
+                    //qDebug()<<stkCode<<code;
                     BlockData *block = DATA_SERVICE->getBlockDataOfCode(code);
                     if(block->mName.length() == 0) continue;
                     QAction *act = new QAction(this);
