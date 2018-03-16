@@ -135,7 +135,7 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
     Profiles::instance()->setValue("UPDATE", "DATE", HqUtils::date2Str(HqUtils::latestActiveDay().addDays(-1)));
     emit signalUpdateHistoryMsg(QStringLiteral("开始读入日线数据"));
     mCurCnt = 0;
-    wkDate = QDate(2017,3,17);
+    wkDate = HqUtils::getActiveDayBefore1HYear();
     mHistoryFileNum = HqUtils::activeDaysNum(wkDate);
     while(wkDate < HqUtils::latestActiveDay())
     {

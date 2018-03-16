@@ -149,6 +149,17 @@ QDate   HqUtils::latestActiveDay()
     return date;
 }
 
+QDate HqUtils::getActiveDayBefore1HYear()
+{
+    QDate date = QDate::currentDate();
+    date = date.addDays(-182);
+    while (!activeDay(date)) {
+        date = date.addDays(1);
+    }
+
+    return date;
+}
+
 int   HqUtils::activeDaysNum(const QDate &start)
 {
     int num = 0;

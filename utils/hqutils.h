@@ -6,6 +6,12 @@
 #include <QDateTime>
 #include <QStringList>
 
+
+class ShareDate: public QDate
+{
+
+};
+
 class HqUtils
 {
 
@@ -24,6 +30,7 @@ public:
     static QString  double2Str(double val);
     static QDate    latestActiveDay();
     static int      activeDaysNum(const QDate& start);
+    static QDate    getActiveDayBefore1HYear();
 
 public:
     static QStringList        mDatesList;
