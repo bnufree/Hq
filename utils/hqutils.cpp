@@ -48,7 +48,7 @@ QString HqUtils::GetFirstLetter( const QString& unicode )
 {
     QTextCodec *gbkCodec = QTextCodec::codecForName("GBK");
     char *strChs = gbkCodec->fromUnicode(unicode).toUpper().data();
-    qDebug()<<"chars:"<<QString::fromLocal8Bit(strChs);
+    qDebug()<<"chars:"<<strChs<<" src:"<<unicode;
     static int li_SecPosValue[] = {
         1601, 1637, 1833, 2078, 2274, 2302, 2433, 2594, 2787, 3106, 3212,
         3472, 3635, 3722, 3730, 3858, 4027, 4086, 4390, 4558, 4684, 4925, 5249
@@ -141,6 +141,17 @@ QString HqUtils::double2Str(double val)
 QDate   HqUtils::latestActiveDay()
 {
     QDate date = QDate::currentDate();
+    while(!activeDay(date))
+    {
+        date = date.addDays(-1);
+    }
+
+    return date;
+}
+
+QDate   HqUtils::lastActiveDay()
+{
+    QDate date =latestActiveDay().addDays(-1);
     while(!activeDay(date))
     {
         date = date.addDays(-1);

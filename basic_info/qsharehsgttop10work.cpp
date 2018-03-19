@@ -25,6 +25,7 @@ void QShareHsgtTop10Work::run()
 {
     QString url = QString("http://dcfm.eastmoney.com//EM_MutiSvcExpandInterface/api/js/get?type=HSGTCJB&token=70f12f2f4f091e459a279469fe49eca5&filter=(DetailDate=^%1^)&js=(x)&sr=1&st=Rank&rt=50014200")
             .arg(mDate);
+    qDebug()<<"url:"<<url;
     QJsonParseError err;
     QJsonDocument doc = QJsonDocument::fromJson(QHttpGet().getContentOfURL(url), &err);
     if(err.error != QJsonParseError::NoError) return;
@@ -35,6 +36,7 @@ void QShareHsgtTop10Work::run()
     for(int i=0; i<result.size(); i++)
     {
         QJsonObject obj = result.at(i).toObject();
+        qDebug()<<obj;
         int market_type = obj.value("MarketType").toInt();
         if(market_type == 2 || market_type == 4) continue;
         ShareBaseData data;

@@ -132,7 +132,7 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
     mPool.waitForDone();
     mShareInfoMap.clear();
 
-    Profiles::instance()->setValue("UPDATE", "DATE", HqUtils::date2Str(HqUtils::latestActiveDay().addDays(-1)));
+    Profiles::instance()->setValue("UPDATE", "DATE", HqUtils::date2Str(HqUtils::lastActiveDay()));
     emit signalUpdateHistoryMsg(QStringLiteral("开始读入日线数据"));
     mCurCnt = 0;
     wkDate = HqUtils::getActiveDayBefore1HYear();

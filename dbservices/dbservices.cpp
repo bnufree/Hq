@@ -127,9 +127,9 @@ void HqInfoService::slotSearchCodesOfText(const QString &text)
     QStringList list;
     if(!mDataBase.getSimilarCodeOfText(list, text))
     {
-        //qDebug()<<"error:"<<mDataBase.errMsg();
+        qDebug()<<"error:"<<mDataBase.errMsg();
     }
-    //qDebug()<<"codes:"<<list;
+    qDebug()<<"codes:"<<list;
     emit signalSendSearchCodesOfText(list);
 }
 

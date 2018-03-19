@@ -78,7 +78,7 @@ bool QShareBasicInfoWorker::getInfossFromWeb(QMap<QString, ShareBaseData>& map)
     //取得分红送配
     pool.start(new QShareFHSPWork("2017-12-31", this));
     //取得北向交易TOP10
-    pool.start(new QShareHsgtTop10Work(HqUtils::latestActiveDay().addDays(-1).toString("yyyy-MM-dd"), this));
+    pool.start(new QShareHsgtTop10Work(HqUtils::lastActiveDay().toString("yyyy-MM-dd"), this));
     pool.waitForDone();
     //取得财务信息
     QStringList allCodes(mShareBaseDataMap.keys());
@@ -157,7 +157,7 @@ void QShareBasicInfoWorker::slotUpdateShareHsgtTop10List(const ShareBaseDataList
         wkVal.mIsTop10 = true;
         wkVal.mTop10Buy = data.mTop10Buy;
         wkVal.mTop10Sell = data.mTop10Sell;
-        //qDebug()<<wkVal.mCode<<wkVal.mIsTop10<<wkVal.mTop10Buy;
+//        qDebug()<<wkVal.mCode<<wkVal.mIsTop10<<wkVal.mTop10Buy;
     }
 }
 

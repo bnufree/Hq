@@ -88,7 +88,7 @@ void QSinaStkResultMergeThread::run()
                         (mMktType == MKT_ZXG && data.mIsFav)||\
                         (mMktType == MKT_LGT_TOP10 && data.mIsTop10) ||\
                         (mMktType == MKT_JJ && (data.mShareType == SHARE_CHINA_FUND_SH || data.mShareType == SHARE_CHINA_FUND_SZ))||\
-                        (mMktType == MKT_OTHER && mSelfCodesList.contains(QString::fromStdString(data.mCode).right(6)));
+                        (mMktType == MKT_OTHER && mSelfCodesList.contains(QString::fromStdString(data.mCode)));
                 if(sts)
                 {
                     wklist.append(data);

@@ -29,6 +29,7 @@ public:
     static QDate    dateFromStr(const QString& str);
     static QString  double2Str(double val);
     static QDate    latestActiveDay();
+    static QDate    lastActiveDay();
     static int      activeDaysNum(const QDate& start);
     static QDate    getActiveDayBefore1HYear();
 
