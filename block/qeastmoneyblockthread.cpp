@@ -2,14 +2,13 @@
 #include <QDebug>
 //#include "profiles.h"
 #include <QDateTime>
-#include "stkinfofilemanage.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
 #include "qexchangedatamanage.h"
 #include <QRegularExpression>
 #include "qeastmoneyblocksharethread.h"
-#include "qhttpget.h"
+#include "utils/qhttpget.h"
 #include "dbservices/dbservices.h"
 #include "utils/hqutils.h"
 #include <QThreadPool>

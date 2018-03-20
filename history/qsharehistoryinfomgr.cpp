@@ -3,20 +3,21 @@
 #include "qsharehistoryfilework.h"
 #include "qsharehistorycounterwork.h"
 #include "dbservices/dbservices.h"
-#include "../qeastmoneyhsgtshareamount.h"
 #include <QDebug>
 #include "qhkexchangevoldataprocess.h"
 #include "utils/hqutils.h"
 #include "utils/profiles.h"
 
-#define     SAVE_DIR    QDir::currentPath() + "/data/"
+#define     SAVE_DIR                QDir::currentPath() + "/data/"
+#define     UPDATE_SEC              "UPDATE"
+#define     UPDATE_DATE             "DATE"
 QShareHistoryInfoMgr::QShareHistoryInfoMgr(const QStringList& codes, QObject *parent) : QObject(parent)
 {
     //设定初始化的日线更新时期
-    Profiles::instance()->setDefault("UPDATE", "DATE", HqUtils::date2Str(QDate(2017,3,16)));
+    Profiles::instance()->setDefault(UPDATE_SEC, UPDATE_DATE, HqUtils::date2Str(QDate(2017,3,16)));
     mCodesList = codes;
     mPool.setExpiryTimeout(-1);
-    mPool.setMaxThreadCount(8);
+    mPool.setMaxThreadCount(16);
     connect(this, SIGNAL(signalStartGetHistory()), this, SLOT(slotStartGetHistory()));
     connect(this, SIGNAL(signalUpdateAllShareFromDate(bool,QDate)), this, SLOT(slotUpdateAllShareFromDate(bool,QDate)));
     connect(DATA_SERVICE, SIGNAL(signalUpdateHistoryInfoFinished()), this, SLOT(slotDbUpdateHistoryFinished()));
@@ -73,7 +74,6 @@ void QShareHistoryInfoMgr::slotUpdateShareHistoryProcess(const ShareDataList& li
 
 void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& date)
 {
-
     //创建文件保存的目录
     QDir wkdir(SAVE_DIR);
     if(!wkdir.exists())
@@ -95,7 +95,6 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
         mPool.start(thread);
     }
     mPool.waitForDone();
-
     emit signalUpdateHistoryMsg(QStringLiteral("开始更新外资持股数据..."));
     QDate wkDate = date;
     while(wkDate < HqUtils::latestActiveDay())
@@ -109,6 +108,7 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
         wkDate = wkDate.addDays(1);
     }
     mPool.waitForDone();
+
     emit signalUpdateHistoryMsg(QStringLiteral("开始将日线数据写入文件"));
 
     wkDate = date;
@@ -132,7 +132,7 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
     mPool.waitForDone();
     mShareInfoMap.clear();
 
-    Profiles::instance()->setValue("UPDATE", "DATE", HqUtils::date2Str(HqUtils::lastActiveDay()));
+    Profiles::instance()->setValue(UPDATE_SEC, UPDATE_DATE, HqUtils::date2Str(HqUtils::lastActiveDay()));
     emit signalUpdateHistoryMsg(QStringLiteral("开始读入日线数据"));
     mCurCnt = 0;
     wkDate = HqUtils::getActiveDayBefore1HYear();
@@ -154,7 +154,6 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
     mCurCnt = 0;
     foreach(QString code, mShareInfoHistoryMap.keys())
     {
-        //qDebug()<<"code:"<<code<<mShareInfoHistoryMap[code].size();
         QShareHistoryCounterWork * process = new QShareHistoryCounterWork(code, mShareInfoHistoryMap[code], this);
         mPool.start(process);
     }

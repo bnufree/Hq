@@ -1,18 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>QShareHistoryDialog</class>
- <widget name="QShareHistoryDialog" class="QDialog">
+ <widget class="QDialog" name="QShareHistoryDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>805</width>
+    <height>606</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QShareGraphicWidget" name="widget" native="true"/>
+   </item>
+  </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QShareGraphicWidget</class>
+   <extends>QWidget</extends>
+   <header>history/qsharegraphicwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

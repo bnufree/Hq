@@ -37,6 +37,7 @@ public:
     void         setBlockShareCodes(const QString& block, const QStringList& codes);
     void         saveShares();
     BlockDataPList  getAllBlock();
+    ShareDataList   getShareHistoryDataList(const QString& code);
 
 signals:
     //开始创建数据库需要的表信息，初始化数据库
@@ -70,7 +71,8 @@ signals:
                                           double lastMonthChange,\
                                           double lastYearChange,\
                                           qint64 vol,\
-                                          qint64 vol_chnage);
+                                          qint64 vol_chnage,\
+                                          const ShareDataList& list);
     void signalUpdateStkProfitList(const ShareDataList& list);
     void signalInitShareRealInfos(const QStringList& codes);
     void signalSetFavCode(const QString& code);
@@ -100,7 +102,8 @@ public slots:
                                         double lastMonthChange,\
                                         double lastYearChange,\
                                         qint64 vol,\
-                                        qint64 vol_chnage);
+                                        qint64 vol_chnage,\
+                                        const ShareDataList& list);
     void slotUpdateHistoryChange(const QString& code);
     void slotUpdateStkProfitList(const ShareDataList& list);
     void slotAddShareAmoutByForeigner(const ShareDataList& list);
@@ -151,6 +154,8 @@ private:    //本类使用的变量
     QMutex                      mBlockMutex;
     QMutex                      mShareMutex;
     HQDBDataBase                mDataBase;
+    QMap<QString, ShareDataList>    mShareHistoryDataList;
+    QStringList                 mFavCodeList;
 };
 
 #endif // DBSERVICE_H

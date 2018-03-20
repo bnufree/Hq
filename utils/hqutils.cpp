@@ -46,9 +46,11 @@ bool HqUtils::isCurrentActive()
 
 QString HqUtils::GetFirstLetter( const QString& unicode )
 {
-    QTextCodec *gbkCodec = QTextCodec::codecForName("GBK");
-    char *strChs = gbkCodec->fromUnicode(unicode).toUpper().data();
-    qDebug()<<"chars:"<<strChs<<" src:"<<unicode;
+//    QTextCodec *gbkCodec = QTextCodec::codecForName("GBK");
+//    char *strChs = gbkCodec->fromUnicode(unicode).toUpper().data();
+    char *strChs = unicode.toLocal8Bit().data();
+    qDebug()<<"chars:"<<QString::fromStdString(strChs)<<" src:"<<unicode;
+ //   char *strChs = unicode.toLocal8Bit().data();
     static int li_SecPosValue[] = {
         1601, 1637, 1833, 2078, 2274, 2302, 2433, 2594, 2787, 3106, 3212,
         3472, 3635, 3722, 3730, 3858, 4027, 4086, 4390, 4558, 4684, 4925, 5249
@@ -158,6 +160,11 @@ QDate   HqUtils::lastActiveDay()
     }
 
     return date;
+}
+
+QDate HqUtils::getLgtStartDate()
+{
+    return QDate(2017,3,17);
 }
 
 QDate HqUtils::getActiveDayBefore1HYear()

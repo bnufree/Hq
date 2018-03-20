@@ -2,9 +2,9 @@
 #include "dbservices/dbservices.h"
 #include "basic_info/qsharebasicinfoworker.h"
 #include "history/qsharehistoryinfomgr.h"
-#include "qsinastkinfothread.h"
-#include "qeastmoneynorthboundthread.h"
-#include "qsinastkresultmergethread.h"
+#include "real/qsinastkinfothread.h"
+#include "real/qeastmoneynorthboundthread.h"
+#include "real/qsinastkresultmergethread.h"
 #include "block/qeastmoneyblockmangagerthread.h"
 
 HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \

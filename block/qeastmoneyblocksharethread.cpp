@@ -1,6 +1,6 @@
 ﻿#include "qeastmoneyblocksharethread.h"
 #include <QRegExp>
-#include "qhttpget.h"
+#include "utils/qhttpget.h"
 #include <QDebug>
 #include "dbservices/dbservices.h"
 
@@ -31,7 +31,7 @@ void QEastMoneyBlockShareThread::run()
     {
         QString code = exp.cap(1);
         index += exp.matchedLength();
-        sharecodeslist.append(code);
+        sharecodeslist.append(ShareBaseData::fullCode(code));
         DATA_SERVICE->setShareBlock(code, mBlockCode);
     }
     if(sharecodeslist.length() > 0)

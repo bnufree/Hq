@@ -1,7 +1,7 @@
 ﻿#include "qsharehistoryinfothread.h"
 #include <QDateTime>
 #include <QDebug>
-#include "qhttpget.h"
+#include "utils/qhttpget.h"
 #include "utils/hqutils.h"
 
 QShareHistoryInfoThread::QShareHistoryInfoThread(const QString& code, const QDate& date, QObject* parent) :

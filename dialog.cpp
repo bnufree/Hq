@@ -3,10 +3,8 @@
 #include <QDebug>
 #include <QMenu>
 #include "utils/profiles.h"
-#include "stkmktcap.h"
 #include <QDateTime>
 #include "qexchangedatemangagedialog.h"
-#include "qeastmoneyzjlxthread.h"
 #include <QShortcut>
 //#include "qthook.h"
 #include <QProcess>
@@ -14,13 +12,7 @@
 #include <QResizeEvent>
 #include "qindexwidget.h"
 #include "basic_info/qsharebasicinfoworker.h"
-#include "qeastmoneynorthboundthread.h"
-#include "qeastmoneyhsgtdialog.h"
-#include "./history/qsharehistoryinfomgr.h"
-#include "qhttpget.h"
-#include "exchange/qexchangerecordworker.h"
-#include "qeastmoneyhsgtshareamount.h"
-
+#include "history/qsharehistorydialog.h"
 #include "hqtaskmagrcenter.h"
 
 #define     STK_ZXG_SEC         "0520"
@@ -187,7 +179,6 @@ void Dialog::on_closeBtn_clicked()
 
 void Dialog::closeEvent(QCloseEvent *event)
 {
-    DATA_SERVICE->saveShares();
 }
 
 void Dialog::on_srchBtn_clicked()
@@ -356,8 +347,7 @@ void Dialog::slotTodayHSGUpdated()
 
 void Dialog::slotUpdateHSGTOfCode(const QString &code)
 {
-    QEastMoneyHSGTDialog *dlg = new QEastMoneyHSGTDialog ;
+    QShareHistoryDialog *dlg = new QShareHistoryDialog(code) ;
     dlg->setModal(false);
-    dlg->slotDisplayCode(code);
     dlg->show();
 }

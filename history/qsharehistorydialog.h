@@ -1,4 +1,4 @@
-#ifndef QSHAREHISTORYDIALOG_H
+﻿#ifndef QSHAREHISTORYDIALOG_H
 #define QSHAREHISTORYDIALOG_H
 
 #include <QDialog>
@@ -12,11 +12,12 @@ class QShareHistoryDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit QShareHistoryDialog(QWidget *parent = 0);
+    explicit QShareHistoryDialog(const QString& code = QString(), QWidget *parent = 0);
     ~QShareHistoryDialog();
 
 private:
     Ui::QShareHistoryDialog *ui;
+    QString     mCode;
 };
 
 #endif // QSHAREHISTORYDIALOG_H

@@ -14,7 +14,7 @@ QShareHistoryCounterWork::~QShareHistoryCounterWork()
 
 void QShareHistoryCounterWork::run()
 {
-    qSort(mList.begin(), mList.end(), ShareData::sortByDateDesc);
+    qSort(mList.begin(), mList.end(), ShareData::sortByDateAsc);
     int size = mList.size();
     double lastColse = 0;
     double lastMoney = 0.0;
@@ -28,8 +28,8 @@ void QShareHistoryCounterWork::run()
 
     if(size > 0)
     {
-        lastMoney = mList[0].mMoney;
-        lastColse = mList[0].mClose;
+        lastMoney = mList[size-1].mMoney;
+        lastColse = mList[size-1].mClose;
         int day[] = {DAYS_3, DAYS_5, DAYS_10, DAYS_MONTH, DAYS_HALF_YEAR};
         double *change[] = {&last3Change, &last5Change, &last10Change, &lastMonthChange, &last1HYearChange};
         int k = 0;
@@ -41,7 +41,7 @@ void QShareHistoryCounterWork::run()
 
                 if(k < day[i])
                 {
-                    ShareData curData = mList[k];
+                    ShareData curData = mList[size-1-k];
                     changper *= (1 + curData.mChgPercent /100);
                     for(int j=i; j<5; j++)
                     {
@@ -55,14 +55,14 @@ void QShareHistoryCounterWork::run()
             }
         }
 
-        vol = mList[0].mForeignVol;
+        vol = mList[size-1].mForeignVol;
         vol_change = vol;
         if(size >=2)
         {
-            vol_change -= mList[1].mForeignVol;
+            vol_change -= mList[size-2].mForeignVol;
         }
     }
-    DATA_SERVICE->signalUpdateShareinfoWithHistory(mCode, lastMoney, last3Change, last5Change, last10Change, lastMonthChange, last1HYearChange, vol, vol_change);
+    DATA_SERVICE->signalUpdateShareinfoWithHistory(mCode, lastMoney, last3Change, last5Change, last10Change, lastMonthChange, last1HYearChange, vol, vol_change, mList);
 
 //    qDebug()<<mCode<<lastMoney<<last3Change<<last5Change<<last10Change<<lastMonthChange<<last1HYearChange<<vol<<vol_change;
 

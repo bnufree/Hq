@@ -103,7 +103,6 @@ bool QShareBasicInfoWorker::writeInfos(const ShareBaseDataList &list)
         fwrite(&cur, sizeof(cur), 1, fp);
         int size = list.size();
         fwrite(&size, sizeof(size), 1, fp);
-        qDebug()<<"size:"<<size<<" "<<sizeof(ShareBaseData)<<" total:"<<size * sizeof(ShareBaseData);
         for(int i=0; i<size; i++)
         {
             fwrite(&list[i], sizeof(ShareBaseData), 1, fp);

@@ -1,5 +1,5 @@
 ﻿#include "qsharehsgttop10work.h"
-#include "qhttpget.h"
+#include "utils/qhttpget.h"
 #include <QJsonDocument>
 #include <QJsonValue>
 #include <QJsonParseError>

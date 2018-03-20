@@ -5,18 +5,19 @@
 #include <QDebug>
 #include <QDate>
 //#include "qglobalapplication.h"
-#include "qhttpget.h"
 #include <QFile>
-#include "utils/hqutils.h"
+#include "basic_info/qsharecodeswork.h"
+#include "QThreadPool"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("GBK"));
 #if 0
-    QString src = QStringLiteral("招商银行");
-    QTextCodec *utf8 = QTextCodec::codecForName("UTF8");
-    qDebug()<<HqUtils::GetFirstLetter(utf8->toUnicode(src.toStdString().data()))<<"src:"<<src;
+    QThreadPool pool;
+    pool.setExpiryTimeout(-1);
+    pool.start(new QShareCodesWork);
+    pool.waitForDone();
 #else
     Dialog w;
     w.showMaximized();

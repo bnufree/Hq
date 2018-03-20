@@ -1,5 +1,5 @@
 ﻿#include "qsharefinancialinfowork.h"
-#include "qhttpget.h"
+#include "utils/qhttpget.h"
 #include "utils/sharedata.h"
 
 QShareFinancialInfoWork::QShareFinancialInfoWork(const QStringList& list, QObject* parent)

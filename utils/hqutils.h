@@ -32,6 +32,7 @@ public:
     static QDate    lastActiveDay();
     static int      activeDaysNum(const QDate& start);
     static QDate    getActiveDayBefore1HYear();
+    static QDate    getLgtStartDate();
 
 public:
     static QStringList        mDatesList;

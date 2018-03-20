@@ -18,27 +18,17 @@ DESTDIR = ../bin2/
 SOURCES += main.cpp\
         dialog.cpp \
     dataexchange.cpp \
-    qsinastkinfothread.cpp \
-    qsinasearchthread.cpp \
-    qsinastkresultmergethread.cpp \
     qeastmoneylhbthread.cpp \
-    qeastmoneyzjlxthread.cpp \
-    stkmktcap.cpp \
-    stkinfofilemanage.cpp \
     qexchangedatamanage.cpp \
     qexchangedatemangagedialog.cpp \
     qglobalapplication.cpp \
     qindexframe.cpp \
     qindexwidget.cpp \
-    qhttpget.cpp \
-    qeastmoneynorthboundthread.cpp \
-    qeastmoneyhsgtdialog.cpp \
     history/qsharehistoryinfomgr.cpp \
 #    webfile/weberror.cpp \
 #    webfile/webfile.cpp \
     exchange/qexchangerecordworker.cpp \
     exchange/qexchangefiledlg.cpp \
-    qeastmoneyhsgtshareamount.cpp \
     table/qstktablewidgetitem.cpp \
     table/HqTableWidget.cpp \
     table/qsharetablewidget.cpp \
@@ -63,17 +53,16 @@ SOURCES += main.cpp\
     hqtaskmagrcenter.cpp \
     history/qsharehistoryinfothread.cpp \
     history/qsharehistorycounterwork.cpp \
-    history/qsharehistoryfilework.cpp
+    history/qsharehistoryfilework.cpp \
+    utils/qhttpget.cpp \
+    real/qeastmoneynorthboundthread.cpp \
+    real/qeastmoneyzjlxthread.cpp \
+    real/qsinastkinfothread.cpp \
+    real/qsinastkresultmergethread.cpp
 
 HEADERS  += dialog.h \
     dataexchange.h \
-    qsinastkinfothread.h \
-    qsinasearchthread.h \
-    qsinastkresultmergethread.h \
     qeastmoneylhbthread.h \
-    qeastmoneyzjlxthread.h \
-    stkmktcap.h \
-    stkinfofilemanage.h \
     qexchangedatamanage.h \
     qexchangedatemangagedialog.h \
     qglobalapplication.h \
@@ -81,16 +70,12 @@ HEADERS  += dialog.h \
     dbservices.h \
     qindexframe.h \
     qindexwidget.h \
-    qhttpget.h \
-    qeastmoneynorthboundthread.h \
-    qeastmoneyhsgtdialog.h \
     history/qsharehistoryinfomgr.h \
 #    webfile/debugout.h \
 #    webfile/weberror.h \
 #    webfile/webfile.h \
     exchange/qexchangerecordworker.h \
     exchange/qexchangefiledlg.h \
-    qeastmoneyhsgtshareamount.h \
     table/qstktablewidgetitem.h \
     utils/comdatadefines.h \
     table/HqTableWidget.h \
@@ -117,12 +102,16 @@ HEADERS  += dialog.h \
     hqtaskmagrcenter.h \
     history/qsharehistoryinfothread.h \
     history/qsharehistorycounterwork.h \
-    history/qsharehistoryfilework.h
+    history/qsharehistoryfilework.h \
+    utils/qhttpget.h \
+    real/qeastmoneynorthboundthread.h \
+    real/qeastmoneyzjlxthread.h \
+    real/qsinastkinfothread.h \
+    real/qsinastkresultmergethread.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \
     qindexframe.ui \
-    qeastmoneyhsgtdialog.ui \
     exchange/qexchangefiledlg.ui \
     history/qsharehistorydialog.ui
 
