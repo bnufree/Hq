@@ -63,6 +63,13 @@
      </property>
     </widget>
    </item>
+   <item>
+    <widget class="QLabel" name="money">
+     <property name="text">
+      <string>---</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>

@@ -55,7 +55,7 @@ void QIndexWidget::updateData(const ShareDataList &list)
             if(hlay)   hlay->addWidget(w);
             mIndexWidgetMap[data.mCode] = w;
         }
-        w->updateVal(data.mCur, data.mChg, data.mChgPercent);
+        w->updateVal(data.mCur, data.mChg, data.mChgPercent, data.mMoney);
     }
 }
 

@@ -198,7 +198,7 @@ void QHKExchangeVolDataProcess::run()
                     qint64 vol = list[i].mForeignVol;
                     fwrite(&code, sizeof(int), 1, fp);
                     fwrite(&(vol), sizeof(qint64), 1, fp);
-                    qDebug()<<"write code:"<<code<<vol;
+                    //qDebug()<<"write code:"<<code<<vol;
                 }
                 //然后在移动到开头写入时间，保证是最新的
                 fseek(fp, 0, SEEK_SET);

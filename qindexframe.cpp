@@ -19,11 +19,12 @@ void QIndexFrame::setName(const QString &name)
     ui->name->setText(name);
 }
 
-void QIndexFrame::updateVal(double cur, double chg, double chgper)
+void QIndexFrame::updateVal(double cur, double chg, double chgper, double money)
 {
-    ui->chg->setText(QString("").sprintf("%.2f", chg));
-    ui->cur->setText(QString("").sprintf("%.2f", cur));
+    ui->chg->setText(QString("").sprintf("%.0f", chg));
+    ui->cur->setText(QString("").sprintf("%.0f", cur));
     ui->chgper->setText(QString("").sprintf("%.2f%", chgper));
+    ui->money->setText(QStringLiteral("%1亿").arg(QString::number(money / 10000.0, 'f', 0)));
     int chgint = (int)(chg*100);
     this->setStyleSheet(QString("QLabel{"
                             "font-weight:bold;"

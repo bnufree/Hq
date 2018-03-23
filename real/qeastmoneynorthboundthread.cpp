@@ -29,7 +29,7 @@ double QEastmoneyNorthBoundThread::changeRMBString(const QString &src)
     if(index != -1)
     {
         double value = exp.cap().toDouble();
-        if(src.contains("亿元"))
+        if(src.contains(QStringLiteral("亿元")))
         {
             return value * 100000000;
         }
@@ -57,6 +57,7 @@ void QEastmoneyNorthBoundThread::slotRecvHttpContent(const QByteArray &bytes)
     hgt_pure_in = sh_north.split(",").at(6);
     QString sz_north = splitstr[1];
     sgt_pure_in = sz_north.split(",").at(6);
+    qDebug()<<"hgt:"<<hgt_pure_in<<" sgt:"<<sgt_pure_in;
     double pure_in[2];
     pure_in[0] = changeRMBString(hgt_pure_in) / 100000000;
     pure_in[1] = changeRMBString(sgt_pure_in) / 100000000;
@@ -69,8 +70,10 @@ void QEastmoneyNorthBoundThread::slotRecvHttpContent(const QByteArray &bytes)
         data.setCode(hgt[0]);
         data.setName(hgt[2]);
         data.mChgPercent = hgt[3].left(hgt[3].length() -1).toDouble();
-        data.mCur = pure_in[i-3];
-        data.mChg = data.mCur / 130;
+        data.mChg = pure_in[i-3];
+        data.mCur = 130 - data.mChg;
+        data.mMoney = data.mChg * 10000;
+        qDebug()<<data.mCode<<data.mName<<data.mCur<<data.mChg<<data.mChgPercent;
         wklist.append(data);
     }
 
