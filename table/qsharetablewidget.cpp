@@ -75,23 +75,23 @@ void QShareTablewidget::setDataList(const ShareDataList &list)
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mMutalbleCap/ 100000000.0 )+ QStringLiteral("亿"));
 
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mProfit));
-        if(data.mForeignVol >= 10000000){
+        if(data.mForeignVol >= 100000000){
             this->setItemText(i, k++, QString("").sprintf("%.2f", data.mForeignVol / 100000000.0) + QStringLiteral("亿"));
         } else {
             this->setItemText(i, k++, QString("").sprintf("%.2f", data.mForeignVol / 10000.0)  + QStringLiteral("万"));
         }
-        if(data.mForeignVolChg >= 10000000){
+        if(data.mForeignVolChg >= 100000000){
             this->setItemText(i, k++, QString("").sprintf("%.2f", data.mForeignVolChg / 100000000.0) + QStringLiteral("亿"));
         } else {
             this->setItemText(i, k++, QString("").sprintf("%.2f", data.mForeignVolChg / 10000.0)  + QStringLiteral("万"));
         }
-        if(data.mForeignCap >= 1000000){
+        if(data.mForeignCap >= 100000000){
             this->setItemText(i, k++, QString("").sprintf("%.2f", data.mForeignCap / 100000000.0) + QStringLiteral("亿"));
         } else {
             this->setItemText(i, k++, QString("").sprintf("%.0f", data.mForeignCap / 10000.0) + QStringLiteral("万"));
         }
 
-        if(data.mForeignCapChg >= 1000000){
+        if(data.mForeignCapChg >= 100000000){
             this->setItemText(i, k++, QString("").sprintf("%.2f", data.mForeignCapChg / 100000000.0) + QStringLiteral("亿"));
         } else {
             this->setItemText(i, k++, QString("").sprintf("%.0f", data.mForeignCapChg / 10000.0) + QStringLiteral("万"));
