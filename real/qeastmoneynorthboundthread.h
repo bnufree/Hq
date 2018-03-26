@@ -21,7 +21,7 @@ signals:
     void    signalUpdateNorthBoundList(const ShareDataList& list);
     void    start();
 private:
-    QHttpGet        *mHttp;
+    QList<QHttpGet*> mNorthBoudProxyList;
     QThread         mWorkThread;
 };
 
