@@ -2,10 +2,9 @@
 #define QEASTMONEYNORTHBOUNDTHREAD_H
 
 #include <QThread>
-//#include "dbservices/sharedata.h"
 #include "utils/qhttpget.h"
+#include "utils/sharedata.h"
 
-class ShareDataList;
 class QHttpGet;
 class QEastmoneyNorthBoundThread : public QObject
 {
@@ -18,11 +17,12 @@ public slots:
     void    run();
     void    slotRecvHttpContent(const QByteArray& bytes);
 signals:
-    void    signalUpdateNorthBoundList(const ShareDataList& list);
+    void    signalUpdateNorthBoundList(const QList<NS_BOUND_DATA> &list);
     void    start();
 private:
     QList<QHttpGet*> mNorthBoudProxyList;
     QThread         mWorkThread;
+    QList<NS_BOUND_DATA>       mBoundDataList;
 };
 
 #endif // QEASTMONEYNORTHBOUNDTHREAD_H

@@ -15,6 +15,7 @@ public:
     explicit QIndexFrame(const QString& name, QWidget *parent = 0);
     ~QIndexFrame();
     void updateVal(double cur, double chg, double chgper, double money);
+    void updateBound(double buy, double sell, double pure, double total);
     void setName(const QString& name);
 
 private:

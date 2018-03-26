@@ -4,7 +4,7 @@
 #include <QWidget>
 //#include "dbservices/sharedata.h"
 #include "qindexframe.h"
-#include <QMap>
+#include "utils/sharedata.h"
 
 class ShareDataList;
 class QIndexWidget : public QWidget
@@ -19,6 +19,7 @@ signals:
 
 public slots:
     void updateData(const ShareDataList& list);
+    void updateData(const QList<NS_BOUND_DATA> &list);
     void insetWidget(const QString& code);
 
 private:

@@ -546,4 +546,17 @@ private:
     QMap<QString, int>        mDataIndexMap; //key = time+code(sh600036)
 };
 
+typedef struct North_South_Bound_Data
+{
+    QString mCode;
+    QString mName;
+    double  mBuy;
+    double  mSell;
+    double  mTotal;
+    double  mPure;
+    double  mChange;
+}NS_BOUND_DATA;
+
+//typedef QList<North_South_Bound_Data>        LGT_DATALIST;
+
 #endif // SHAREDATA_H

@@ -2,7 +2,6 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QDebug>
-#include "utils/sharedata.h"
 
 
 QIndexWidget::QIndexWidget(QWidget *parent) : QWidget(parent)
@@ -27,6 +26,36 @@ void QIndexWidget::insetWidget(const QString &code)
     data.setCode(code.right(6));
     list<<data;
     updateData(list);
+}
+
+void QIndexWidget::updateData(const QList<NS_BOUND_DATA> &list)
+{
+    foreach (NS_BOUND_DATA data, list) {
+        //qDebug()<<"data:"<<data.mCode<<" "<<data.mName<<" "<<data.mChg<<" "<<data.mChgPercent;
+        QIndexFrame* w = NULL;
+        if(mIndexWidgetMap.contains(data.mCode))
+        {
+            w = mIndexWidgetMap[data.mCode];
+            w->setName(data.mName);
+        } else
+        {
+            QHBoxLayout *hlay = 0;
+            if(mIndexWidgetMap.count() % 4 == 0)
+            {
+                hlay = new QHBoxLayout(this);
+                ((QVBoxLayout*) this->layout())->addLayout(hlay);
+            } else
+            {
+                QLayoutItem* item = ((QVBoxLayout*) this->layout())->itemAt(this->layout()->count()-1);
+                if(item) hlay = (QHBoxLayout*)(item->layout());
+            }
+            w = new QIndexFrame(data.mName, this);
+            //this->layout()->addWidget(w);
+            if(hlay)   hlay->addWidget(w);
+            mIndexWidgetMap[data.mCode] = w;
+        }
+        w->updateBound(data.mBuy, data.mSell, data.mPure, data.mTotal);
+    }
 }
 
 void QIndexWidget::updateData(const ShareDataList &list)

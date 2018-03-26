@@ -22,6 +22,7 @@ signals:
     void        signalSendIndexCodesList(const QStringList& list);
     void        signalSendIndexRealDataList(const ShareDataList& list);
     void        signalSendShareRealDataList(const ShareDataList& list);
+    void        signalSendNotrhBoundDataList(const QList<NS_BOUND_DATA> &list);
     void        signalBlockDataListUpdated(const BlockDataVList& list);
     void        signalSearchCodesOfText(const QString& input);
     void        signalSetFavCode(const QString& code);

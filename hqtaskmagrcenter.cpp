@@ -12,6 +12,8 @@ HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
     mShareInfoMergeThread(0),\
     mBlockMgr(0)
 {
+    qRegisterMetaType<QList<NS_BOUND_DATA>>("const QList<NS_BOUND_DATA> &");
+    qRegisterMetaType<NS_BOUND_DATA>("const NS_BOUND_DATA&");
     connect(this, SIGNAL(signalStart()), this, SLOT(slotStart()));
     connect(DATA_SERVICE, SIGNAL(signalDbInitFinished()), this, SLOT(slotDBInitFinished()));
     connect(this, SIGNAL(signalSearchCodesOfText(QString)), DATA_SERVICE, SIGNAL(signalSearchCodesOfText(QString)));
@@ -109,7 +111,7 @@ void HQTaskMagrCenter::slotBaseDataListFinished(const QStringList& codes, const 
     indexInfoThread->signalSetStkList(indexlist);
     //更新北向的买入卖出情况
     QEastmoneyNorthBoundThread *north = new QEastmoneyNorthBoundThread();
-    connect(north, SIGNAL(signalUpdateNorthBoundList(ShareDataList)), this, SIGNAL(signalSendIndexRealDataList(ShareDataList)));
+    connect(north, SIGNAL(signalUpdateNorthBoundList(QList<NS_BOUND_DATA>)), this, SIGNAL(signalSendNotrhBoundDataList(QList<NS_BOUND_DATA>)));
     mRealWorkObjList.append(north);
     north->start();
     //实时全市场的行情初始化

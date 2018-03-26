@@ -80,10 +80,9 @@ void QEastmoneyNorthBoundThread::slotRecvHttpContent(const QByteArray &bytes)
 {
     QHttpGet *get = qobject_cast<QHttpGet*>(sender());
     if(!get) return;
-    static ShareDataList wklist;
     QString name = get->objectName();
     QString result = QString::fromUtf8(bytes);
-    qDebug()<<"res:"<<result.replace(QRegExp("[\\r\\n\\t]"), "");
+    //qDebug()<<"res:"<<result.replace(QRegExp("[\\r\\n\\t]"), "");
     if(name == "EAST")
     {
         //开始解析
@@ -96,7 +95,7 @@ void QEastmoneyNorthBoundThread::slotRecvHttpContent(const QByteArray &bytes)
         hgt_pure_in = sh_north.split(",").at(6);
         QString sz_north = splitstr[1];
         sgt_pure_in = sz_north.split(",").at(6);
-        qDebug()<<"hgt:"<<hgt_pure_in<<" sgt:"<<sgt_pure_in;
+        //qDebug()<<"hgt:"<<hgt_pure_in<<" sgt:"<<sgt_pure_in;
         double pure_in[2];
         pure_in[0] = changeRMBString(hgt_pure_in) / 100000000;
         pure_in[1] = changeRMBString(sgt_pure_in) / 100000000;
@@ -104,15 +103,29 @@ void QEastmoneyNorthBoundThread::slotRecvHttpContent(const QByteArray &bytes)
         for(int i=3; i<splitstr.length(); i++)
         {
             QStringList hgt = splitstr[i].split(",");
-            ShareData data;
-            data.setCode(hgt[0]);
-            data.setName(hgt[2]);
-            data.mChgPercent = hgt[3].left(hgt[3].length() -1).toDouble();
-            data.mChg = pure_in[i-3];
-            //data.mCur = 130 - data.mChg;
-            //data.mMoney = data.mChg * 10000;
-            qDebug()<<data.mCode<<data.mName<<data.mCur<<data.mChg<<data.mChgPercent;
-            wklist.append(data);
+            bool exist = false;
+            QString code = hgt[0];
+            for(int i=0; i<mBoundDataList.length(); i++)
+            {
+                NS_BOUND_DATA& data = mBoundDataList[i];
+                if(data.mCode == code)
+                {
+                    data.mName = hgt[2];
+                    data.mChange = hgt[3].left(hgt[3].length() -1).toDouble();
+                    //data.mPure = pure_in[i-3];
+                    exist = true;
+                    break;
+                }
+            }
+            if(!exist)
+            {
+                NS_BOUND_DATA data;
+                data.mCode = code;
+                data.mName = hgt[2];
+                data.mChange = hgt[3].left(hgt[3].length() -1).toDouble();
+                //data.mPure = pure_in[i-3];
+                mBoundDataList.append(data);
+            }
         }
     } else
     {
@@ -127,21 +140,26 @@ void QEastmoneyNorthBoundThread::slotRecvHttpContent(const QByteArray &bytes)
         qDebug()<<list.length()<<list;
         if(list.length() >=3)
         {
-            for(int i=0; i<wklist.length(); i++)
+            for(int i=0; i<mBoundDataList.length(); i++)
             {
-                ShareData& data = wklist[i];
-                qDebug()<<name<<data.mCode;
-                if(name == QString::fromStdString(data.mCode))
+                NS_BOUND_DATA& data = mBoundDataList[i];
+                //qDebug()<<name<<data.mCode;
+                if(name == data.mCode)
                 {
-                    data.mMoney = list[0] * 100.0;
-                    data.mCur = list[1];
-                    //data.mChg = list[2];
+                    data.mTotal = list[0] * 100.0;
+                    data.mBuy = list[1]*100;
+                    data.mSell = list[2]*100;
+                    data.mPure = data.mBuy - data.mSell;
+                    break;
                 }
 
             }
 
         }
     }
-        //qDebug()<<
-        emit signalUpdateNorthBoundList(wklist);
+    //qDebug()<<
+    foreach (NS_BOUND_DATA data, mBoundDataList) {
+        qDebug()<<data.mCode<<data.mName<<data.mBuy<<data.mSell<<data.mPure<<data.mTotal;
+    }
+    emit signalUpdateNorthBoundList(mBoundDataList);
 }
