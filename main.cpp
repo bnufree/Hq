@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     pool.waitForDone();
 #else
     Dialog w;
-    w.showMaximized();
+    w.show();
 #endif
 
     return a.exec();

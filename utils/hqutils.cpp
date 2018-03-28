@@ -1,6 +1,6 @@
 ﻿#include "hqutils.h"
 #include <QTextCodec>
-#include <Windows.h>
+//#include <Windows.h>
 #include "profiles.h"
 
 #define         DATE_STR_FORMAT         "yyyy-MM-dd"
@@ -65,10 +65,10 @@ QString HqUtils::GetFirstLetter( const QString& unicode )
     int H = 0;
     int L = 0;
     int W = 0;
-    UINT stringlen = strlen(strChs);
-    for (UINT i = 0; i < stringlen; i++) {
-        H = (UCHAR) (strChs[i + 0]);
-        L = (UCHAR) (strChs[i + 1]);
+    uint32_t stringlen = strlen(strChs);
+    for (uint32_t i = 0; i < stringlen; i++) {
+        H = (unsigned char) (strChs[i + 0]);
+        L = (unsigned char) (strChs[i + 1]);
         if (H < 0xA1 || L < 0xA1) {
             if(H != 42)
             {
