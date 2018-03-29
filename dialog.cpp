@@ -43,6 +43,7 @@ Dialog::Dialog(QWidget *parent) :
     ui(new Ui::MainDialog)
 {
     ui->setupUi(this);
+    ui->blocktbl->hide();
     //指数显示
     if(!mIndexWidget)
     {
@@ -67,15 +68,15 @@ Dialog::Dialog(QWidget *parent) :
     systemIcon->show();
     connect(systemIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(setDlgShow(QSystemTrayIcon::ActivationReason)));
 
-    //创建快捷事件
-    QShortcut *shotcut = new QShortcut(QKeySequence("Alt+X"), this);  //隐藏
-    connect(shotcut, SIGNAL(activated()), this, SLOT(slotWhetherDisplay()));
-    QShortcut *shotcut1 = new QShortcut(QKeySequence("Alt+A"), this);
-    connect(shotcut1, SIGNAL(activated()), this, SLOT(slotDisplayAll()));
-    QShortcut *shotcut2 = new QShortcut(QKeySequence("Alt+S"), this);
-    connect(shotcut2, SIGNAL(activated()), this, SLOT(slotDisplayBlock()));
-    QShortcut *shotcut3 = new QShortcut(QKeySequence("Alt+D"), this);
-    connect(shotcut3, SIGNAL(activated()), this, SLOT(slotDisplayShareMini()));
+//    //创建快捷事件
+//    QShortcut *shotcut = new QShortcut(QKeySequence("Alt+X"), this);  //隐藏
+//    connect(shotcut, SIGNAL(activated()), this, SLOT(slotWhetherDisplay()));
+//    QShortcut *shotcut1 = new QShortcut(QKeySequence("Alt+A"), this);
+//    connect(shotcut1, SIGNAL(activated()), this, SLOT(slotDisplayAll()));
+//    QShortcut *shotcut2 = new QShortcut(QKeySequence("Alt+S"), this);
+//    connect(shotcut2, SIGNAL(activated()), this, SLOT(slotDisplayBlock()));
+//    QShortcut *shotcut3 = new QShortcut(QKeySequence("Alt+D"), this);
+//    connect(shotcut3, SIGNAL(activated()), this, SLOT(slotDisplayShareMini()));
     //    setHook(this);
 
     //

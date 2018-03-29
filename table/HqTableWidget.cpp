@@ -32,6 +32,7 @@ void HqTableWidget::setHeaders(const TableColDataList &list)
     mColDataList = list;
     this->setColumnCount(list.length());
     for(int i=0; i<mColDataList.size(); i++) {
+        this->setColumnWidth(i, 150);
         mColDataList[i].mColNum = i;
         this->setHorizontalHeaderItem(i, new QStkTableWidgetItem(mColDataList[i].mColStr));
         this->horizontalHeaderItem(i)->setData(COL_TYPE_ROLE, mColDataList[i].mType);

@@ -49,6 +49,11 @@ border-bottom：0px solid gray;
 background:skyblue;
 }
 
+QTableView::item
+{
+	height:40px;
+}
+
 /*
 QTableView{
 color:white;

@@ -21,11 +21,26 @@ void QIndexFrame::setName(const QString &name)
 
 void QIndexFrame::updateVal(double cur, double chg, double chgper, double money)
 {
-    ui->chg->setText(QString("").sprintf("%.0f", chg));
-    ui->cur->setText(QString("").sprintf("%.0f", cur));
+    ui->chg->setText(QString("").sprintf("%.2f", chg));
+    ui->cur->setText(QString("").sprintf("%.2f", cur));
     ui->chgper->setText(QString("").sprintf("%.2f%", chgper));
     ui->money->setText(QStringLiteral("%1亿").arg(QString::number(money / 10000.0, 'f', 0)));
     int chgint = (int)(chg*100);
+    this->setStyleSheet(QString("QLabel{"
+                            "font-weight:bold;"
+                            "color:%1;"
+                            "alignment:center;"
+                                "}")
+                        .arg(chgint == 0? "black" : chgint > 0? "red":"green"));
+}
+
+void QIndexFrame::updateBound(double shVal, QString shName, double szVal, QString szName)
+{
+    ui->cur->setText(shName);
+    ui->chg->setText(QStringLiteral("%1亿").arg(QString::number(shVal / 10000.0, 'f', 2)));
+    ui->chgper->setText(szName);
+    ui->money->setText(QStringLiteral("%1亿").arg(QString::number(szVal / 10000.0, 'f', 2)));
+    int chgint = (int)(shVal+szVal);
     this->setStyleSheet(QString("QLabel{"
                             "font-weight:bold;"
                             "color:%1;"

@@ -16,6 +16,7 @@ public:
     ~QIndexFrame();
     void updateVal(double cur, double chg, double chgper, double money);
     void updateBound(double buy, double sell, double pure, double total);
+    void updateBound(double shVal, QString shName, double szVal, QString szName);
     void setName(const QString& name);
 
 private:

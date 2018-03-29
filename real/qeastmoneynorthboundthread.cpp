@@ -112,7 +112,7 @@ void QEastmoneyNorthBoundThread::slotRecvHttpContent(const QByteArray &bytes)
                 {
                     data.mName = hgt[2];
                     data.mChange = hgt[3].left(hgt[3].length() -1).toDouble();
-                    //data.mPure = pure_in[i-3];
+                    data.mPure = pure_in[i-3];
                     exist = true;
                     break;
                 }
@@ -123,7 +123,7 @@ void QEastmoneyNorthBoundThread::slotRecvHttpContent(const QByteArray &bytes)
                 data.mCode = code;
                 data.mName = hgt[2];
                 data.mChange = hgt[3].left(hgt[3].length() -1).toDouble();
-                //data.mPure = pure_in[i-3];
+                data.mPure = pure_in[i-3];
                 mBoundDataList.append(data);
             }
         }

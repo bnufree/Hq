@@ -130,6 +130,7 @@ void HQTaskMagrCenter::slotBaseDataListFinished(const QStringList& codes, const 
     mRealWorkObjList.append(mBlockMgr);
     connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataVList)), this, SIGNAL(signalBlockDataListUpdated(BlockDataVList)));
     mBlockMgr->start();
+    return;
 
     //更新日线数据
     QShareHistoryInfoMgr* historyMgr = new QShareHistoryInfoMgr(codes);
