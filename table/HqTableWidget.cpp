@@ -18,7 +18,7 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),mCustomCont
     this->setSelectionBehavior(QAbstractItemView::SelectRows);
     this->setSelectionMode(QAbstractItemView::SingleSelection);
     this->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    //this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     //鼠标右键选择
     connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotCustomContextMenuRequested(QPoint)));
     connect(this, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(slotCellDoubleClicked(int,int)));
@@ -32,7 +32,7 @@ void HqTableWidget::setHeaders(const TableColDataList &list)
     mColDataList = list;
     this->setColumnCount(list.length());
     for(int i=0; i<mColDataList.size(); i++) {
-        this->setColumnWidth(i, 150);
+        this->setColumnWidth(i, 80);
         mColDataList[i].mColNum = i;
         this->setHorizontalHeaderItem(i, new QStkTableWidgetItem(mColDataList[i].mColStr));
         this->horizontalHeaderItem(i)->setData(COL_TYPE_ROLE, mColDataList[i].mType);

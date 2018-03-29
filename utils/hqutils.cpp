@@ -65,8 +65,8 @@ QString HqUtils::GetFirstLetter( const QString& unicode )
     int H = 0;
     int L = 0;
     int W = 0;
-    uint32_t stringlen = strlen(strChs);
-    for (uint32_t i = 0; i < stringlen; i++) {
+    unsigned int stringlen = strlen(strChs);
+    for (unsigned int i = 0; i < stringlen; i++) {
         H = (unsigned char) (strChs[i + 0]);
         L = (unsigned char) (strChs[i + 1]);
         if (H < 0xA1 || L < 0xA1) {

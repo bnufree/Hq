@@ -8,6 +8,7 @@
 #include <QFile>
 #include "basic_info/qsharecodeswork.h"
 #include "QThreadPool"
+#include <QDesktopWidget>
 
 int main(int argc, char *argv[])
 {
@@ -19,7 +20,10 @@ int main(int argc, char *argv[])
     pool.start(new QShareCodesWork);
     pool.waitForDone();
 #else
+    qDebug()<<QApplication::desktop()->screenGeometry();
+    //make size as 9:16
     Dialog w;
+    w.resize(1080*0.3, 1920*0.3);
     w.show();
 #endif
 
