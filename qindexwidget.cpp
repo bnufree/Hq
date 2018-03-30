@@ -6,7 +6,8 @@
 
 QIndexWidget::QIndexWidget(QWidget *parent) : QStackedWidget(parent)
 {
-    this->setMaximumHeight(60);
+    this->setMinimumHeight(120);
+    this->setMaximumHeight(120);
     mIndexWidgetMap.clear();
     QVBoxLayout *lay = new QVBoxLayout(this);
     lay->setMargin(3);
@@ -26,6 +27,10 @@ QIndexWidget::~QIndexWidget()
         mSwitchTimer->stop();
         mSwitchTimer->deleteLater();
     }
+}
+void QIndexWidget::resizeEvent(QResizeEvent *e)
+{
+    QStackedWidget::resizeEvent(e);
 }
 
 void QIndexWidget::insetWidget(const QString &code)

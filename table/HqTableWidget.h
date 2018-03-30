@@ -4,6 +4,7 @@
 #include <QTableWidget>
 #include <QMenu>
 #include "utils/comdatadefines.h"
+#include <QResizeEvent>
 
 class HqTableWidget : public QTableWidget
 {
@@ -22,6 +23,8 @@ public:
     void initPageCtrlMenu();
     QAction* insertContextMenu(QMenu* menu);
     void insertContextMenu(QAction *act);
+protected:
+    void resizeEvent(QResizeEvent *event);
 private slots:
 
 signals:

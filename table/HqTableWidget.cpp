@@ -213,5 +213,29 @@ void HqTableWidget::slotCellClicked(int row, int col)
     this->horizontalHeader()->setHighlightSections(false);
 }
 
+void HqTableWidget::resizeEvent(QResizeEvent *event)
+{
+    QTableWidget::resizeEvent(event);
+    QSize size = event->size();
+    int rowNum = 20;
+    int colNum = 4;
+    if(size.height() < size.width())
+    {
+        rowNum = 10;
+        colNum = 8;
+    }
+    for(int i=0; i<this->rowCount(); i++)
+    {
+        this->setRowHeight(i, size.height() / rowNum);
+    }
+
+    for(int i=0; i<this->columnCount(); i++)
+    {
+        this->setColumnWidth(i,size.width()/ colNum);
+    }
+
+
+}
+
 
 

@@ -5,8 +5,11 @@ QIndexFrame::QIndexFrame(const QString& name, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::QIndexFrame)
 {
-    ui->setupUi(this);\
+    ui->setupUi(this);
     ui->name->setText(name.trimmed());
+    QFont font = this->font();
+    font.setBold(true);
+    this->setFont(font);
 }
 
 QIndexFrame::~QIndexFrame()

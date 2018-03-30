@@ -20,10 +20,10 @@ int main(int argc, char *argv[])
     pool.start(new QShareCodesWork);
     pool.waitForDone();
 #else
-    qDebug()<<QApplication::desktop()->screenGeometry();
+    QRect rect = QApplication::desktop()->screenGeometry();
     //make size as 9:16
     Dialog w;
-    w.resize(1080*0.3, 1920*0.3);
+    w.resize(rect.height() / 1.77 , rect.height());
     w.show();
 #endif
 

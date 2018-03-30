@@ -44,6 +44,10 @@ Dialog::Dialog(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->blocktbl->hide();
+    ui->DateMgrBtn->setVisible(false);
+    ui->HSGTBTN->setVisible(false);
+    ui->closeBtn->setVisible(false);
+    ui->minBtn->setVisible(false);
     //指数显示
     if(!mIndexWidget)
     {

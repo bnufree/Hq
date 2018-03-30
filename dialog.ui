@@ -167,9 +167,15 @@ QMenu::icon:checked { background: gray; border: 1px inset gray; position: absolu
      </item>
      <item>
       <widget class="QLineEdit" name="searchTxt">
+       <property name="minimumSize">
+        <size>
+         <width>300</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="maximumSize">
         <size>
-         <width>100</width>
+         <width>500</width>
          <height>16777215</height>
         </size>
        </property>

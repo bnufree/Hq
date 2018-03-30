@@ -6,6 +6,7 @@
 #include "qindexframe.h"
 #include "utils/sharedata.h"
 #include <QTimer>
+#include <QResizeEvent>
 
 class ShareDataList;
 class QIndexWidget : public QStackedWidget
@@ -15,7 +16,7 @@ public:
     explicit QIndexWidget(QWidget *parent = 0);
     ~QIndexWidget();
 
-
+    void resizeEvent(QResizeEvent *e);
 signals:
 
 public slots:
