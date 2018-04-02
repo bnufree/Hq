@@ -62,7 +62,8 @@ SOURCES += main.cpp\
     real/qsahrerealdisplaywidget.cpp \
     qandroidbutton.cpp \
     qdatamgrwidget.cpp \
-    table/qsharemutualbundwidget.cpp
+    table/qsharemutualbundwidget.cpp \
+    qandroidlistwidget.cpp
 
 HEADERS  += dialog.h \
     dataexchange.h \
@@ -115,7 +116,8 @@ HEADERS  += dialog.h \
     real/qsahrerealdisplaywidget.h \
     qandroidbutton.h \
     qdatamgrwidget.h \
-    table/qshareMutualbundwidget.h
+    table/qshareMutualbundwidget.h \
+    qandroidlistwidget.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

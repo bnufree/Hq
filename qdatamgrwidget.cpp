@@ -1,4 +1,4 @@
-#include "qdatamgrwidget.h"
+﻿#include "qdatamgrwidget.h"
 #include "ui_qdatamgrwidget.h"
 #include "basic_info/qsharehsgttop10work.h"
 #include <QThreadPool>
@@ -10,7 +10,8 @@ QDataMgrWidget::QDataMgrWidget(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->mDataTypeBox->addItem(QStringLiteral("陆股通"), DATA_MUTUAL_MARKET);
-    ui->mDataTypeBox->addItem(QStringLiteral("龙虎榜"), DATA_LHB);    
+    ui->mDataTypeBox->addItem(QStringLiteral("龙虎榜"), DATA_LHB);
+    ui->mDataTypeBox->setMinimumWidth(ui->mDataTypeBox->fontMetrics().width(ui->mDataTypeBox->itemText(0)));
     ui->mCurDayText->setText(QDate::currentDate().toString("yyyy-MM-dd"));
     ui->mDataTypeBox->setCurrentIndex(0);
     connect(ui->mDataTypeBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setDislayDataType(int)));
@@ -35,6 +36,7 @@ void QDataMgrWidget::slotDayChanged()
         curDate = curDate.addDays(-1);
     } else
     {
+        if(curDate == QDate::currentDate()) return;
         curDate = curDate.addDays(1);
     }
     ui->mCurDayText->setText(curDate.toString("yyyy-MM-dd"));

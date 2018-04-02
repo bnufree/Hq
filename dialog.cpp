@@ -15,6 +15,7 @@
 #include "history/qsharehistorydialog.h"
 #include "hqtaskmagrcenter.h"
 #include "table/qsharetablewidget.h"
+#include "qandroidlistwidget.h"
 
 #define     STK_ZXG_SEC         "0520"
 #define     STK_HSJJ_SEC        "4521"
@@ -375,12 +376,24 @@ void Dialog::slotUpdateHSGTOfCode(const QString &code)
 
 void Dialog::on_dataMgrBtn_clicked()
 {
-//    QMenu *menu = new QMenu(this);
-//    menu->addAction(new QAction(QStringLiteral("陆股通"), this));
-//    menu->addAction(new QAction(QStringLiteral("龙虎榜"), this));
-//    ui->DataMgrBtn->addAction(0);
-    ui->mainStackWidget->setCurrentWidget(mDataMgrWidget);
-    mDataMgrWidget->updateData();
+    QMenu *menu = new QMenu(this);
+    QAction* act = menu->addAction(QStringLiteral("陆股通"));
+    menu->addAction(QStringLiteral("龙虎榜"));
+    menu->actionGeometry(act);
+
+    QPoint tp = ((QWidget*)ui->DataMgrBtn->parent())->mapToGlobal(ui->DataMgrBtn->geometry().topLeft());
+    menu->popup(0, tp.y() - menu->height());
+
+    //menu->popup();
+    //ui->DataMgrBtn->addAction(0);
+    //ui->mainStackWidget->setCurrentWidget(mDataMgrWidget);
+    //mDataMgrWidget->updateData();
+//    QAndroidListWidget *list = new QAndroidListWidget(this);
+//    list->addItem(QStringLiteral("陆股通"));
+//    list->addItem(QStringLiteral("龙虎榜"));
+//    QPoint tp = ((QWidget*)ui->DataMgrBtn->parent())->mapToGlobal(ui->DataMgrBtn->geometry().topLeft());
+//    list->move(0, /*tp.y() - list->size().height()*/0);
+//    list->show();
 }
 
 void Dialog::slotHqCenterBtnClicked()
