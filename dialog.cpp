@@ -376,24 +376,29 @@ void Dialog::slotUpdateHSGTOfCode(const QString &code)
 
 void Dialog::on_dataMgrBtn_clicked()
 {
-    QMenu *menu = new QMenu(this);
-    QAction* act = menu->addAction(QStringLiteral("陆股通"));
-    menu->addAction(QStringLiteral("龙虎榜"));
-    menu->actionGeometry(act);
-
-    QPoint tp = ((QWidget*)ui->DataMgrBtn->parent())->mapToGlobal(ui->DataMgrBtn->geometry().topLeft());
-    menu->popup(0, tp.y() - menu->height());
-
     //menu->popup();
     //ui->DataMgrBtn->addAction(0);
     //ui->mainStackWidget->setCurrentWidget(mDataMgrWidget);
     //mDataMgrWidget->updateData();
-//    QAndroidListWidget *list = new QAndroidListWidget(this);
-//    list->addItem(QStringLiteral("陆股通"));
-//    list->addItem(QStringLiteral("龙虎榜"));
-//    QPoint tp = ((QWidget*)ui->DataMgrBtn->parent())->mapToGlobal(ui->DataMgrBtn->geometry().topLeft());
-//    list->move(0, /*tp.y() - list->size().height()*/0);
-//    list->show();
+    QAndroidListWidget *list = new QAndroidListWidget(this);
+    list->addItem(QStringLiteral("陆股通"), DATA_MUTUAL_MARKET);
+    list->addItem(QStringLiteral("龙虎榜"), DATA_LHB);
+    connect(list, SIGNAL(signalItemClicked(int)), this, SLOT(slotDisplayDataPage(int)));
+    QPoint tp = ((QWidget*)ui->DataMgrBtn->parent())->mapToGlobal(ui->DataMgrBtn->geometry().topLeft());
+    list->move(0, tp.y() - list->size().height());
+    list->show();
+}
+
+void Dialog::slotDisplayDataPage(int val)
+{
+    QAndroidListWidget* widget = qobject_cast<QAndroidListWidget*>(sender());
+    if(!widget) return;
+    ui->mainStackWidget->setCurrentWidget(mDataMgrWidget);
+    mDataMgrWidget->setDataType(val);
+    mDataMgrWidget->updateData();
+    widget->hide();
+    widget->deleteLater();
+
 }
 
 void Dialog::slotHqCenterBtnClicked()

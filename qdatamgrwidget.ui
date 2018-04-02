@@ -22,19 +22,6 @@ text-align:center;
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>数据类别</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="mDataTypeBox"/>
-     </item>
-     <item>
       <widget class="QAndroidButton" name="mPreDayBtn">
        <property name="text">
         <string>&lt;</string>

@@ -24,6 +24,7 @@ int main(int argc, char *argv[])
     //make size as 9:16
     Dialog w;
     w.resize(rect.height() / 1.77 , rect.height());
+    w.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     w.show();
 #endif
 

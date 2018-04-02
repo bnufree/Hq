@@ -21,6 +21,7 @@ public:
     explicit QDataMgrWidget(QWidget *parent = 0);
     ~QDataMgrWidget();
     void updateData();
+    void setDataType(int type);
 public slots:
     void   setDislayDataType(int index);
     void   slotUpdateShareHsgtTop10List(const ShareBaseDataList& list);
@@ -28,6 +29,7 @@ public slots:
 
 private:
     Ui::QDataMgrWidget *ui;
+    int     mDataType;
 };
 
 #endif // QDATAMGRWIDGET_H

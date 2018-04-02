@@ -221,12 +221,16 @@ void HqTableWidget::resizeEvent(QResizeEvent *event)
 {
     QTableWidget::resizeEvent(event);
     QSize size = event->size();
-    int rowNum = 20;
+    int rowNum = 10;
     int colNum = 4;
     if(size.height() < size.width())
     {
-        rowNum = 10;
+        rowNum = 5;
         colNum = 8;
+        if(colNum > this->columnCount())
+        {
+            colNum = this->columnCount();
+        }
     }
     for(int i=0; i<this->rowCount(); i++)
     {

@@ -9,12 +9,7 @@ QDataMgrWidget::QDataMgrWidget(QWidget *parent) :
     ui(new Ui::QDataMgrWidget)
 {
     ui->setupUi(this);
-    ui->mDataTypeBox->addItem(QStringLiteral("陆股通"), DATA_MUTUAL_MARKET);
-    ui->mDataTypeBox->addItem(QStringLiteral("龙虎榜"), DATA_LHB);
-    ui->mDataTypeBox->setMinimumWidth(ui->mDataTypeBox->fontMetrics().width(ui->mDataTypeBox->itemText(0)));
     ui->mCurDayText->setText(QDate::currentDate().toString("yyyy-MM-dd"));
-    ui->mDataTypeBox->setCurrentIndex(0);
-    connect(ui->mDataTypeBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setDislayDataType(int)));
     connect(ui->mPreDayBtn, SIGNAL(clicked()), this, SLOT(slotDayChanged()));
     connect(ui->mNextDayBtn, SIGNAL(clicked()), this, SLOT(slotDayChanged()));
     //updateData();
@@ -49,18 +44,22 @@ void QDataMgrWidget::setDislayDataType(int type)
     updateData();
 }
 
+void QDataMgrWidget::setDataType(int type)
+{
+    ui->mCurDayText->setText(QDate::currentDate().toString("yyyy-MM-dd"));
+    mDataType = type;
+}
+
 void QDataMgrWidget::updateData()
 {
-    QDate date = QDate::fromString(ui->mCurDayText->text(), "yyyy-MM-dd");
-    int type = ui->mDataTypeBox->currentData().toInt();
-    if(type == DATA_MUTUAL_MARKET)
+    if(mDataType == DATA_MUTUAL_MARKET)
     {
         QThreadPool pool;
         pool.setExpiryTimeout(-1);
         pool.setMaxThreadCount(16);
         pool.start(new QShareHsgtTop10Work(ui->mCurDayText->text(), this));
         pool.waitForDone();
-    } else if(type == DATA_LHB)
+    } else if(mDataType == DATA_LHB)
     {
 
     }
