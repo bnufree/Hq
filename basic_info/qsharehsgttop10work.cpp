@@ -41,6 +41,7 @@ void QShareHsgtTop10Work::run()
         if(market_type == 2 || market_type == 4) continue;
         ShareBaseData data;
         data.setCode(ShareBaseData::fullCode(obj.value("Code").toString()));
+        data.setName(obj.value("Name").toString());
         if(data.mCode[2] == '6')
         {
             //上海
@@ -58,7 +59,7 @@ void QShareHsgtTop10Work::run()
 
 
 
-    if(list.length() > 0 && mParent)
+    if(mParent)
     {
         QMetaObject::invokeMethod(mParent, "slotUpdateShareHsgtTop10List", Qt::DirectConnection, Q_ARG(ShareBaseDataList,list ));
     }

@@ -137,7 +137,7 @@ void QEastmoneyNorthBoundThread::slotRecvHttpContent(const QByteArray &bytes)
             list.append(money.cap(1).remove(QRegExp(tr("[, ]"))).toInt());
             index += money.matchedLength();
         }
-        qDebug()<<list.length()<<list;
+        //qDebug()<<list.length()<<list;
         if(list.length() >=3)
         {
             for(int i=0; i<mBoundDataList.length(); i++)
@@ -159,7 +159,7 @@ void QEastmoneyNorthBoundThread::slotRecvHttpContent(const QByteArray &bytes)
     }
     //qDebug()<<
     foreach (NS_BOUND_DATA data, mBoundDataList) {
-        qDebug()<<data.mCode<<data.mName<<data.mBuy<<data.mSell<<data.mPure<<data.mTotal;
+        //qDebug()<<data.mCode<<data.mName<<data.mBuy<<data.mSell<<data.mPure<<data.mTotal;
     }
     emit signalUpdateNorthBoundList(mBoundDataList);
 }

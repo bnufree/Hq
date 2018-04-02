@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1078</width>
-    <height>1920</height>
+    <width>300</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -57,9 +57,82 @@ background: #ff8400;
 } 
 QMenu::item { height:24px;margin:2px }
 QMenu::icon:checked { background: gray; border: 1px inset gray; position: absolute; top: 1px; right: 1px; bottom: 1px; left: 1px;}
+
+QScrollBar:horizontal {
+    border: 2px solid grey;
+    background: #32CC99;
+    height: 15px;
+    margin: 0px 20px 0 20px;
+}
+QScrollBar::handle:horizontal {
+    background: white;
+    min-width: 20px;
+}
+QScrollBar::add-line:horizontal {
+    border: 2px solid grey;
+    background: #32CC99;
+    width: 20px;
+    subcontrol-position: right;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:horizontal {
+    border: 2px solid grey;
+    background: #32CC99;
+    width: 20px;
+    subcontrol-position: left;
+    subcontrol-origin: margin;
+}
+
+QScrollBar:left-arrow:horizontal, QScrollBar::right-arrow:horizontal {
+    border: 2px solid grey;
+    width: 3px;
+    height: 3px;
+    background: white;
+}
+
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+    background: none;
+}
+
+QScrollBar:vertical {
+     border: 2px solid grey;
+     background: #32CC99;
+     width: 15px;
+     margin: 22px 0 22px 0;
+ }
+ QScrollBar::handle:vertical {
+     background: white;
+     min-height: 20px;
+ }
+ QScrollBar::add-line:vertical {
+     border: 2px solid grey;
+     background: #32CC99;
+     height: 20px;
+     subcontrol-position: bottom;
+     subcontrol-origin: margin;
+ }
+
+ QScrollBar::sub-line:vertical {
+     border: 2px solid grey;
+     background: #32CC99;
+     height: 20px;
+     subcontrol-position: top;
+     subcontrol-origin: margin;
+ }
+ QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
+     border: 2px solid grey;
+     width: 3px;
+     height: 3px;
+     background: white;
+ }
+
+ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+     background: none;
+ }
 </string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,10,0">
    <property name="spacing">
     <number>0</number>
    </property>
@@ -76,176 +149,75 @@ QMenu::icon:checked { background: gray; border: 1px inset gray; position: absolu
     <number>0</number>
    </property>
    <item>
+    <widget class="QFrame" name="indexframe">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <property name="spacing">
       <number>0</number>
      </property>
      <item>
-      <widget class="QBlockTableWidget" name="blocktbl">
-       <property name="maximumSize">
-        <size>
-         <width>150</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="contextMenuPolicy">
-        <enum>Qt::CustomContextMenu</enum>
-       </property>
-       <property name="verticalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="horizontalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
-       </property>
-       <property name="alternatingRowColors">
-        <bool>true</bool>
-       </property>
-       <property name="selectionMode">
-        <enum>QAbstractItemView::SingleSelection</enum>
-       </property>
-       <property name="selectionBehavior">
-        <enum>QAbstractItemView::SelectRows</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QShareTablewidget" name="hqtbl">
-       <property name="mouseTracking">
-        <bool>true</bool>
-       </property>
-       <property name="contextMenuPolicy">
-        <enum>Qt::CustomContextMenu</enum>
-       </property>
-       <property name="verticalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="horizontalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
-       </property>
-       <property name="alternatingRowColors">
-        <bool>true</bool>
-       </property>
-       <property name="selectionMode">
-        <enum>QAbstractItemView::SingleSelection</enum>
-       </property>
-       <property name="selectionBehavior">
-        <enum>QAbstractItemView::SelectRows</enum>
-       </property>
-       <attribute name="horizontalHeaderCascadingSectionResizes">
-        <bool>true</bool>
-       </attribute>
-       <attribute name="horizontalHeaderMinimumSectionSize">
-        <number>20</number>
-       </attribute>
-       <attribute name="verticalHeaderVisible">
-        <bool>false</bool>
-       </attribute>
+      <widget class="QStackedWidget" name="mainStackWidget">
+       <widget class="QWidget" name="page"/>
+       <widget class="QWidget" name="page_2"/>
       </widget>
      </item>
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <property name="spacing">
-      <number>0</number>
-     </property>
-     <item>
-      <widget class="QPushButton" name="DateMgrBtn">
-       <property name="text">
-        <string>日期管理</string>
-       </property>
-       <property name="flat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="searchTxt">
-       <property name="minimumSize">
-        <size>
-         <width>300</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>500</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="placeholderText">
-        <string>代码拼音</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="updatelbl">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="HSGTBTN">
-       <property name="text">
-        <string>日线数据整理</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="minBtn">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="closeBtn">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <widget class="QFrame" name="titleFrame">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QLineEdit" name="searchTxt">
+        <property name="placeholderText">
+         <string>代码拼音</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QAndroidButton" name="HqCenterButton">
+        <property name="text">
+         <string>行情中心</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QAndroidButton" name="DataMgrBtn">
+        <property name="text">
+         <string>数据中心</string>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::PlainText</enum>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>QShareTablewidget</class>
-   <extends>QTableWidget</extends>
-   <header>table/qsharetablewidget.h</header>
-  </customwidget>
-  <customwidget>
-   <class>QBlockTableWidget</class>
-   <extends>QTableWidget</extends>
-   <header>table/qblocktablewidget.h</header>
+   <class>QAndroidButton</class>
+   <extends>QLabel</extends>
+   <header>qandroidbutton.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

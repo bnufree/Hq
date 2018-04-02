@@ -4,6 +4,7 @@
 #include <QAction>
 #include "qstktablewidgetitem.h"
 #include <QDebug>
+#include <QScrollBar>
 
 #define     COL_TYPE_ROLE               Qt::UserRole + 1
 #define     COL_SORT_ROLE               Qt::UserRole + 2
@@ -12,9 +13,9 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),mCustomCont
 {
     initPageCtrlMenu();
     mColDataList.clear();
-    mColWidth = 60;
+//    mColWidth = 60;
     this->verticalHeader()->setVisible(false);
-    this->horizontalHeader()->setDefaultSectionSize(mColWidth);    
+//    this->horizontalHeader()->setDefaultSectionSize(mColWidth);
     this->setSelectionBehavior(QAbstractItemView::SelectRows);
     this->setSelectionMode(QAbstractItemView::SingleSelection);
     this->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -24,6 +25,9 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),mCustomCont
     connect(this, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(slotCellDoubleClicked(int,int)));
     this->horizontalHeader()->setHighlightSections(false);
     connect(this->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(slotHeaderClicked(int)));
+//    this->verticalScrollBar()->setMaximumWidth(10);
+
+//    this->horizontalScrollBar()->setMaximumHeight(10);
 }
 
 void HqTableWidget::setHeaders(const TableColDataList &list)

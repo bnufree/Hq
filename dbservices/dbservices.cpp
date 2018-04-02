@@ -130,9 +130,12 @@ void HqInfoService::initBlockData(int type)
 void HqInfoService::slotSearchCodesOfText(const QString &text)
 {
     QStringList list;
-    if(!mDataBase.getSimilarCodeOfText(list, text))
+    if(text.length() > 0)
     {
-        qDebug()<<"error:"<<mDataBase.errMsg();
+        if(!mDataBase.getSimilarCodeOfText(list, text))
+        {
+            qDebug()<<"error:"<<mDataBase.errMsg();
+        }
     }
     qDebug()<<"codes:"<<list;
     emit signalSendSearchCodesOfText(list);

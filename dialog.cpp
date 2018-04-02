@@ -14,6 +14,7 @@
 #include "basic_info/qsharebasicinfoworker.h"
 #include "history/qsharehistorydialog.h"
 #include "hqtaskmagrcenter.h"
+#include "table/qsharetablewidget.h"
 
 #define     STK_ZXG_SEC         "0520"
 #define     STK_HSJJ_SEC        "4521"
@@ -43,22 +44,33 @@ Dialog::Dialog(QWidget *parent) :
     ui(new Ui::MainDialog)
 {
     ui->setupUi(this);
-    ui->blocktbl->hide();
-    ui->DateMgrBtn->setVisible(false);
-    ui->HSGTBTN->setVisible(false);
-    ui->closeBtn->setVisible(false);
-    ui->minBtn->setVisible(false);
+    while(ui->mainStackWidget->count())
+    {
+        ui->mainStackWidget->removeWidget(ui->mainStackWidget->widget(0));
+    }
+    mShareTableWidget = new QShareTablewidget(this);
+    ui->mainStackWidget->addWidget(mShareTableWidget);
+    mDataMgrWidget = new QDataMgrWidget(this);
+    ui->mainStackWidget->addWidget(mDataMgrWidget);
+    mBlockTableWidget = new QBlockTableWidget(this);
+    ui->mainStackWidget->addWidget(mBlockTableWidget);
+    connect(ui->DataMgrBtn, SIGNAL(clicked()), this, SLOT(on_dataMgrBtn_clicked()));
+    connect(ui->HqCenterButton, SIGNAL(clicked()), this, SLOT(slotHqCenterBtnClicked()));
+
     //指数显示
+    QHBoxLayout *indexLayout = new QHBoxLayout;
+    ui->indexframe->setLayout(indexLayout);
+    indexLayout->setMargin(3);
     if(!mIndexWidget)
     {
         mIndexWidget = new QIndexWidget(this);
-        ui->verticalLayout->insertWidget(0, mIndexWidget);
+        ui->indexframe->layout()->addWidget(mIndexWidget);
     }
     this->setWindowFlags(Qt::FramelessWindowHint);
     this->setMouseTracking(true);
     mDisplayMode = E_DISPLAY_ALL;
-    ui->closeBtn->setIcon(style()->standardPixmap(QStyle::SP_TitleBarCloseButton));
-    ui->minBtn->setIcon(style()->standardIcon(QStyle::SP_TitleBarMinButton));
+    //ui->closeBtn->setIcon(style()->standardPixmap(QStyle::SP_TitleBarCloseButton));
+    //ui->minBtn->setIcon(style()->standardIcon(QStyle::SP_TitleBarMinButton));
     //ui->srchBtn->setIcon(style()->standardIcon(QStyle::SP_BrowserReload));
     //系统托盘
     QIcon appIcon = QIcon(":/icon/image/Baidu_96px.png");
@@ -85,24 +97,25 @@ Dialog::Dialog(QWidget *parent) :
 
     //
     mTaskMgr = new HQTaskMagrCenter;
-    connect(ui->hqtbl, SIGNAL(signalSetFavCode(QString)), mTaskMgr, SIGNAL(signalSetFavCode(QString)));
+    connect(mShareTableWidget, SIGNAL(signalSetFavCode(QString)), mTaskMgr, SIGNAL(signalSetFavCode(QString)));
     connect(mTaskMgr, SIGNAL(signalSendIndexCodesList(QStringList)), this, SLOT(slotRecvIndexCodesList(QStringList)));
     connect(mTaskMgr, SIGNAL(signalSendIndexRealDataList(ShareDataList)), mIndexWidget, SLOT(updateData(ShareDataList)));
     connect(mTaskMgr, SIGNAL(signalSendShareRealDataList(ShareDataList)), this, SLOT(updateHqTable(ShareDataList)));
-    connect(ui->hqtbl, SIGNAL(signalSetDisplayHSHK(QString)), this, SLOT(slotUpdateHSGTOfCode(QString)));
-    connect(ui->hqtbl, SIGNAL(signalSetShareMarket(int)), mTaskMgr, SLOT(setMktType(int)));
-    connect(ui->hqtbl, SIGNAL(signalSetSortType(int)), mTaskMgr, SLOT(setSortType(int)));
-    connect(ui->hqtbl, SIGNAL(signalDisplayPage(int)), mTaskMgr, SLOT(setDisplayPage(int)));
-    connect(ui->hqtbl, SIGNAL(signalSetDisplayBlockDetail(QStringList)), mTaskMgr, SLOT(setSelfCodesList(QStringList)));
-    connect(ui->blocktbl, SIGNAL(signalDisplayBlockDetailCodesList(QStringList)), mTaskMgr, SLOT(setSelfCodesList(QStringList)));
+    connect(mShareTableWidget, SIGNAL(signalSetDisplayHSHK(QString)), this, SLOT(slotUpdateHSGTOfCode(QString)));
+    connect(mShareTableWidget, SIGNAL(signalSetShareMarket(int)), mTaskMgr, SLOT(setMktType(int)));
+    connect(mShareTableWidget, SIGNAL(signalSetSortType(int)), mTaskMgr, SLOT(setSortType(int)));
+    connect(mShareTableWidget, SIGNAL(signalDisplayPage(int)), mTaskMgr, SLOT(setDisplayPage(int)));
+    connect(mShareTableWidget, SIGNAL(signalSetDisplayBlockDetail(QStringList)), mTaskMgr, SLOT(setSelfCodesList(QStringList)));
+    connect(mBlockTableWidget, SIGNAL(signalDisplayBlockDetailCodesList(QStringList)), mTaskMgr, SLOT(setSelfCodesList(QStringList)));
     connect(mTaskMgr, SIGNAL(signalBlockDataListUpdated(BlockDataVList)), this, SLOT(updateBlockTable(BlockDataVList)));
-    connect(ui->blocktbl, SIGNAL(signalSetSortType(int)), mTaskMgr, SLOT(reverseSortRule()));
-    connect(ui->blocktbl, SIGNAL(signalSetBlockType(int)), mTaskMgr, SLOT(setCurBlockType(int)));
+    connect(mBlockTableWidget, SIGNAL(signalSetSortType(int)), mTaskMgr, SLOT(reverseSortRule()));
+    connect(mBlockTableWidget, SIGNAL(signalSetBlockType(int)), mTaskMgr, SLOT(setCurBlockType(int)));
     connect(mTaskMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SLOT(slotUpdateMsg(QString)));
     connect(mTaskMgr, SIGNAL(signalSendNotrhBoundDataList(QList<NS_BOUND_DATA>)), mIndexWidget, SLOT(updateData(QList<NS_BOUND_DATA>)));
     //
 
     mTaskMgr->signalStart();
+    ui->mainStackWidget->setCurrentIndex(0);
 }
 
 
@@ -195,7 +208,7 @@ void Dialog::on_srchBtn_clicked()
 
 void Dialog::slotUpdateMsg(const QString &msg)
 {
-    ui->updatelbl->setText(msg);
+    //ui->updatelbl->setText(msg);
 }
 
 void Dialog::on_minBtn_clicked()
@@ -206,16 +219,18 @@ void Dialog::on_minBtn_clicked()
 void Dialog::resizeEvent(QResizeEvent *event)
 {
     QDialog::resizeEvent(event);
+    ui->searchTxt->setMaximumWidth(event->size().width()*0.4);
+    ui->searchTxt->setMaximumWidth(event->size().width()*0.4);
 }
 
 void Dialog::updateHqTable(const ShareDataList& pDataList)
 {
-    ui->hqtbl->setDataList(pDataList);
+    mShareTableWidget->setDataList(pDataList);
 }
 
 void Dialog::updateBlockTable(const BlockDataVList& pDataList)
 {
-    ui->blocktbl->setDataList(pDataList);
+    mBlockTableWidget->setDataList(pDataList);
 }
 void Dialog::on_searchTxt_textChanged(const QString &arg1)
 {
@@ -254,8 +269,8 @@ void Dialog::on_MainDialog_customContextMenuRequested(const QPoint &pos)
 void Dialog::slotDisplayAll()
 {
     mDisplayMode = E_DISPLAY_ALL;
-    ui->hqtbl->setVisible(true);
-    ui->blocktbl->setVisible(true);
+    mShareTableWidget->setVisible(true);
+    mBlockTableWidget->setVisible(true);
     mDisplayCol = 4;
     foreach (QAction* act, mHqColActList) {
         if(act->isChecked())
@@ -272,9 +287,9 @@ void Dialog::slotDisplayBlock()
 {
     mDisplayMode = E_DISPLAY_BLOCK;
 
-    ui->blocktbl->setVisible(true);
-    ui->hqtbl->setVisible(false);
-    mDisplayCol = ui->blocktbl->horizontalHeader()->count();
+    mBlockTableWidget->setVisible(true);
+    mShareTableWidget->setVisible(false);
+    mDisplayCol = mBlockTableWidget->horizontalHeader()->count();
     mTargetSize.setWidth(mDisplayCol * mSecSize);
     setTargetSize(mTargetSize);
 }
@@ -291,12 +306,12 @@ void Dialog::slotDisplayShareMini()
     {
         mDisplayMode = E_DISPLAY_Share_MINI;
     }
-    ui->blocktbl->setVisible(false);
-    ui->hqtbl->setVisible(true);
+    mBlockTableWidget->setVisible(false);
+    mShareTableWidget->setVisible(true);
     mDisplayCol = 0;
-    for(int i=0; i<ui->hqtbl->columnCount(); i++)
+    for(int i=0; i<mShareTableWidget->columnCount(); i++)
     {
-        if(!ui->hqtbl->isColumnHidden(i)) mDisplayCol++;
+        if(!mShareTableWidget->isColumnHidden(i)) mDisplayCol++;
     }
     mTargetSize.setWidth(mDisplayCol * mSecSize);
     setTargetSize(mTargetSize);
@@ -348,7 +363,7 @@ void Dialog::on_HSGTBTN_clicked()
 
 void Dialog::slotTodayHSGUpdated()
 {
-    ui->HSGTBTN->setStyleSheet("background-color:red");
+    //ui->HSGTBTN->setStyleSheet("background-color:red");
 }
 
 void Dialog::slotUpdateHSGTOfCode(const QString &code)
@@ -356,4 +371,19 @@ void Dialog::slotUpdateHSGTOfCode(const QString &code)
     QShareHistoryDialog *dlg = new QShareHistoryDialog(code) ;
     dlg->setModal(false);
     dlg->show();
+}
+
+void Dialog::on_dataMgrBtn_clicked()
+{
+//    QMenu *menu = new QMenu(this);
+//    menu->addAction(new QAction(QStringLiteral("陆股通"), this));
+//    menu->addAction(new QAction(QStringLiteral("龙虎榜"), this));
+//    ui->DataMgrBtn->addAction(0);
+    ui->mainStackWidget->setCurrentWidget(mDataMgrWidget);
+    mDataMgrWidget->updateData();
+}
+
+void Dialog::slotHqCenterBtnClicked()
+{
+    ui->mainStackWidget->setCurrentWidget(mShareTableWidget);
 }

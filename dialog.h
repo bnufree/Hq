@@ -6,6 +6,9 @@
 #include <QTableWidget>
 #include "utils/blockdata.h"
 #include "utils/sharedata.h"
+#include "table/qsharetablewidget.h"
+#include "table/qblocktablewidget.h"
+#include "qdatamgrwidget.h"
 
 class HQTaskMagrCenter;
 class QIndexWidget;
@@ -81,6 +84,7 @@ public slots:
     void slotDisplayShareMini();
     void slotTodayHSGUpdated();
     void slotUpdateHSGTOfCode(const QString& code);
+    void slotHqCenterBtnClicked();
 
 private slots:
     void on_zjlxBtn_clicked();
@@ -101,6 +105,8 @@ private slots:
 
     void on_HSGTBTN_clicked();
 
+    void on_dataMgrBtn_clicked();
+
 private:
     Ui::MainDialog *ui;
     QSystemTrayIcon *systemIcon;
@@ -118,6 +124,9 @@ private:
     QPoint   dPos;
     HQTaskMagrCenter     *mTaskMgr;
     QIndexWidget        *mIndexWidget;
+    QShareTablewidget   *mShareTableWidget;
+    QBlockTableWidget   *mBlockTableWidget;
+    QDataMgrWidget      *mDataMgrWidget;
 };
 
 #endif // DIALOG_H

@@ -59,7 +59,10 @@ SOURCES += main.cpp\
     real/qeastmoneyzjlxthread.cpp \
     real/qsinastkinfothread.cpp \
     real/qsinastkresultmergethread.cpp \
-    real/qsahrerealdisplaywidget.cpp
+    real/qsahrerealdisplaywidget.cpp \
+    qandroidbutton.cpp \
+    qdatamgrwidget.cpp \
+    table/qsharemutualbundwidget.cpp
 
 HEADERS  += dialog.h \
     dataexchange.h \
@@ -109,19 +112,30 @@ HEADERS  += dialog.h \
     real/qeastmoneyzjlxthread.h \
     real/qsinastkinfothread.h \
     real/qsinastkresultmergethread.h \
-    real/qsahrerealdisplaywidget.h
+    real/qsahrerealdisplaywidget.h \
+    qandroidbutton.h \
+    qdatamgrwidget.h \
+    table/qshareMutualbundwidget.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \
     qindexframe.ui \
     exchange/qexchangefiledlg.ui \
     history/qsharehistorydialog.ui \
-    real/qsahrerealdisplaywidget.ui
+    real/qsahrerealdisplaywidget.ui \
+    qdatamgrwidget.ui
 
 RESOURCES += \
     image.qrc
 
 DISTFILES += \
+    android/AndroidManifest.xml \
+    android/gradle/wrapper/gradle-wrapper.jar \
+    android/gradlew \
+    android/res/values/libs.xml \
+    android/build.gradle \
+    android/gradle/wrapper/gradle-wrapper.properties \
+    android/gradlew.bat \
     android/AndroidManifest.xml \
     android/gradle/wrapper/gradle-wrapper.jar \
     android/gradlew \

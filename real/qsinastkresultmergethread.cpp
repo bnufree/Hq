@@ -516,7 +516,13 @@ void QSinaStkResultMergeThread::SortResultList(ShareDataList &result, const Shar
 void QSinaStkResultMergeThread::setSelfCodesList(const QStringList &list)
 {
     mSelfCodesList = list;
-    mMktType = MKT_OTHER;
+    if(list.length() > 0)
+    {
+        mMktType = MKT_OTHER;
+    } else
+    {
+        mMktType = MKT_ALL;
+    }
     //qDebug()<<"selfcodes:"<<mSelfCodesList;
 }
 

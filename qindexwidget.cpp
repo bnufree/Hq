@@ -6,8 +6,8 @@
 
 QIndexWidget::QIndexWidget(QWidget *parent) : QStackedWidget(parent)
 {
-    this->setMinimumHeight(120);
-    this->setMaximumHeight(120);
+//    this->setMinimumHeight(120);
+//    this->setMaximumHeight(120);
     mIndexWidgetMap.clear();
     QVBoxLayout *lay = new QVBoxLayout(this);
     lay->setMargin(3);
@@ -30,6 +30,7 @@ QIndexWidget::~QIndexWidget()
 }
 void QIndexWidget::resizeEvent(QResizeEvent *e)
 {
+    qDebug()<<"QIndexWidget"<<__func__<<e->size();
     QStackedWidget::resizeEvent(e);
 }
 
