@@ -23,6 +23,7 @@ struct zjlxData{
 #define         SZZXB_SHARE_REG        "(sz){0,1}(002[0-9]{3})"
 #define         SZCYB_SHARE_REG        "(sz){0,1}(30[0-9]{4})"
 #define         HK_SHARE_REG        "(hk){0,1}\\d{5}"
+
 //定义基础的数据类型
 typedef enum data_type{
     DATA_UNDEFINED = 0x00,
@@ -241,6 +242,16 @@ public:
         }
 
         return src;
+    }
+
+    bool operator <(const ShareBaseData& data) const
+    {
+        return ((*this).mTop10Buy - (*this).mTop10Sell) < (data.mTop10Buy - data.mTop10Sell);
+    }
+
+    bool operator >(const ShareBaseData& data) const
+    {
+        return ((*this).mTop10Buy - (*this).mTop10Sell) > (data.mTop10Buy - data.mTop10Sell);
     }
 
 public:

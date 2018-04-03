@@ -9,6 +9,7 @@
 #include "basic_info/qsharecodeswork.h"
 #include "QThreadPool"
 #include <QDesktopWidget>
+#include <QDir>
 
 int main(int argc, char *argv[])
 {
@@ -21,6 +22,7 @@ int main(int argc, char *argv[])
     pool.waitForDone();
 #else
     QRect rect = QApplication::desktop()->screenGeometry();
+    qDebug()<<__func__<<rect<<QDir::currentPath();
     //make size as 9:16
     Dialog w;
     w.resize(rect.height() / 1.77 , rect.height());

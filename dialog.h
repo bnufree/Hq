@@ -86,6 +86,7 @@ public slots:
     void slotUpdateHSGTOfCode(const QString& code);
     void slotHqCenterBtnClicked();
     void slotDisplayDataPage(int val);
+    void slotDisplayHqCenterPage(int val);
 private slots:
     void on_zjlxBtn_clicked();
 

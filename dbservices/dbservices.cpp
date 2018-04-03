@@ -585,6 +585,7 @@ void HqInfoService::slotSetFavCode(const QString &code)
             mFavCodeList.removeAll(ShareBaseData::fullCode(code));
         }
         Profiles::instance()->setValue(FAV_CODE_SEC, FAV_CODE, mFavCodeList);
+        qDebug()<<Profiles::instance()->value(FAV_CODE_SEC, FAV_CODE).toStringList();
     }
 }
 

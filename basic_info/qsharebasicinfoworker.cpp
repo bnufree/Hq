@@ -10,7 +10,6 @@
 #include <QFile>
 
 #define STOCK_CODE_FILE  "share.dat"
-
 QShareBasicInfoWorker::QShareBasicInfoWorker(QObject *parent) : QObject(parent)
 {
     mShareBaseDataMap.clear();
@@ -34,11 +33,21 @@ void QShareBasicInfoWorker::slotGetBasicInfo()
 
 bool QShareBasicInfoWorker::getInfosFromFile(QMap<QString, ShareBaseData>& map)
 {
+    qDebug()<<__FUNCTION__<<__LINE__;
     map.clear();
-    if(!QFile::exists(STOCK_CODE_FILE)) return false;
+    if(!QFile::exists(STOCK_CODE_FILE))
+    {
+        qDebug()<<__FUNCTION__<<__LINE__;
+        qDebug()<<STOCK_CODE_FILE<<" does not exist!!";
+        return false;
+    }
     //读取文件
     QFile file(STOCK_CODE_FILE);
-    if(!file.open(QIODevice::ReadOnly)) return false;
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        qDebug()<<__FUNCTION__<<__LINE__;
+        return false;
+    }
     int size = file.size();
     int totalNum = 0;
     if(size > sizeof(qint64) + sizeof(int))
@@ -60,6 +69,7 @@ bool QShareBasicInfoWorker::getInfosFromFile(QMap<QString, ShareBaseData>& map)
     file.close();
     if(totalNum != 0 && map.count() == totalNum)
     {
+        qDebug()<<__FUNCTION__<<__LINE__;
         return true;
     }
     qDebug()<<"read from file failed!!!!!!!!!!!!!!!!!!!!!!";
@@ -99,6 +109,7 @@ bool QShareBasicInfoWorker::writeInfos(const ShareBaseDataList &list)
     FILE *fp = fopen(STOCK_CODE_FILE, "wb+");
     if(fp)
     {
+        qDebug()<<__FUNCTION__<<__LINE__;
         qint64 cur = QDateTime(HqUtils::latestActiveDay().addDays(-1)).toMSecsSinceEpoch();
         fwrite(&cur, sizeof(cur), 1, fp);
         int size = list.size();
@@ -113,6 +124,9 @@ bool QShareBasicInfoWorker::writeInfos(const ShareBaseDataList &list)
         cur = QDateTime(HqUtils::latestActiveDay()).toMSecsSinceEpoch();
         fwrite(&cur, sizeof(cur), 1, fp);
         fclose(fp);
+    } else
+    {
+        qDebug()<<__FUNCTION__<<__LINE__;
     }
 
     return true;

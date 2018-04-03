@@ -10,6 +10,7 @@ QAndroidListWidget::QAndroidListWidget(QWidget *parent) : QWidget(parent)
 {
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
+    layout->setSpacing(0);
     this->setLayout(layout);
     this->setStyleSheet("QLabel{border:1px solid black;}");
 }

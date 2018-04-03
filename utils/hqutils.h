@@ -7,6 +7,7 @@
 #include <QStringList>
 
 
+#define         ANDROID_FILE_PATH       "/mnt/sdcard/com.hq.info"
 class ShareDate: public QDate
 {
 

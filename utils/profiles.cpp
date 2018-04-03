@@ -1,4 +1,7 @@
 ﻿#include "profiles.h"
+#include "hqutils.h"
+#include <QDir>
+#include <QDebug>
 
 Profiles* Profiles::minstance = 0;
 Profiles::MGarbage Profiles::Garbage;
@@ -6,7 +9,16 @@ Profiles::Profiles(QObject *parent) :
     configSettings(NULL),
     QObject(parent)
 {
-    configSettings = new QSettings("etc/profiles.ini", QSettings::IniFormat);
+    QDir dir(ANDROID_FILE_PATH);
+    if(!dir.exists())
+    {
+        dir.mkdir(ANDROID_FILE_PATH);
+         qDebug()<<"path not exist!!!!!!!!!!!"<<ANDROID_FILE_PATH;
+    } else
+    {
+        qDebug()<<"path already exist!!!!!!!!!!!";
+    }
+    configSettings = new QSettings(QString("%1/%2").arg(ANDROID_FILE_PATH).arg("profiles.ini"), QSettings::IniFormat);
     configSettings->setIniCodec(QTextCodec::codecForName("GB18030"));
 }
 

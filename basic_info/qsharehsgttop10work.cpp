@@ -56,6 +56,10 @@ void QShareHsgtTop10Work::run()
 
         list.append(data);
     }
+    if(list.size() > 0)
+    {
+        qSort(list.begin(), list.end(), qGreater<ShareBaseData>());
+    }
 
 
 
