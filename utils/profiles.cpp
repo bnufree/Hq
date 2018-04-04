@@ -9,16 +9,7 @@ Profiles::Profiles(QObject *parent) :
     configSettings(NULL),
     QObject(parent)
 {
-    QDir dir(ANDROID_FILE_PATH);
-    if(!dir.exists())
-    {
-        dir.mkdir(ANDROID_FILE_PATH);
-         qDebug()<<"path not exist!!!!!!!!!!!"<<ANDROID_FILE_PATH;
-    } else
-    {
-        qDebug()<<"path already exist!!!!!!!!!!!";
-    }
-    configSettings = new QSettings(QString("%1/%2").arg(ANDROID_FILE_PATH).arg("profiles.ini"), QSettings::IniFormat);
+    configSettings = new QSettings(QString("assets:/profiles.ini"), QSettings::IniFormat);
     configSettings->setIniCodec(QTextCodec::codecForName("GB18030"));
 }
 

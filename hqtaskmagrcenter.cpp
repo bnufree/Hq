@@ -10,6 +10,7 @@
 HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
     QObject(parent),\
     mShareInfoMergeThread(0),\
+    mShareBasicWorker(0),\
     mBlockMgr(0)
 {
     qRegisterMetaType<QList<NS_BOUND_DATA>>("const QList<NS_BOUND_DATA> &");
@@ -17,7 +18,7 @@ HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
     connect(this, SIGNAL(signalStart()), this, SLOT(slotStart()));
     connect(DATA_SERVICE, SIGNAL(signalDbInitFinished()), this, SLOT(slotDBInitFinished()));
     connect(this, SIGNAL(signalSearchCodesOfText(QString)), DATA_SERVICE, SIGNAL(signalSearchCodesOfText(QString)));
-    connect(this, SIGNAL(signalSetFavCode(QString)), DATA_SERVICE, SIGNAL(signalSetFavCode(QString)));
+    connect(this, SIGNAL(signalSetFavCode(QString)), this, SLOT(slotSetFavCode(QString)));
     this->moveToThread(&mWorkThread);
     mWorkThread.start();
 }
@@ -39,11 +40,20 @@ void HQTaskMagrCenter::slotDBInitFinished()
 {
     qDebug()<<__FUNCTION__<<__LINE__;
     //数据库初始化完成，开始取得基本的信息
-    QShareBasicInfoWorker *basic_info = new QShareBasicInfoWorker;
-    connect(basic_info, SIGNAL(signalBaseDataListFinished(QStringList,ShareBaseDataList)),\
+    mShareBasicWorker = new QShareBasicInfoWorker;
+    if(!mShareBasicWorker) return;
+    connect(mShareBasicWorker, SIGNAL(signalBaseDataListFinished(QStringList,ShareBaseDataList)),\
             this, SLOT(slotBaseDataListFinished(QStringList,ShareBaseDataList)));
-    basic_info->signalGetBasicInfo();
+//    connect(this, SIGNAL(signalSetFavCode(QString)),\
+//             mShareBasicWorker, SLOT(updateShareFavCode(QString)));
+    mShareBasicWorker->signalGetBasicInfo();
 
+}
+
+void HQTaskMagrCenter::slotSetFavCode(const QString &code)
+{
+    if(mShareBasicWorker) mShareBasicWorker->signalUpdateFavCode(code);
+    emit DATA_SERVICE->signalSetFavCode(code);
 }
 
 void   HQTaskMagrCenter::setMktType(int type)
@@ -96,11 +106,11 @@ void HQTaskMagrCenter::slotBaseDataListFinished(const QStringList& codes, const 
     qDebug()<<"update code finshed:"<<list.length();
     //更新后台数据信息
     DATA_SERVICE->signalUpdateShareBasicInfo(list);
-    QShareBasicInfoWorker* ptr = qobject_cast<QShareBasicInfoWorker*>(sender());
-    if(ptr)
-    {
-        ptr->deleteLater();
-    }
+//    QShareBasicInfoWorker* ptr = qobject_cast<QShareBasicInfoWorker*>(sender());
+//    if(ptr)
+//    {
+//        ptr->deleteLater();
+//    }
 
     //更新实时的指数
     QStringList indexlist;
@@ -123,7 +133,7 @@ void HQTaskMagrCenter::slotBaseDataListFinished(const QStringList& codes, const 
 
     mShareInfoMergeThread->setStkList(codes);
     mShareInfoMergeThread->setActive(true);
-    mShareInfoMergeThread->setMktType(MKT_ALL);
+    mShareInfoMergeThread->setMktType(MKT_ZXG);
     mShareInfoMergeThread->start();
     //板块行情初始化
     mBlockMgr = new QEastMoneyBlockMangagerThread();

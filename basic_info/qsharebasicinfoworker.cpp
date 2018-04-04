@@ -14,6 +14,8 @@ QShareBasicInfoWorker::QShareBasicInfoWorker(QObject *parent) : QObject(parent)
 {
     mShareBaseDataMap.clear();
     connect(this, SIGNAL(signalGetBasicInfo()), this, SLOT(slotGetBasicInfo()));
+    connect(this, SIGNAL(signalUpdateFavCode(QString)), \
+            this, SLOT(updateShareFavCode(QString)));
     moveToThread(&mWorkThread);
     mWorkThread.start();
 }
@@ -29,6 +31,15 @@ void QShareBasicInfoWorker::slotGetBasicInfo()
 
     emit signalBaseDataListFinished(QStringList(mShareBaseDataMap.keys()), mShareBaseDataMap.values());
 
+}
+
+void QShareBasicInfoWorker::updateShareFavCode(const QString &code)
+{
+    qDebug()<<__func__<<code;
+    ShareBaseData &data = mShareBaseDataMap[ShareBaseData::fullCode(code)];
+    data.mIsFav = !(data.mIsFav);
+    qDebug()<<__func__<<data.mCode<<data.mIsFav;
+    writeInfos(mShareBaseDataMap.values());
 }
 
 bool QShareBasicInfoWorker::getInfosFromFile(QMap<QString, ShareBaseData>& map)
@@ -62,7 +73,7 @@ bool QShareBasicInfoWorker::getInfosFromFile(QMap<QString, ShareBaseData>& map)
                 ShareBaseData data;
                 file.read((char*)(&data), sizeof(ShareBaseData));
                 map[QString::fromStdString(data.mCode)] = data;
-                //qDebug()<<data.mCode<<data.mName<<data.mPY<<data.mTotalShare;
+                //qDebug()<<data.mCode<<data.mName<<data.mIsFav;
             }
         }
     }

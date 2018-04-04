@@ -7,6 +7,7 @@
 
 class QSinaStkResultMergeThread;
 class QEastMoneyBlockMangagerThread;
+class QShareBasicInfoWorker;
 
 class HQTaskMagrCenter : public QObject
 {
@@ -33,6 +34,7 @@ public slots:
     void        slotDBInitFinished();
     void        slotBaseDataListFinished(const QStringList& codes, const ShareBaseDataList& list);
     void        slotUpdateHistoryFinished();
+    void        slotSetFavCode(const QString& code);
 
     //
     void        setMktType(int type);
@@ -49,6 +51,7 @@ private:
     QList<QObject*>             mRealWorkObjList;
     QSinaStkResultMergeThread*   mShareInfoMergeThread;
     QEastMoneyBlockMangagerThread*  mBlockMgr;
+    QShareBasicInfoWorker*          mShareBasicWorker;
 };
 
 #endif // HQTASKMAGRCENTER_H

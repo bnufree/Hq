@@ -22,6 +22,7 @@ HqInfoService::HqInfoService(QObject *parent) :
     qRegisterMetaType<FinDataList>("const FinDataList&");
     qRegisterMetaType<ShareBaseDataList>("const ShareBaseDataList&");
     mFavCodeList = Profiles::instance()->value(FAV_CODE_SEC, FAV_CODE, QStringList()).toStringList();
+    qDebug()<<"fav:"<<mFavCodeList.mid(0, 10);
     initSignalSlot();
     initHistoryDates();
     //3、开启异步通讯
@@ -369,13 +370,13 @@ void HqInfoService::slotUpdateShareBasicInfo(const ShareBaseDataList &list)
                 res->mTop10Sell = data.mTop10Sell;
                 res->setPY(QString::fromStdString(data.mPY));
                 res->mProfit = data.mProfit;
-                if(mFavCodeList.contains(ShareBaseData::fullCode(QString::fromStdString(data.mCode))))
-                {
-                    res->mIsFav = true;
-                } else
-                {
-                    res->mIsFav = false;
-                }
+//                if(mFavCodeList.contains(ShareBaseData::fullCode(QString::fromStdString(data.mCode))))
+//                {
+//                    res->mIsFav = true;
+//                } else
+//                {
+//                    res->mIsFav = false;
+//                }
             }
         }
     }
@@ -577,15 +578,15 @@ void HqInfoService::slotSetFavCode(const QString &code)
     if(data)
     {
         data->mIsFav = !data->mIsFav;
-        if(data->mIsFav && !mFavCodeList.contains(ShareBaseData::fullCode(code)))
-        {
-            mFavCodeList.append(ShareBaseData::fullCode(code));
-        } else if(!data->mIsFav)
-        {
-            mFavCodeList.removeAll(ShareBaseData::fullCode(code));
-        }
-        Profiles::instance()->setValue(FAV_CODE_SEC, FAV_CODE, mFavCodeList);
-        qDebug()<<Profiles::instance()->value(FAV_CODE_SEC, FAV_CODE).toStringList();
+//        if(data->mIsFav && !mFavCodeList.contains(ShareBaseData::fullCode(code)))
+//        {
+//            mFavCodeList.append(ShareBaseData::fullCode(code));
+//        } else if(!data->mIsFav)
+//        {
+//            mFavCodeList.removeAll(ShareBaseData::fullCode(code));
+//        }
+//        Profiles::instance()->setValue(FAV_CODE_SEC, FAV_CODE, mFavCodeList);
+//        qDebug()<<Profiles::instance()->value(FAV_CODE_SEC, FAV_CODE).toStringList();
     }
 }
 

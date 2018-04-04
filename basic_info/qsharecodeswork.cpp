@@ -27,8 +27,8 @@ void QShareCodesWork::run()
     QTextCodec *codes = QTextCodec::codecForHtml(http);
     QString result = codes->toUnicode(http);
     QRegExp reg(">([\u4e00-\u9fa5A-Z0-9]{1,})\\(([0-9]{6})\\)<");
-    //|510[0-9]{3}|1599[0-9]{2}
-    QRegExp reg_code("60[013][0-9]{3}|300[0-9]{3}|00[012][0-9]{3}");
+    //
+    QRegExp reg_code("60[013][0-9]{3}|300[0-9]{3}|00[012][0-9]{3}|510[0-9]{3}|1599[0-9]{2}");
     int index = 0;
     while((index = reg.indexIn(result, index)) >= 0)
     {
