@@ -25,9 +25,7 @@ int main(int argc, char *argv[])
     qDebug()<<__func__<<rect<<QDir::currentPath();
     //make size as 9:16
     Dialog w;
-    w.resize(rect.height() / 1.77 , rect.height());
-    w.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    w.show();
+    w.showMaximized();
 #endif
 
     return a.exec();

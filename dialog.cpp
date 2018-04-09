@@ -116,6 +116,7 @@ Dialog::Dialog(QWidget *parent) :
     //
 
     mTaskMgr->signalStart();
+
     ui->mainStackWidget->setCurrentIndex(0);
     mTaskMgr->setMktType(MKT_ALL);
 }
@@ -220,6 +221,8 @@ void Dialog::on_minBtn_clicked()
 
 void Dialog::resizeEvent(QResizeEvent *event)
 {
+    if(event->size().width() > QApplication::desktop()->availableGeometry().size().width() ||
+       event->size().height() > QApplication::desktop()->availableGeometry().size().height()     ) return;
     QDialog::resizeEvent(event);
     ui->searchTxt->setMaximumWidth(event->size().width()*0.4);
     ui->searchTxt->setMaximumWidth(event->size().width()*0.4);

@@ -5,27 +5,44 @@
 #include "qstktablewidgetitem.h"
 #include <QDebug>
 #include <QScrollBar>
+#include <QPropertyAnimation>
 
 #define     COL_TYPE_ROLE               Qt::UserRole + 1
 #define     COL_SORT_ROLE               Qt::UserRole + 2
 
-HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),mCustomContextMenu(0)
+HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
+    mCurScrollBar(0),
+    mMoveDir(-1),
+    mCustomContextMenu(0)
 {
     initPageCtrlMenu();
     mColDataList.clear();
-//    mColWidth = 60;
+ //   QObjectList objectList = this->children();
+//    for(int i = 0; i < objectList.count(); i++)
+//    {
+//        if(objectList.at(i)->objectName() == "qt_scrollarea_viewport")
+//        {
+//            objectList.at(i)->installEventFilter(this);
+//        }
+//    }
+//    qDebug()<<objectList;
+
     this->verticalHeader()->setVisible(false);
-//    this->horizontalHeader()->setDefaultSectionSize(mColWidth);
     this->setSelectionBehavior(QAbstractItemView::SelectRows);
     this->setSelectionMode(QAbstractItemView::SingleSelection);
     this->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    //this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     //鼠标右键选择
     connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotCustomContextMenuRequested(QPoint)));
     connect(this, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(slotCellDoubleClicked(int,int)));
     this->horizontalHeader()->setHighlightSections(false);
     connect(this->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(slotHeaderClicked(int)));
-    this->setAttribute(Qt::WA_AcceptTouchEvents);
+    this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+//    QList<Qt::GestureType> gestures;
+//    gestures<<Qt::PinchGesture<<Qt::PanGesture<<Qt::TapGesture<<Qt::TapAndHoldGesture<<Qt::SwipeGesture;
+//    foreach (Qt::GestureType type, gestures) {
+//        grabGesture(type);
+//    }
 }
 
 void HqTableWidget::setHeaders(const TableColDataList &list)
@@ -242,6 +259,142 @@ void HqTableWidget::resizeEvent(QResizeEvent *event)
 
 
 }
+
+bool HqTableWidget::event(QEvent *event)
+{
+    if(event->type() == QEvent::Gesture)
+    {
+        return gestureEvent(static_cast<QGestureEvent*> (event));
+    }
+
+    return QTableWidget::event(event);
+}
+
+bool HqTableWidget::gestureEvent(QGestureEvent *event)
+{
+    qDebug()<<__func__<<event->gestures();
+}
+
+
+//bool HqTableWidget::eventFilter(QObject *obj, QEvent *event)
+//{
+//    return QTableWidget::eventFilter(obj, event);
+////    static int press_y   = 0;
+////    static int move_y    = -1;
+////    static int release_y = 0;
+////    static int press_x = 0;
+////    static int move_x = -1;
+////    static int release_x = 0;
+//    static QDateTime pressDateTime;
+////    static QPropertyAnimation *animation = new QPropertyAnimation();
+
+//    if("qt_scrollarea_viewport" != obj->objectName())
+//    {
+//        return false;
+//    }
+//    //根据鼠标的动作——按下、放开、拖动，执行相应的操作
+//    if(event->type() == QEvent::MouseButtonPress)
+//    {
+//        //记录按下的时间、坐标
+//        mPressPnt = QCursor::pos();
+//        pressDateTime = QDateTime::currentDateTime();
+//        mMovePnt = mPressPnt;
+//        mMoveDir = -1;
+//        //press_y = move_y;
+//        //animation->stop();
+//    }
+//    else if(event->type() == QEvent::MouseButtonRelease)
+//    {
+//#if 0
+//        //鼠标放开，根据鼠标拖动的垂直距离和持续时间，设置窗口滚动快慢程度和距离
+//        if(animation->targetObject() != mCurScrollBar)
+//        {
+//            animation->setTargetObject(mCurScrollBar);
+//            animation->setPropertyName("value");
+//        }
+//        mMovePnt = QCursor::pos();
+//        QObject *parent_obj = obj->parent();
+//        if(parent_obj != 0 || parent_obj->inherits("QAbstractItemView"))
+//        {
+//            QTimer::singleShot(150, (QAbstractItemView *)parent_obj
+//                               , SLOT(clearSelection()));
+//        }
+//        int endValue = 0;
+//        int pageStep = 0;
+//        int scroll_max = mCurScrollBar->maximum();
+//        int scroll_min = mCurScrollBar->minimum();
+//        if( (mMoveDir == 1 && qAbs(mMovePnt.y() - mPressPnt.y()) > 45) ||\
+//                (mMoveDir == 0 && qAbs(mMovePnt.x() - mPressPnt.x()) > 45))
+//        {
+//            int mseconds = pressDateTime.msecsTo(QDateTime::currentDateTime());
+//            int limit = 440;
+//            pageStep = 240;//scrollBarV->pageStep();
+//            //            qDebug()<<"pageStep="<<pageStep;
+//            if(mseconds > limit)//滑动的时间大于某个值的时候，不再滚动(通过增加分母)
+//            {
+//                mseconds = mseconds + (mseconds - limit) * 20;
+//            }
+
+//            if(release_y - press_y > 0)
+//            {
+//                endValue = m_scrollBarV->value()
+//                        - pageStep * (200.0 / mseconds);//.0避免避免强制转换为整形
+//                if(scrollV_min > endValue)
+//                {
+//                    endValue = scrollV_min;
+//                }
+//            }
+//            else if(release_y - press_y < 0)
+//            {
+//                    endValue = m_scrollBarV->value() + pageStep * (200.0 / mseconds);
+//                    if(endValue > scrollV_max)
+//                    {
+//                        endValue = scrollV_max;
+//                    }
+//            }
+//            if(mseconds > limit)
+//            {
+//                mseconds = 0;//滑动的时间大于某个值的时候，滚动距离变小，减小滑动的时间
+//            }
+//            animation->setDuration(mseconds+550);
+//            animation->setEndValue(endValue);
+//            animation->setEasingCurve(QEasingCurve::OutQuad);
+//            animation->start();
+//            return true;
+//        }
+//#endif
+//        return true;
+//    }
+//    else if(event->type() == QEvent::MouseMove)
+//    {
+//        //窗口跟着鼠标移动
+//        QPoint move_pnt = QCursor::pos();
+//        //判断鼠标当前是水平移动还是数值运动
+//        mMoveDir = 1; //0水平，1竖直
+//        double rad = qAbs(atan2(move_pnt.y() - mPressPnt.y(), move_pnt.x() - mPressPnt.x()));
+//        if( (0<=rad && rad<=0.25*3.1415926) || (rad >= 0.75 *3.1415926 && rad<=3.1415926))
+//        {
+//            mMoveDir = 0;
+//        }
+//        mCurScrollBar = mMoveDir == 1? this->verticalScrollBar() : this->horizontalScrollBar();
+//        int move_distance = mMoveDir == 1? move_pnt.y() - mMovePnt.y() : move_pnt.x() - mMovePnt.x();
+//        int endValue = mCurScrollBar->value() - move_distance;
+//        int scroll_max = mCurScrollBar->maximum();
+//        int scroll_min = mCurScrollBar->minimum();
+//        if(scroll_min > endValue)
+//        {
+//            endValue = scroll_min;
+//        }
+//        if(endValue > scroll_max)
+//        {
+//            endValue = scroll_max;
+//        }
+//        mCurScrollBar->setValue(endValue);
+//        mMovePnt = move_pnt;
+//    }
+//    return false;
+//}
+
 
 
 
