@@ -9,7 +9,10 @@
 #define     COL_TYPE_ROLE               Qt::UserRole + 1
 #define     COL_SORT_ROLE               Qt::UserRole + 2
 
-HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),mCustomContextMenu(0)
+HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
+    mCurScrollBar(0),
+    mMoveDir(-1),
+    mCustomContextMenu(0)
 {
     initPageCtrlMenu();
     mColDataList.clear();
@@ -25,7 +28,11 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),mCustomCont
     connect(this, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(slotCellDoubleClicked(int,int)));
     this->horizontalHeader()->setHighlightSections(false);
     connect(this->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(slotHeaderClicked(int)));
-    this->setAttribute(Qt::WA_AcceptTouchEvents);
+    //this->setAttribute(Qt::WA_AcceptTouchEvents);
+    this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    this->horizontalScrollBar()->setPageStep(1);
+    this->verticalScrollBar()->setPageStep(1);
 }
 
 void HqTableWidget::setHeaders(const TableColDataList &list)
@@ -219,29 +226,202 @@ void HqTableWidget::resizeEvent(QResizeEvent *event)
 {
     QTableWidget::resizeEvent(event);
     QSize size = event->size();
-    int rowNum = 10;
-    int colNum = 4;
+    mMaxDisplayRow = 10;
+    mMaxDisplayCol = 4;
     if(size.height() < size.width())
     {
-        rowNum = 5;
-        colNum = 8;
-        if(colNum > this->columnCount())
+        mMaxDisplayRow = 5;
+        mMaxDisplayCol = 8;
+        if(mMaxDisplayCol > this->columnCount())
         {
-            colNum = this->columnCount();
+            mMaxDisplayCol = this->columnCount();
         }
     }
     for(int i=0; i<this->rowCount(); i++)
     {
-        this->setRowHeight(i, size.height() / rowNum);
+        this->setRowHeight(i, size.height() / mMaxDisplayRow);
     }
 
     for(int i=0; i<this->columnCount(); i++)
     {
-        this->setColumnWidth(i,size.width()/ colNum);
+        this->setColumnWidth(i,size.width()/ mMaxDisplayCol);
+    }
+    this->horizontalScrollBar()->setMaximum(size.width()-this->horizontalScrollBar()->pageStep());
+    this->verticalScrollBar()->setMaximum(size.height()-this->verticalScrollBar()->pageStep());
+    for(int i=0; i<this->columnCount(); i++)
+    {
+        if(i <mMaxDisplayCol)
+        {
+            this->setColumnHidden(i, false);
+        } else
+        {
+            this->setColumnHidden(i, true);
+        }
     }
 
 
+    for(int i=0; i<this->rowCount(); i++)
+    {
+        if(i <mMaxDisplayRow)
+        {
+            this->setRowHidden(i, false);
+        } else
+        {
+            this->setRowHidden(i, true);
+        }
+    }
+
+
+
 }
+
+void HqTableWidget::mousePressEvent(QMouseEvent *event)
+{
+    qDebug()<<__func__<<event;
+    mPressPnt = QCursor::pos();
+    mMovePnt = mPressPnt;
+    mMoveDir = -1;
+    QTableWidget::mousePressEvent(event);
+}
+
+void HqTableWidget::mouseMoveEvent(QMouseEvent *event)
+{
+    qDebug()<<__func__<<event;
+
+    //窗口跟着鼠标移动
+    QPoint move_pnt = QCursor::pos();
+    //判断鼠标当前是水平移动还是数值运动
+    mMoveDir = 1; //0水平，1竖直
+    double rad = qAbs(atan2(move_pnt.y() - mPressPnt.y(), move_pnt.x() - mPressPnt.x()));
+    if( (0<=rad && rad<=0.25*3.1415926) || (rad >= 0.75 *3.1415926 && rad<=3.1415926))
+    {
+        mMoveDir = 0;
+    }
+    int move_distance = (mMoveDir == 1? move_pnt.y() - mMovePnt.y() : move_pnt.x() - mMovePnt.x());
+    qDebug()<<__func__<<mMoveDir<<move_distance;
+#if 0
+    mCurScrollBar = mMoveDir == 1? this->verticalScrollBar() : this->horizontalScrollBar();
+    int scroll_max = mCurScrollBar->maximum();
+    int scroll_min = mCurScrollBar->minimum();
+    int endValue = int(mCurScrollBar->value() - (move_distance * 1.0 / (scroll_max - scroll_min)));
+    qDebug()<<__func__<<mCurScrollBar->value()<<scroll_min<<scroll_max<<move_distance<<endValue;
+    if(scroll_min > endValue)
+    {
+        endValue = scroll_min;
+    }
+    if(endValue > scroll_max)
+    {
+        endValue = scroll_max;
+    }
+    mCurScrollBar->setValue(endValue);
+#else
+    if(mMoveDir == 0)
+    {
+        if(move_distance < 0)
+        {
+            //从右往左，显示右边的列数
+            for(int i=2; i<this->columnCount(); i++)
+            {
+                if(this->isColumnHidden(i)) continue;
+                if(this->columnCount() - i == mMaxDisplayCol - 2) break;
+                this->setColumnHidden(i, true);
+                if(i+mMaxDisplayCol - 2 < this->columnCount())
+                this->setColumnHidden(i+mMaxDisplayCol - 2, false);
+            }
+
+
+        } else if(move_distance > 0)
+        {
+            //从左往右，显示左边的列数
+            for(int i=this->columnCount()-1; i>=2; i++)
+            {
+                if(!this->isColumnHidden(i)) continue;
+                if(i == mMaxDisplayCol - 1) break;
+                this->setColumnHidden(i, true);
+                this->setColumnHidden(i-mMaxDisplayCol+ 2, false);
+            }
+        }
+        //显示当前的显示列
+        QString colstr;
+        for(int i=0; i<this->columnCount(); i++)
+        {
+            if(!this->isColumnHidden(i))
+            colstr += QString::number(i+1);
+        }
+        qDebug()<<__func__<<"display col:"<<colstr;
+    } else
+    {
+        if(move_distance < 0)
+        {
+            //从右往左，显示右边的列数
+
+
+        } else if(move_distance > 0)
+        {
+            //从左往右，显示左边的列数
+        }
+    }
+#endif
+    mMovePnt = move_pnt;
+    //return QTableWidget::mouseMoveEvent(event);
+}
+
+void HqTableWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+    return QTableWidget::mouseReleaseEvent(event);
+}
+
+#if 0
+bool HqTableWidget::event(QEvent *event)
+{
+    return QTableWidget::event(event);
+    //根据鼠标的动作——按下、放开、拖动，执行相应的操作
+    if(event->type() == QEvent::MouseButtonPress)
+    {
+        //记录按下的时间、坐标
+        mPressPnt = QCursor::pos();
+        mMovePnt = mPressPnt;
+        mMoveDir = -1;
+        return true;
+    }
+    else if(event->type() == QEvent::MouseButtonRelease)
+    {
+        mCurScrollBar = 0;
+        mMoveDir = -1;
+        return true;
+    }
+    else if(event->type() == QEvent::MouseMove)
+    {
+        //窗口跟着鼠标移动
+        QPoint move_pnt = QCursor::pos();
+        //判断鼠标当前是水平移动还是数值运动
+        mMoveDir = 1; //0水平，1竖直
+        double rad = qAbs(atan2(move_pnt.y() - mPressPnt.y(), move_pnt.x() - mPressPnt.x()));
+        if( (0<=rad && rad<=0.25*3.1415926) || (rad >= 0.75 *3.1415926 && rad<=3.1415926))
+        {
+            mMoveDir = 0;
+        }
+        mCurScrollBar = mMoveDir == 1? this->verticalScrollBar() : this->horizontalScrollBar();
+        int move_distance = mMoveDir == 1? move_pnt.y() - mMovePnt.y() : move_pnt.x() - mMovePnt.x();
+        int endValue = mCurScrollBar->value() - move_distance;
+        int scroll_max = mCurScrollBar->maximum();
+        int scroll_min = mCurScrollBar->minimum();
+        if(scroll_min > endValue)
+        {
+            endValue = scroll_min;
+        }
+        if(endValue > scroll_max)
+        {
+            endValue = scroll_max;
+        }
+        mCurScrollBar->setValue(endValue);
+        mMovePnt = move_pnt;
+        return true;
+    }
+
+}
+
+#endif
 
 
 

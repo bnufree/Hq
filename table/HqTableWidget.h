@@ -25,6 +25,10 @@ public:
     void insertContextMenu(QAction *act);
 protected:
     void resizeEvent(QResizeEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+    //bool event(QEvent *e);
 private slots:
 
 signals:
@@ -46,6 +50,12 @@ private:
     QMenu                   *mCustomContextMenu;
     QStringList             mFavShareList;
     //int                     mOldRowCount;
+    QScrollBar*             mCurScrollBar;
+    QPoint                  mPressPnt;
+    QPoint                  mMovePnt;
+    int                     mMoveDir;
+    int                     mMaxDisplayCol;
+    int                     mMaxDisplayRow;
 };
 
 #endif // HqTableWidget_H
