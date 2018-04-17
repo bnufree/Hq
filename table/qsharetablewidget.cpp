@@ -45,7 +45,7 @@ void QShareTablewidget::setDataList(const ShareDataList &list)
     int i = 0;
     foreach (ShareData data, list) {
         int k =0;
-        this->setItemText(i, k++, QString::fromStdString(data.mCode).right(6), Qt::AlignRight);
+        this->setItemText(i, k++, QString::fromStdString(data.mCode).right(6));
         this->setItemText(i, k++, data.mName);
         this->setItemText(i, k++, HqUtils::double2Str(data.mCur));
         double val = mShareMap[data.mCode];

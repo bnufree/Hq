@@ -11,6 +11,7 @@ Profiles::Profiles(QObject *parent) :
 {
     configSettings = new QSettings(QString("assets:/profiles.ini"), QSettings::IniFormat);
     configSettings->setIniCodec(QTextCodec::codecForName("GB18030"));
+    qDebug()<<__func__<<configSettings->allKeys()<<configSettings->childGroups();
 }
 
 Profiles::~Profiles()

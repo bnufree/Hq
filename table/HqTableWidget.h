@@ -5,6 +5,14 @@
 #include <QMenu>
 #include "utils/comdatadefines.h"
 #include <QResizeEvent>
+#include <QGestureEvent>
+
+enum OPT_MOVE_MODE{
+    OPT_LEFT = 0,
+    OPT_RIGHT,
+    OPT_UP,
+    OPT_DOWN,
+};
 
 class HqTableWidget : public QTableWidget
 {
@@ -25,10 +33,13 @@ public:
     void insertContextMenu(QAction *act);
 protected:
     void resizeEvent(QResizeEvent *event);
+#if 0
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
-    //bool event(QEvent *e);
+#endif
+    bool event(QEvent *e);
+    bool gestureEvent(QGestureEvent* event);
 private slots:
 
 signals:
@@ -43,10 +54,12 @@ public slots:
     virtual void slotCellDoubleClicked(int row, int col);
     void slotCellClicked(int row, int col);
     void slotHeaderClicked(int col);
+    void optMoveTable(OPT_MOVE_MODE mode);
 
 private:
     TableColDataList        mColDataList;
     int                     mColWidth;
+    int                     mRowHeight;
     QMenu                   *mCustomContextMenu;
     QStringList             mFavShareList;
     //int                     mOldRowCount;

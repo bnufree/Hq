@@ -5,6 +5,7 @@
 #include "qstktablewidgetitem.h"
 #include <QDebug>
 #include <QScrollBar>
+#include <QMessageBox>
 
 #define     COL_TYPE_ROLE               Qt::UserRole + 1
 #define     COL_SORT_ROLE               Qt::UserRole + 2
@@ -33,6 +34,10 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->horizontalScrollBar()->setPageStep(1);
     this->verticalScrollBar()->setPageStep(1);
+    grabGesture(Qt::TapGesture);
+    grabGesture(Qt::SwipeGesture);
+    grabGesture(Qt::PanGesture);
+    grabGesture(Qt::TapAndHoldGesture);
 }
 
 void HqTableWidget::setHeaders(const TableColDataList &list)
@@ -119,10 +124,12 @@ void HqTableWidget::updateFavShareIconOfRow(int row, bool isFav)
     if(row >= this->rowCount()) return;
     if(isFav)
     {
-        this->item(row, 0)->setIcon(QIcon(":/icon/image/zxg.ico"));
+        this->item(row, 0)->setTextColor(Qt::red);
+        //this->item(row, 0)->setIcon(QIcon(":/icon/image/zxg.ico"));
     } else
     {
-        this->item(row, 0)->setIcon(QIcon());
+        this->item(row, 0)->setTextColor(Qt::black);
+        //this->item(row, 0)->setIcon(QIcon());
     }
 }
 
@@ -138,6 +145,11 @@ void HqTableWidget::prepareUpdateTable(int newRowCount)
     } else
     {
         //do nothing
+    }
+
+    for(int i=0 ;i<rowCount(); i++)
+    {
+        setRowHeight(i, mRowHeight);
     }
 }
 
@@ -224,7 +236,6 @@ void HqTableWidget::slotCellClicked(int row, int col)
 
 void HqTableWidget::resizeEvent(QResizeEvent *event)
 {
-    QTableWidget::resizeEvent(event);
     QSize size = event->size();
     mMaxDisplayRow = 10;
     mMaxDisplayCol = 4;
@@ -237,17 +248,18 @@ void HqTableWidget::resizeEvent(QResizeEvent *event)
             mMaxDisplayCol = this->columnCount();
         }
     }
-    for(int i=0; i<this->rowCount(); i++)
-    {
-        this->setRowHeight(i, size.height() / mMaxDisplayRow);
-    }
+    mRowHeight = size.height() / mMaxDisplayRow;
+//    for(int i=0; i<this->rowCount(); i++)
+//    {
+//        this->setRowHeight(i, size.height() / mMaxDisplayRow);
+//    }
 
     for(int i=0; i<this->columnCount(); i++)
     {
         this->setColumnWidth(i,size.width()/ mMaxDisplayCol);
     }
-    this->horizontalScrollBar()->setMaximum(size.width()-this->horizontalScrollBar()->pageStep());
-    this->verticalScrollBar()->setMaximum(size.height()-this->verticalScrollBar()->pageStep());
+//    this->horizontalScrollBar()->setMaximum(size.width()-this->horizontalScrollBar()->pageStep());
+//    this->verticalScrollBar()->setMaximum(size.height()-this->verticalScrollBar()->pageStep());
     for(int i=0; i<this->columnCount(); i++)
     {
         if(i <mMaxDisplayCol)
@@ -260,21 +272,25 @@ void HqTableWidget::resizeEvent(QResizeEvent *event)
     }
 
 
-    for(int i=0; i<this->rowCount(); i++)
-    {
-        if(i <mMaxDisplayRow)
-        {
-            this->setRowHidden(i, false);
-        } else
-        {
-            this->setRowHidden(i, true);
-        }
-    }
+//    for(int i=0; i<this->rowCount(); i++)
+//    {
+//        if(i <mMaxDisplayRow)
+//        {
+//            this->setRowHidden(i, false);
+//        } else
+//        {
+//            this->setRowHidden(i, true);
+//        }
+//    }
+
+
+    QTableWidget::resizeEvent(event);
 
 
 
 }
 
+#if 0
 void HqTableWidget::mousePressEvent(QMouseEvent *event)
 {
     qDebug()<<__func__<<event;
@@ -370,10 +386,116 @@ void HqTableWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     return QTableWidget::mouseReleaseEvent(event);
 }
+#endif
 
-#if 0
+#if 1
+bool HqTableWidget::gestureEvent(QGestureEvent *event)
+{
+    QGesture* obj = 0;
+    if(obj = event->gesture(Qt::TapGesture))
+    {
+        //处理点击功能
+        QTapGesture * gesture = static_cast<QTapGesture*>(obj);
+        qDebug()<<"tap:"<<gesture<<gesture->position();
+
+    } else if(obj = event->gesture(Qt::TapAndHoldGesture))
+    {
+        //QMessageBox::information(0, "hold on press", " ok");
+
+    } else if(obj = event->gesture(Qt::PanGesture))
+    {
+        QPanGesture* gesture = static_cast<QPanGesture*>(obj);
+        QPointF delta = gesture->delta();
+
+
+    } else if(obj = event->gesture(Qt::SwipeGesture))
+    {
+        QSwipeGesture* gesture = static_cast<QSwipeGesture*>(obj);
+        qDebug()<<gesture->horizontalDirection()<<gesture->verticalDirection();
+        double angle = gesture->swipeAngle();
+        optMoveTable(OPT_RIGHT);
+    }
+
+    return true;
+
+
+}
+
+void HqTableWidget::optMoveTable(OPT_MOVE_MODE mode)
+{
+    if(OPT_RIGHT == mode)
+    {
+        //显示右边的列
+        int col_start = 0, col_end = 0;
+        for(int i=2; i<this->columnCount(); i++)
+        {
+            if(!this->isColumnHidden(i))
+            {
+                if(col_start == 0)
+                {
+                    col_start = i;
+                }
+            } else
+            {
+                if(col_end == 0)
+                {
+                    col_end = i-1;
+                    break;
+                }
+            }
+        }
+        //设定新的显示的列
+        if(col_end == 0)
+        {
+            //已经到了最后，不操作
+        } else
+        {
+            //还存在未显示的咧
+            this->setColumnHidden(col_start, true);
+            this->setColumnHidden(col_end + 1, false);
+        }
+
+    } else if(OPT_LEFT == mode)
+    {
+        //显示左边的列
+        int col_start = 0, col_end = 0;
+        for(int i=this->columnCount()-1; i>=2; i--)
+        {
+            if(!this->isColumnHidden(i))
+            {
+                if(col_end == 0)
+                {
+                    col_end = i;
+                }
+            } else
+            {
+                if(col_start == 0)
+                {
+                    col_start = i+1;
+                    break;
+                }
+            }
+        }
+        //设定新的显示的列
+        if(col_start == 0)
+        {
+            //已经到了最左，不操作
+        } else
+        {
+            //还存在未显示的咧
+            this->setColumnHidden(col_end, true);
+            this->setColumnHidden(col_start - 1, false);
+        }
+    }
+}
+
 bool HqTableWidget::event(QEvent *event)
 {
+    qDebug()<<"event:"<<event->type();
+    if(event->type() == QEvent::Gesture)
+    {
+        return gestureEvent(static_cast<QGestureEvent*>(event));
+    }
     return QTableWidget::event(event);
     //根据鼠标的动作——按下、放开、拖动，执行相应的操作
     if(event->type() == QEvent::MouseButtonPress)
