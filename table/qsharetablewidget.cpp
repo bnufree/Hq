@@ -9,8 +9,9 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
 {
     //设定抬头
     TableColDataList datalist;
-    datalist.append(TableColData(QStringLiteral("代码"), STK_DISPLAY_SORT_TYPE_CODE));
-    datalist.append(TableColData(QStringLiteral("名称"), STK_DISPLAY_SORT_TYPE_NAME));
+//    datalist.append(TableColData(QStringLiteral("代码"), STK_DISPLAY_SORT_TYPE_CODE));
+//    datalist.append(TableColData(QStringLiteral("名称"), STK_DISPLAY_SORT_TYPE_NAME));
+    datalist.append(TableColData(QStringLiteral(""), STK_DISPLAY_SORT_TYPE_CODE));
     datalist.append(TableColData(QStringLiteral("现价"), STK_DISPLAY_SORT_TYPE_PRICE));
     datalist.append(TableColData(QStringLiteral("涨跌"), STK_DISPLAY_SORT_TYPE_CHGPER));
     datalist.append(TableColData(QStringLiteral("成交"), STK_DISPLAY_SORT_TYPE_CJE));
@@ -45,8 +46,9 @@ void QShareTablewidget::setDataList(const ShareDataList &list)
     int i = 0;
     foreach (ShareData data, list) {
         int k =0;
-        this->setItemText(i, k++, QString::fromStdString(data.mCode).right(6));
-        this->setItemText(i, k++, data.mName);
+//        this->setItemText(i, k++, QString::fromStdString(data.mCode).right(6));
+        this->setCodeName(i, k++, data.mCode, data.mName);
+//        this->setItemText(i, k++, data.mName);
         this->setItemText(i, k++, HqUtils::double2Str(data.mCur));
         double val = mShareMap[data.mCode];
         QString flag = val < data.mChgPercent ? QStringLiteral("↑") : val > data.mChgPercent ? QStringLiteral("↓") : "";

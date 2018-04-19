@@ -15,9 +15,14 @@
   </property>
   <property name="styleSheet">
    <string notr="true">*{
-	background-color:white;
-	color:black;
+	background-color:black;
+	color:white;
 	font-weight:bold;
+}
+
+QWidget:focus
+{
+	outline:none;
 }
 
 QHeaderView
@@ -34,6 +39,7 @@ background:skyblue;
 QTableView::item
 {
 	height:40px;
+	font-size:16px;
 }
 
 /*

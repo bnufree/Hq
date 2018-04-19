@@ -14,6 +14,8 @@ enum OPT_MOVE_MODE{
     OPT_DOWN,
 };
 
+#define         HQ_NO_GESTURE
+
 class HqTableWidget : public QTableWidget
 {
     Q_OBJECT
@@ -21,6 +23,7 @@ public:
     explicit HqTableWidget(QWidget *parent = 0);
     void setHeaders(const TableColDataList& list);
     void appendRow();
+    void setCodeName(int row, int column,const QString& code,const QString& name);
     void setItemText(int row, int column, const QString& text, Qt::AlignmentFlag flg = Qt::AlignCenter);
     void setFavShareList(const QStringList& list);
     void appendFavShare(const QString& code);
@@ -33,13 +36,16 @@ public:
     void insertContextMenu(QAction *act);
 protected:
     void resizeEvent(QResizeEvent *event);
-#if 0
+    void displayVisibleCols();
+    void displayVisibleRows();
+#ifdef HQ_NO_GESTURE
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
-#endif
+#else
     bool event(QEvent *e);
     bool gestureEvent(QGestureEvent* event);
+#endif
 private slots:
 
 signals:

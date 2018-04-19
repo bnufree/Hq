@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QScrollBar>
 #include <QMessageBox>
+#include "qsharecodenamewidget.h"
 
 #define     COL_TYPE_ROLE               Qt::UserRole + 1
 #define     COL_SORT_ROLE               Qt::UserRole + 2
@@ -21,7 +22,7 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     this->verticalHeader()->setVisible(false);
 //    this->horizontalHeader()->setDefaultSectionSize(mColWidth);
     this->setSelectionBehavior(QAbstractItemView::SelectRows);
-    this->setSelectionMode(QAbstractItemView::SingleSelection);
+    this->setSelectionMode(QAbstractItemView::NoSelection);
     this->setEditTriggers(QAbstractItemView::NoEditTriggers);
     //this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     //鼠标右键选择
@@ -34,10 +35,12 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->horizontalScrollBar()->setPageStep(1);
     this->verticalScrollBar()->setPageStep(1);
+#ifndef HQ_NO_GESTURE
     grabGesture(Qt::TapGesture);
     grabGesture(Qt::SwipeGesture);
     grabGesture(Qt::PanGesture);
     grabGesture(Qt::TapAndHoldGesture);
+#endif
 }
 
 void HqTableWidget::setHeaders(const TableColDataList &list)
@@ -104,6 +107,22 @@ void HqTableWidget::setItemText(int row, int column, const QString &text, Qt::Al
     }
 }
 
+void HqTableWidget::setCodeName(int row, int column, const QString &code, const QString &name)
+{
+    QShareCodeNameWidget *item = static_cast<QShareCodeNameWidget*> (this->cellWidget(row, column));
+    if(item)
+    {
+        item->setCode(code);
+        item->setName(name);
+    }
+    else
+    {
+        item = new QShareCodeNameWidget(code, name);
+        this->setCellWidget(row, column, item);
+    }
+    setItemText(row, column, "");
+}
+
 void HqTableWidget::setFavShareList(const QStringList &list)
 {
     mFavShareList = list;
@@ -128,7 +147,7 @@ void HqTableWidget::updateFavShareIconOfRow(int row, bool isFav)
         //this->item(row, 0)->setIcon(QIcon(":/icon/image/zxg.ico"));
     } else
     {
-        this->item(row, 0)->setTextColor(Qt::black);
+        this->item(row, 0)->setTextColor(Qt::white);
         //this->item(row, 0)->setIcon(QIcon());
     }
 }
@@ -151,6 +170,18 @@ void HqTableWidget::prepareUpdateTable(int newRowCount)
     {
         setRowHeight(i, mRowHeight);
     }
+
+
+//    for(int i=0; i<this->rowCount(); i++)
+//    {
+//        if(i <mMaxDisplayRow)
+//        {
+//            this->setRowHidden(i, false);
+//        } else
+//        {
+//            this->setRowHidden(i, true);
+//        }
+//    }
 }
 
 void HqTableWidget::removeRows(int start, int count)
@@ -159,6 +190,13 @@ void HqTableWidget::removeRows(int start, int count)
     {
         for(int k=0; k<this->columnCount(); k++)
         {
+            QShareCodeNameWidget *w = static_cast<QShareCodeNameWidget*> (this->cellWidget(start, k));
+            if(w)
+            {
+                delete w;
+                w = 0;
+            }
+
             QStkTableWidgetItem *item = (QStkTableWidgetItem*)(this->item(start, k));
             if(item)
             {
@@ -249,6 +287,7 @@ void HqTableWidget::resizeEvent(QResizeEvent *event)
         }
     }
     mRowHeight = size.height() / mMaxDisplayRow;
+    mColWidth = size.width()/ mMaxDisplayCol;
 //    for(int i=0; i<this->rowCount(); i++)
 //    {
 //        this->setRowHeight(i, size.height() / mMaxDisplayRow);
@@ -256,7 +295,7 @@ void HqTableWidget::resizeEvent(QResizeEvent *event)
 
     for(int i=0; i<this->columnCount(); i++)
     {
-        this->setColumnWidth(i,size.width()/ mMaxDisplayCol);
+        this->setColumnWidth(i, mColWidth);
     }
 //    this->horizontalScrollBar()->setMaximum(size.width()-this->horizontalScrollBar()->pageStep());
 //    this->verticalScrollBar()->setMaximum(size.height()-this->verticalScrollBar()->pageStep());
@@ -271,124 +310,13 @@ void HqTableWidget::resizeEvent(QResizeEvent *event)
         }
     }
 
-
-//    for(int i=0; i<this->rowCount(); i++)
-//    {
-//        if(i <mMaxDisplayRow)
-//        {
-//            this->setRowHidden(i, false);
-//        } else
-//        {
-//            this->setRowHidden(i, true);
-//        }
-//    }
-
-
     QTableWidget::resizeEvent(event);
 
 
 
 }
 
-#if 0
-void HqTableWidget::mousePressEvent(QMouseEvent *event)
-{
-    qDebug()<<__func__<<event;
-    mPressPnt = QCursor::pos();
-    mMovePnt = mPressPnt;
-    mMoveDir = -1;
-    QTableWidget::mousePressEvent(event);
-}
-
-void HqTableWidget::mouseMoveEvent(QMouseEvent *event)
-{
-    qDebug()<<__func__<<event;
-
-    //窗口跟着鼠标移动
-    QPoint move_pnt = QCursor::pos();
-    //判断鼠标当前是水平移动还是数值运动
-    mMoveDir = 1; //0水平，1竖直
-    double rad = qAbs(atan2(move_pnt.y() - mPressPnt.y(), move_pnt.x() - mPressPnt.x()));
-    if( (0<=rad && rad<=0.25*3.1415926) || (rad >= 0.75 *3.1415926 && rad<=3.1415926))
-    {
-        mMoveDir = 0;
-    }
-    int move_distance = (mMoveDir == 1? move_pnt.y() - mMovePnt.y() : move_pnt.x() - mMovePnt.x());
-    qDebug()<<__func__<<mMoveDir<<move_distance;
-#if 0
-    mCurScrollBar = mMoveDir == 1? this->verticalScrollBar() : this->horizontalScrollBar();
-    int scroll_max = mCurScrollBar->maximum();
-    int scroll_min = mCurScrollBar->minimum();
-    int endValue = int(mCurScrollBar->value() - (move_distance * 1.0 / (scroll_max - scroll_min)));
-    qDebug()<<__func__<<mCurScrollBar->value()<<scroll_min<<scroll_max<<move_distance<<endValue;
-    if(scroll_min > endValue)
-    {
-        endValue = scroll_min;
-    }
-    if(endValue > scroll_max)
-    {
-        endValue = scroll_max;
-    }
-    mCurScrollBar->setValue(endValue);
-#else
-    if(mMoveDir == 0)
-    {
-        if(move_distance < 0)
-        {
-            //从右往左，显示右边的列数
-            for(int i=2; i<this->columnCount(); i++)
-            {
-                if(this->isColumnHidden(i)) continue;
-                if(this->columnCount() - i == mMaxDisplayCol - 2) break;
-                this->setColumnHidden(i, true);
-                if(i+mMaxDisplayCol - 2 < this->columnCount())
-                this->setColumnHidden(i+mMaxDisplayCol - 2, false);
-            }
-
-
-        } else if(move_distance > 0)
-        {
-            //从左往右，显示左边的列数
-            for(int i=this->columnCount()-1; i>=2; i++)
-            {
-                if(!this->isColumnHidden(i)) continue;
-                if(i == mMaxDisplayCol - 1) break;
-                this->setColumnHidden(i, true);
-                this->setColumnHidden(i-mMaxDisplayCol+ 2, false);
-            }
-        }
-        //显示当前的显示列
-        QString colstr;
-        for(int i=0; i<this->columnCount(); i++)
-        {
-            if(!this->isColumnHidden(i))
-            colstr += QString::number(i+1);
-        }
-        qDebug()<<__func__<<"display col:"<<colstr;
-    } else
-    {
-        if(move_distance < 0)
-        {
-            //从右往左，显示右边的列数
-
-
-        } else if(move_distance > 0)
-        {
-            //从左往右，显示左边的列数
-        }
-    }
-#endif
-    mMovePnt = move_pnt;
-    //return QTableWidget::mouseMoveEvent(event);
-}
-
-void HqTableWidget::mouseReleaseEvent(QMouseEvent *event)
-{
-    return QTableWidget::mouseReleaseEvent(event);
-}
-#endif
-
-#if 1
+#ifndef HQ_NO_GESTURE
 bool HqTableWidget::gestureEvent(QGestureEvent *event)
 {
     QGesture* obj = 0;
@@ -413,80 +341,13 @@ bool HqTableWidget::gestureEvent(QGestureEvent *event)
         QSwipeGesture* gesture = static_cast<QSwipeGesture*>(obj);
         qDebug()<<gesture->horizontalDirection()<<gesture->verticalDirection();
         double angle = gesture->swipeAngle();
-        optMoveTable(OPT_RIGHT);
+        QMessageBox::information(0, "Swip Gesture", QString::number(angle, 'f', 2));
+        //optMoveTable(OPT_RIGHT);
     }
 
     return true;
 
 
-}
-
-void HqTableWidget::optMoveTable(OPT_MOVE_MODE mode)
-{
-    if(OPT_RIGHT == mode)
-    {
-        //显示右边的列
-        int col_start = 0, col_end = 0;
-        for(int i=2; i<this->columnCount(); i++)
-        {
-            if(!this->isColumnHidden(i))
-            {
-                if(col_start == 0)
-                {
-                    col_start = i;
-                }
-            } else
-            {
-                if(col_end == 0)
-                {
-                    col_end = i-1;
-                    break;
-                }
-            }
-        }
-        //设定新的显示的列
-        if(col_end == 0)
-        {
-            //已经到了最后，不操作
-        } else
-        {
-            //还存在未显示的咧
-            this->setColumnHidden(col_start, true);
-            this->setColumnHidden(col_end + 1, false);
-        }
-
-    } else if(OPT_LEFT == mode)
-    {
-        //显示左边的列
-        int col_start = 0, col_end = 0;
-        for(int i=this->columnCount()-1; i>=2; i--)
-        {
-            if(!this->isColumnHidden(i))
-            {
-                if(col_end == 0)
-                {
-                    col_end = i;
-                }
-            } else
-            {
-                if(col_start == 0)
-                {
-                    col_start = i+1;
-                    break;
-                }
-            }
-        }
-        //设定新的显示的列
-        if(col_start == 0)
-        {
-            //已经到了最左，不操作
-        } else
-        {
-            //还存在未显示的咧
-            this->setColumnHidden(col_end, true);
-            this->setColumnHidden(col_start - 1, false);
-        }
-    }
 }
 
 bool HqTableWidget::event(QEvent *event)
@@ -497,53 +358,237 @@ bool HqTableWidget::event(QEvent *event)
         return gestureEvent(static_cast<QGestureEvent*>(event));
     }
     return QTableWidget::event(event);
-    //根据鼠标的动作——按下、放开、拖动，执行相应的操作
-    if(event->type() == QEvent::MouseButtonPress)
-    {
-        //记录按下的时间、坐标
-        mPressPnt = QCursor::pos();
-        mMovePnt = mPressPnt;
-        mMoveDir = -1;
-        return true;
-    }
-    else if(event->type() == QEvent::MouseButtonRelease)
-    {
-        mCurScrollBar = 0;
-        mMoveDir = -1;
-        return true;
-    }
-    else if(event->type() == QEvent::MouseMove)
-    {
-        //窗口跟着鼠标移动
-        QPoint move_pnt = QCursor::pos();
-        //判断鼠标当前是水平移动还是数值运动
-        mMoveDir = 1; //0水平，1竖直
-        double rad = qAbs(atan2(move_pnt.y() - mPressPnt.y(), move_pnt.x() - mPressPnt.x()));
-        if( (0<=rad && rad<=0.25*3.1415926) || (rad >= 0.75 *3.1415926 && rad<=3.1415926))
-        {
-            mMoveDir = 0;
-        }
-        mCurScrollBar = mMoveDir == 1? this->verticalScrollBar() : this->horizontalScrollBar();
-        int move_distance = mMoveDir == 1? move_pnt.y() - mMovePnt.y() : move_pnt.x() - mMovePnt.x();
-        int endValue = mCurScrollBar->value() - move_distance;
-        int scroll_max = mCurScrollBar->maximum();
-        int scroll_min = mCurScrollBar->minimum();
-        if(scroll_min > endValue)
-        {
-            endValue = scroll_min;
-        }
-        if(endValue > scroll_max)
-        {
-            endValue = scroll_max;
-        }
-        mCurScrollBar->setValue(endValue);
-        mMovePnt = move_pnt;
-        return true;
-    }
-
 }
 
+#else
+
+void HqTableWidget::mousePressEvent(QMouseEvent *event)
+{
+    qDebug()<<__func__<<event;
+    mPressPnt = QCursor::pos();
+    mMovePnt = mPressPnt;
+    mMoveDir = -1;
+    QTableWidget::mousePressEvent(event);
+}
+
+void HqTableWidget::mouseMoveEvent(QMouseEvent *event)
+{
+    qDebug()<<__func__<<event;
+
+    //窗口跟着鼠标移动
+    QPoint move_pnt = QCursor::pos();
+    //判断鼠标当前是水平移动还是数值运动
+    mMoveDir = 1; //0水平，1竖直
+    double rad = qAbs(atan2(move_pnt.y() - mPressPnt.y(), move_pnt.x() - mPressPnt.x()));
+    if( (0<=rad && rad<=0.25*3.1415926) || (rad >= 0.75 *3.1415926 && rad<=3.1415926))
+    {
+        mMoveDir = 0;
+    }
+    int move_distance = (mMoveDir == 1? move_pnt.y() - mMovePnt.y() : move_pnt.x() - mMovePnt.x());
+    qDebug()<<__func__<<mMoveDir<<move_distance;
+    if(move_distance == 0) return;
+#if 0
+    mCurScrollBar = mMoveDir == 1? this->verticalScrollBar() : this->horizontalScrollBar();
+    int scroll_max = mCurScrollBar->maximum();
+    int scroll_min = mCurScrollBar->minimum();
+    int endValue = int(mCurScrollBar->value() - (move_distance * 1.0 / (scroll_max - scroll_min)));
+    qDebug()<<__func__<<mCurScrollBar->value()<<scroll_min<<scroll_max<<move_distance<<endValue;
+    if(scroll_min > endValue)
+    {
+        endValue = scroll_min;
+    }
+    if(endValue > scroll_max)
+    {
+        endValue = scroll_max;
+    }
+    mCurScrollBar->setValue(endValue);
+#else
+    if(mMoveDir == 0)
+    {
+        if(qAbs(move_distance) < 0.5 *mColWidth) return;
+        OPT_MOVE_MODE mode = move_distance < 0 ? OPT_LEFT : OPT_RIGHT;
+        optMoveTable(mode);
+
+    } else
+    {
+        QTableWidget::mouseMoveEvent(event);
+//        if(qAbs(move_distance) < 0.5*mRowHeight) return;
+//        OPT_MOVE_MODE mode = move_distance < 0 ? OPT_UP : OPT_DOWN;
+//        optMoveTable(mode);
+    }
 #endif
+    mMovePnt = move_pnt;
+    //return QTableWidget::mouseMoveEvent(event);
+}
+
+void HqTableWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+    return QTableWidget::mouseReleaseEvent(event);
+}
+#endif
+
+
+void HqTableWidget::optMoveTable(OPT_MOVE_MODE mode)
+{
+    if(OPT_LEFT == mode)
+    {
+        //显示右边的列
+        int col_start = 0, col_end = 0;
+        for(int i=1; i<this->columnCount(); i++)
+        {
+            if(!this->isColumnHidden(i))
+            {
+                if(col_start == 0)
+                {
+                    col_start = i;
+                }
+            } else
+            {
+                if(col_start == 0) continue;
+                if(col_end == 0)
+                {
+                    col_end = i-1;
+                    break;
+                }
+            }
+        }
+        //设定新的显示的列
+        //qDebug()<<"start:"<<col_start<<" end:"<<col_end;
+        if(col_end == 0)
+        {
+            //已经到了最后，不操作
+        } else
+        {
+            //还存在未显示的咧
+            this->setColumnHidden(col_start, true);
+            this->setColumnHidden(col_end + 1, false);
+        }
+        //displayVisibleCols();
+
+    } else if(OPT_RIGHT == mode)
+    {
+        //显示左边的列
+        int col_start = 0, col_end = 0;
+        for(int i=this->columnCount()-1; i>=1; i--)
+        {
+            if(!this->isColumnHidden(i))
+            {
+                if(col_end == 0)
+                {
+                    col_end = i;
+                }
+            } else
+            {
+                if(col_end == 0) continue;
+                if(col_start == 0)
+                {
+                    col_start = i+1;
+                    break;
+                }
+            }
+        }
+        //qDebug()<<"start:"<<col_start<<" end:"<<col_end;
+        //设定新的显示的列
+        if(col_start == 0)
+        {
+            //已经到了最左，不操作
+        } else
+        {
+            //还存在未显示的咧
+            this->setColumnHidden(col_end, true);
+            this->setColumnHidden(col_start - 1, false);
+        }
+        //displayVisibleCols();
+
+    } else if(mode == OPT_UP)
+    {
+        //向上滑动，显示下面的列
+        int row_start = 0, row_end = 0;
+        for(int i=0; i<this->rowCount(); i++)
+        {
+            if(!this->isRowHidden(i))
+            {
+                if(row_start == 0)
+                {
+                    row_start = i;
+                }
+            } else
+            {
+                if(row_start == 0) continue;
+                if(row_end == 0)
+                {
+                    row_end = i-1;
+                    break;
+                }
+            }
+        }
+        if(row_end == 0)
+        {
+            //已经到了最后，不操作
+        } else
+        {
+            //还存在未显示的咧
+            this->setRowHidden(row_start, true);
+            this->setRowHidden(row_end + 1, false);
+        }
+        displayVisibleRows();
+    } else if(mode == OPT_DOWN)
+    {
+        //向下滑动，显示上面的行
+        int row_start = 0, row_end = 0;
+        for(int i=this->rowCount()-1; i>=0; i--)
+        {
+            if(!this->isRowHidden(i))
+            {
+                if(row_end == 0)
+                {
+                    row_end = i;
+                }
+            } else
+            {
+                if(row_end == 0) continue;
+                if(row_start == 0)
+                {
+                    row_start = i+1;
+                    break;
+                }
+            }
+        }
+        //qDebug()<<"start:"<<row_start<<" end:"<<row_end;
+        //设定新的显示的列
+        if(row_start == 0)
+        {
+            //已经到了最左，不操作
+        } else
+        {
+            //还存在未显示的咧
+            this->setRowHidden(row_end, true);
+            this->setRowHidden(row_start - 1, false);
+        }
+        displayVisibleRows();
+
+    }
+}
+
+void HqTableWidget::displayVisibleCols()
+{
+    for(int i=0; i<columnCount(); i++)
+    {
+        if(isColumnHidden(i)) continue;
+        qDebug()<<"col:"<<i<<this->horizontalHeaderItem(i)->text().toLocal8Bit();
+    }
+}
+
+void HqTableWidget::displayVisibleRows()
+{
+    for(int i=0; i<rowCount(); i++)
+    {
+        if(isRowHidden(i)) continue;
+        qDebug()<<"row:"<<i;
+    }
+}
+
+
 
 
 

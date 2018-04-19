@@ -2,6 +2,7 @@
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QDebug>
 
 QShareCodeNameWidget::QShareCodeNameWidget(const QString& code, const QString& name,QWidget *parent) :\
     QWidget(parent),\

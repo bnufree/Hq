@@ -119,6 +119,9 @@ Dialog::Dialog(QWidget *parent) :
 
     ui->mainStackWidget->setCurrentIndex(0);
     mTaskMgr->setMktType(MKT_ALL);
+
+    //读取配置文件
+    qDebug()<<__func__<<"ini section:"<<Profiles::instance()->getAllSections();
 }
 
 
