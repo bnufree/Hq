@@ -12,7 +12,7 @@ QAndroidListWidget::QAndroidListWidget(QWidget *parent) : QWidget(parent)
     layout->setMargin(0);
     layout->setSpacing(0);
     this->setLayout(layout);
-    this->setStyleSheet("QLabel{border:1px solid black;}");
+    this->setStyleSheet("QLabel{border:1px solid gray;}");
 }
 
 void QAndroidListWidget::addItem(const QString &item, const QVariant& data)

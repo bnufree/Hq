@@ -24,7 +24,7 @@ public:
     void setHeaders(const TableColDataList& list);
     void appendRow();
     void setCodeName(int row, int column,const QString& code,const QString& name);
-    void setItemText(int row, int column, const QString& text, Qt::AlignmentFlag flg = Qt::AlignCenter);
+    void setItemText(int row, int column, const QString& text, const QColor& color = Qt::white, Qt::AlignmentFlag flg = Qt::AlignCenter);
     void setFavShareList(const QStringList& list);
     void appendFavShare(const QString& code);
     void removeFavShare(const QString& code);

@@ -16,6 +16,7 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     mMoveDir(-1),
     mCustomContextMenu(0)
 {
+    this->setItemDelegate(new RowDelegate);
     initPageCtrlMenu();
     mColDataList.clear();
 //    mColWidth = 60;
@@ -94,17 +95,21 @@ void HqTableWidget::appendRow()
     this->insertRow(this->rowCount());
 }
 
-void HqTableWidget::setItemText(int row, int column, const QString &text, Qt::AlignmentFlag flg)
+void HqTableWidget::setItemText(int row, int column, const QString &text, const QColor& color, Qt::AlignmentFlag flg)
 {
-    QStkTableWidgetItem *item = (QStkTableWidgetItem*) (this->item(row, column));
-    if(item)
+    QStkTableWidgetItem *item = static_cast<QStkTableWidgetItem*> (this->item(row, column));
+    if(!item)
     {
-        item->setString(text);
+        item = new QStkTableWidgetItem(text, flg);
+        setItem(row, column, item);
     }
-    else
-    {
-        this->setItem(row, column, new QStkTableWidgetItem(text, flg));
-    }
+
+    item->setString(text);
+    item->setTextColor(color);
+    QFont font = item->font();
+    font.setBold(true);
+    font.setPointSize(20);
+    item->setFont(font);
 }
 
 void HqTableWidget::setCodeName(int row, int column, const QString &code, const QString &name)
@@ -141,15 +146,10 @@ void HqTableWidget::removeFavShare(const QString &code)
 void HqTableWidget::updateFavShareIconOfRow(int row, bool isFav)
 {
     if(row >= this->rowCount()) return;
-    if(isFav)
-    {
-        this->item(row, 0)->setTextColor(Qt::red);
-        //this->item(row, 0)->setIcon(QIcon(":/icon/image/zxg.ico"));
-    } else
-    {
-        this->item(row, 0)->setTextColor(Qt::white);
-        //this->item(row, 0)->setIcon(QIcon());
-    }
+    QShareCodeNameWidget * w = static_cast<QShareCodeNameWidget*>(cellWidget(row, 0));
+    if(!w) return;
+    QString color = isFav ? "magenta" : "white";
+    w->setStyleSheet(QString("color:%1").arg(color));
 }
 
 void HqTableWidget::prepareUpdateTable(int newRowCount)

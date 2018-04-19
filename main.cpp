@@ -1,4 +1,4 @@
-﻿//#include "dialog.h"
+﻿#include "dialog.h"
 #include <QApplication>
 #include <QTextCodec>
 #include <QDebug>
@@ -15,8 +15,8 @@ int main(int argc, char *argv[])
     QRect rect = QApplication::desktop()->screenGeometry();
     qDebug()<<__func__<<rect<<QDir::currentPath();
     //make size as 9:16
-    //Dialog w;
-    //w.showMaximized();
+    Dialog w;
+    w.showMaximized();
 
     return a.exec();
 }

@@ -46,10 +46,9 @@ void QShareTablewidget::setDataList(const ShareDataList &list)
     int i = 0;
     foreach (ShareData data, list) {
         int k =0;
-//        this->setItemText(i, k++, QString::fromStdString(data.mCode).right(6));
         this->setCodeName(i, k++, data.mCode, data.mName);
-//        this->setItemText(i, k++, data.mName);
-        this->setItemText(i, k++, HqUtils::double2Str(data.mCur));
+        QColor dis_color = data.mChgPercent > 0 ? Qt::red : data.mChgPercent < 0 ? Qt::green : Qt::white;
+        this->setItemText(i, k++, HqUtils::double2Str(data.mCur), dis_color);
         double val = mShareMap[data.mCode];
         QString flag = val < data.mChgPercent ? QStringLiteral("↑") : val > data.mChgPercent ? QStringLiteral("↓") : "";
         this->setItemText(i, k++, QString("%1%2%").arg(flag).arg(QString::number(data.mChgPercent, 'f', 2)));

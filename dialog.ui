@@ -40,6 +40,8 @@ QTableView::item
 {
 	height:40px;
 	font-size:16px;
+	border-top:1px sloid gray;
+	border-bottom:1px solid gray;
 }
 
 /*
