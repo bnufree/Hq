@@ -1,6 +1,7 @@
 ﻿#include "hqdbdatabase.h"
 #include <QMutexLocker>
 #include <QDebug>
+#include <QFile>
 
 #define     QDebug()            qDebug()<<__FUNCTION__<<__LINE__
 #define     HISTORY_TABLE(code) HQ_SHARE_HISTORY_INFO_TABLE + code.right(6)
@@ -13,7 +14,7 @@ HQDBDataBase::HQDBDataBase(QObject *parent) : QObject(parent)
     {
         mSQLQuery = QSqlQuery(mDB);
     }
-    qDebug()<<"db init:"<<mInitDBFlg;
+    qDebug()<<"db init:"<<mInitDBFlg<<QFile::exists(mDB.databaseName());
 }
 
 HQDBDataBase::~HQDBDataBase()
