@@ -44,11 +44,13 @@ Dialog::Dialog(QWidget *parent) :
     QDialog(parent),mTaskMgr(0),mIndexWidget(0),
     ui(new Ui::MainDialog)
 {
+    qDebug()<<__func__<<__LINE__;
     ui->setupUi(this);
     while(ui->mainStackWidget->count())
     {
         ui->mainStackWidget->removeWidget(ui->mainStackWidget->widget(0));
     }
+    qDebug()<<__func__<<__LINE__;
     mShareTableWidget = new QShareTablewidget(this);
     ui->mainStackWidget->addWidget(mShareTableWidget);
     mDataMgrWidget = new QDataMgrWidget(this);
@@ -96,7 +98,7 @@ Dialog::Dialog(QWidget *parent) :
 //    connect(shotcut3, SIGNAL(activated()), this, SLOT(slotDisplayShareMini()));
     //    setHook(this);
 
-    //
+   qDebug()<<__func__<<__LINE__;
     mTaskMgr = new HQTaskMagrCenter;
     connect(mShareTableWidget, SIGNAL(signalSetFavCode(QString)), mTaskMgr, SIGNAL(signalSetFavCode(QString)));
     connect(mTaskMgr, SIGNAL(signalSendIndexCodesList(QStringList)), this, SLOT(slotRecvIndexCodesList(QStringList)));
@@ -114,14 +116,12 @@ Dialog::Dialog(QWidget *parent) :
     connect(mTaskMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SLOT(slotUpdateMsg(QString)));
     connect(mTaskMgr, SIGNAL(signalSendNotrhBoundDataList(QList<NS_BOUND_DATA>)), mIndexWidget, SLOT(updateData(QList<NS_BOUND_DATA>)));
     //
-
+    qDebug()<<__func__<<__LINE__;
     mTaskMgr->signalStart();
 
     ui->mainStackWidget->setCurrentIndex(0);
     mTaskMgr->setMktType(MKT_ALL);
-
-    //读取配置文件
-    qDebug()<<__func__<<"ini section:"<<Profiles::instance()->getAllSections();
+    qDebug()<<__func__<<__LINE__;
 }
 
 

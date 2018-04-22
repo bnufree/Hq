@@ -14,7 +14,7 @@
 QShareHistoryInfoMgr::QShareHistoryInfoMgr(const QStringList& codes, QObject *parent) : QObject(parent)
 {
     //设定初始化的日线更新时期
-    Profiles::instance()->setDefault(UPDATE_SEC, UPDATE_DATE, HqUtils::date2Str(QDate::currentDate().addDays(-365)));
+    PROFILES_INS->setDefault(UPDATE_SEC, UPDATE_DATE, HqUtils::date2Str(QDate::currentDate().addDays(-365)));
     mCodesList = codes;
     mPool.setExpiryTimeout(-1);
     mPool.setMaxThreadCount(16);
@@ -36,7 +36,7 @@ QShareHistoryInfoMgr::~QShareHistoryInfoMgr()
 void QShareHistoryInfoMgr::slotStartGetHistory()
 {
     //开始更新日线数据，取得上次日线数据的日期
-    QDate lastDate = HqUtils::dateFromStr(Profiles::instance()->value("UPDATE", "DATE").toString());
+    QDate lastDate = HqUtils::dateFromStr(PROFILES_INS->value("UPDATE", "DATE").toString());
     QDate updateDate = lastDate.addDays(1);
     slotUpdateAllShareFromDate(false,updateDate);
 }
@@ -132,7 +132,7 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
     mPool.waitForDone();
     mShareInfoMap.clear();
 
-    Profiles::instance()->setValue(UPDATE_SEC, UPDATE_DATE, HqUtils::date2Str(HqUtils::lastActiveDay()));
+    PROFILES_INS->setValue(UPDATE_SEC, UPDATE_DATE, HqUtils::date2Str(HqUtils::lastActiveDay()));
     emit signalUpdateHistoryMsg(QStringLiteral("开始读入日线数据"));
     mCurCnt = 0;
     wkDate = HqUtils::getActiveDayBefore1HYear();

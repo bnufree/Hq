@@ -21,15 +21,15 @@ HqInfoService::HqInfoService(QObject *parent) :
     qRegisterMetaType<ShareDataList>("const ShareDataList&");
     qRegisterMetaType<FinDataList>("const FinDataList&");
     qRegisterMetaType<ShareBaseDataList>("const ShareBaseDataList&");
-    mFavCodeList = Profiles::instance()->value(FAV_CODE_SEC, FAV_CODE, QStringList()).toStringList();
+    //mFavCodeList = PROFILES_INS->value(FAV_CODE_SEC, FAV_CODE, QStringList()).toStringList();
     qDebug()<<"fav:"<<mFavCodeList.mid(0, 10);
     initSignalSlot();
     initHistoryDates();
     //3、开启异步通讯
     moveToThread(&m_threadWork);
     m_threadWork.start();
+    qDebug()<<__func__<<__LINE__;
 }
-
 
 HqInfoService::~HqInfoService()
 {
@@ -100,11 +100,13 @@ bool HqInfoService::createHistoryTable(const QString &pTableName)
 
 void HqInfoService::initHistoryDates()
 {
-    mLastActiveDate = QExchangeDataManage::instance()->GetLatestActiveDay(QDate::currentDate().addDays(-1));
-    mLast3DaysDate = QExchangeDataManage::instance()->GetLatestActiveDay(QDate::currentDate().addDays(-4));
-    mLast5DaysDate = QExchangeDataManage::instance()->GetLatestActiveDay(QDate::currentDate().addDays(-6));
-    mLast10DaysDate = QExchangeDataManage::instance()->GetLatestActiveDay(QDate::currentDate().addDays(-11));
-    mLast1MonthDate = QExchangeDataManage::instance()->GetLatestActiveDay(QDate::currentDate().addMonths(-1));
+    qDebug()<<__func__<<__LINE__;
+//    mLastActiveDate = QExchangeDataManage::instance()->GetLatestActiveDay(QDate::currentDate().addDays(-1));
+//    mLast3DaysDate = QExchangeDataManage::instance()->GetLatestActiveDay(QDate::currentDate().addDays(-4));
+//    mLast5DaysDate = QExchangeDataManage::instance()->GetLatestActiveDay(QDate::currentDate().addDays(-6));
+//    mLast10DaysDate = QExchangeDataManage::instance()->GetLatestActiveDay(QDate::currentDate().addDays(-11));
+//    mLast1MonthDate = QExchangeDataManage::instance()->GetLatestActiveDay(QDate::currentDate().addMonths(-1));
+    qDebug()<<__func__<<__LINE__;
 }
 
 void HqInfoService::initSignalSlot()

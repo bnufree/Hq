@@ -7,7 +7,8 @@ QExchangeDataManage::QExchangeDataDeleter QExchangeDataManage::delobj;
 
 QExchangeDataManage::QExchangeDataManage(QObject *parent) : QObject(parent)
 {
-    mUnexhangeDayList =  Profiles::instance()->value("DateManage", "Expired").toStringList();
+    mUnexhangeDayList =  PROFILES_INS->value("DateManage", "Expired").toStringList();
+    qDebug()<<__func__<<mUnexhangeDayList;
 }
 
 QExchangeDataManage::~QExchangeDataManage()
@@ -30,7 +31,7 @@ void QExchangeDataManage::AddDay(const QDate& date)
     if(!mUnexhangeDayList.contains(datestr))
     {
         mUnexhangeDayList.append(datestr);
-        Profiles::instance()->setValue("DateManage", "Expired", mUnexhangeDayList);
+        PROFILES_INS->setValue("DateManage", "Expired", mUnexhangeDayList);
     }
 }
 
@@ -40,7 +41,7 @@ void QExchangeDataManage::RemoveDay(const QDate& date)
     if(mUnexhangeDayList.contains(datestr))
     {
         mUnexhangeDayList.removeOne(datestr);
-        Profiles::instance()->setValue("DateManage", "Expired", mUnexhangeDayList);
+        PROFILES_INS->setValue("DateManage", "Expired", mUnexhangeDayList);
     }
 }
 

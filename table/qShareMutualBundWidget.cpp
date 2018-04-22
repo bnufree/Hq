@@ -23,9 +23,9 @@ void QShareMutualBundwidget::setDataList(const ShareBaseDataList &list)
     foreach (ShareBaseData data, list) {
         int k =0;
         this->setItemText(i, k++, data.mName);
-        this->setItemText(i, k++, QString("").sprintf("%.2f",data.mTop10Buy / 10000.0));
-        this->setItemText(i, k++, QString("").sprintf("%.2f",data.mTop10Sell/ 10000.0));
-        this->setItemText(i, k++, QString("").sprintf("%.2f",(data.mTop10Buy-data.mTop10Sell)/10000.0));
+        this->setItemText(i, k++, QString("").sprintf("%.0f",data.mTop10Buy / 10000.0));
+        this->setItemText(i, k++, QString("").sprintf("%.0f",data.mTop10Sell/ 10000.0));
+        this->setItemText(i, k++, QString("").sprintf("%.0f",(data.mTop10Buy-data.mTop10Sell)/10000.0));
         this->item(i,0)->setData(Qt::UserRole,QString::fromStdString(data.mCode));
         i++;
     }
