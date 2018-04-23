@@ -46,6 +46,7 @@ Dialog::Dialog(QWidget *parent) :
     QDialog(parent),mTaskMgr(0),mIndexWidget(0),
     ui(new Ui::MainDialog)
 {
+    qDebug()<<__func__<<__LINE__;
     ui->setupUi(this);
     //创建系统的工作目录
     QDir dir(HQ_WORK_DIR);
@@ -60,6 +61,7 @@ Dialog::Dialog(QWidget *parent) :
     {
         ui->mainStackWidget->removeWidget(ui->mainStackWidget->widget(0));
     }
+    qDebug()<<__func__<<__LINE__;
     mShareTableWidget = new QShareTablewidget(this);
     ui->mainStackWidget->addWidget(mShareTableWidget);
     mDataMgrWidget = new QDataMgrWidget(this);

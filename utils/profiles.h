@@ -2,34 +2,58 @@
 #define PROFILE_H
 
 #include <QObject>
-#include <QSettings>
 #include <QDebug>
 #include <QTextCodec>
+#include <QFile>
+#include <QMutex>
+
+struct KeyVal
+{
+    QString     mKey;
+    QVariant    mVal;
+    QStringList mCommentList;
+};
+
+struct Section
+{
+    QString             mSecName;
+    QList<KeyVal>       mValList;
+    QStringList         mCommentlist;
+};
+
+#define     PROFILES_INS        Profiles::instance()
+
 
 class Profiles : public QObject
 {
     Q_OBJECT
 public:
     ~Profiles();
-    static Profiles *instance();
     QStringList getAllSections();
+    static Profiles* instance();
+
 private:
     explicit Profiles(QObject *parent = 0);
+    static QMutex      mutex;
+    void initContent();
+    void initDefaultExpiredDate();
+    void initDefaultFavShare();
+    void save();
+    static Profiles     *mInstance;
 private:
-    static Profiles     *minstance;
     class MGarbage // 它的唯一工作就是在析构函数中删除CSingleton的实例
     {
     public:
         ~MGarbage()
         {
-            if (Profiles::minstance)
-                delete Profiles::minstance;
+            if (Profiles::mInstance)
+                delete Profiles::mInstance;
         }
     };
     static MGarbage Garbage; // 定义一个静态成员，在程序结束时，系统会调用它的析构函数
 
-    QSettings           *configSettings;
-    QSettings           *iniSettings;
+    QMap<QString, Section>      mContentList;
+    bool                        mFileSts;
 public slots:
     void setValue( const QString & prefix, const QString & key, const QVariant & value );
     void setDefault( const QString & prefix, const QString & key, const QVariant & value );

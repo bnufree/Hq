@@ -10,7 +10,7 @@ QExchangeDateMangageDialog::QExchangeDateMangageDialog(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowFlags(this->windowFlags() ^ Qt::FramelessWindowHint);
     //初始化已经设定的日期
-    mMgrDates = Profiles::instance()->value("DateManage", "Expired").toStringList();
+    mMgrDates = PROFILES_INS->value("DateManage", "Expired").toStringList();
     mMgrDates.sort();
     //foreach (QString date, dates) {
         ui->listWidget->addItems(mMgrDates);
@@ -53,6 +53,6 @@ void QExchangeDateMangageDialog::on_calendarWidget_currentPageChanged(int year, 
 void QExchangeDateMangageDialog::on_CloseBtn_clicked()
 {
     qDebug()<<"expired:"<<mMgrDates;
-    Profiles::instance()->setValue("DateManage", "Expired", QVariant(mMgrDates));
+    PROFILES_INS->setValue("DateManage", "Expired", QVariant(mMgrDates));
     emit accepted();
 }

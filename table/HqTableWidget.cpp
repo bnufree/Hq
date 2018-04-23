@@ -10,6 +10,7 @@
 
 #define     COL_TYPE_ROLE               Qt::UserRole + 1
 #define     COL_SORT_ROLE               Qt::UserRole + 2
+#define     PAGE_SIZE                   50
 
 HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     mCurScrollBar(0),
@@ -17,6 +18,7 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     mCustomContextMenu(0)
 {
     this->setItemDelegate(new RowDelegate);
+    this->setRowCount(PAGE_SIZE);
     initPageCtrlMenu();
     mColDataList.clear();
 //    mColWidth = 60;
@@ -165,46 +167,29 @@ void HqTableWidget::prepareUpdateTable(int newRowCount)
     {
         //do nothing
     }
-
-    for(int i=0 ;i<rowCount(); i++)
-    {
-        setRowHeight(i, mRowHeight);
-    }
-
-
-//    for(int i=0; i<this->rowCount(); i++)
-//    {
-//        if(i <mMaxDisplayRow)
-//        {
-//            this->setRowHidden(i, false);
-//        } else
-//        {
-//            this->setRowHidden(i, true);
-//        }
-//    }
 }
 
 void HqTableWidget::removeRows(int start, int count)
 {
     for(int i=0; i<count; i++)
     {
+        int row = start + i;
         for(int k=0; k<this->columnCount(); k++)
         {
-            QShareCodeNameWidget *w = static_cast<QShareCodeNameWidget*> (this->cellWidget(start, k));
+            QShareCodeNameWidget *w = static_cast<QShareCodeNameWidget*> (this->cellWidget(row, k));
             if(w)
             {
                 delete w;
                 w = 0;
             }
 
-            QStkTableWidgetItem *item = (QStkTableWidgetItem*)(this->item(start, k));
+            QStkTableWidgetItem *item = (QStkTableWidgetItem*)(this->item(row, k));
             if(item)
             {
                 delete item;
                 item = 0;
             }
         }
-        this->removeRow(start);
     }
 }
 
@@ -288,17 +273,16 @@ void HqTableWidget::resizeEvent(QResizeEvent *event)
     }
     mRowHeight = size.height() / mMaxDisplayRow;
     mColWidth = size.width()/ mMaxDisplayCol;
-//    for(int i=0; i<this->rowCount(); i++)
-//    {
-//        this->setRowHeight(i, size.height() / mMaxDisplayRow);
-//    }
+    for(int i=0; i<this->rowCount(); i++)
+    {
+        this->setRowHeight(i, size.height() / mMaxDisplayRow);
+    }
 
     for(int i=0; i<this->columnCount(); i++)
     {
         this->setColumnWidth(i, mColWidth);
     }
-//    this->horizontalScrollBar()->setMaximum(size.width()-this->horizontalScrollBar()->pageStep());
-//    this->verticalScrollBar()->setMaximum(size.height()-this->verticalScrollBar()->pageStep());
+
     for(int i=0; i<this->columnCount(); i++)
     {
         if(i <mMaxDisplayCol)
@@ -307,6 +291,17 @@ void HqTableWidget::resizeEvent(QResizeEvent *event)
         } else
         {
             this->setColumnHidden(i, true);
+        }
+    }
+
+    for(int i=0; i<this->rowCount(); i++)
+    {
+        if(i<mMaxDisplayRow)
+        {
+            this->setRowHidden(i, false);
+        } else
+        {
+            this->setRowHidden(i, true);
         }
     }
 
@@ -411,10 +406,9 @@ void HqTableWidget::mouseMoveEvent(QMouseEvent *event)
 
     } else
     {
-        QTableWidget::mouseMoveEvent(event);
-//        if(qAbs(move_distance) < 0.5*mRowHeight) return;
-//        OPT_MOVE_MODE mode = move_distance < 0 ? OPT_UP : OPT_DOWN;
-//        optMoveTable(mode);
+        if(qAbs(move_distance) < 0.5*mRowHeight) return;
+        OPT_MOVE_MODE mode = move_distance < 0 ? OPT_UP : OPT_DOWN;
+        optMoveTable(mode);
     }
 #endif
     mMovePnt = move_pnt;
@@ -504,25 +498,28 @@ void HqTableWidget::optMoveTable(OPT_MOVE_MODE mode)
     {
         //向上滑动，显示下面的列
         int row_start = 0, row_end = 0;
+        bool start_init = false, end_init = false;
         for(int i=0; i<this->rowCount(); i++)
         {
             if(!this->isRowHidden(i))
             {
-                if(row_start == 0)
+                if(!start_init)
                 {
                     row_start = i;
+                    start_init = true;
                 }
             } else
             {
-                if(row_start == 0) continue;
-                if(row_end == 0)
+                if(!start_init) continue;
+                if(!end_init)
                 {
                     row_end = i-1;
+                    end_init = true;
                     break;
                 }
             }
         }
-        if(row_end == 0)
+        if(!end_init)
         {
             //已经到了最后，不操作
         } else
@@ -536,27 +533,30 @@ void HqTableWidget::optMoveTable(OPT_MOVE_MODE mode)
     {
         //向下滑动，显示上面的行
         int row_start = 0, row_end = 0;
+        bool start_init = false, end_init = false;
         for(int i=this->rowCount()-1; i>=0; i--)
         {
             if(!this->isRowHidden(i))
             {
-                if(row_end == 0)
+                if(end_init == 0)
                 {
                     row_end = i;
+                    end_init = true;
                 }
             } else
             {
-                if(row_end == 0) continue;
-                if(row_start == 0)
+                if(end_init == 0) continue;
+                if(start_init == 0)
                 {
                     row_start = i+1;
+                    start_init = true;
                     break;
                 }
             }
         }
         //qDebug()<<"start:"<<row_start<<" end:"<<row_end;
         //设定新的显示的列
-        if(row_start == 0)
+        if(start_init == 0)
         {
             //已经到了最左，不操作
         } else

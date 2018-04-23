@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QThread>
 #include "hqdbdatabase.h"
+#include "utils/profiles.h"
 
 
 #define DATA_SERVICE HqInfoService::instance()
