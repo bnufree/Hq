@@ -134,10 +134,6 @@ Dialog::Dialog(QWidget *parent) :
 
     ui->mainStackWidget->setCurrentIndex(0);
     mTaskMgr->setMktType(MKT_ALL);
-
-    //读取配置文件
-    Profiles::instance()->setDefault("ZXG", "codes", QStringList()<<"600036"<<"000002");
-    qDebug()<<__func__<<"ini section:"<<Profiles::instance()->getAllSections();
 }
 
 

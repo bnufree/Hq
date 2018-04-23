@@ -14,7 +14,7 @@
 QShareHistoryInfoMgr::QShareHistoryInfoMgr(const QStringList& codes, QObject *parent) : QObject(parent)
 {
     //设定初始化的日线更新时期
-    PROFILES_INS->setDefault(UPDATE_SEC, UPDATE_DATE, HqUtils::date2Str(QDate::currentDate().addDays(-365)));
+    PROFILES_INS ->setDefault(UPDATE_SEC, UPDATE_DATE, HqUtils::date2Str(QDate::currentDate().addDays(-365)));
     mCodesList = codes;
     mPool.setExpiryTimeout(-1);
     mPool.setMaxThreadCount(16);
