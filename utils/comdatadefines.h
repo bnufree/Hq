@@ -120,6 +120,7 @@ typedef struct struTableColData
 }TableColData;
 
 typedef QList<TableColData>         TableColDataList;
+#define         HQ_WORK_DIR         "/sdcard/hq/etc"
 
 #endif // COMDATADEFINES_H
 

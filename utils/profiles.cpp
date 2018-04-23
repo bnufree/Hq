@@ -1,7 +1,7 @@
 ﻿#include "profiles.h"
-#include "hqutils.h"
 #include <QDir>
 #include <QDebug>
+#include "comdatadefines.h"
 
 #define     INI_FILE_NAME           "profiles.ini"
 
@@ -11,9 +11,22 @@ Profiles::Profiles(QObject *parent) :
     configSettings(NULL),
     QObject(parent)
 {
-    configSettings = new QSettings(INI_FILE_NAME, QSettings::IniFormat);
+    QString fileNM = QString("%1%2").arg(HQ_WORK_DIR).arg(INI_FILE_NAME);
+    bool sts = QFile::exists(fileNM);
+    qDebug()<<QFile::exists(fileNM);
+    if(!sts)
+    {
+        QFile file(fileNM);
+        if(file.open(QIODevice::WriteOnly))
+        {
+            file.close();
+        }
+    }
+    qDebug()<<QFile::exists(fileNM);
+    configSettings = new QSettings(fileNM, QSettings::IniFormat);
     configSettings->setIniCodec(QTextCodec::codecForName("GB18030"));
     qDebug()<<__func__<<configSettings->allKeys()<<configSettings->childGroups();
+
 }
 
 

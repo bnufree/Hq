@@ -16,6 +16,8 @@
 #include "hqtaskmagrcenter.h"
 #include "table/qsharetablewidget.h"
 #include "qandroidlistwidget.h"
+#include "utils/comdatadefines.h"
+#include <QDir>
 
 #define     STK_ZXG_SEC         "0520"
 #define     STK_HSJJ_SEC        "4521"
@@ -45,6 +47,15 @@ Dialog::Dialog(QWidget *parent) :
     ui(new Ui::MainDialog)
 {
     ui->setupUi(this);
+    //创建系统的工作目录
+    QDir dir(HQ_WORK_DIR);
+    bool exist = dir.exists(HQ_WORK_DIR);
+    qDebug()<<"work dir exist:"<<exist;
+    if(!exist)
+    {
+        bool sts = dir.mkpath(HQ_WORK_DIR);
+        qDebug()<<"make sts :"<<sts<<" now path exist:"<<dir.exists();
+    }
     while(ui->mainStackWidget->count())
     {
         ui->mainStackWidget->removeWidget(ui->mainStackWidget->widget(0));
@@ -96,6 +107,8 @@ Dialog::Dialog(QWidget *parent) :
 //    connect(shotcut3, SIGNAL(activated()), this, SLOT(slotDisplayShareMini()));
     //    setHook(this);
 
+
+
     //
     mTaskMgr = new HQTaskMagrCenter;
     connect(mShareTableWidget, SIGNAL(signalSetFavCode(QString)), mTaskMgr, SIGNAL(signalSetFavCode(QString)));
@@ -121,6 +134,7 @@ Dialog::Dialog(QWidget *parent) :
     mTaskMgr->setMktType(MKT_ALL);
 
     //读取配置文件
+    Profiles::instance()->setDefault("ZXG", "codes", QStringList()<<"600036"<<"000002");
     qDebug()<<__func__<<"ini section:"<<Profiles::instance()->getAllSections();
 }
 
@@ -251,10 +265,7 @@ void Dialog::on_searchTxt_textChanged(const QString &arg1)
 
 void Dialog::on_DateMgrBtn_clicked()
 {
-    QExchangeDateMangageDialog *dlg = new QExchangeDateMangageDialog;
-    if(dlg == NULL) return;
-    connect(dlg, SIGNAL(accepted()), dlg, SLOT(deleteLater()));
-    dlg->exec();
+
 }
 
 

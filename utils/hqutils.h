@@ -36,7 +36,7 @@ public:
     static QDate    getLgtStartDate();
 
 public:
-    static QStringList        mDatesList;
+    //static QStringList        mDatesList;
 };
 
 #endif // HQUTILS_H

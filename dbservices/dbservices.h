@@ -113,7 +113,6 @@ public slots:
     void slotQueryShareForeignVol(const QString& code);
 
 private:
-    void initHistoryDates();
     void initSignalSlot();
     bool createHistoryTable(const QString& pTableName);
     //bool createShareBaseInfoTable(const QString& code);

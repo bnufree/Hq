@@ -17,10 +17,7 @@ DESTDIR = ../bin2/
 
 SOURCES += main.cpp\
         dialog.cpp \
-    dataexchange.cpp \
     qeastmoneylhbthread.cpp \
-    qexchangedatamanage.cpp \
-    qexchangedatemangagedialog.cpp \
     qglobalapplication.cpp \
     qindexframe.cpp \
     qindexwidget.cpp \
@@ -67,10 +64,7 @@ SOURCES += main.cpp\
     table/qsharecodenamewidget.cpp
 
 HEADERS  += dialog.h \
-    dataexchange.h \
     qeastmoneylhbthread.h \
-    qexchangedatamanage.h \
-    qexchangedatemangagedialog.h \
     qglobalapplication.h \
 #    qthook.h \
     dbservices.h \

@@ -5,7 +5,7 @@
 
 #define         DATE_STR_FORMAT         "yyyy-MM-dd"
 
-QStringList HqUtils::mDatesList = Profiles::instance()->value("DateManage", "Expired").toStringList();
+//QStringList HqUtils::mDatesList = Profiles::instance()->value("DateManage", "Expired").toStringList();
 HqUtils::HqUtils()
 {
 }
@@ -17,7 +17,7 @@ bool HqUtils::weekend(const QDate &date)
 
 bool HqUtils::activeDay(const QDate &date)
 {
-    return (!weekend(date)) && (!HqUtils::mDatesList.contains(date2Str(date)));
+    return !weekend(date)/* && (!HqUtils::mDatesList.contains(date2Str(date))*/;
 }
 
 bool HqUtils::isActiveTime(const QTime &time)
