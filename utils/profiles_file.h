@@ -21,8 +21,6 @@ struct Section
     QStringList         mCommentlist;
 };
 
-#define     PROFILES_INS        Profiles::instance()
-
 
 class Profiles : public QObject
 {

@@ -40,9 +40,8 @@ void QShareCodesWork::run()
             data.setCode(ShareBaseData::fullCode(code));
             data.setName(name);
             data.setShareType(ShareBaseData::shareType(code));
-            //HqUtils::GetFirstLetter(name);
-            //data.setPY(PY);            
-            //qDebug()<<data.mCode<<data.mName<<data.mShareType<<data.shareTypeString();
+            data.setPY(HqUtils::GetFirstLetter(name));
+            qDebug()<<data.mCode<<data.mName<<data.mShareType<<data.shareTypeString()<<data.mPY;
             list.append(data);
         }
         index += reg.matchedLength();

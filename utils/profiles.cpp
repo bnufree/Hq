@@ -25,6 +25,7 @@ Profiles::Profiles(QObject *parent) :
     qDebug()<<QFile::exists(fileNM);
     configSettings = new QSettings(fileNM, QSettings::IniFormat);
     configSettings->setIniCodec(QTextCodec::codecForName("GB18030"));
+    initDefaultExpiredDate();
     qDebug()<<__func__<<configSettings->allKeys()<<configSettings->childGroups();
 
 }
@@ -36,11 +37,6 @@ Profiles::~Profiles()
     {
         configSettings->deleteLater();
     }
-//    if ( minstance )
-//    {
-//        delete minstance;
-//        minstance = 0;
-//    }
 }
 /*-------------------------------------------
  *
@@ -104,3 +100,14 @@ QStringList Profiles::getAllSections()
     qDebug()<<__func__<<QFile::exists(INI_FILE_NAME)<<configSettings->fileName();
     return configSettings->childGroups();
 }
+
+void Profiles::initDefaultExpiredDate()
+{
+    QString sec = "DateManage";
+    QString key = "Expired";
+    QStringList list;
+    list<<"2017-01-01"<<"2017-01-02"<<"2017-01-03"<<"2017-01-27"<<"2017-01-28"<<"2017-01-29"<<"2017-01-30"<<"2017-01-31"<<"2017-02-01"<<"2017-02-02"<<"2017-04-02"<<"2017-04-03"<<"2017-04-04"<<"2017-04-29"<<"2017-04-30"<<"2017-05-01"<<"2017-05-28"<<"2017-05-29"<<"2017-05-30"<<"2017-10-01"<<"2017-10-02"<<"2017-10-03"<<"2017-10-04"<<"2017-10-05"<<"2017-10-06"<<"2017-10-07"<<"2017-10-08"<<"2018-01-01"<<"2018-02-15"<<"2018-02-16"<<"2018-02-17"<<"2018-02-18"<<"2018-02-19"<<"2018-02-20"<<"2018-02-21"<<"2018-04-05"<<"2018-04-06"<<"2018-04-07"<<"2018-04-29"<<"2018-04-30"<<"2018-05-01"<<"2018-06-16"<<"2018-06-17"<<"2018-06-18"<<"2018-09-22"<<"2018-09-23"<<"2018-09-24"<<"2018-10-01"<<"2018-10-02"<<"2018-10-03"<<"2018-10-04"<<"2018-10-05"<<"2018-10-06"<<"2018-10-07";
+    setDefault(sec, key, list);
+}
+
+
