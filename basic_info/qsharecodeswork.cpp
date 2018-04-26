@@ -6,10 +6,12 @@
 #include <QFile>
 #include <QDir>
 #include "dbservices/hqdatadefines.h"
+#include "dbservices/dbservices.h"
 #include <QTextCodec>
 #include "utils/qhttpget.h"
 #include "utils/hqutils.h"
 #include "utils/sharedata.h"
+#include <QEventLoop>
 
 QShareCodesWork::QShareCodesWork(QObject *parent) : mParent(parent),QRunnable()
 {
@@ -22,9 +24,9 @@ QShareCodesWork::~QShareCodesWork()
 void QShareCodesWork::run()
 {
     ShareBaseDataList list;
-    QTextCodec *utf8 = QTextCodec::codecForName("UTF8");
     QByteArray http = QHttpGet::getContentOfURL("http://quote.eastmoney.com/stocklist.html");
     QTextCodec *codes = QTextCodec::codecForHtml(http);
+    QTextCodec *UTF8 = QTextCodec::codecForName("UTF8");
     QString result = codes->toUnicode(http);
     QRegExp reg(">([\u4e00-\u9fa5A-Z0-9]{1,})\\(([0-9]{6})\\)<");
     //
@@ -40,8 +42,6 @@ void QShareCodesWork::run()
             data.setCode(ShareBaseData::fullCode(code));
             data.setName(name);
             data.setShareType(ShareBaseData::shareType(code));
-            data.setPY(HqUtils::GetFirstLetter(name));
-            qDebug()<<data.mCode<<data.mName<<data.mShareType<<data.shareTypeString()<<data.mPY;
             list.append(data);
         }
         index += reg.matchedLength();

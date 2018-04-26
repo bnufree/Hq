@@ -66,12 +66,19 @@ public:
     bool getHistoryDataOfCode(ShareDataList& list, const QString &code);
     bool getSimilarCodeOfText(QStringList& codes, const QString& text);
 
+    //日期操作
+    bool addDate(const QDate& date);
+    bool delDate(const QDate& date = QDate());
+    bool updateDates(const QList<QDate>& dates);
+    bool queryCloseDates(QList<QDate>& dates, uint start, uint end);
+
 private:
     bool initSqlDB();
     bool createBlockTable();
     bool createShareBasicTable();
     bool createGeneralTable();
     bool createShareHistoryInfoTable();
+    bool createCloseDateTable();
     bool isTableExist(const QString &pTable);
     bool createTable(const QString& pTable, const TableColList& cols);
 

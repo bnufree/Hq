@@ -13,6 +13,7 @@
 #define         HQ_HSGTOP10_TABLE                   "hsgTop10"
 #define         HQ_GENERAL_TABLE                    "general_info"
 #define         HQ_FINANCE_TABLE                    "finance"
+#define         HQ_CLOSE_DATE_TABLE                 "close_date"
 
 //列名
 #define         HQ_TABLE_COL_ID                 "id"

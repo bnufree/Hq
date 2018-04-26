@@ -205,6 +205,7 @@ bool HQDBDataBase::createDBTables()
     if(!createBlockTable()) return false;
     if(!createShareBasicTable()) return false;
     if(!createGeneralTable()) return false;
+    if(!createCloseDateTable()) return false;
     qDebug()<<__FUNCTION__<<__LINE__;
     return true;
 }
@@ -223,6 +224,8 @@ bool HQDBDataBase::createBlockTable()
     colist.append({HQ_TABLE_COL_DATE, "DATE NULL"});
     return createTable(HQ_BLOCK_TABLE, colist);
 }
+
+
 
 bool HQDBDataBase::createShareBasicTable()
 {
@@ -712,6 +715,65 @@ bool HQDBDataBase::getHistoryDataOfCode(ShareDataList& list, const QString &code
     }
     if(list.length() == 0) return false;
     return true;
+}
+
+//日期操作相关
+bool HQDBDataBase::createCloseDateTable()
+{
+    if(isTableExist(HQ_CLOSE_DATE_TABLE)) return true;
+    TableColList colist;
+    colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
+    colist.append({HQ_TABLE_COL_DATE, "DATE  NOT NULL"});
+    return createTable(HQ_CLOSE_DATE_TABLE, colist);
+}
+
+bool HQDBDataBase::addDate(const QDate &date)
+{
+    QMutexLocker locker(&mSQlMutex);
+    mSQLQuery.prepare(QString("insert into %1 (%2) where (?)").arg(HQ_CLOSE_DATE_TABLE).arg(HQ_TABLE_COL_DATE));
+    mSQLQuery.addBindValue(date);
+    return mSQLQuery.exec();
+}
+
+bool HQDBDataBase::delDate(const QDate &date)
+{
+    QList<HQ_QUERY_CONDITION> list;
+    if(date.isValid())
+    {
+        HQ_QUERY_CONDITION con;
+        con.col = HQ_TABLE_COL_DATE;
+        con.val = QVariant(date);
+        list.append(con);
+    }
+    return deleteRecord(HQ_CLOSE_DATE_TABLE, list);
+}
+
+bool HQDBDataBase::updateDates(const QList<QDate> &dates)
+{
+    QSqlDatabase::database().transaction();
+    if(!deleteRecord(HQ_CLOSE_DATE_TABLE))
+    {
+        QSqlDatabase::database().rollback();
+        return false;
+    }
+    foreach (QDate date, dates) {
+        if(!addDate(date))
+        {
+            QSqlDatabase::database().rollback();
+            return false;
+        }
+    }
+
+    QSqlDatabase::database().commit();
+    return true;
+}
+
+bool HQDBDataBase::queryCloseDates(QList<QDate> &dates, uint start, uint end)
+{
+    QMutexLocker locker(&mSQlMutex);
+    mSQLQuery.prepare(QString("insert into %1 (%2) where (?)").arg(HQ_CLOSE_DATE_TABLE).arg(HQ_TABLE_COL_DATE));
+    mSQLQuery.addBindValue(date);
+    return mSQLQuery.exec();
 }
 
 QString HQDBDataBase::errMsg()
