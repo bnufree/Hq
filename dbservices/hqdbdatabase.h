@@ -70,7 +70,7 @@ public:
     bool addDate(const QDate& date);
     bool delDate(const QDate& date = QDate());
     bool updateDates(const QList<QDate>& dates);
-    bool queryCloseDates(QList<QDate>& dates, uint start, uint end);
+    bool queryCloseDates(QList<QDate>& dates);
 
 private:
     bool initSqlDB();

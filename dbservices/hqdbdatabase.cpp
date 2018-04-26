@@ -768,12 +768,16 @@ bool HQDBDataBase::updateDates(const QList<QDate> &dates)
     return true;
 }
 
-bool HQDBDataBase::queryCloseDates(QList<QDate> &dates, uint start, uint end)
+bool HQDBDataBase::queryCloseDates(QList<QDate> &dates)
 {
     QMutexLocker locker(&mSQlMutex);
-    mSQLQuery.prepare(QString("insert into %1 (%2) where (?)").arg(HQ_CLOSE_DATE_TABLE).arg(HQ_TABLE_COL_DATE));
-    mSQLQuery.addBindValue(date);
-    return mSQLQuery.exec();
+    QString sql = QString("select %1 from %2 ").arg(HQ_TABLE_COL_DATE).arg(HQ_CLOSE_DATE_TABLE);
+    if(!mSQLQuery.exec(sql)) return false;
+    while (mSQLQuery.next()) {
+        dates.append(mSQLQuery.value(0).toDate());
+    }
+
+    return true;
 }
 
 QString HQDBDataBase::errMsg()
