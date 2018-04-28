@@ -740,9 +740,7 @@ bool HQDBDataBase::delDate(const QDate &date)
     QList<HQ_QUERY_CONDITION> list;
     if(date.isValid())
     {
-        HQ_QUERY_CONDITION con;
-        con.col = HQ_TABLE_COL_DATE;
-        con.val = QVariant(date);
+        HQ_QUERY_CONDITION con(HQ_TABLE_COL_DATE, QVariant(date));
         list.append(con);
     }
     return deleteRecord(HQ_CLOSE_DATE_TABLE, list);

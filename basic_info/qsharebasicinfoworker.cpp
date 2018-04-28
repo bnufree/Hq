@@ -8,8 +8,9 @@
 #include "qsharehsgttop10work.h"
 #include "qsharefinancialinfowork.h"
 #include <QFile>
+#include "dbservices/dbservices.h"
 
-#define STOCK_CODE_FILE  "share.dat"
+#define         STOCK_CODE_FILE         QString("%1/share.data").arg(ANDROID_FILE_PATH)
 QShareBasicInfoWorker::QShareBasicInfoWorker(QObject *parent) : QObject(parent)
 {
     mShareBaseDataMap.clear();
@@ -65,7 +66,10 @@ bool QShareBasicInfoWorker::getInfosFromFile(QMap<QString, ShareBaseData>& map)
     {
         qint64 lastupdate = 0;
         file.read((char*)(&lastupdate), sizeof(qint64));
-        if(QDateTime::fromMSecsSinceEpoch(lastupdate).date() == HqUtils::latestActiveDay())
+        QDate lastDate = QDateTime::fromMSecsSinceEpoch(lastupdate).date();
+        QDate latestActiveDate = DATA_SERVICE->latestActiveDay();
+        qDebug()<<"last:"<<lastDate<<"latest:"<<latestActiveDate;
+        if(lastDate == latestActiveDate)
         {
             file.read((char*)(&totalNum), sizeof(int));
             int count = 0;
@@ -73,11 +77,12 @@ bool QShareBasicInfoWorker::getInfosFromFile(QMap<QString, ShareBaseData>& map)
                 ShareBaseData data;
                 file.read((char*)(&data), sizeof(ShareBaseData));
                 map[QString::fromStdString(data.mCode)] = data;
-                //qDebug()<<data.mCode<<data.mName<<data.mIsFav;
+                qDebug()<<data.mCode<<data.mName;
             }
         }
     }
     file.close();
+    qDebug()<<"total num:"<<totalNum<<" read count:"<<map.count();
     if(totalNum != 0 && map.count() == totalNum)
     {
         qDebug()<<__FUNCTION__<<__LINE__;
@@ -99,7 +104,7 @@ bool QShareBasicInfoWorker::getInfossFromWeb(QMap<QString, ShareBaseData>& map)
     //取得分红送配
     pool.start(new QShareFHSPWork("2017-12-31", this));
     //取得北向交易TOP10
-    pool.start(new QShareHsgtTop10Work(HqUtils::lastActiveDay().toString("yyyy-MM-dd"), this));
+    pool.start(new QShareHsgtTop10Work(DATA_SERVICE->lastActiveDay().toString("yyyy-MM-dd"), this));
     pool.waitForDone();
     //取得财务信息
     QStringList allCodes(mShareBaseDataMap.keys());
@@ -117,11 +122,11 @@ bool QShareBasicInfoWorker::getInfossFromWeb(QMap<QString, ShareBaseData>& map)
 
 bool QShareBasicInfoWorker::writeInfos(const ShareBaseDataList &list)
 {
-    FILE *fp = fopen(STOCK_CODE_FILE, "wb+");
+    FILE *fp = fopen(STOCK_CODE_FILE.toStdString().data(), "wb+");
     if(fp)
     {
         qDebug()<<__FUNCTION__<<__LINE__;
-        qint64 cur = QDateTime(HqUtils::latestActiveDay().addDays(-1)).toMSecsSinceEpoch();
+        qint64 cur = QDateTime(DATA_SERVICE->latestActiveDay().addDays(-1)).toMSecsSinceEpoch();
         fwrite(&cur, sizeof(cur), 1, fp);
         int size = list.size();
         fwrite(&size, sizeof(size), 1, fp);
@@ -132,7 +137,7 @@ bool QShareBasicInfoWorker::writeInfos(const ShareBaseDataList &list)
 
         //更新时间到最新，移动到开头写入时间，保证是最新的
         fseek(fp, 0, SEEK_SET);
-        cur = QDateTime(HqUtils::latestActiveDay()).toMSecsSinceEpoch();
+        cur = QDateTime(DATA_SERVICE->latestActiveDay()).toMSecsSinceEpoch();
         fwrite(&cur, sizeof(cur), 1, fp);
         fclose(fp);
     } else
@@ -151,7 +156,7 @@ void QShareBasicInfoWorker::slotUpdateShareCodesList(const ShareBaseDataList &li
         ShareBaseData &wkVal = mShareBaseDataMap[code];
         wkVal.setCode(code);
         wkVal.setName(QString::fromStdString(data.mName));
-        wkVal.setPY(QString::fromStdString(data.mPY));
+        //wkVal.setPY(QString::fromStdString(data.mPY));
         wkVal.mShareType = data.mShareType;
         //qDebug()<<wkVal.mCode<<wkVal.mName<<wkVal.mPY;
     }
@@ -164,10 +169,7 @@ void QShareBasicInfoWorker::slotUpdateShareFHSPList(const ShareBaseDataList &lis
     foreach (ShareBaseData data, list) {
         QString code = QString::fromStdString(data.mCode);
         ShareBaseData &wkVal = mShareBaseDataMap[code];
-        wkVal.mSZZG = data.mSZZG;
-        wkVal.mXJFH = data.mXJFH;
-        wkVal.mGQDJR = data.mGQDJR;
-        wkVal.mYAGGR = data.mYAGGR;
+        wkVal.mFhspInfo = data.mFhspInfo;
         //qDebug()<<wkVal.mCode<<wkVal.mSZZG<<wkVal.mXJFH;
     }
 }
@@ -178,9 +180,7 @@ void QShareBasicInfoWorker::slotUpdateShareHsgtTop10List(const ShareBaseDataList
     foreach (ShareBaseData data, list) {
         QString code = QString::fromStdString(data.mCode);
         ShareBaseData &wkVal = mShareBaseDataMap[code];
-        wkVal.mIsTop10 = true;
-        wkVal.mTop10Buy = data.mTop10Buy;
-        wkVal.mTop10Sell = data.mTop10Sell;
+        wkVal.mHKExInfo = data.mHKExInfo;
 //        qDebug()<<wkVal.mCode<<wkVal.mIsTop10<<wkVal.mTop10Buy;
     }
 }
@@ -191,11 +191,7 @@ void QShareBasicInfoWorker::slotUpdateShareFinancialList(const ShareBaseDataList
     foreach (ShareBaseData data, list) {
         QString code = QString::fromStdString(data.mCode);
         ShareBaseData &wkVal = mShareBaseDataMap[code];
-        wkVal.mMGSY = data.mMGSY;
-        wkVal.mMGJZC = data.mMGJZC;
-        wkVal.mTotalShare = data.mTotalShare;
-        wkVal.mMutalShare = data.mMutalShare;
-        wkVal.mJZCSYL = data.mJZCSYL;
+        wkVal.mFinanceInfo = data.mFinanceInfo;
         wkVal.setPY(QString::fromStdString(data.mPY));
     }
 }

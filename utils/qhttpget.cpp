@@ -3,6 +3,7 @@
 #include <QThread>
 #include <QEventLoop>
 #include "utils/hqutils.h"
+#include "dbservices/dbservices.h"
 
 QHttpGet::QHttpGet(const QString& url, bool sequential, QObject *parent) :
     QThread(parent),mMgr(0), mUrl(url), mReply(0), mIsSequential(sequential), mUpdateTimer(0)
@@ -100,7 +101,7 @@ void QHttpGet::run()
             }
         }
         QThread::sleep(mInertVal);
-        if(!HqUtils::isCurrentActive())
+        if(!DATA_SERVICE->isCurrentActive())
         {
             active = false;
         } else

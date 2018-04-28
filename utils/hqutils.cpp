@@ -10,45 +10,23 @@ HqUtils::HqUtils()
 {
 }
 
-bool HqUtils::weekend(const QDate &date)
-{
-    return date.dayOfWeek() == 6 || date.dayOfWeek() == 7;
-}
 
-bool HqUtils::activeDay(const QDate &date)
-{
-    return !weekend(date)/* && (!HqUtils::mDatesList.contains(date2Str(date))*/;
-}
 
-bool HqUtils::isActiveTime(const QTime &time)
-{
-    int act_start1 = 9*60+15;
-    int act_end1 = 11*60+30;
-    int act_start2 = 13*60;
-    int act_end2 = 15*60;
-    int hour = time.hour();
-    int minute = time.minute();
-    int res = hour *60 + minute;
-    if((res >= act_start1 && res <= act_end1) || (res >= act_start2 && res <= act_end2))
-    {
-            return true;
-    }
-    return false;
-}
 
-bool HqUtils::isCurrentActive()
-{
-    QDateTime cur = QDateTime::currentDateTime();
-    if(!activeDay((cur.date()))) return false;
-    return isActiveTime(cur.time());
-}
+
 
 
 QString HqUtils::GetFirstLetter( const QString& unicode )
 {
     QTextCodec *gbkCodec = QTextCodec::codecForName("GBK");
-    char *strChs = gbkCodec->fromUnicode(unicode).toUpper().data();
-    qDebug()<<"chars:"<<QString::fromStdString(strChs)<<" src:"<<unicode;
+    QByteArray gbkArray = gbkCodec->fromUnicode(unicode).toUpper();
+    char *strChs = gbkArray.data();
+    QByteArray unicodeArray;
+    for(int i=0; i<unicode.length(); i++)
+    {
+        unicodeArray.append(QByteArray::number(unicode[i].unicode(), 16));
+    }
+    //qDebug()<<"chars:"<<gbkArray<<" src:"<<unicode<<" unicode:"<<unicodeArray.toUpper();
  //   char *strChs = unicode.toLocal8Bit().data();
     static int li_SecPosValue[] = {
         1601, 1637, 1833, 2078, 2274, 2302, 2433, 2594, 2787, 3106, 3212,
@@ -118,15 +96,7 @@ bool HqUtils::writeInt2File(int val, FILE *fp)
     fwrite(&wkval, sizeof(int), 1, fp);
     return true;
 }
-QString  HqUtils::date2Str(const QDate& date)
-{
-    return date.toString(DATE_STR_FORMAT);
-}
 
-QDate  HqUtils::dateFromStr(const QString& str)
-{
-    return QDate::fromString(str, DATE_STR_FORMAT);
-}
 
 QString HqUtils::double2Str(double val)
 {
@@ -138,58 +108,3 @@ QString HqUtils::double2Str(double val)
 
     return wkval;
 }
-
-QDate   HqUtils::latestActiveDay()
-{
-    QDate date = QDate::currentDate();
-    while(!activeDay(date))
-    {
-        date = date.addDays(-1);
-    }
-
-    return date;
-}
-
-QDate   HqUtils::lastActiveDay()
-{
-    QDate date =latestActiveDay().addDays(-1);
-    while(!activeDay(date))
-    {
-        date = date.addDays(-1);
-    }
-
-    return date;
-}
-
-QDate HqUtils::getLgtStartDate()
-{
-    return QDate(2017,3,17);
-}
-
-QDate HqUtils::getActiveDayBefore1HYear()
-{
-    QDate date = QDate::currentDate();
-    date = date.addDays(-182);
-    while (!activeDay(date)) {
-        date = date.addDays(1);
-    }
-
-    return date;
-}
-
-int   HqUtils::activeDaysNum(const QDate &start)
-{
-    int num = 0;
-    QDate wkdate = start;
-    while (wkdate < latestActiveDay()) {
-        if(activeDay(wkdate))
-        {
-            num++;
-        }
-        wkdate = wkdate.addDays(1);
-    }
-
-    return num;
-}
-
-

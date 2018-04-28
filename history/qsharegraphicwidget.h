@@ -39,7 +39,7 @@ public:
             GRAPHIC_DATA graph;
             graph.mDate = QDateTime::fromMSecsSinceEpoch(data.mTime).date();
             graph.mClose = data.mClose;
-            graph.mForVol = data.mForeignVol;
+            graph.mForVol = data.mHKExInfo.mForeignVol;
             graph.mMoney = data.mMoney;
             graph.mRzye = data.mRZRQ;
             graph.mZjlx = data.mZJLX;

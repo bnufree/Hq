@@ -3,6 +3,7 @@
 #include <QDebug>
 #include "utils/qhttpget.h"
 #include "utils/hqutils.h"
+#include "dbservices/dbservices.h"
 
 QShareHistoryInfoThread::QShareHistoryInfoThread(const QString& code, const QDate& date, QObject* parent) :
     mCode(code),
@@ -58,7 +59,7 @@ void QShareHistoryInfoThread::run()
             {
                 bool found = false;
                 QDate curDate = QDate::fromString(cols[0], "yyyy-MM-dd");
-                if(!HqUtils::activeDay(curDate)) continue;
+                if(!DATA_SERVICE->activeDay(curDate)) continue;
                 if(cols[3].toDouble() == 0) continue;
                 ShareData data;
                 data.mTime = QDateTime(curDate).toMSecsSinceEpoch();
@@ -75,8 +76,8 @@ void QShareHistoryInfoThread::run()
                 data.mVol = cols[11].toLongLong();
                 data.mMoney = cols[12].toDouble();
                 double price = data.mCur;
-                data.mTotalShare = cols[13].toDouble() / price;
-                data.mMutalShare= cols[14].toDouble() / price;
+                data.mFinanceInfo.mTotalShare = cols[13].toDouble() / price;
+                data.mFinanceInfo.mMutalShare= cols[14].toDouble() / price;
                 data.mClose = data.mCur;
                 list.append(data);
             }

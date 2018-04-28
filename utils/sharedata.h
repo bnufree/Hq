@@ -112,6 +112,62 @@ typedef    enum     share_type
     SHARE_US,
 }SHARE_TYPE;
 
+typedef struct Finance
+{
+    double          mEPS;      //每股收益
+    double          mBVPS;     //每股净资产
+    double          mROE;    //净资产收益率
+    qint64          mTotalShare;
+    qint64          mMutalShare;
+
+    Finance()
+    {
+        mEPS = 0.0;
+        mBVPS = 0.0;
+        mROE = 0.0;
+        mTotalShare = 0;
+        mMutalShare = 0;
+    }
+}FINANCE_DATA;
+
+struct ChinaShareEx
+{
+    double      mBuyMoney;              //买入金额
+    double      mSellMoney;             //卖出金额
+    double      mPureMoney;
+    qint64      mForeignVol;            //持股量
+    double      mTotalPercent;          //占流通股百分比
+    bool        mIsTop10;               //是否是当天10大成交
+    QDate       mDate;
+
+    ChinaShareEx()
+    {
+        mBuyMoney = 0.0;
+        mSellMoney = 0.0;
+        mPureMoney = mBuyMoney - mSellMoney;
+        mForeignVol = 0;
+        mTotalPercent = 0;
+        mIsTop10 = false;
+        mDate = QDate::currentDate();
+    }
+};
+
+//分红信息
+struct  ShareFhsp
+{
+    double          mSZZG; //送转股比例
+    double          mXJFH;  //现金分红
+    qint64          mGQDJR; //股权登记日
+    qint64          mYAGGR; //预案公告日
+    ShareFhsp()
+    {
+        mSZZG = 0.0;
+        mXJFH = 0.0;
+        mGQDJR = 0;
+        mYAGGR = 0;
+    }
+};
+
 class ShareBaseData : public BaseData
 {
 public:
@@ -119,19 +175,10 @@ public:
         BaseData(data.mIsFav, data.mDataType, data.mCode, data.mName, data.mPY)
     {
         mShareType = data.mShareType;
-        mIsTop10 = data.mIsTop10;
-        mTotalShare = data.mTotalShare;
-        mMutalShare = data.mMutalShare;
-        mMGSY = data.mMGSY;
-        mMGJZC = data.mMGJZC;
-        mJZCSYL = data.mJZCSYL;
-        mSZZG = data.mSZZG;
-        mXJFH = data.mXJFH;
-        mGQDJR = data.mGQDJR;
-        mYAGGR = data.mYAGGR;
+        mHKExInfo = data.mHKExInfo;
+        mFhspInfo = data.mFhspInfo;
+        mFinanceInfo = data.mFinanceInfo;
         mProfit = data.mProfit;
-        mTop10Buy = data.mTop10Buy;
-        mTop10Sell = data.mTop10Sell;
     }
 
     inline ShareBaseData(const QString& code = QString(), \
@@ -140,19 +187,7 @@ public:
         :BaseData(code, name, abbr, DATA_SHARE)
     {
         mShareType = SHARE_UNDEFINED;
-        mIsTop10 = 0; //CHINA HK
-        mTotalShare = 0;
-        mMutalShare = 0;
-        mMGSY = 0.0;
-        mMGJZC = 0.0;
-        mJZCSYL = 0.0;
-        mSZZG = 0.0;
-        mXJFH = 0.0;
-        mGQDJR = 0;
-        mYAGGR = 0;
         mProfit = 0.0;
-        mTop10Buy = 0;
-        mTop10Sell = 0;
     }
 
     void setShareType(SHARE_TYPE type)
@@ -246,32 +281,21 @@ public:
 
     bool operator <(const ShareBaseData& data) const
     {
-        return ((*this).mTop10Buy - (*this).mTop10Sell) < (data.mTop10Buy - data.mTop10Sell);
+        return ((*this).mHKExInfo.mPureMoney) < (data.mHKExInfo.mPureMoney);
     }
 
     bool operator >(const ShareBaseData& data) const
     {
-        return ((*this).mTop10Buy - (*this).mTop10Sell) > (data.mTop10Buy - data.mTop10Sell);
+        return ((*this).mHKExInfo.mPureMoney) > (data.mHKExInfo.mPureMoney);
     }
 
 public:
     //基本信息
-    bool            mIsTop10;
     SHARE_TYPE      mShareType;
     double          mProfit;
-    double          mTop10Buy;
-    double          mTop10Sell;
-    qint64          mTotalShare;
-    qint64          mMutalShare;
-    //财务信息
-    double          mMGSY;      //每股收益
-    double          mMGJZC;     //每股净资产
-    double          mJZCSYL;    //净资产收益率
-    //分红信息
-    double          mSZZG; //送转股比例
-    double          mXJFH;  //现金分红
-    qint64          mGQDJR; //股权登记日
-    qint64          mYAGGR; //预案公告日
+    ChinaShareEx    mHKExInfo;
+    Finance         mFinanceInfo;
+    ShareFhsp       mFhspInfo;
 };
 
 typedef QList<ShareBaseData>     ShareBaseDataList;
@@ -305,7 +329,6 @@ public:
         mGXL = 0;   //股息率
         mTotalCap = 0;
         mMutalbleCap = 0;
-        mForeignVol = 0;
         mForeignVolChg = 0;
         mForeignCap = 0;
         mForeignCapChg = 0;
@@ -351,7 +374,6 @@ public:
         mGXL = 0;   //股息率
         mTotalCap = 0;
         mMutalbleCap = 0;
-        mForeignVol = 0;
         mForeignVolChg = 0;
         mForeignCap = 0;
         mForeignCapChg = 0;
@@ -486,7 +508,6 @@ public:
     double          mGXL;   //股息率
     double          mTotalCap;
     double          mMutalbleCap;
-    qint64          mForeignVol;
     qint64          mForeignVolChg;
     double          mForeignCap;
     double          mForeignCapChg;

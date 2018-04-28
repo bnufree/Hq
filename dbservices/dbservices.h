@@ -39,6 +39,19 @@ public:
     void         saveShares();
     BlockDataPList  getAllBlock();
     ShareDataList   getShareHistoryDataList(const QString& code);
+    //交易日期处理
+    bool        weekend(const QDate& date);
+    bool        activeDay(const QDate& date);
+    bool        isCurrentActive();
+    bool        isActiveTime(const QTime& time);
+    QDate       latestActiveDay();
+    QDate       lastActiveDay();
+    int         activeDaysNum(const QDate& start);
+    QDate       getActiveDayBefore1HYear();
+    QDate       getLgtStartDate();
+    QString     date2Str(const QDate& date);
+    QDate       dateFromStr(const QString& str);
+
 
 signals:
     //开始创建数据库需要的表信息，初始化数据库
@@ -156,6 +169,7 @@ private:    //本类使用的变量
     HQDBDataBase                mDataBase;
     QMap<QString, ShareDataList>    mShareHistoryDataList;
     QStringList                 mFavCodeList;
+    QStringList                 mClosedDateList;
 };
 
 #endif // DBSERVICE_H

@@ -38,8 +38,8 @@ QEastMoneyBlockThread::QEastMoneyBlockThread(int pBlockID, QObject *parent) : QO
     mSortRule = -1;
     mBlockDataList.clear();
     qRegisterMetaType<BlockDataPList>("const BlockDataPList&");
-    qRegisterMetaType<QMap<QString, BlockDataPList>>("const QMap<QString, BlockDataPList>&");
-    qRegisterMetaType<QMap<QString, BlockData*>>("const QMap<QString, BlockData*>&");
+    qRegisterMetaType<QMap<QString, BlockDataPList> >("const QMap<QString, BlockDataPList>&");
+    qRegisterMetaType<QMap<QString, BlockData*> >("const QMap<QString, BlockData*>&");
     qRegisterMetaType<BlockDataVList>("const BlockDataVList&");
     this->moveToThread(&mWorkthread);
     connect(this, SIGNAL(start()), this, SLOT(slotUpdateBlockShare()));
@@ -149,7 +149,7 @@ void QEastMoneyBlockThread::slotUpdateBlockShare()
     {
         if(active) slotUpdateBlockInfos();
         QThread::sleep(3);
-        if(!HqUtils::isCurrentActive())
+        if(!DATA_SERVICE->isCurrentActive())
         {
             active = false;
         } else

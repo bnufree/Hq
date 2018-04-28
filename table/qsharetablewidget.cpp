@@ -70,15 +70,15 @@ void QShareTablewidget::setDataList(const ShareDataList &list)
             this->setItemText(i, k++, QString("").sprintf("%.0f", data.mZJLX) + QStringLiteral("万"));
         }
         this->setItemText(i, k++, QString("").sprintf("%.2f",data.mGXL * 100));
-        this->setItemText(i, k++, QString("").sprintf("%.0f",data.mSZZG));
+        this->setItemText(i, k++, QString("").sprintf("%.0f",data.mFhspInfo.mSZZG));
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mTotalCap / 100000000.0 ) + QStringLiteral("亿"));
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mMutalbleCap/ 100000000.0 )+ QStringLiteral("亿"));
 
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mProfit));
-        if(data.mForeignVol >= 100000000){
-            this->setItemText(i, k++, QString("").sprintf("%.2f", data.mForeignVol / 100000000.0) + QStringLiteral("亿"));
+        if(data.mHKExInfo.mForeignVol >= 100000000){
+            this->setItemText(i, k++, QString("").sprintf("%.2f", data.mHKExInfo.mForeignVol / 100000000.0) + QStringLiteral("亿"));
         } else {
-            this->setItemText(i, k++, QString("").sprintf("%.2f", data.mForeignVol / 10000.0)  + QStringLiteral("万"));
+            this->setItemText(i, k++, QString("").sprintf("%.2f", data.mHKExInfo.mForeignVol / 10000.0)  + QStringLiteral("万"));
         }
         if(data.mForeignVolChg >= 100000000){
             this->setItemText(i, k++, QString("").sprintf("%.2f", data.mForeignVolChg / 100000000.0) + QStringLiteral("亿"));
@@ -97,8 +97,8 @@ void QShareTablewidget::setDataList(const ShareDataList &list)
             this->setItemText(i, k++, QString("").sprintf("%.0f", data.mForeignCapChg / 10000.0) + QStringLiteral("万"));
         }
         this->setItemText(i, k++, QString("").sprintf("%.2f",data.mHsl * 100));
-        this->setItemText(i, k++, QDateTime::fromMSecsSinceEpoch(data.mGQDJR).toString("yyyy-MM-dd"));
-        this->setItemText(i, k++, QDateTime::fromMSecsSinceEpoch(data.mYAGGR).toString("yyyy-MM-dd"));
+        this->setItemText(i, k++, QDateTime::fromMSecsSinceEpoch(data.mFhspInfo.mGQDJR).toString("yyyy-MM-dd"));
+        this->setItemText(i, k++, QDateTime::fromMSecsSinceEpoch(data.mFhspInfo.mYAGGR).toString("yyyy-MM-dd"));
         this->setItemText(i, k++, QDateTime::fromMSecsSinceEpoch(data.mTime).toString("hh:mm:ss"));
         this->updateFavShareIconOfRow(i, data.mIsFav);
         this->item(i, 0)->setData(Qt::UserRole, data.mCode);

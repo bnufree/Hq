@@ -7,6 +7,7 @@
 #include <QScrollBar>
 #include <QMessageBox>
 #include "qsharecodenamewidget.h"
+#include <math.h>
 
 #define     COL_TYPE_ROLE               Qt::UserRole + 1
 #define     COL_SORT_ROLE               Qt::UserRole + 2

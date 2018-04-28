@@ -86,7 +86,7 @@ void QSinaStkResultMergeThread::run()
                         (mMktType == MKT_ZXB && data.mShareType == SHARE_CHINA_SZ_ZXB)||\
                         (mMktType == MKT_CYB && data.mShareType == SHARE_CHINA_SZ_CYB)||\
                         (mMktType == MKT_ZXG && data.mIsFav)||\
-                        (mMktType == MKT_LGT_TOP10 && data.mIsTop10) ||\
+                        (mMktType == MKT_LGT_TOP10 && data.mHKExInfo.mIsTop10) ||\
                         (mMktType == MKT_JJ && (data.mShareType == SHARE_CHINA_FUND_SH || data.mShareType == SHARE_CHINA_FUND_SZ))||\
                         (mMktType == MKT_OTHER && mSelfCodesList.contains(ShareBaseData::fullCode(data.mCode)));
                 if(sts)

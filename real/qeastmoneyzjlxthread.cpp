@@ -7,7 +7,7 @@
 QEastMoneyZjlxThread::QEastMoneyZjlxThread(QObject *parent) : QObject(parent)
 {
     QString wkURL = QString("http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx/JS.aspx?type=ct&st=(BalFlowMain)&sr=-1&p=1&ps=5000&js=var%20jRmrwiia={pages:(pc),data:[(x)]}&token=894050c76af8597a853f5b408b759f5d&cmd=C._AB&sty=DCFFITA&rt=49490052");
-    qRegisterMetaType<QList<zjlxData>>("const QList<zjlxData>&");
+    qRegisterMetaType<QList<zjlxData> >("const QList<zjlxData>&");
     mHttp = new QHttpGet(wkURL, true);
     mHttp->setUpdateInterval(60);
     connect(mHttp, SIGNAL(signalSendHttpConent(QByteArray)), this, SLOT(slotRecvHttpContent(QByteArray)));

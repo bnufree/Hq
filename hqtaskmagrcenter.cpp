@@ -13,7 +13,7 @@ HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
     mShareBasicWorker(0),\
     mBlockMgr(0)
 {
-    qRegisterMetaType<QList<NS_BOUND_DATA>>("const QList<NS_BOUND_DATA> &");
+    qRegisterMetaType<QList<NS_BOUND_DATA> >("const QList<NS_BOUND_DATA> &");
     qRegisterMetaType<NS_BOUND_DATA>("const NS_BOUND_DATA&");
     connect(this, SIGNAL(signalStart()), this, SLOT(slotStart()));
     connect(DATA_SERVICE, SIGNAL(signalDbInitFinished()), this, SLOT(slotDBInitFinished()));
@@ -52,7 +52,7 @@ void HQTaskMagrCenter::slotDBInitFinished()
 
 void HQTaskMagrCenter::slotSetFavCode(const QString &code)
 {
-    if(mShareBasicWorker) mShareBasicWorker->signalUpdateFavCode(code);
+    //if(mShareBasicWorker) mShareBasicWorker->signalUpdateFavCode(code);
     emit DATA_SERVICE->signalSetFavCode(code);
 }
 

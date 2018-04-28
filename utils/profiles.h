@@ -7,6 +7,11 @@
 #include <QTextCodec>
 
 #define         PROFILES_INS            Profiles::instance()
+//配置文件定义
+#define     FAV_CODE_SEC            "ZXG"
+#define     FAV_CODE_KEY            "Codes"
+#define     CLOSE_DATE_SEC          "CloseDates"
+#define     CLOSE_DATE_KEY          "Dates"
 
 class Profiles : public QObject
 {

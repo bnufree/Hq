@@ -78,7 +78,8 @@ void QSinaStkInfoThread::slotUpdateInfo()
 
 void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
 {
-    QString result = QString::fromLocal8Bit(bytes.data());
+    QTextCodec *codes = QTextCodec::codecForName("GBK");
+    QString result = codes->toUnicode(bytes);
     //先换行
     QStringList resultlist = result.split(QRegExp("[\\n;]"), QString::SkipEmptyParts);
     //再分割具体的字段
@@ -111,19 +112,19 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
         }
         if(data->mCur != 0)
         {
-            data->mGXL = data->mXJFH / data->mCur;
+            data->mGXL = data->mFhspInfo.mXJFH / data->mCur;
         }
-        data->mTotalCap = data->mCur * data->mTotalShare;
-        data->mMutalbleCap = data->mCur * data->mMutalShare;
-        if(data->mMutalShare > 0)
+        data->mTotalCap = data->mCur * data->mFinanceInfo.mTotalShare;
+        data->mMutalbleCap = data->mCur * data->mFinanceInfo.mMutalShare;
+        if(data->mFinanceInfo.mMutalShare > 0)
         {
-            data->mHsl = data->mVol / (double)(data->mMutalShare);
+            data->mHsl = data->mVol / (double)(data->mFinanceInfo.mMutalShare);
         }
         if(data->mProfit == 0)
         {
             data->mProfit = DATA_SERVICE->getProfit(code);
         }
-        data->mForeignCap = data->mForeignVol * data->mCur ;
+        data->mForeignCap = data->mHKExInfo.mForeignVol * data->mCur ;
         data->mForeignCapChg = data->mForeignVolChg * data->mCur ;
 //        data->mUpdateTime = QDateTime::currentMSecsSinceEpoch();
         datalist.append(*data);

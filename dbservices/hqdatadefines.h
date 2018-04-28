@@ -81,20 +81,20 @@ struct TABLE_COL_DEF
 
 typedef QList<TABLE_COL_DEF>        TableColList;
 
-struct FINANCE_DATA{
-    int mCode;          //将代码整数话
-    int mMGSY;          //每股收益*100;
-    int mMGJZC;         //每股净资产*100;
-    int mJZCSYL;        //净资产收益率*100;
-    int mXJFH;          //每股现金分红*10000
-    int mSZBL;          //10股送转比例*10
-    qint64 mTotalShare;
-    qint64 mMutalShare;
-    qint64 mYAGGR;
-    qint64 mGQDJR;
-};
+//struct FINANCE_DATA{
+//    int mCode;          //将代码整数话
+//    int mMGSY;          //每股收益*100;
+//    int mMGJZC;         //每股净资产*100;
+//    int mJZCSYL;        //净资产收益率*100;
+//    int mXJFH;          //每股现金分红*10000
+//    int mSZBL;          //10股送转比例*10
+//    qint64 mTotalShare;
+//    qint64 mMutalShare;
+//    qint64 mYAGGR;
+//    qint64 mGQDJR;
+//};
 
-typedef QList<FINANCE_DATA>         FinDataList;
+//typedef QList<FINANCE_DATA>         FinDataList;
 
 #endif // HQDATADEFINES
 

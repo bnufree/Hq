@@ -7,21 +7,23 @@
 #include "utils/sharedata.h"
 #include "utils/profiles.h"
 
+#define         DATE_STR_FORMAT         "yyyy-MM-dd"
 
 #define     HSGT_TABLE          "hsgvol"
-#define     FAV_CODE_SEC        "ZXG"
-#define     FAV_CODE            "codes"
 HqInfoService* HqInfoService::m_pInstance = 0;
 HqInfoService::CGarbo HqInfoService::s_Garbo;
 QMutex HqInfoService::mutex;
+
+
 HqInfoService::HqInfoService(QObject *parent) :
     QObject(parent)
 {
     qRegisterMetaType<ShareDataList>("const ShareDataList&");
-    qRegisterMetaType<FinDataList>("const FinDataList&");
+    //qRegisterMetaType<FinDataList>("const FinDataList&");
     qRegisterMetaType<ShareBaseDataList>("const ShareBaseDataList&");
-    mFavCodeList = Profiles::instance()->value(FAV_CODE_SEC, FAV_CODE, QStringList()).toStringList();
-    qDebug()<<"fav:"<<mFavCodeList.mid(0, 10);
+    mFavCodeList = Profiles::instance()->value(FAV_CODE_SEC, FAV_CODE_KEY, QStringList()).toStringList();
+    mClosedDateList = PROFILES_INS->value(CLOSE_DATE_SEC, CLOSE_DATE_KEY, QStringList()).toStringList();
+    qDebug()<<"close:"<<mClosedDateList;
     initSignalSlot();
     //3、开启异步通讯
     moveToThread(&m_threadWork);
@@ -303,7 +305,7 @@ void HqInfoService::slotUpdateShareinfoWithHistory(const QString& code,\
         data->mLast10DaysChgPers = last10Change;
         data->mLastMonthChgPers = lastMonthChange;
         data->mChgPersFromYear = lastYearChange;
-        data->mForeignVol = vol;
+        data->mHKExInfo.mForeignVol = vol;
         data->mForeignVolChg = vol_chnage;
     }
     emit signalUpdateShareHistoryFinished(code);
@@ -345,27 +347,18 @@ void HqInfoService::slotUpdateShareBasicInfo(const ShareBaseDataList &list)
             if(res)
             {
                 res->mShareType = data.mShareType;
-                res->mIsTop10 = data.mIsTop10;
-                res->mMGJZC = data.mMGJZC ;
-                res->mMGSY = data.mMGSY;
-                res->mTotalShare = data.mTotalShare;
-                res->mMutalShare = data.mMutalShare;
-                res->mJZCSYL = data.mJZCSYL;
-                res->mXJFH = data.mXJFH;
-                res->mSZZG = data.mSZZG;
-                res->mYAGGR = data.mYAGGR;
-                res->mGQDJR = data.mGQDJR;
-                res->mTop10Buy = data.mTop10Buy;
-                res->mTop10Sell = data.mTop10Sell;
+                res->mHKExInfo = data.mHKExInfo;
+                res->mFinanceInfo = data.mFinanceInfo;
+                res->mFhspInfo = data.mFhspInfo;
                 res->setPY(QString::fromStdString(data.mPY));
                 res->mProfit = data.mProfit;
-//                if(mFavCodeList.contains(ShareBaseData::fullCode(QString::fromStdString(data.mCode))))
-//                {
-//                    res->mIsFav = true;
-//                } else
-//                {
-//                    res->mIsFav = false;
-//                }
+                if(mFavCodeList.contains(ShareBaseData::fullCode(QString::fromStdString(data.mCode))))
+                {
+                    res->mIsFav = true;
+                } else
+                {
+                    res->mIsFav = false;
+                }
             }
         }
     }
@@ -567,15 +560,15 @@ void HqInfoService::slotSetFavCode(const QString &code)
     if(data)
     {
         data->mIsFav = !data->mIsFav;
-//        if(data->mIsFav && !mFavCodeList.contains(ShareBaseData::fullCode(code)))
-//        {
-//            mFavCodeList.append(ShareBaseData::fullCode(code));
-//        } else if(!data->mIsFav)
-//        {
-//            mFavCodeList.removeAll(ShareBaseData::fullCode(code));
-//        }
-//        Profiles::instance()->setValue(FAV_CODE_SEC, FAV_CODE, mFavCodeList);
-//        qDebug()<<Profiles::instance()->value(FAV_CODE_SEC, FAV_CODE).toStringList();
+        if(data->mIsFav && !mFavCodeList.contains(ShareBaseData::fullCode(code)))
+        {
+            mFavCodeList.append(ShareBaseData::fullCode(code));
+        } else if(!data->mIsFav)
+        {
+            mFavCodeList.removeAll(ShareBaseData::fullCode(code));
+        }
+        Profiles::instance()->setValue(FAV_CODE_SEC, FAV_CODE_KEY, mFavCodeList);
+        qDebug()<<Profiles::instance()->value(FAV_CODE_SEC, FAV_CODE_KEY).toStringList();
     }
 }
 
@@ -595,3 +588,104 @@ ShareDataList HqInfoService::getShareHistoryDataList(const QString& code)
 {
     return mShareHistoryDataList[ShareBaseData::fullCode(code)];
 }
+
+
+//交易日期的处理
+bool HqInfoService::weekend(const QDate &date)
+{
+    return date.dayOfWeek() == 6 || date.dayOfWeek() == 7;
+}
+
+bool HqInfoService::activeDay(const QDate &date)
+{
+    return !(weekend(date) || mClosedDateList.contains(date2Str(date)));
+}
+
+bool HqInfoService::isActiveTime(const QTime &time)
+{
+    int act_start1 = 9*60+15;
+    int act_end1 = 11*60+30;
+    int act_start2 = 13*60;
+    int act_end2 = 15*60;
+    int hour = time.hour();
+    int minute = time.minute();
+    int res = hour *60 + minute;
+    if((res >= act_start1 && res <= act_end1) || (res >= act_start2 && res <= act_end2))
+    {
+            return true;
+    }
+    return false;
+}
+
+bool HqInfoService::isCurrentActive()
+{
+    QDateTime cur = QDateTime::currentDateTime();
+    if(!activeDay((cur.date()))) return false;
+    return isActiveTime(cur.time());
+}
+
+
+QString  HqInfoService::date2Str(const QDate& date)
+{
+    return date.toString(DATE_STR_FORMAT);
+}
+
+QDate  HqInfoService::dateFromStr(const QString& str)
+{
+    return QDate::fromString(str, DATE_STR_FORMAT);
+}
+
+
+QDate   HqInfoService::latestActiveDay()
+{
+    QDate date = QDate::currentDate();
+    while(!activeDay(date))
+    {
+        date = date.addDays(-1);
+    }
+
+    return date;
+}
+
+QDate   HqInfoService::lastActiveDay()
+{
+    QDate date =latestActiveDay().addDays(-1);
+    while(!activeDay(date))
+    {
+        date = date.addDays(-1);
+    }
+
+    return date;
+}
+
+QDate HqInfoService::getLgtStartDate()
+{
+    return QDate(2017,3,17);
+}
+
+QDate HqInfoService::getActiveDayBefore1HYear()
+{
+    QDate date = QDate::currentDate();
+    date = date.addDays(-182);
+    while (!activeDay(date)) {
+        date = date.addDays(1);
+    }
+
+    return date;
+}
+
+int   HqInfoService::activeDaysNum(const QDate &start)
+{
+    int num = 0;
+    QDate wkdate = start;
+    while (wkdate < latestActiveDay()) {
+        if(activeDay(wkdate))
+        {
+            num++;
+        }
+        wkdate = wkdate.addDays(1);
+    }
+
+    return num;
+}
+

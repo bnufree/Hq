@@ -8,6 +8,7 @@
 #include <QDebug>
 #include "utils/hqutils.h"
 #include "utils/sharedata.h"
+#include "dbservices/dbservices.h"
 
 QShareFHSPWork::QShareFHSPWork(const QString& date, QObject *parent) : mDate(date), mParent(parent),QRunnable()
 {
@@ -62,10 +63,10 @@ void QShareFHSPWork::run()
         //开始解析角色信息数据
         ShareBaseData data;
         data.setCode(ShareBaseData::fullCode(subobj.value("Code").toString()));
-        data.mSZZG = subobj.value("SZZBL").toString().toDouble();
-        data.mXJFH = subobj.value("XJFH").toString().toDouble()/10;
-        data.mGQDJR = QDateTime(HqUtils::dateFromStr(subobj.value("GQDJR").toString().left(10))).toMSecsSinceEpoch();
-        data.mYAGGR = QDateTime(HqUtils::dateFromStr(subobj.value("YAGGR").toString().left(10))).toMSecsSinceEpoch();
+        data.mFhspInfo.mSZZG = subobj.value("SZZBL").toString().toDouble();
+        data.mFhspInfo.mXJFH = subobj.value("XJFH").toString().toDouble()/10;
+        data.mFhspInfo.mGQDJR = QDateTime(DATA_SERVICE->dateFromStr(subobj.value("GQDJR").toString().left(10))).toMSecsSinceEpoch();
+        data.mFhspInfo.mYAGGR = QDateTime(DATA_SERVICE->dateFromStr(subobj.value("YAGGR").toString().left(10))).toMSecsSinceEpoch();
         list.append(data);
     }
 
