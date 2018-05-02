@@ -33,7 +33,8 @@ QHeaderView
 QHeaderView::section{
 border：0px solid gray;
 border-bottom：0px solid gray;
-background:skyblue;
+background:transparent;
+height:60px;
 }
 
 QTableView::item

@@ -25,7 +25,6 @@ ShareData::ShareData():ShareBaseData()
     mGXL = 0;   //股息率
     mTotalCap = 0;
     mMutalbleCap = 0;
-    mForeignVol = 0;
     mForeignVolChg = 0;
     mForeignCap = 0;
     mForeignCapChg = 0;
@@ -129,22 +128,22 @@ bool ShareData::sortByGxlAsc(const ShareData& d1, const ShareData& d2)
 
 bool ShareData::sortBySzzblDesc(const ShareData& d1, const ShareData& d2)
 {
-    return d1.mSZZG > d2.mSZZG;
+    return d1.mFhspInfo.mSZZG > d2.mFhspInfo.mSZZG;
 }
 
 bool ShareData::sortBySzzblAsc(const ShareData& d1, const ShareData& d2)
 {
-    return d1.mSZZG < d2.mSZZG;
+    return d1.mFhspInfo.mSZZG < d2.mFhspInfo.mSZZG;
 }
 
 bool ShareData::sortByGqdjrDesc(const ShareData& d1, const ShareData& d2)
 {
-    return d1.mGQDJR > d2.mGQDJR;
+    return d1.mFhspInfo.mGQDJR > d2.mFhspInfo.mGQDJR;
 }
 
 bool ShareData::sortByGqdjrAsc(const ShareData& d1, const ShareData& d2)
 {
-    return d1.mGQDJR < d2.mGQDJR;
+    return d1.mFhspInfo.mGQDJR < d2.mFhspInfo.mGQDJR;
 }
 
 bool ShareData::sortByTcapDesc(const ShareData& d1, const ShareData& d2)
@@ -179,12 +178,12 @@ bool ShareData::sortByProfitAsc(const ShareData& d1, const ShareData& d2)
 
 bool ShareData::sortByForVolDesc(const ShareData& d1, const ShareData& d2)
 {
-    return d1.mForeignVol > d2.mForeignVol;
+    return d1.mHKExInfo.mForeignVol > d2.mHKExInfo.mForeignVol;
 }
 
 bool ShareData::sortByForVolAsc(const ShareData& d1, const ShareData& d2)
 {
-    return d1.mForeignVol < d2.mForeignVol;
+    return d1.mHKExInfo.mForeignVol < d2.mHKExInfo.mForeignVol;
 }
 
 bool ShareData::sortByForCapDesc(const ShareData& d1, const ShareData& d2)

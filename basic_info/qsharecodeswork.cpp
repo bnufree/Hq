@@ -47,7 +47,7 @@ void QShareCodesWork::run()
             data.setName(name);
             data.setShareType(ShareBaseData::shareType(code));            
             //data.setPY(HqUtils::GetFirstLetter(UTF8->toUnicode(name.toUtf8())));
-            qDebug()<<data.mCode<<data.mName<<data.mPY;
+            //qDebug()<<data.mCode<<data.mName<<data.mPY;
             list.append(data);
         }
         index += reg.matchedLength();

@@ -69,7 +69,7 @@ void QHKExchangeVolDataProcess::getMktVolInfo(ShareDataList &list, const QDate &
             start_index += volExp.cap().length();
             ShareData data;
             data.setCode(tmpCode);
-            data.mForeignVol = vol;
+            data.mHKExInfo.mForeignVol = vol;
             data.mTime = QDateTime(mDate).toMSecsSinceEpoch();
             list.append(data);
             if(date == QDate(2018,3,15))
@@ -195,7 +195,7 @@ void QHKExchangeVolDataProcess::run()
                 for(int i=0; i<list.size(); i++){
                     //fprintf(fp, "%s%ld", list[i].mCode.toStdString().data(), list[i].mForeignVol);
                     int code = atoi(list[i].mCode);
-                    qint64 vol = list[i].mForeignVol;
+                    qint64 vol = list[i].mHKExInfo.mForeignVol;
                     fwrite(&code, sizeof(int), 1, fp);
                     fwrite(&(vol), sizeof(qint64), 1, fp);
                     //qDebug()<<"write code:"<<code<<vol;

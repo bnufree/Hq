@@ -32,11 +32,11 @@ void QShareFinancialInfoWork::run()
             ShareBaseData data;
             data.setCode(ShareBaseData::fullCode(list[1].mid(9,6)));
             data.setPY(list[3].toUpper());
-            data.mMGSY = list[6].toDouble();
-            data.mMGJZC = list[7].toDouble();
-            data.mTotalShare = qint64(list[9].toDouble() * 10000);
-            data.mMutalShare = qint64(list[10].toDouble() * 10000);
-            data.mJZCSYL = list[18].toDouble();
+            data.mFinanceInfo.mEPS = list[6].toDouble();
+            data.mFinanceInfo.mBVPS = list[7].toDouble();
+            data.mFinanceInfo.mTotalShare = qint64(list[9].toDouble() * 10000);
+            data.mFinanceInfo.mMutalShare = qint64(list[10].toDouble() * 10000);
+            data.mFinanceInfo.mROE = list[18].toDouble();
             dataList.append(data);
 
         }

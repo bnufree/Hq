@@ -55,11 +55,11 @@ void QShareHistoryCounterWork::run()
             }
         }
 
-        vol = mList[size-1].mForeignVol;
+        vol = mList[size-1].mHKExInfo.mForeignVol;
         vol_change = vol;
         if(size >=2)
         {
-            vol_change -= mList[size-2].mForeignVol;
+            vol_change -= mList[size-2].mHKExInfo.mForeignVol;
         }
     }
     DATA_SERVICE->signalUpdateShareinfoWithHistory(mCode, lastMoney, last3Change, last5Change, last10Change, lastMonthChange, last1HYearChange, vol, vol_change, mList);

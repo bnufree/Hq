@@ -52,6 +52,7 @@ void QShareHsgtTop10Work::run()
             data.mHKExInfo.mSellMoney = obj.value("SGTMCJE").toDouble();
         }
         data.mHKExInfo.mIsTop10 = true;
+        data.mHKExInfo.mPureMoney = data.mHKExInfo.mBuyMoney - data.mHKExInfo.mSellMoney;
 
         list.append(data);
     }
