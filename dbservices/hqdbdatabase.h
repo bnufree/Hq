@@ -7,6 +7,7 @@
 #include "hqdatadefines.h"
 #include "utils/blockdata.h"
 #include "utils/sharedata.h"
+#include "utils/comdatadefines.h"
 
 enum HISTORY_CHANGEPERCENT{
     DAYS_3 = 3,

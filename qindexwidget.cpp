@@ -9,10 +9,14 @@ QIndexWidget::QIndexWidget(QWidget *parent) : QStackedWidget(parent)
 //    this->setMinimumHeight(120);
 //    this->setMaximumHeight(120);
     mIndexWidgetMap.clear();
-    QVBoxLayout *lay = new QVBoxLayout(this);
-    lay->setMargin(3);
+    if(layout() == 0)
+    {
+        QVBoxLayout *lay = new QVBoxLayout(this);
+        this->setLayout(lay);
+    }
+    QLayout *lay = layout();
+    lay->setMargin(30);
     lay->setSpacing(3);
-    this->setLayout(lay);
     mSwitchTimer = new QTimer(this);
     mSwitchTimer->setInterval(3000);
     connect(mSwitchTimer, SIGNAL(timeout()), this, SLOT(switchWidget()));

@@ -2,10 +2,12 @@
 #include <QMutexLocker>
 #include <QDebug>
 #include <QFile>
+#include "utils/comdatadefines.h"
 
 #define     QDebug()            qDebug()<<__FUNCTION__<<__LINE__
 #define     HISTORY_TABLE(code) HQ_SHARE_HISTORY_INFO_TABLE + code.right(6)
 
+#define     DB_FILE             QString("%1db.data").arg(HQ_WORK_DIR)
 
 HQDBDataBase::HQDBDataBase(QObject *parent) : QObject(parent)
 {
@@ -42,7 +44,7 @@ bool HQDBDataBase::initSqlDB()
     {
         mDB = QSqlDatabase::addDatabase("QSQLITE");
     }
-    mDB.setDatabaseName("db.dat");
+    mDB.setDatabaseName(DB_FILE);
     return mDB.open();
 }
 
