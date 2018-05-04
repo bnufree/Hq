@@ -17,6 +17,7 @@ public:
     void updateVal(double cur, double chg, double chgper, double money);
     void updateBound(double buy, double sell, double pure, double total);
     void updateBound(double shVal, QString shName, double szVal, QString szName);
+    void updateBound(double pure, const QString& name);
     void setName(const QString& name);
 
 private:

@@ -52,6 +52,22 @@ void QIndexFrame::updateBound(double shVal, QString shName, double szVal, QStrin
                         .arg(chgint == 0? "black" : chgint > 0? "red":"green"));
 }
 
+void QIndexFrame::updateBound(double pure, const QString &name)
+{
+    ui->name->setText(name);
+    ui->chg->setText(QStringLiteral("%1亿").arg(QString::number(pure / 10000.0, 'f', 2)));
+    ui->cur->setVisible(false);
+    ui->chgper->setVisible(false);
+    ui->money->setVisible(false);
+    int chgint = (int)(pure);
+    this->setStyleSheet(QString("QLabel{"
+                            "font-weight:bold;"
+                            "color:%1;"
+                            "alignment:center;"
+                                "}")
+                        .arg(chgint == 0? "black" : chgint > 0? "red":"green"));
+}
+
 void QIndexFrame::updateBound(double buy, double sell, double pure, double total)
 {
     ui->cur->setText(QStringLiteral("买：%1亿").arg(QString::number(buy / 10000.0, 'f', 1)));

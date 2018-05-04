@@ -180,7 +180,7 @@ void QShareBasicInfoWorker::slotUpdateShareCodesList(const ShareBaseDataList &li
         wkVal.setName(QString::fromStdString(data.mName));
         //wkVal.setPY(QString::fromStdString(data.mPY));
         wkVal.mShareType = data.mShareType;
-        qDebug()<<wkVal.mCode<<wkVal.mName;
+        //qDebug()<<wkVal.mCode<<wkVal.mName;
     }
 //    int i = 0;
 //    while (i < mShareBaseDataMap.keys().length()) {

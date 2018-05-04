@@ -26,7 +26,7 @@ public slots:
     void switchWidget();
 
 private:
-    QMap<QString, QIndexFrame*> mIndexWidgetMap;
+    QMap<QString, QWidget*> mIndexWidgetMap;
     QTimer*             mSwitchTimer;
 };
 

@@ -14,7 +14,7 @@ QSinaStkResultMergeThread::QSinaStkResultMergeThread(QObject *parent) : QThread(
     mSortType = STK_DISPLAY_SORT_TYPE_CHGPER;
     mSortRule = -1;
     mActive = true;
-    QEastMoneyZjlxThread *zjt = new QEastMoneyZjlxThread(this);
+    QEastMoneyZjlxThread *zjt = new QEastMoneyZjlxThread();
     connect(zjt, SIGNAL(sendZjlxDataList(QList<zjlxData>)), this, SLOT(slotRevZjlxData(QList<zjlxData>)));
 }
 

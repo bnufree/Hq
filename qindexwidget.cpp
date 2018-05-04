@@ -46,18 +46,29 @@ void QIndexWidget::insetWidget(const QString &code)
 void QIndexWidget::updateData(const QList<NS_BOUND_DATA> &list)
 {
 #if 1
+    qDebug()<<list.length();
     if(list.length() != 2) return;
-    QIndexFrame* w = NULL;
+    QWidget* w = NULL;
     if(mIndexWidgetMap.contains("BKLGT"))
     {
         w = mIndexWidgetMap["BKLGT"];
     } else
     {
-        w = new QIndexFrame("", this);
+        w = new QWidget(this);
+        w->setLayout(new QHBoxLayout(this));
         this->addWidget(w);
         mIndexWidgetMap["BKLGT"] = w;
+        w->layout()->addWidget(new QIndexFrame(list[0].mName, this));
+        w->layout()->addWidget(new QIndexFrame(list[1].mName, this));
     }
-    w->updateBound(list[0].mPure, list[0].mName, list[1].mPure, list[1].mName);
+    qDebug()<<list.length()<<w->layout()->count();
+    if(list.length() != w->layout()->count()) return;
+    for(int i=0; i<w->layout()->count(); i++)
+    {
+        qDebug()<<i+1<<list[i].mPure<<list[i].mName;
+        QIndexFrame* frame = static_cast<QIndexFrame*>(w->layout()->itemAt(i)->widget());
+        frame->updateBound(list[i].mPure, list[i].mName);
+    }
  #else
     foreach (NS_BOUND_DATA data, list) {
         //qDebug()<<"data:"<<data.mCode<<" "<<data.mName<<" "<<data.mChg<<" "<<data.mChgPercent;
@@ -84,7 +95,7 @@ void QIndexWidget::updateData(const ShareDataList &list)
         QIndexFrame* w = NULL;
         if(mIndexWidgetMap.contains(data.mCode))
         {
-            w = mIndexWidgetMap[data.mCode];
+            w = (QIndexFrame*)(mIndexWidgetMap[data.mCode]);
             w->setName(data.mName);
         } else
         {

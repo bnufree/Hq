@@ -51,7 +51,6 @@ private:
     QList<QObject*>             mRealWorkObjList;
     QSinaStkResultMergeThread*   mShareInfoMergeThread;
     QEastMoneyBlockMangagerThread*  mBlockMgr;
-    QShareBasicInfoWorker*          mShareBasicWorker;
 };
 
 #endif // HQTASKMAGRCENTER_H

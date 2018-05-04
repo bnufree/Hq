@@ -22,7 +22,7 @@ signals:
 private:
     QList<QHttpGet*> mNorthBoudProxyList;
     QThread         mWorkThread;
-    QList<NS_BOUND_DATA>       mBoundDataList;
+    QMap<QString, NS_BOUND_DATA>       mBoundDataList;
 };
 
 #endif // QEASTMONEYNORTHBOUNDTHREAD_H

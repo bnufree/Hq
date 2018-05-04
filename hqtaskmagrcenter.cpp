@@ -10,7 +10,6 @@
 HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
     QObject(parent),\
     mShareInfoMergeThread(0),\
-    mShareBasicWorker(0),\
     mBlockMgr(0)
 {
     qRegisterMetaType<QList<NS_BOUND_DATA> >("const QList<NS_BOUND_DATA> &");
@@ -40,13 +39,11 @@ void HQTaskMagrCenter::slotDBInitFinished()
 {
     qDebug()<<__FUNCTION__<<__LINE__;
     //数据库初始化完成，开始取得基本的信息
-    mShareBasicWorker = new QShareBasicInfoWorker;
-    if(!mShareBasicWorker) return;
-    connect(mShareBasicWorker, SIGNAL(signalBaseDataListFinished(QStringList,ShareBaseDataList)),\
+    QShareBasicInfoWorker *basic  = new QShareBasicInfoWorker;
+    if(!basic) return;
+    connect(basic, SIGNAL(signalBaseDataListFinished(QStringList,ShareBaseDataList)),\
             this, SLOT(slotBaseDataListFinished(QStringList,ShareBaseDataList)));
-//    connect(this, SIGNAL(signalSetFavCode(QString)),\
-//             mShareBasicWorker, SLOT(updateShareFavCode(QString)));
-    mShareBasicWorker->signalGetBasicInfo();
+    basic->signalGetBasicInfo();
 
 }
 
@@ -106,15 +103,15 @@ void HQTaskMagrCenter::slotBaseDataListFinished(const QStringList& codes, const 
     qDebug()<<"update code finshed:"<<list.length();
     //更新后台数据信息
     DATA_SERVICE->signalUpdateShareBasicInfo(list);
-//    QShareBasicInfoWorker* ptr = qobject_cast<QShareBasicInfoWorker*>(sender());
-//    if(ptr)
-//    {
-//        ptr->deleteLater();
-//    }
+    QShareBasicInfoWorker* ptr = qobject_cast<QShareBasicInfoWorker*>(sender());
+    if(ptr)
+    {
+        ptr->deleteLater();
+    }
 
     //更新实时的指数
     QStringList indexlist;
-    indexlist<<"s_sh000001"<<"s_sh000300"<<"s_sz399001"<<"s_sz399006"<<"s_sh000016"<<"s_sh000010";
+    indexlist<<"s_sh000001"<<"s_sh000300"<<"s_sz399001"<<"s_sz399006"<<"s_sh000016";
     QSinaStkInfoThread* indexInfoThread = new QSinaStkInfoThread;
     mRealWorkObjList.append(indexInfoThread);
     connect(indexInfoThread, SIGNAL(sendStkDataList(ShareDataList)), this, SIGNAL(signalSendIndexRealDataList(ShareDataList)));
@@ -135,6 +132,7 @@ void HQTaskMagrCenter::slotBaseDataListFinished(const QStringList& codes, const 
     mShareInfoMergeThread->setActive(true);
     mShareInfoMergeThread->setMktType(MKT_ZXG);
     mShareInfoMergeThread->start();
+    return;
     //板块行情初始化
     mBlockMgr = new QEastMoneyBlockMangagerThread();
     mRealWorkObjList.append(mBlockMgr);
