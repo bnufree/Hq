@@ -54,6 +54,7 @@ void QDataMgrWidget::updateData()
 {
     if(mDataType == DATA_MUTUAL_MARKET)
     {
+        ui->mDataTableWidget->setDataList(ShareBaseDataList());
         QThreadPool pool;
         pool.setExpiryTimeout(-1);
         pool.setMaxThreadCount(16);
