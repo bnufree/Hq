@@ -74,7 +74,7 @@ Dialog::Dialog(QWidget *parent) :
     //指数显示
     QHBoxLayout *indexLayout = new QHBoxLayout;
     ui->indexframe->setLayout(indexLayout);
-    indexLayout->setContentsMargins(100, 10, 100, 10);
+    indexLayout->setContentsMargins(50, 5, 50, 5);
     if(!mIndexWidget)
     {
         mIndexWidget = new QIndexWidget(this);
@@ -392,10 +392,6 @@ void Dialog::slotUpdateHSGTOfCode(const QString &code)
 
 void Dialog::on_dataMgrBtn_clicked()
 {
-    //menu->popup();
-    //ui->DataMgrBtn->addAction(0);
-    //ui->mainStackWidget->setCurrentWidget(mDataMgrWidget);
-    //mDataMgrWidget->updateData();
     QAndroidListWidget *list = new QAndroidListWidget(this);
     list->addItem(QStringLiteral("陆股通"), DATA_MUTUAL_MARKET);
     list->addItem(QStringLiteral("龙虎榜"), DATA_LHB);

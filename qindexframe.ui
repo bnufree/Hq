@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>33</height>
+    <height>51</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,42 +17,34 @@
    <string notr="true"/>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
-   <property name="spacing">
-    <number>3</number>
-   </property>
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>0</number>
-   </property>
    <item>
-    <widget class="QLabel" name="name">
-     <property name="text">
-      <string>TextLabel</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="cur">
-     <property name="text">
-      <string>TextLabel</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QLabel" name="name">
+       <property name="text">
+        <string>上证指数</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="cur">
+       <property name="text">
+        <string>3001.10</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QLabel" name="chg">
      <property name="text">
-      <string>TextLabel</string>
+      <string>+30.12</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -62,7 +54,7 @@
    <item>
     <widget class="QLabel" name="chgper">
      <property name="text">
-      <string>TextLabel</string>
+      <string>+9.98%</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -72,10 +64,10 @@
    <item>
     <widget class="QLabel" name="money">
      <property name="text">
-      <string>---</string>
+      <string>1012亿</string>
      </property>
      <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
    </item>
