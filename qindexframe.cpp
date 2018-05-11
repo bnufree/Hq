@@ -31,8 +31,12 @@ void QIndexFrame::updateVal(double cur, double chg, double chgper, double money)
     int chgint = (int)(chg*100);
     this->setStyleSheet(QString("QLabel{"
                             "font-weight:bold;"
+                                "font-size:20pt;"
                             "color:%1;"
                             "alignment:center;"
+                                "}"
+                                "#name,#cur{"
+                                "font-size:14pt;"
                                 "}")
                         .arg(chgint == 0? "black" : chgint > 0? "red":"green"));
 }
@@ -46,8 +50,12 @@ void QIndexFrame::updateBound(double shVal, QString shName, double szVal, QStrin
     int chgint = (int)(shVal+szVal);
     this->setStyleSheet(QString("QLabel{"
                             "font-weight:bold;"
+                                "font-size:18pt;"
                             "color:%1;"
                             "alignment:center;"
+                                "}"
+                                "#name,#cur{"
+                                "font-size:10pt;"
                                 "}")
                         .arg(chgint == 0? "black" : chgint > 0? "red":"green"));
 }
@@ -62,6 +70,7 @@ void QIndexFrame::updateBound(double pure, const QString &name)
     int chgint = (int)(pure);
     this->setStyleSheet(QString("QLabel{"
                             "font-weight:bold;"
+                                "font-size:20pt;"
                             "color:%1;"
                             "alignment:center;"
                                 "}")

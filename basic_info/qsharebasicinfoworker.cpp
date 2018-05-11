@@ -10,8 +10,9 @@
 #include <QFile>
 #include "dbservices/dbservices.h"
 #include "utils/comdatadefines.h"
+#include "dbservices/qactivedate.h"
 
-#define         STOCK_CODE_FILE         QString("%1share.data").arg(HQ_WORK_DIR)
+#define         STOCK_CODE_FILE         QString("%1share.data").arg(HQ_CODE_DIR)
 QShareBasicInfoWorker::QShareBasicInfoWorker(QObject *parent) : QObject(parent)
 {
     mShareBaseDataMap.clear();
@@ -81,7 +82,7 @@ bool QShareBasicInfoWorker::getInfosFromFile(QMap<QString, ShareBaseData>& map)
         qint64 lastupdate = 0;
         file.read((char*)(&lastupdate), sizeof(qint64));
         QDate lastDate = QDateTime::fromMSecsSinceEpoch(lastupdate).date();
-        QDate latestActiveDate = DATA_SERVICE->latestActiveDay();
+        QDate latestActiveDate = QActiveDateTime::latestActiveDay();
         qDebug()<<"last:"<<lastDate<<"latest:"<<latestActiveDate;
         if(lastDate == latestActiveDate)
         {
@@ -118,7 +119,7 @@ bool QShareBasicInfoWorker::getInfossFromWeb(QMap<QString, ShareBaseData>& map)
     //取得分红送配
     pool.start(new QShareFHSPWork("2017-12-31", this));
     //取得北向交易TOP10
-    pool.start(new QShareHsgtTop10Work(DATA_SERVICE->lastActiveDay().toString("yyyy-MM-dd"), this));
+    pool.start(new QShareHsgtTop10Work(QActiveDateTime::latestActiveDay().toString(DATE_FORMAT), this));
     pool.waitForDone();
 //    int i = 0;
 //    while (i < mShareBaseDataMap.keys().length()) {
@@ -141,11 +142,12 @@ bool QShareBasicInfoWorker::getInfossFromWeb(QMap<QString, ShareBaseData>& map)
 
 bool QShareBasicInfoWorker::writeInfos(const ShareBaseDataList &list)
 {
+    HqUtils::makePath(HQ_CODE_DIR);
     FILE *fp = fopen(STOCK_CODE_FILE.toStdString().data(), "wb+");
     if(fp)
     {
         qDebug()<<__FUNCTION__<<__LINE__;
-        qint64 cur = QDateTime(DATA_SERVICE->latestActiveDay().addDays(-1)).toMSecsSinceEpoch();
+        qint64 cur = QActiveDateTime(QActiveDateTime::latestActiveDay().addDays(-1)).toMSecsSinceEpoch();
         fwrite(&cur, sizeof(cur), 1, fp);
         int size = list.size();
         fwrite(&size, sizeof(size), 1, fp);
@@ -157,7 +159,7 @@ bool QShareBasicInfoWorker::writeInfos(const ShareBaseDataList &list)
 
         //更新时间到最新，移动到开头写入时间，保证是最新的
         fseek(fp, 0, SEEK_SET);
-        cur = QDateTime(DATA_SERVICE->latestActiveDay()).toMSecsSinceEpoch();
+        cur = QActiveDateTime(QActiveDateTime::latestActiveDay()).toMSecsSinceEpoch();
         fwrite(&cur, sizeof(cur), 1, fp);
         fclose(fp);
     } else

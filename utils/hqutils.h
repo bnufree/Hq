@@ -23,6 +23,7 @@ public:
     static bool writeString2File(const QString& str, FILE *fp);
     static bool writeInt2File(int val, FILE* fp);
     static QString  double2Str(double val);
+    static bool makePath(const QString& path);
 
 public:
     //static QStringList        mDatesList;

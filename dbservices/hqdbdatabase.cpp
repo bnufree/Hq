@@ -7,7 +7,7 @@
 #define     QDebug()            qDebug()<<__FUNCTION__<<__LINE__
 #define     HISTORY_TABLE(code) HQ_SHARE_HISTORY_INFO_TABLE + code.right(6)
 
-#define     DB_FILE             QString("%1db.data").arg(HQ_WORK_DIR)
+#define     DB_FILE             QString("%1db.data").arg(HQ_DATA_DIR)
 
 HQDBDataBase::HQDBDataBase(QObject *parent) : QObject(parent)
 {

@@ -3,13 +3,15 @@
 #include "basic_info/qsharehsgttop10work.h"
 #include <QThreadPool>
 #include <QMessageBox>
+#include "dbservices/dbservices.h"
+#include "dbservices/qactivedate.h"
 
 QDataMgrWidget::QDataMgrWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::QDataMgrWidget)
 {
     ui->setupUi(this);
-    ui->mCurDayText->setText(QDate::currentDate().toString("yyyy-MM-dd"));
+    ui->mCurDayText->setText(QActiveDateTime::latestActiveDay().toString(DATE_FORMAT));
     connect(ui->mPreDayBtn, SIGNAL(clicked()), this, SLOT(slotDayChanged()));
     connect(ui->mNextDayBtn, SIGNAL(clicked()), this, SLOT(slotDayChanged()));
     //updateData();
@@ -25,16 +27,16 @@ void QDataMgrWidget::slotDayChanged()
     QAndroidButton *btn = qobject_cast<QAndroidButton*> (sender());
     qDebug()<<"btn:"<<btn;
     if(!btn) return;
-    QDate curDate = QDate::fromString(ui->mCurDayText->text(), "yyyy-MM-dd");
+    QDate curDate = QDate::fromString(ui->mCurDayText->text(), DATE_FORMAT);
     if(btn == ui->mPreDayBtn)
     {
-        curDate = curDate.addDays(-1);
+        curDate = QActiveDateTime(curDate).preActiveDay();
     } else
     {
-        if(curDate == QDate::currentDate()) return;
-        curDate = curDate.addDays(1);
+        if(curDate == QActiveDateTime::latestActiveDay()) return;
+        curDate = QActiveDateTime(curDate).nextActiveDay();
     }
-    ui->mCurDayText->setText(curDate.toString("yyyy-MM-dd"));
+    ui->mCurDayText->setText(curDate.toString(DATE_FORMAT));
     updateData();
 }
 
@@ -54,11 +56,10 @@ void QDataMgrWidget::updateData()
 {
     if(mDataType == DATA_MUTUAL_MARKET)
     {
-        QThreadPool pool;
-        pool.setExpiryTimeout(-1);
-        pool.setMaxThreadCount(16);
-        pool.start(new QShareHsgtTop10Work(ui->mCurDayText->text(), this));
-        pool.waitForDone();
+        ui->mDataTableWidget->setDataList(ShareBaseDataList());
+        QShareHsgtTop10Work *job = new QShareHsgtTop10Work(ui->mCurDayText->text());
+        connect(job, SIGNAL(signalChinaAShareTop10Updated(ShareBaseDataList,QString)), this, SLOT(slotUpdateShareHsgtTop10List(ShareBaseDataList,QString)));
+        QThreadPool::globalInstance()->start(job);
     } else if(mDataType == DATA_LHB)
     {
 
@@ -66,7 +67,7 @@ void QDataMgrWidget::updateData()
 
 }
 
-void QDataMgrWidget::slotUpdateShareHsgtTop10List(const ShareBaseDataList &list)
+void QDataMgrWidget::slotUpdateShareHsgtTop10List(const ShareBaseDataList &list, const QString& date)
 {
     if(list.length() == 0)
     {

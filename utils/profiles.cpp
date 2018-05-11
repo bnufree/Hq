@@ -2,6 +2,7 @@
 #include <QDir>
 #include <QDebug>
 #include "comdatadefines.h"
+#include "hqutils.h"
 
 #define     INI_FILE_NAME           "profiles.ini"
 
@@ -11,11 +12,11 @@ Profiles::Profiles(QObject *parent) :
     configSettings(NULL),
     QObject(parent)
 {
-    QString fileNM = QString("%1%2").arg(HQ_WORK_DIR).arg(INI_FILE_NAME);
+    QString fileNM = QString("%1%2").arg(HQ_CONFIG_DIR).arg(INI_FILE_NAME);
     bool sts = QFile::exists(fileNM);
-    qDebug()<<QFile::exists(fileNM);
     if(!sts)
     {
+        HqUtils::makePath(HQ_CONFIG_DIR);
         QFile file(fileNM);
         if(file.open(QIODevice::WriteOnly))
         {

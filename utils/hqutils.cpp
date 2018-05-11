@@ -2,6 +2,7 @@
 #include <QTextCodec>
 //#include <Windows.h>
 #include "profiles.h"
+#include <QDir>
 
 #define         DATE_STR_FORMAT         "yyyy-MM-dd"
 
@@ -107,4 +108,16 @@ QString HqUtils::double2Str(double val)
     }
 
     return wkval;
+}
+
+bool HqUtils::makePath(const QString &path)
+{
+    QDir dir(path);
+    if(!dir.exists())
+    {
+        dir.mkpath(path);
+    }
+    bool exist = dir.exists();
+    qDebug()<<__func__<<__LINE__<<path<<exist;
+    return exist;
 }

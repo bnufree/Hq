@@ -40,17 +40,21 @@ public:
     BlockDataPList  getAllBlock();
     ShareDataList   getShareHistoryDataList(const QString& code);
     //交易日期处理
+#if 0
     bool        weekend(const QDate& date);
     bool        activeDay(const QDate& date);
     bool        isCurrentActive();
     bool        isActiveTime(const QTime& time);
     QDate       latestActiveDay();
     QDate       lastActiveDay();
+    QDate       preActiveDay(const QDate& date);
+    QDate       nextActiveDay(const QDate& date);
     int         activeDaysNum(const QDate& start);
     QDate       getActiveDayBefore1HYear();
-    QDate       getLgtStartDate();
     QString     date2Str(const QDate& date);
     QDate       dateFromStr(const QString& str);
+#endif
+    QDate       getLgtStartDate();
 
 
 signals:

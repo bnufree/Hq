@@ -48,15 +48,6 @@ Dialog::Dialog(QWidget *parent) :
 {
     qDebug()<<__func__<<__LINE__;
     ui->setupUi(this);
-    //创建系统的工作目录
-    QDir dir(HQ_WORK_DIR);
-    bool exist = dir.exists(HQ_WORK_DIR);
-    qDebug()<<"work dir exist:"<<exist;
-    if(!exist)
-    {
-        bool sts = dir.mkpath(HQ_WORK_DIR);
-        qDebug()<<"make sts :"<<sts<<" now path exist:"<<dir.exists();
-    }
     while(ui->mainStackWidget->count())
     {
         ui->mainStackWidget->removeWidget(ui->mainStackWidget->widget(0));

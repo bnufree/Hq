@@ -6,6 +6,7 @@
 #include <QMap>
 #include "utils/sharedata.h"
 #include "utils/profiles.h"
+#include "qactivedate.h"
 
 #define         DATE_STR_FORMAT         "yyyy-MM-dd"
 
@@ -22,7 +23,7 @@ HqInfoService::HqInfoService(QObject *parent) :
     //qRegisterMetaType<FinDataList>("const FinDataList&");
     qRegisterMetaType<ShareBaseDataList>("const ShareBaseDataList&");
     mFavCodeList = Profiles::instance()->value(FAV_CODE_SEC, FAV_CODE_KEY, QStringList()).toStringList();
-    mClosedDateList = PROFILES_INS->value(CLOSE_DATE_SEC, CLOSE_DATE_KEY, QStringList()).toStringList();
+    QActiveDateTime::mCloseDateList = PROFILES_INS->value(CLOSE_DATE_SEC, CLOSE_DATE_KEY, QStringList()).toStringList();
     qDebug()<<"close:"<<mClosedDateList;
     initSignalSlot();
     //3、开启异步通讯
@@ -589,7 +590,7 @@ ShareDataList HqInfoService::getShareHistoryDataList(const QString& code)
     return mShareHistoryDataList[ShareBaseData::fullCode(code)];
 }
 
-
+#if 0
 //交易日期的处理
 bool HqInfoService::weekend(const QDate &date)
 {
@@ -658,10 +659,7 @@ QDate   HqInfoService::lastActiveDay()
     return date;
 }
 
-QDate HqInfoService::getLgtStartDate()
-{
-    return QDate(2017,3,17);
-}
+
 
 QDate HqInfoService::getActiveDayBefore1HYear()
 {
@@ -687,5 +685,24 @@ int   HqInfoService::activeDaysNum(const QDate &start)
     }
 
     return num;
+}
+
+QDate HqInfoService::preActiveDay(const QDate &date)
+{
+
+}
+
+QDate HqInfoService::nextActiveDay(const QDate &date)
+{
+//    QDate wkdate = date.addDays(1);
+//    while (wkdate.) {
+
+//    }
+}
+#endif
+
+QDate HqInfoService::getLgtStartDate()
+{
+    return QDate(2017,3,17);
 }
 

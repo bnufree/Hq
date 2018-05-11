@@ -12,6 +12,7 @@
 #include "dbservices/dbservices.h"
 #include "utils/hqutils.h"
 #include <QThreadPool>
+#include "dbservices/qactivedate.h"
 
 #define     BLOCK_NMAE          "name"
 #define     BLOCK_CODE          "codes"
@@ -149,13 +150,7 @@ void QEastMoneyBlockThread::slotUpdateBlockShare()
     {
         if(active) slotUpdateBlockInfos();
         QThread::sleep(3);
-        if(!DATA_SERVICE->isCurrentActive())
-        {
-            active = false;
-        } else
-        {
-            active = true;
-        }
+        active  = QActiveDateTime::isCurDateTimeActive();
     }
 }
 

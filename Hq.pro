@@ -61,7 +61,8 @@ SOURCES += main.cpp\
     qdatamgrwidget.cpp \
     table/qsharemutualbundwidget.cpp \
     qandroidlistwidget.cpp \
-    table/qsharecodenamewidget.cpp
+    table/qsharecodenamewidget.cpp \
+    dbservices/qactivedate.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -113,7 +114,8 @@ HEADERS  += dialog.h \
     qdatamgrwidget.h \
     table/qshareMutualbundwidget.h \
     qandroidlistwidget.h \
-    table/qsharecodenamewidget.h
+    table/qsharecodenamewidget.h \
+    dbservices/qactivedate.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

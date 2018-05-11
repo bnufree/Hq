@@ -4,6 +4,7 @@
 #include <QEventLoop>
 #include "utils/hqutils.h"
 #include "dbservices/dbservices.h"
+#include "dbservices/qactivedate.h"
 
 QHttpGet::QHttpGet(const QString& url, bool sequential, QObject *parent) :
     QThread(parent),mMgr(0), mUrl(url), mReply(0), mIsSequential(sequential), mUpdateTimer(0)
@@ -101,13 +102,7 @@ void QHttpGet::run()
             }
         }
         QThread::sleep(mInertVal);
-        if(!DATA_SERVICE->isCurrentActive())
-        {
-            active = false;
-        } else
-        {
-            active = true;
-        }
+        active = QActiveDateTime::isCurDateTimeActive();
         if(recv.size() >=0)
         {
             emit signalSendHttpConent(recv);

@@ -4,6 +4,7 @@
 #include "utils/qhttpget.h"
 #include "utils/hqutils.h"
 #include "dbservices/dbservices.h"
+#include "dbservices/qactivedate.h"
 
 QShareHistoryInfoThread::QShareHistoryInfoThread(const QString& code, const QDate& date, QObject* parent) :
     mCode(code),
@@ -59,7 +60,7 @@ void QShareHistoryInfoThread::run()
             {
                 bool found = false;
                 QDate curDate = QDate::fromString(cols[0], "yyyy-MM-dd");
-                if(!DATA_SERVICE->activeDay(curDate)) continue;
+                if(!QActiveDateTime(curDate).isDayActive()) continue;
                 if(cols[3].toDouble() == 0) continue;
                 ShareData data;
                 data.mTime = QDateTime(curDate).toMSecsSinceEpoch();

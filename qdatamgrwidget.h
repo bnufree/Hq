@@ -1,4 +1,4 @@
-#ifndef QDATAMGRWIDGET_H
+﻿#ifndef QDATAMGRWIDGET_H
 #define QDATAMGRWIDGET_H
 
 #include <QWidget>
@@ -24,7 +24,7 @@ public:
     void setDataType(int type);
 public slots:
     void   setDislayDataType(int index);
-    void   slotUpdateShareHsgtTop10List(const ShareBaseDataList& list);
+    void   slotUpdateShareHsgtTop10List(const ShareBaseDataList& list, const QString& date);
     void   slotDayChanged();
 
 private:

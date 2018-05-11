@@ -7,6 +7,7 @@
 #include "qhkexchangevoldataprocess.h"
 #include "utils/hqutils.h"
 #include "utils/profiles.h"
+#include "dbservices/qactivedate.h"
 
 #define     SAVE_DIR                QDir::currentPath() + "/data/"
 #define     UPDATE_SEC              "UPDATE"
@@ -14,7 +15,7 @@
 QShareHistoryInfoMgr::QShareHistoryInfoMgr(const QStringList& codes, QObject *parent) : QObject(parent)
 {
     //设定初始化的日线更新时期
-    PROFILES_INS ->setDefault(UPDATE_SEC, UPDATE_DATE, DATA_SERVICE->date2Str(QDate::currentDate().addDays(-365)));
+    PROFILES_INS ->setDefault(UPDATE_SEC, UPDATE_DATE, QActiveDateTime(QDate::currentDate().addDays(-365)).toString(DATE_FORMAT));
     mCodesList = codes;
     mPool.setExpiryTimeout(-1);
     mPool.setMaxThreadCount(16);
@@ -36,7 +37,7 @@ QShareHistoryInfoMgr::~QShareHistoryInfoMgr()
 void QShareHistoryInfoMgr::slotStartGetHistory()
 {
     //开始更新日线数据，取得上次日线数据的日期
-    QDate lastDate = DATA_SERVICE->dateFromStr(PROFILES_INS->value("UPDATE", "DATE").toString());
+    QDate lastDate = QDate::fromString(PROFILES_INS->value("UPDATE", "DATE").toString(), DATE_FORMAT);
     QDate updateDate = lastDate.addDays(1);
     slotUpdateAllShareFromDate(false,updateDate);
 }
@@ -45,14 +46,14 @@ void QShareHistoryInfoMgr::slotUpdateForignVolInfo(const ShareDataList &list, co
 {
     QMutexLocker locker(&mShareInfoMutex);
     foreach (ShareData data, list) {
-        ShareDataList &wklist = mShareInfoMap[DATA_SERVICE->date2Str(date)];
+        ShareDataList &wklist = mShareInfoMap[date.toString(DATE_FORMAT)];
         ShareData &wkdata = wklist.valueOfDate(date, data.mCode);
         wkdata.mHKExInfo.mForeignVol = data.mHKExInfo.mForeignVol;
     }
-    mDates.removeAll(DATA_SERVICE->date2Str(date));
+    mDates.removeAll(date.toString(DATE_FORMAT));
     emit signalUpdateHistoryMsg(QString("%1:%2/%3").\
                                 arg(QStringLiteral("外资持股数据更新完成")).\
-                                arg(DATA_SERVICE->date2Str(date)).\
+                                arg(date.toString(DATE_FORMAT)).\
                                 arg(mDates.size() < 10 ? mDates.join(","):""));
 }
 
@@ -62,7 +63,7 @@ void QShareHistoryInfoMgr::slotUpdateShareHistoryProcess(const ShareDataList& li
     //将历史数据更新到map
     foreach (ShareData data, list) {
         QDate date = QDateTime::fromMSecsSinceEpoch(data.mTime).date();
-        ShareDataList &wklist = mShareInfoMap[DATA_SERVICE->date2Str(date)];
+        ShareDataList &wklist = mShareInfoMap[date.toString(DATE_FORMAT)];
         wklist.append(data);
 
     }
@@ -97,11 +98,11 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
     mPool.waitForDone();
     emit signalUpdateHistoryMsg(QStringLiteral("开始更新外资持股数据..."));
     QDate wkDate = date;
-    while(wkDate < DATA_SERVICE->latestActiveDay())
+    while(wkDate < QActiveDateTime::latestActiveDay())
     {
-        if(DATA_SERVICE->activeDay(wkDate))
+        if(QActiveDateTime(wkDate).isDayActive())
         {
-            mDates.append(DATA_SERVICE->date2Str(wkDate));
+            mDates.append(wkDate.toString(DATE_FORMAT));
             QHKExchangeVolDataProcess * process = new QHKExchangeVolDataProcess(wkDate, this);
             mPool.start(process);
         }
@@ -114,9 +115,9 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
     wkDate = date;
     mCurCnt = 0;
     //qDebug()<<"write info total size:"<<mShareInfoMap.size();
-    while(wkDate < DATA_SERVICE->latestActiveDay())
+    while(wkDate < QActiveDateTime::latestActiveDay())
     {
-        QString key = DATA_SERVICE->date2Str(wkDate);
+        QString key = wkDate.toString(DATE_FORMAT);
         if(mShareInfoMap.contains(key))
         {
             QString fileName = QString("%1%2.dat").arg(SAVE_DIR).arg(wkDate.toString("yyyyMMdd"));
@@ -132,14 +133,14 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
     mPool.waitForDone();
     mShareInfoMap.clear();
 
-    PROFILES_INS->setValue(UPDATE_SEC, UPDATE_DATE, DATA_SERVICE->date2Str(DATA_SERVICE->lastActiveDay()));
+    PROFILES_INS->setValue(UPDATE_SEC, UPDATE_DATE, QActiveDateTime::latestActiveDay().toString(DATE_FORMAT));
     emit signalUpdateHistoryMsg(QStringLiteral("开始读入日线数据"));
     mCurCnt = 0;
-    wkDate = DATA_SERVICE->getActiveDayBefore1HYear();
-    mHistoryFileNum = DATA_SERVICE->activeDaysNum(wkDate);
-    while(wkDate < DATA_SERVICE->latestActiveDay())
+    wkDate = QActiveDateTime::getActiveDayBefore1HYear();
+    mHistoryFileNum = QActiveDateTime::activeDaysNum(wkDate);
+    while(wkDate < QActiveDateTime::latestActiveDay())
     {
-        if(DATA_SERVICE->activeDay(wkDate))
+        if(QActiveDateTime(wkDate).isDayActive())
         {
             QString fileName = QString("%1%2.dat").arg(SAVE_DIR).arg(wkDate.toString("yyyyMMdd"));
             QShareHistoryFileWork * process = new QShareHistoryFileWork(FILE_READ, fileName, ShareDataList(), this);

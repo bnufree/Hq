@@ -9,6 +9,7 @@
 #include "utils/hqutils.h"
 #include "utils/sharedata.h"
 #include "dbservices/dbservices.h"
+#include "dbservices/qactivedate.h"
 
 QShareFHSPWork::QShareFHSPWork(const QString& date, QObject *parent) : mDate(date), mParent(parent),QRunnable()
 {
@@ -65,8 +66,8 @@ void QShareFHSPWork::run()
         data.setCode(ShareBaseData::fullCode(subobj.value("Code").toString()));
         data.mFhspInfo.mSZZG = subobj.value("SZZBL").toString().toDouble();
         data.mFhspInfo.mXJFH = subobj.value("XJFH").toString().toDouble()/10;
-        data.mFhspInfo.mGQDJR = QDateTime(DATA_SERVICE->dateFromStr(subobj.value("GQDJR").toString().left(10))).toMSecsSinceEpoch();
-        data.mFhspInfo.mYAGGR = QDateTime(DATA_SERVICE->dateFromStr(subobj.value("YAGGR").toString().left(10))).toMSecsSinceEpoch();
+        data.mFhspInfo.mGQDJR = QActiveDateTime(QDate::fromString(subobj.value("GQDJR").toString().left(10), DATE_FORMAT)).toMSecsSinceEpoch();
+        data.mFhspInfo.mYAGGR = QActiveDateTime(QDate::fromString(subobj.value("YAGGR").toString().left(10), DATE_FORMAT)).toMSecsSinceEpoch();
         list.append(data);
     }
 
