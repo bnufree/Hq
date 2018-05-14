@@ -46,7 +46,7 @@ bool QActiveDateTime::isTimeActive()
 QDate QActiveDateTime::preActiveDay()
 {
     QDate date = this->addDays(-1).date();
-    while (!QActiveDateTime(date).isActive()) {
+    while (!QActiveDateTime(date).isDayActive()) {
         date = date.addDays(-1);
     }
     return date;
@@ -55,7 +55,7 @@ QDate QActiveDateTime::preActiveDay()
 QDate QActiveDateTime::nextActiveDay()
 {
     QDate date = this->addDays(1).date();
-    while (!QActiveDateTime(date).isActive()) {
+    while (!QActiveDateTime(date).isDayActive()) {
         date = date.addDays(1);
     }
     return date;

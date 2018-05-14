@@ -8,12 +8,14 @@
 
 QDataMgrWidget::QDataMgrWidget(QWidget *parent) :
     QWidget(parent),
+    mDataType(DATA_NONE),
     ui(new Ui::QDataMgrWidget)
 {
     ui->setupUi(this);
     ui->mCurDayText->setText(QActiveDateTime::latestActiveDay().toString(DATE_FORMAT));
     connect(ui->mPreDayBtn, SIGNAL(clicked()), this, SLOT(slotDayChanged()));
     connect(ui->mNextDayBtn, SIGNAL(clicked()), this, SLOT(slotDayChanged()));
+    ui->mNextDayBtn->setVisible(false);
     //updateData();
 }
 
@@ -28,14 +30,25 @@ void QDataMgrWidget::slotDayChanged()
     qDebug()<<"btn:"<<btn;
     if(!btn) return;
     QDate curDate = QDate::fromString(ui->mCurDayText->text(), DATE_FORMAT);
+    qDebug()<<"curDate:"<<curDate;
     if(btn == ui->mPreDayBtn)
     {
         curDate = QActiveDateTime(curDate).preActiveDay();
     } else
     {
-        if(curDate == QActiveDateTime::latestActiveDay()) return;
-        curDate = QActiveDateTime(curDate).nextActiveDay();
+        if(curDate != QActiveDateTime::latestActiveDay())
+        {
+            curDate = QActiveDateTime(curDate).nextActiveDay();
+        }
     }
+    if(curDate == QActiveDateTime::latestActiveDay())
+    {
+        ui->mNextDayBtn->setVisible(false);
+    } else
+    {
+        ui->mNextDayBtn->setVisible(true);
+    }
+    qDebug()<<"new date:"<<curDate;
     ui->mCurDayText->setText(curDate.toString(DATE_FORMAT));
     updateData();
 }
@@ -48,7 +61,11 @@ void QDataMgrWidget::setDislayDataType(int type)
 
 void QDataMgrWidget::setDataType(int type)
 {
-    ui->mCurDayText->setText(QDate::currentDate().toString("yyyy-MM-dd"));
+    if(type != mDataType)
+    {
+        ui->mCurDayText->setText(QActiveDateTime::latestActiveDay().toString(DATE_FORMAT));
+        ui->mNextDayBtn->setVisible(false);
+    }
     mDataType = type;
 }
 

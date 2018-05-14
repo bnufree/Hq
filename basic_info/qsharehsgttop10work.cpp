@@ -70,6 +70,7 @@ void QShareHsgtTop10Work::run()
             }
             data.mHKExInfo.mIsTop10 = true;
             data.mHKExInfo.mPureMoney = data.mHKExInfo.mBuyMoney - data.mHKExInfo.mSellMoney;
+            data.mHKExInfo.mDate = QDate::fromString(mDate, "yyyy-MM-dd");
 
             list.append(data);
         }

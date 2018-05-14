@@ -5,5 +5,7 @@
         <file>image/baidu.svg</file>
         <file>image/Baidu_96px.png</file>
         <file>image/zxg.ico</file>
+        <file>image/nextpage.png</file>
+        <file>image/prepage.png</file>
     </qresource>
 </RCC>

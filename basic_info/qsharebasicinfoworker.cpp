@@ -28,21 +28,8 @@ void QShareBasicInfoWorker::slotGetBasicInfo()
     //从文件获取信息
     if(!getInfosFromFile(mShareBaseDataMap))
     {
-        QMap<QString, ShareBaseData> tmepmap = mShareBaseDataMap;
         getInfossFromWeb(mShareBaseDataMap);
         writeInfos(mShareBaseDataMap.values());
-        qDebug()<<"old map size:"<<tmepmap.size();
-        if(tmepmap.size() > 0)
-        {
-            QStringList oldkeys(tmepmap.keys());
-            QStringList newkeys(mShareBaseDataMap.keys());
-            foreach (QString key, newkeys) {
-                if(!oldkeys.contains(key)){
-                    qDebug()<<"skip key:"<<key<<mShareBaseDataMap[key].mName;
-                }
-            }
-
-        }
     }
 
     emit signalBaseDataListFinished(QStringList(mShareBaseDataMap.keys()), mShareBaseDataMap.values());

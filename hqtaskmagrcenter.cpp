@@ -132,6 +132,7 @@ void HQTaskMagrCenter::slotBaseDataListFinished(const QStringList& codes, const 
     mShareInfoMergeThread->setActive(true);
     mShareInfoMergeThread->setMktType(MKT_ZXG);
     mShareInfoMergeThread->start();
+    return;
     //板块行情初始化
     mBlockMgr = new QEastMoneyBlockMangagerThread();
     mRealWorkObjList.append(mBlockMgr);

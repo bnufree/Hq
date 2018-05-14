@@ -44,6 +44,13 @@ bool HQDBDataBase::initSqlDB()
     {
         mDB = QSqlDatabase::addDatabase("QSQLITE");
     }
+    QDir dir(HQ_DATA_DIR);
+    if(!dir.exists())
+    {
+        dir.mkpath(HQ_DATA_DIR);
+
+    }
+     qDebug()<<"data dir exist:"<<dir.exists();
     mDB.setDatabaseName(DB_FILE);
     return mDB.open();
 }

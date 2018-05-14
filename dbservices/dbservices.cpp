@@ -24,7 +24,7 @@ HqInfoService::HqInfoService(QObject *parent) :
     qRegisterMetaType<ShareBaseDataList>("const ShareBaseDataList&");
     mFavCodeList = Profiles::instance()->value(FAV_CODE_SEC, FAV_CODE_KEY, QStringList()).toStringList();
     QActiveDateTime::mCloseDateList = PROFILES_INS->value(CLOSE_DATE_SEC, CLOSE_DATE_KEY, QStringList()).toStringList();
-    qDebug()<<"close:"<<mClosedDateList;
+    qDebug()<<"close:"<<QActiveDateTime::mCloseDateList;
     initSignalSlot();
     //3、开启异步通讯
     moveToThread(&m_threadWork);
