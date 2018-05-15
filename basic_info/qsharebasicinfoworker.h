@@ -32,6 +32,7 @@ private:
     QThread     mWorkThread;
     QMap<QString, ShareBaseData>        mShareBaseDataMap;
     QMutex      mUpdateMutex;
+    bool        mNeedUpdateCurrentTop10;
 
 };
 

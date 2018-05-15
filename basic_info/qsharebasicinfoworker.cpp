@@ -25,13 +25,19 @@ QShareBasicInfoWorker::QShareBasicInfoWorker(QObject *parent) : QObject(parent)
 
 void QShareBasicInfoWorker::slotGetBasicInfo()
 {
-    //从文件获取信息
+    //从文件获取信息基本信息，包括代码，分红送配，财务信息
     if(!getInfosFromFile(mShareBaseDataMap))
     {
         getInfossFromWeb(mShareBaseDataMap);
         writeInfos(mShareBaseDataMap.values());
     }
-
+    //获取陆股通TOP10数据
+    QThreadPool pool;
+    pool.setExpiryTimeout(-1);
+    QDate queryDate = QActiveDateTime::latestActiveDay();
+    //取得北向交易TOP10
+    pool.start(new QShareHsgtTop10Work(queryDate.toString(DATE_FORMAT), this));
+    pool.waitForDone();
     emit signalBaseDataListFinished(QStringList(mShareBaseDataMap.keys()), mShareBaseDataMap.values());
 
 }
@@ -105,8 +111,8 @@ bool QShareBasicInfoWorker::getInfossFromWeb(QMap<QString, ShareBaseData>& map)
     pool.start(new QShareCodesWork(this));
     //取得分红送配
     pool.start(new QShareFHSPWork("2017-12-31", this));
-    //取得北向交易TOP10
-    pool.start(new QShareHsgtTop10Work(QActiveDateTime::latestActiveDay().toString(DATE_FORMAT), this));
+//    //取得北向交易TOP10
+//    pool.start(new QShareHsgtTop10Work(QActiveDateTime::latestActiveDay().toString(DATE_FORMAT), this));
     pool.waitForDone();
 //    int i = 0;
 //    while (i < mShareBaseDataMap.keys().length()) {
