@@ -8,6 +8,7 @@
 #include "utils/hqutils.h"
 #include "utils/profiles.h"
 #include "dbservices/qactivedate.h"
+#include "utils/comdatadefines.h"
 
 #define     SAVE_DIR                QDir::currentPath() + "/data/"
 #define     UPDATE_SEC              "UPDATE"
@@ -76,18 +77,7 @@ void QShareHistoryInfoMgr::slotUpdateShareHistoryProcess(const ShareDataList& li
 void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& date)
 {
     //创建文件保存的目录
-    QDir wkdir(SAVE_DIR);
-    if(!wkdir.exists())
-    {
-        if(wkdir.mkpath(SAVE_DIR))
-        {
-            qDebug()<<"make path "<<SAVE_DIR<<" ok.";
-        } else
-        {
-            qDebug()<<"make path "<<SAVE_DIR<<" falied.";
-        }
-
-    }
+    HqUtils::makePath(HQ_SHARE_HISTORY_DIR);
     mCurCnt = 0;
     //开始更新日线数据
     emit signalUpdateHistoryMsg(QStringLiteral("开始更新日线数据..."));

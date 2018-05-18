@@ -132,6 +132,7 @@ void HQTaskMagrCenter::slotBaseDataListFinished(const QStringList& codes, const 
     mShareInfoMergeThread->setActive(true);
     mShareInfoMergeThread->setMktType(MKT_ZXG);
     mShareInfoMergeThread->start();
+#if 0
     return;
     //板块行情初始化
     mBlockMgr = new QEastMoneyBlockMangagerThread();
@@ -139,7 +140,7 @@ void HQTaskMagrCenter::slotBaseDataListFinished(const QStringList& codes, const 
     connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataVList)), this, SIGNAL(signalBlockDataListUpdated(BlockDataVList)));
     mBlockMgr->start();
     return;
-
+#endif
     //更新日线数据
     QShareHistoryInfoMgr* historyMgr = new QShareHistoryInfoMgr(codes);
     connect(historyMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SIGNAL(signalUpdateHistoryMsg(QString)));

@@ -5,6 +5,7 @@
 #include "utils/hqutils.h"
 #include "dbservices/dbservices.h"
 #include "dbservices/qactivedate.h"
+#include "utils/comdatadefines.h"
 
 QShareHistoryInfoThread::QShareHistoryInfoThread(const QString& code, const QDate& date, QObject* parent) :
     mCode(code),
@@ -17,6 +18,7 @@ QShareHistoryInfoThread::QShareHistoryInfoThread(const QString& code, const QDat
     {
         mCode = mCode.right(6);
     }
+    mFileName = QString("%1%2").arg(HQ_SHARE_HISTORY_DIR).arg(mCode);
 }
 
 QShareHistoryInfoThread::~QShareHistoryInfoThread()
@@ -24,19 +26,36 @@ QShareHistoryInfoThread::~QShareHistoryInfoThread()
 
 }
 
+QDate QShareHistoryInfoThread::lastUpdateDate()
+{
+    QDate date = QDate::currentDate().addYears(1);
+    if(!QFile::exists(mFileName)) return date;
+    //读取文件
+    QFile file(mFileName);
+    if(!file.open(QIODevice::ReadOnly)) return date;
+    int size = file.size();
+    int totalNum = 0;
+    if(size >= sizeof(SHARE_HISTORY_INFO) && file.seek(size - sizeof(SHARE_HISTORY_INFO)))
+    {
+        //读取最后一个的日期
+        SHARE_HISTORY_INFO info;
+        file.read((char*)(&info), sizeof(SHARE_HISTORY_INFO));
+        qDebug()<<mCode<<QDate::fromJulianDay(info.date)<<info.close * 0.001<<info.change * 0.01<<info.foreign_vol;
+        date = QDate::fromJulianDay(info.date);
+    }
+    file.close();
+    return date;
+}
+
+
 void QShareHistoryInfoThread::run()
 {
-    QDate start = mStartDate;
-    QDate end = QDate::currentDate().addDays(-1);
-    ShareDataList list;
+    //基金不更新
+    if(mCode.left(1) == "5" || mCode.left(1) == "1") return;
+    QDate start = QActiveDateTime(lastUpdateDate()).nextActiveDay();
+    QDate end = QActiveDateTime::latestActiveDay();
+    QList<SHARE_HISTORY_INFO> list;
 
-    //只更新基本几只ETF
-    if(mCode.left(1) == "5" || mCode.left(1) == "1")
-    {
-         QRegExp exp("(510(050|300|900|500))|(1599(15|20))");
-         if(!exp.exactMatch(mCode))goto FUNC_END;
-    }
-    //检查日线数据是否需要更新    
     if(start <= end)
     {
         QString wkCode;
@@ -58,31 +77,22 @@ void QShareHistoryInfoThread::run()
             QStringList cols = lines[i].split(",");
             if(cols.length() >= 15)
             {
-                bool found = false;
                 QDate curDate = QDate::fromString(cols[0], "yyyy-MM-dd");
                 if(!QActiveDateTime(curDate).isDayActive()) continue;
-                if(cols[3].toDouble() == 0) continue;
-                ShareData data;
-                data.mTime = QDateTime(curDate).toMSecsSinceEpoch();
-                data.setCode(mCode);
-                data.setName(cols[2]);
-                data.mCur = cols[3].toDouble();
-                data.mHigh = cols[4].toDouble();
-                data.mLow = cols[5].toDouble();
-                data.mOpen = cols[6].toDouble();
-                data.mLastClose = cols[7].toDouble();
-                data.mChg = cols[8].toDouble();
-                data.mChgPercent = cols[9].toDouble();
-                data.mHsl = cols[10].toDouble();
-                data.mVol = cols[11].toLongLong();
-                data.mMoney = cols[12].toDouble();
-                double price = data.mCur;
-                data.mFinanceInfo.mTotalShare = cols[13].toDouble() / price;
-                data.mFinanceInfo.mMutalShare= cols[14].toDouble() / price;
-                data.mClose = data.mCur;
+                if(cols[3].toDouble() < 0.001) continue;
+                SHARE_HISTORY_INFO data;
+                data.date = curDate.toJulianDay();
+                data.close = round(cols[3].toDouble() * 1000);
+                data.change = round(cols[9].toDouble() * 100);
+                data.total_share = cols[13].toDouble() / data.close * 100;
+                data.mutal_share = cols[14].toDouble() / data.close * 100;
                 list.append(data);
             }
         }
+    }
+    if(list.size() > 0)
+    {
+        //写入文件
     }
 
 FUNC_END:

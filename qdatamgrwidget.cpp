@@ -12,6 +12,7 @@ QDataMgrWidget::QDataMgrWidget(QWidget *parent) :
     ui(new Ui::QDataMgrWidget)
 {
     ui->setupUi(this);
+    //connect(ui->mCurDayText, SIGNAL(windowIconTextChanged(QString))
     ui->mCurDayText->setText(QActiveDateTime::latestActiveDay().toString(DATE_FORMAT));
     connect(ui->mPreDayBtn, SIGNAL(clicked()), this, SLOT(slotDayChanged()));
     connect(ui->mNextDayBtn, SIGNAL(clicked()), this, SLOT(slotDayChanged()));
@@ -91,4 +92,14 @@ void QDataMgrWidget::slotUpdateShareHsgtTop10List(const ShareBaseDataList &list,
         QMessageBox::warning(0, QStringLiteral(""), QStringLiteral("数据未找到."));
     }
     ui->mDataTableWidget->setDataList(list);
+
+    QDate curDate = QDate::fromString(date, DATE_FORMAT);
+    if(curDate == QActiveDateTime::latestActiveDay())
+    {
+        ui->mNextDayBtn->setVisible(false);
+    } else
+    {
+        ui->mNextDayBtn->setVisible(true);
+    }
+    ui->mCurDayText->setText(curDate.toString(DATE_FORMAT));
 }
