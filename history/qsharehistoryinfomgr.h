@@ -8,9 +8,9 @@
 #include <QMutex>
 #include <QThreadPool>
 #include <QDate>
+#include "utils/sharedata.h"
 
 class QEastmoneyShareHistoryInfoThread;
-class ShareDataList;
 
 class QShareHistoryInfoMgr : public QObject
 {
@@ -34,8 +34,8 @@ signals:
 public slots:
     void slotStartGetHistory();
     void slotUpdateAllShareFromDate(bool deldb, const QDate& date = QDate(2017,3,17));
-    void slotUpdateForignVolInfo(const ShareDataList& list, const QDate& date);
-    void slotUpdateShareHistoryProcess(const ShareDataList& list);
+    void slotUpdateForignVolInfo(const QStringList& list, const QDate& date);
+    void slotUpdateShareHistoryProcess(const ShareHistoryList& list);
     void slotDbUpdateHistoryFinished();
     void slotUpdateShareHistoryInfoFinished(const QString& code);
     void slotUpdateReadHistoryInfo(const ShareDataList& list);
@@ -44,7 +44,7 @@ public slots:
 private:
     QThread             mWorkThread;
     QStringList         mCodesList;
-    QMap<QString, ShareDataList>    mShareInfoMap;
+    QMap<int, QMap<qint64, qint64>>    mShareInfoMap;  //code   date   vol
     QMutex              mShareInfoMutex;
     QMutex              mShareHistoryMutex;
     int                 mCurCnt;

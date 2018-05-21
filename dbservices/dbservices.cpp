@@ -20,6 +20,7 @@ HqInfoService::HqInfoService(QObject *parent) :
     QObject(parent)
 {
     qRegisterMetaType<ShareDataList>("const ShareDataList&");
+    qRegisterMetaType<ShareHistoryList>("const ShareHistoryList&");
     //qRegisterMetaType<FinDataList>("const FinDataList&");
     qRegisterMetaType<ShareBaseDataList>("const ShareBaseDataList&");
     mFavCodeList = Profiles::instance()->value(FAV_CODE_SEC, FAV_CODE_KEY, QStringList()).toStringList();
@@ -104,8 +105,8 @@ void HqInfoService::initSignalSlot()
     connect(this, SIGNAL(signalInitDBTables()), this, SLOT(slotInitDBTables()));
     connect(this, SIGNAL(signalUpdateShareCodesList(QStringList)), this, SLOT(slotUpdateShareCodesList(QStringList)));
     connect(this, SIGNAL(signalRecvShareHistoryInfos(QString,ShareDataList, bool)), this, SLOT(slotRecvShareHistoryInfos(QString,ShareDataList, bool)));
-    connect(this, SIGNAL(signalUpdateShareinfoWithHistory(QString,double,double,double,double,double,double, qint64, qint64,ShareDataList)),\
-            this, SLOT(slotUpdateShareinfoWithHistory(QString,double,double,double,double,double,double, qint64, qint64,ShareDataList)));
+    connect(this, SIGNAL(signalUpdateShareinfoWithHistory(QString,double,double,double,double,double,double, qint64, qint64,ShareHistoryList)),\
+            this, SLOT(slotUpdateShareinfoWithHistory(QString,double,double,double,double,double,double, qint64, qint64,ShareHistoryList)));
     connect(this, SIGNAL(signalUpdateShareBasicInfo(ShareBaseDataList)), this, SLOT(slotUpdateShareBasicInfo(ShareBaseDataList)));
     connect(this, SIGNAL(signalQueryShareForeignVol(QString)), this, SLOT(slotQueryShareForeignVol(QString)));
     connect(this, SIGNAL(signalRecvAllShareHistoryInfos(ShareDataList,bool)), this, SLOT(slotRecvAllShareHistoryInfos(ShareDataList,bool)));
@@ -294,7 +295,7 @@ void HqInfoService::slotUpdateShareinfoWithHistory(const QString& code,\
                                                    double lastYearChange,\
                                                    qint64 vol,\
                                                    qint64 vol_chnage,\
-                                                   const ShareDataList& list)
+                                                   const ShareHistoryList& list)
 {
     mShareHistoryDataList[ShareBaseData::fullCode(code.right(6))] = list;
     ShareData *data = mStkRealInfo[ShareBaseData::fullCode(code.right(6))];
@@ -585,7 +586,7 @@ BlockDataPList HqInfoService::getAllBlock()
     return mBlockDataMap.values();
 }
 
-ShareDataList HqInfoService::getShareHistoryDataList(const QString& code)
+ShareHistoryList HqInfoService::getShareHistoryDataList(const QString& code)
 {
     return mShareHistoryDataList[ShareBaseData::fullCode(code)];
 }

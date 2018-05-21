@@ -7,9 +7,9 @@
 #include "dbservices/qactivedate.h"
 #include "utils/comdatadefines.h"
 
-QShareHistoryInfoThread::QShareHistoryInfoThread(const QString& code, const QDate& date, QObject* parent) :
+QShareHistoryInfoThread::QShareHistoryInfoThread(const QString& code, const QMap<qint64, qint64>& foreign_map, QObject* parent) :
     mCode(code),
-    mStartDate(date),
+    mForeignMap(foreign_map),
     mParent(parent),
     QRunnable()
 {
@@ -47,6 +47,19 @@ QDate QShareHistoryInfoThread::lastUpdateDate()
     return date;
 }
 
+bool QShareHistoryInfoThread::write(const QList<SHARE_HISTORY_INFO> &list)
+{
+    FILE *fp = fopen(mFileName.toStdString().data(), "ab+");
+    if(fp)
+    {
+        for(int i=0; i<list.size(); i++)
+        {
+            fwrite(&(list[i]), sizeof(SHARE_HISTORY_INFO), 1, fp);
+        }
+        fclose(fp);
+    }
+}
+
 
 void QShareHistoryInfoThread::run()
 {
@@ -54,7 +67,7 @@ void QShareHistoryInfoThread::run()
     if(mCode.left(1) == "5" || mCode.left(1) == "1") return;
     QDate start = QActiveDateTime(lastUpdateDate()).nextActiveDay();
     QDate end = QActiveDateTime::latestActiveDay();
-    QList<SHARE_HISTORY_INFO> list;
+    ShareHistoryList list;
 
     if(start <= end)
     {
@@ -86,6 +99,9 @@ void QShareHistoryInfoThread::run()
                 data.change = round(cols[9].toDouble() * 100);
                 data.total_share = cols[13].toDouble() / data.close * 100;
                 data.mutal_share = cols[14].toDouble() / data.close * 100;
+                data.foreign_vol = mForeignMap[data.date];
+                data.money = cols[12].toDouble();
+                data.vol = cols[11].toDouble();
                 list.append(data);
             }
         }
@@ -93,6 +109,7 @@ void QShareHistoryInfoThread::run()
     if(list.size() > 0)
     {
         //写入文件
+        write(list);
     }
 
 FUNC_END:
@@ -100,7 +117,7 @@ FUNC_END:
     {
         QMetaObject::invokeMethod(mParent,\
                                   "slotUpdateShareHistoryProcess",\
-                                  Qt::DirectConnection, Q_ARG(ShareDataList,list ));
+                                  Qt::DirectConnection, Q_ARG(ShareHistoryList,list ));
     }
     return;
 }

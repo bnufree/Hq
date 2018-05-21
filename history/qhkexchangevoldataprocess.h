@@ -5,6 +5,7 @@
 #include <QDate>
 #include <QObject>
 #include "utils/sharedata.h"
+#include <QMap>
 
 class QHKExchangeVolDataProcess : public QRunnable
 {
@@ -14,8 +15,8 @@ public:
 
 public:
     void run();
-    void getMktVolInfo(ShareDataList& list, const QDate& date, int mkt);
-    void getMktVolInfo(ShareDataList& list, const QDate& date, const QString& fileName);
+    void getMktVolInfo(QStringList& list,int& num, const QDate& date, int mkt = 0);
+    void getMktVolInfo(QStringList& list, const QDate& date, const QString& fileName);
 private:
     QDate       mDate;
     QObject*    mParent;

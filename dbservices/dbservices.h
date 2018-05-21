@@ -38,7 +38,7 @@ public:
     void         setBlockShareCodes(const QString& block, const QStringList& codes);
     void         saveShares();
     BlockDataPList  getAllBlock();
-    ShareDataList   getShareHistoryDataList(const QString& code);
+    ShareHistoryList   getShareHistoryDataList(const QString& code);
     //交易日期处理
 #if 0
     bool        weekend(const QDate& date);
@@ -90,7 +90,7 @@ signals:
                                           double lastYearChange,\
                                           qint64 vol,\
                                           qint64 vol_chnage,\
-                                          const ShareDataList& list);
+                                          const ShareHistoryList& list);
     void signalUpdateStkProfitList(const ShareDataList& list);
     void signalInitShareRealInfos(const QStringList& codes);
     void signalSetFavCode(const QString& code);
@@ -121,7 +121,7 @@ public slots:
                                         double lastYearChange,\
                                         qint64 vol,\
                                         qint64 vol_chnage,\
-                                        const ShareDataList& list);
+                                        const ShareHistoryList& list);
     void slotUpdateHistoryChange(const QString& code);
     void slotUpdateStkProfitList(const ShareDataList& list);
     void slotAddShareAmoutByForeigner(const ShareDataList& list);
@@ -171,7 +171,7 @@ private:    //本类使用的变量
     QMutex                      mBlockMutex;
     QMutex                      mShareMutex;
     HQDBDataBase                mDataBase;
-    QMap<QString, ShareDataList>    mShareHistoryDataList;
+    QMap<QString, ShareHistoryList>    mShareHistoryDataList;
     QStringList                 mFavCodeList;
     QStringList                 mClosedDateList;
 };

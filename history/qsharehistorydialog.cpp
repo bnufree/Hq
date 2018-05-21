@@ -9,7 +9,7 @@ QShareHistoryDialog::QShareHistoryDialog(const QString& code, QWidget *parent) :
 {
     ui->setupUi(this);
     //this->setFixedSize(200, 200);
-    ui->widget->setValue(GRAPHIC_DATA_LIST(DATA_SERVICE->getShareHistoryDataList(mCode)));
+    //ui->widget->setValue(GRAPHIC_DATA_LIST(DATA_SERVICE->getShareHistoryDataList(mCode)));
 }
 
 QShareHistoryDialog::~QShareHistoryDialog()

@@ -7,28 +7,20 @@
 #include <QObject>
 #include "utils/sharedata.h"
 
-struct   SHARE_HISTORY_INFO{
-    qint64  date;
-    int     close;
-    int     change;     //9.98% * 100
-    qint64  total_share;
-    qint64  mutal_share;
-    qint64  foreign_vol;
-};
-
 class QShareHistoryInfoThread : public QRunnable
 {
 public:
-    explicit QShareHistoryInfoThread(const QString& code, const QDate& date,QObject* parent = 0);
+    explicit QShareHistoryInfoThread(const QString& code, const QMap<qint64, qint64>& foreign_map, QObject* parent = 0);
     ~QShareHistoryInfoThread();
     QString getCode();
 public:
     void run();
 private:
     QDate lastUpdateDate();
+    bool  write(const QList<SHARE_HISTORY_INFO>& list);
 private:
     QString         mCode;
-    QDate           mStartDate;
+    QMap<qint64, qint64> mForeignMap;
     QObject         *mParent;
     QString         mFileName;
 };

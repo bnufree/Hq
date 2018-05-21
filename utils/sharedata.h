@@ -14,6 +14,19 @@ struct zjlxData{
     double zjlx;
 };
 
+struct   SHARE_HISTORY_INFO{
+    qint64  date;
+    int     close;
+    int     change;     //9.98% * 100
+    double  money;
+    double  vol;
+    qint64  total_share;
+    qint64  mutal_share;
+    qint64  foreign_vol;
+};
+
+typedef QList<SHARE_HISTORY_INFO>       ShareHistoryList;
+
 #define         SH_FUND_REG         "(sh){0,1}5[0-9]{5}"
 #define         SH_INDEX_REG        "sh0[0-9]{5}"
 #define         SZ_FUND_REG         "(sz){0,1}1[0-9]{5}"
@@ -110,6 +123,8 @@ typedef    enum     share_type
     SHARE_INDEX_US,
     SHARE_HK,
     SHARE_US,
+    SHARE_CHINA_SZ = SHARE_CHINA_SZ_ZB | SHARE_CHINA_SZ_ZXB | SHARE_CHINA_SZ_CYB,
+    SHARE_CHINA = SHARE_CHINA_SH | SHARE_CHINA_SZ,
 }SHARE_TYPE;
 
 typedef struct Finance
