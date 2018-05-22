@@ -16,8 +16,8 @@ struct zjlxData{
 
 struct   SHARE_HISTORY_INFO{
     qint64  date;
-    int     close;
-    int     change;     //9.98% * 100
+    double     close;
+    double     change;     //9.98% * 100
     double  money;
     double  vol;
     qint64  total_share;

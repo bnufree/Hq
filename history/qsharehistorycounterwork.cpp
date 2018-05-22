@@ -42,7 +42,7 @@ void QShareHistoryCounterWork::run()
         file.close();
 
     }
- //   qSort(mList.begin(), mList.end(), ShareData::sortByDateAsc);
+ //   qSort(mList.begin(), mList.end(), ShareData::sortByDateAsc);    
     int size = mList.size();
     double lastColse = 0;
     double lastMoney = 0.0;

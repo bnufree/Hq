@@ -104,7 +104,7 @@ void QHKExchangeVolDataProcess::getMktVolInfo(QStringList& list, const QDate& da
                 count = 0;
             }
         }
-        qDebug()<<"total_size:"<<total_size<<" read count:"<<list.size()<<date;
+        //qDebug()<<"total_size:"<<total_size<<" read count:"<<list.size()<<date;
     }
     file.close();
     return ;

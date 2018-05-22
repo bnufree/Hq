@@ -40,7 +40,7 @@ void QShareHistoryInfoMgr::slotStartGetHistory()
     //开始更新日线数据，取得上次日线数据的日期
     //QDate lastDate = QDate::fromString(PROFILES_INS->value(UPDATE_SEC, UPDATE_DATE).toString(), DATE_FORMAT);
     //QDate updateDate = lastDate.addDays(1);
-    slotUpdateAllShareFromDate(false,QActiveDateTime::latestActiveDay().addYears(1));
+    slotUpdateAllShareFromDate(false,QActiveDateTime::latestActiveDay().addYears(-1));
 }
 
 void QShareHistoryInfoMgr::slotUpdateForignVolInfo(const QStringList& list, const QDate& date)
@@ -56,7 +56,8 @@ void QShareHistoryInfoMgr::slotUpdateForignVolInfo(const QStringList& list, cons
             wklist[date.toJulianDay()] = val;
         }
     }
-//    mDates.removeAll(date.toString(DATE_FORMAT));
+    qDebug()<<__func__<<date<<list.size()<<mDates.size();
+    mDates.removeAll(date.toString(DATE_FORMAT));
 //    emit signalUpdateHistoryMsg(QString("%1:%2/%3").\
 //                                arg(QStringLiteral("外资持股数据更新完成")).\
 //                                arg(date.toString(DATE_FORMAT)).\
@@ -81,6 +82,7 @@ void QShareHistoryInfoMgr::slotUpdateShareHistoryProcess(const ShareHistoryList&
 
 void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& date)
 {
+    qDebug()<<__func__<<date;
     //创建文件保存的目录
     HqUtils::makePath(HQ_SHARE_HISTORY_DIR);
     HqUtils::makePath(HQ_LGTHISTORY_DIR);
@@ -88,6 +90,7 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
     emit signalUpdateHistoryMsg(QStringLiteral("开始更新外资持股数据..."));
     //更新外资持股数据，然后传递给个股日线合成
     QDate wkDate = date;
+    qDebug()<<__func__<<wkDate<<QActiveDateTime::latestActiveDay();
     while(wkDate < QActiveDateTime::latestActiveDay())
     {
         if(QActiveDateTime(wkDate).isDayActive())
