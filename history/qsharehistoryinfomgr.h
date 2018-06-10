@@ -44,7 +44,7 @@ public slots:
 private:
     QThread             mWorkThread;
     QStringList         mCodesList;
-    QMap<int, QMap<qint64, qint64>>    mShareInfoMap;  //code   date   vol
+    QMap<int, QMap<qint64, qint64> >    mShareInfoMap;  //code   date   vol
     QMutex              mShareInfoMutex;
     QMutex              mShareHistoryMutex;
     int                 mCurCnt;
