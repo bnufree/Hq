@@ -360,7 +360,7 @@ bool HqTableWidget::event(QEvent *event)
 
 void HqTableWidget::mousePressEvent(QMouseEvent *event)
 {
-    qDebug()<<__func__<<event;
+    //qDebug()<<__func__<<event;
     mPressPnt = QCursor::pos();
     mMovePnt = mPressPnt;
     mMoveDir = -1;
@@ -369,7 +369,7 @@ void HqTableWidget::mousePressEvent(QMouseEvent *event)
 
 void HqTableWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    qDebug()<<__func__<<event;
+//    qDebug()<<__func__<<event;
 
     //窗口跟着鼠标移动
     QPoint move_pnt = QCursor::pos();
@@ -381,7 +381,7 @@ void HqTableWidget::mouseMoveEvent(QMouseEvent *event)
         mMoveDir = 0;
     }
     int move_distance = (mMoveDir == 1? move_pnt.y() - mMovePnt.y() : move_pnt.x() - mMovePnt.x());
-    qDebug()<<__func__<<mMoveDir<<move_distance;
+//    qDebug()<<__func__<<mMoveDir<<move_distance;
     if(move_distance == 0) return;
 #if 0
     mCurScrollBar = mMoveDir == 1? this->verticalScrollBar() : this->horizontalScrollBar();
@@ -576,7 +576,7 @@ void HqTableWidget::displayVisibleCols()
     for(int i=0; i<columnCount(); i++)
     {
         if(isColumnHidden(i)) continue;
-        qDebug()<<"col:"<<i<<this->horizontalHeaderItem(i)->text().toLocal8Bit();
+        //qDebug()<<"col:"<<i<<this->horizontalHeaderItem(i)->text().toLocal8Bit();
     }
 }
 
@@ -585,7 +585,7 @@ void HqTableWidget::displayVisibleRows()
     for(int i=0; i<rowCount(); i++)
     {
         if(isRowHidden(i)) continue;
-        qDebug()<<"row:"<<i;
+        //qDebug()<<"row:"<<i;
     }
 }
 

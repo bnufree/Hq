@@ -63,6 +63,7 @@ bool QShareBasicInfoWorker::getInfosFromFile(QMap<QString, ShareBaseData>& map)
     }
     //读取文件
     QFile file(STOCK_CODE_FILE);
+    qDebug()<<"file path:"<<file.fileName();
     if(!file.open(QIODevice::ReadOnly))
     {
         qDebug()<<__FUNCTION__<<__LINE__;

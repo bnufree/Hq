@@ -9,14 +9,14 @@ QAndroidButton::QAndroidButton(const QString& label, QWidget *parent) :\
 
 void QAndroidButton::mousePressEvent(QMouseEvent *ev)
 {
-    qDebug()<<__func__<<"!!!!!!!!!!!!!!!!!!!!!!!!!!";
+//    qDebug()<<__func__<<"!!!!!!!!!!!!!!!!!!!!!!!!!!";
     //this->setStyleSheet("color:red");
     emit clicked();
 }
 
 void QAndroidButton::focusOutEvent(QFocusEvent *ev)
 {
-    qDebug()<<__func__<<"$$$$$$$$$$$$$$$$$$$$$$$$$$";
+//    qDebug()<<__func__<<"$$$$$$$$$$$$$$$$$$$$$$$$$$";
     //this->setStyleSheet("color:black");
 }
 
