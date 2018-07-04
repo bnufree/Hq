@@ -3,6 +3,7 @@
 
 #include  <QString>
 #include  <QVariant>
+#include  <QApplication>
 
 typedef enum enStockDisplayRule
 {
@@ -120,8 +121,13 @@ typedef struct struTableColData
 }TableColData;
 
 typedef QList<TableColData>         TableColDataList;
-#define         HQ_CONFIG_DIR               QString("/sdcard/hq/etc/")
-#define         HQ_DATA_DIR                 QString("/sdcard/hq/data/")
+#ifdef Q_OS_WIN
+#define         HQ_APP_DIR                  QApplication::applicationDirPath()
+#else
+#define         HQ_APP_DIR                  QString("/sdcard/hq")
+#endif
+#define         HQ_CONFIG_DIR               QString("%1/etc/").arg(HQ_APP_DIR)
+#define         HQ_DATA_DIR                 QString("%1/data/").arg(HQ_APP_DIR)
 #define         HQ_CODE_DIR                 QString("%1%2/").arg(HQ_DATA_DIR).arg("code")
 #define         HQ_HSTOP10_DIR              QString("%1%2/").arg(HQ_DATA_DIR).arg("hstop10")
 #define         HQ_LGTHISTORY_DIR              QString("%1%2/").arg(HQ_DATA_DIR).arg("china_a_foreign")
