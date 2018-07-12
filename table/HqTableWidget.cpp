@@ -160,7 +160,7 @@ void HqTableWidget::prepareUpdateTable(int newRowCount)
     int oldRowCount = this->rowCount();
     if(oldRowCount < newRowCount)
     {
-        this->setRowCount(newRowCount);
+        //this->setRowCount(newRowCount);
     } else if(oldRowCount > newRowCount)
     {
         removeRows(newRowCount, oldRowCount - newRowCount);
@@ -168,6 +168,7 @@ void HqTableWidget::prepareUpdateTable(int newRowCount)
     {
         //do nothing
     }
+    this->setRowCount(newRowCount);
 }
 
 void HqTableWidget::removeRows(int start, int count)
@@ -261,6 +262,7 @@ void HqTableWidget::slotCellClicked(int row, int col)
 void HqTableWidget::resizeEvent(QResizeEvent *event)
 {
     QSize size = event->size();
+    qDebug()<<__func__<<__LINE__<<size;
     mMaxDisplayRow = 10;
     mMaxDisplayCol = 4;
     if(size.height() < size.width())
@@ -520,6 +522,8 @@ void HqTableWidget::optMoveTable(OPT_MOVE_MODE mode)
                 }
             }
         }
+        qDebug()<<"display bottom:"<<row_start<<mMaxDisplayRow<<this->rowCount();
+        if(row_start + mMaxDisplayRow >= this->rowCount()-1) return;
         if(!end_init)
         {
             //已经到了最后，不操作
