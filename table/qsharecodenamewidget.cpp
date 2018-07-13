@@ -10,8 +10,8 @@ QShareCodeNameWidget::QShareCodeNameWidget(const QString& code, const QString& n
     mNameLbl(0)
 {
     QVBoxLayout *vlay = new QVBoxLayout(this);
-    vlay->setContentsMargins(0, 2, 0, 2);
-    vlay->setSpacing(10);
+    vlay->setContentsMargins(0, 1, 0, 1);
+    vlay->setSpacing(1);
     this->setLayout(vlay);
     mCodeLbl = new QLabel(code, this);
     mNameLbl = new QLabel(name, this);

@@ -8,6 +8,7 @@
 #include <QMessageBox>
 #include "qsharecodenamewidget.h"
 #include <math.h>
+#include <QDesktopWidget>
 
 #define     COL_TYPE_ROLE               Qt::UserRole + 1
 #define     COL_SORT_ROLE               Qt::UserRole + 2
@@ -45,6 +46,11 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     grabGesture(Qt::PanGesture);
     grabGesture(Qt::TapAndHoldGesture);
 #endif
+    //根据当前屏幕的大小来设定显示的行高和列宽
+    QRect rect = QApplication::desktop()->availableGeometry();
+    //默认屏幕大小为1920*1080
+    mRowHeight = (/*1080.0 * 1.0 / rect.height() * 40*/this->fontMetrics().height()* 2);
+    mColWidth = qRound(1920.0 * 1.0 / rect.width() * 140);
 }
 
 void HqTableWidget::setHeaders(const TableColDataList &list)
@@ -169,6 +175,11 @@ void HqTableWidget::prepareUpdateTable(int newRowCount)
         //do nothing
     }
     this->setRowCount(newRowCount);
+    for(int i=0; i<this->rowCount(); i++)
+    {
+        //this->setRowHeight(i, height() / mMaxDisplayRow);
+        this->setRowHeight(i, mRowHeight);
+    }
 }
 
 void HqTableWidget::removeRows(int start, int count)
@@ -261,26 +272,11 @@ void HqTableWidget::slotCellClicked(int row, int col)
 
 void HqTableWidget::resizeEvent(QResizeEvent *event)
 {
+    QTableWidget::resizeEvent(event);
     QSize size = event->size();
     qDebug()<<__func__<<__LINE__<<size;
-    mMaxDisplayRow = 10;
-    mMaxDisplayCol = 4;
-    if(size.height() < size.width())
-    {
-        mMaxDisplayRow = 5;
-        mMaxDisplayCol = 8;
-        if(mMaxDisplayCol > this->columnCount())
-        {
-            mMaxDisplayCol = this->columnCount();
-        }
-    }
-    mRowHeight = size.height() / mMaxDisplayRow;
-    mColWidth = size.width()/ mMaxDisplayCol;
-    for(int i=0; i<this->rowCount(); i++)
-    {
-        this->setRowHeight(i, size.height() / mMaxDisplayRow);
-    }
-
+    mMaxDisplayRow = size.height() / mRowHeight;
+    mMaxDisplayCol = size.width() / mColWidth;
     for(int i=0; i<this->columnCount(); i++)
     {
         this->setColumnWidth(i, mColWidth);
@@ -308,7 +304,7 @@ void HqTableWidget::resizeEvent(QResizeEvent *event)
         }
     }
 
-    QTableWidget::resizeEvent(event);
+
 
 
 
