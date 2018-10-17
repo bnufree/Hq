@@ -34,6 +34,7 @@ public:
     void initPageCtrlMenu();
     QAction* insertContextMenu(QMenu* menu);
     void insertContextMenu(QAction *act);
+private:
 protected:
     void resizeEvent(QResizeEvent *event);
     void displayVisibleCols();

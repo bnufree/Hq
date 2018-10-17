@@ -48,9 +48,18 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
 #endif
     //根据当前屏幕的大小来设定显示的行高和列宽
     QRect rect = QApplication::desktop()->availableGeometry();
+    QFont font = this->font();
+    font.setBold(true);
+    font.setPointSize(20);
+    this->setFont(font);
     //默认屏幕大小为1920*1080
+    int font_height1 = this->fontMetrics().height();
     mRowHeight = (/*1080.0 * 1.0 / rect.height() * 40*/this->fontMetrics().height()* 2);
+
+    qDebug()<<"height:"<<font_height1<<rect.height()<<mRowHeight;
     mColWidth = qRound(1920.0 * 1.0 / rect.width() * 140);
+    //设定item的大小
+    //this->setStyleSheet(QString("QTableview::item{height:%1;font-weight:bold;font-size:20pt;}").arg(mRowHeight));
 }
 
 void HqTableWidget::setHeaders(const TableColDataList &list)
@@ -115,10 +124,9 @@ void HqTableWidget::setItemText(int row, int column, const QString &text, const 
 
     item->setString(text);
     item->setTextColor(color);
-    QFont font = item->font();
-    font.setBold(true);
-    font.setPointSize(20);
-    item->setFont(font);
+    item->setFont(this->font());
+
+    qDebug()<<item->font().pointSize()<<item->font().bold();
 }
 
 void HqTableWidget::setCodeName(int row, int column, const QString &code, const QString &name)
@@ -177,7 +185,6 @@ void HqTableWidget::prepareUpdateTable(int newRowCount)
     this->setRowCount(newRowCount);
     for(int i=0; i<this->rowCount(); i++)
     {
-        //this->setRowHeight(i, height() / mMaxDisplayRow);
         this->setRowHeight(i, mRowHeight);
     }
 }
