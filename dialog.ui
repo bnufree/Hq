@@ -17,7 +17,7 @@
    <string notr="true">*{
 	background-color:black;
 	color:white;
-	font-weight:bold;
+	font-weight:normal;
 }
 
 QWidget:focus

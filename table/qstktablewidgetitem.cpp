@@ -42,3 +42,4 @@ void QStkTableWidgetItem::setDouble(int val)
 {
     setText(QString::number(val, 'f', 2));
 }
+

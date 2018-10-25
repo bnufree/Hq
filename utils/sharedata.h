@@ -1,13 +1,13 @@
 ﻿#ifndef SHAREDATA_H
 #define SHAREDATA_H
 #include <QStringList>
-#include <QDate>
 #include <QList>
 #include <QObject>
 #include <QMap>
 #include <QDebug>
 #include <QRegExp>
 #include "blockdata.h"
+#include "hqutils.h"
 
 struct zjlxData{
     QString code;
@@ -153,7 +153,7 @@ struct ChinaShareEx
     qint64      mForeignVol;            //持股量
     double      mTotalPercent;          //占流通股百分比
     bool        mIsTop10;               //是否是当天10大成交
-    QDate       mDate;
+    ShareDate       mDate;
 
     ChinaShareEx()
     {
@@ -163,23 +163,23 @@ struct ChinaShareEx
         mForeignVol = 0;
         mTotalPercent = 0;
         mIsTop10 = false;
-        mDate = QDate::currentDate();
+        mDate = ShareDate::currentDate();
     }
 };
 
 //分红信息
-struct  ShareFhsp
+struct  ShareBonus
 {
+    QString         mCode;
     double          mSZZG; //送转股比例
     double          mXJFH;  //现金分红
-    qint64          mGQDJR; //股权登记日
-    qint64          mYAGGR; //预案公告日
-    ShareFhsp()
+    ShareDate           mGQDJR; //股权登记日
+    ShareDate           mYAGGR; //预案公告日
+    ShareDate           mDate;
+    ShareBonus()
     {
         mSZZG = 0.0;
         mXJFH = 0.0;
-        mGQDJR = 0;
-        mYAGGR = 0;
     }
 };
 
@@ -310,7 +310,7 @@ public:
     double          mProfit;
     ChinaShareEx    mHKExInfo;
     Finance         mFinanceInfo;
-    ShareFhsp       mFhspInfo;
+    ShareBonus       mFhspInfo;
 };
 
 typedef QList<ShareBaseData>     ShareBaseDataList;
@@ -359,9 +359,9 @@ public:
         mVol = 0;;
         mTime = 0;
     }
-    ShareData(const QString& code, const QDate& date):ShareBaseData(code)
+    ShareData(const QString& code, const ShareDate& date):ShareBaseData(code)
     {
-        mTime = QDateTime(date).toMSecsSinceEpoch();
+        mTime = QDateTime(date.date()).toMSecsSinceEpoch();
         mClose = 0.0;
         for(int i=0; i<20; i++)
         {
@@ -553,9 +553,9 @@ public:
         }
     }
 
-    ShareData &valueOfDate(const QDate& date, const QString& code)
+    ShareData &valueOfDate(const ShareDate& date, const QString& code)
     {
-        QString key = QString("%1_%2").arg(QDateTime(date).toMSecsSinceEpoch()).arg(ShareBaseData::fullCode(code));
+        QString key = QString("%1_%2").arg(QDateTime(date.date()).toMSecsSinceEpoch()).arg(ShareBaseData::fullCode(code));
         if(!mDataIndexMap.contains(key))
         {
             ShareData data(code, date);

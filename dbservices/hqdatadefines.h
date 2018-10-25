@@ -7,13 +7,14 @@
 //#include "sharedata.h"
 
 //表名
-#define         HQ_SHARE_HISTORY_INFO_TABLE           "Share_history"
-#define         HQ_BLOCK_TABLE                      "block"
-#define         HQ_SHARE_BASIC_INFO_TABLE                      "Share_info"
-#define         HQ_HSGTOP10_TABLE                   "hsgTop10"
-#define         HQ_GENERAL_TABLE                    "general_info"
-#define         HQ_FINANCE_TABLE                    "finance"
-#define         HQ_CLOSE_DATE_TABLE                 "close_date"
+#define         TABLE_SHARE_HISTORY_TEMPLATE        "share_history_%1"
+#define         TABLE_BLOCK                         "block"
+#define         TABLE_SHARE_BASIC_INFO              "share_info"
+#define         TABLE_HSGT_TOP10                    "share_hsgt_top10"
+#define         TABLE_SHARE_BONUS                   "share_bonus"
+#define         TABLE_SHARE_FINANCE                 "share_finance"
+#define         TABLE_DB_UPDATE                     "share_db_update"
+#define         TABLE_SHARE_HOLEDER                 "share_holder"
 
 //列名
 #define         HQ_TABLE_COL_ID                 "id"
@@ -41,9 +42,11 @@
 #define         HQ_TABLE_COL_TABLE_NM           "name"
 #define         HQ_TABLE_COL_MGSY               "MGSY"
 #define         HQ_TABLE_COL_JZCSYL             "JZCSYL"
-#define         HQ_TABLE_COL_YAGGR              "YAGGR"
-#define         HQ_TABLE_COL_GQDJR              "GQDJR"
-#define         HQ_TABLE_COL_FHSP               "FHSP"
+#define         HQ_TABLE_COL_BONUS_YAGGR        "YAGGR"
+#define         HQ_TABLE_COL_BONUS_GQDJR        "GQDJR"
+#define         HQ_TABLE_COL_BONUS_SHARE        "share"
+#define         HQ_TABLE_COL_BONUS_MONEY        "money"
+#define         HQ_TABLE_COL_BONUS_DATE         "date"
 
 //typedef         ShareData               ShareData;
 //typedef         ShareDataList           ShareDataList;

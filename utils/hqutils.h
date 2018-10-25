@@ -8,9 +8,42 @@
 
 
 #define         ANDROID_FILE_PATH       "/mnt/sdcard/com.hq.info"
-class ShareDate: public QDate
-{
 
+class ShareDate
+{
+public:
+    ShareDate() {}
+    ShareDate(const QDate& date):mDate(date){}
+    ShareDate(uint time_t){mDate = QDateTime::fromTime_t(time_t).date();}
+    ShareDate(const ShareDate& other) {mDate = other.mDate;}
+    ShareDate& operator=(const ShareDate& other){
+        if(this != &other) {
+            this->mDate = other.mDate;
+        }
+        return *this;
+    }
+
+    uint toTime_t() const {return QDateTime(mDate).toTime_t();}
+    static ShareDate fromTime_t(uint time_t)
+    {
+        return ShareDate(time_t);
+    }
+    QString toString(){
+        return mDate.toString("yyyy-MM-dd");
+    }
+    static ShareDate fromString(const QString& str)
+    {
+        return ShareDate(QDate::fromString(str, "yyyy-MM-dd"));
+    }
+
+    static ShareDate currentDate(){
+        return ShareDate(QDate::currentDate());
+    }
+    QDate   date() const {return mDate;}
+    bool    isNull() const {return mDate.isNull();}
+
+private:
+    QDate       mDate;
 };
 
 class HqUtils

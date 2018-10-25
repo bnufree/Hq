@@ -4,10 +4,37 @@
 #include <QFile>
 #include "utils/comdatadefines.h"
 
-#define     QDebug()            qDebug()<<__FUNCTION__<<__LINE__
-#define     HISTORY_TABLE(code) HQ_SHARE_HISTORY_INFO_TABLE + code.right(6)
+#define     QDebug()                    qDebug()<<__FUNCTION__<<__LINE__
+#define     HISTORY_TABLE(code)         QString(TABLE_SHARE_HISTORY_TEMPLATE).arg(code.right(6))
 
-#define     DB_FILE             QString("%1db.data").arg(HQ_DATA_DIR)
+#define     DB_FILE                     QString("%1db.data").arg(HQ_DATA_DIR)
+#define     SQL_WHERE                   " where "
+#define     DATESTR(date)               date.toString("yyyy-MM-dd")
+
+
+QString DBColValList::insertString() const
+{
+    if(size() == 0) return QString();
+    QStringList colList;
+    for(int i=0; i<size(); i++)
+    {
+        HQ_QUERY_CONDITION data = at(i);
+        colList.append(data.col);
+    }
+    QString("(%1) values (%2)").arg(colList.join(",")).arg(DBPlacementList(colList.size()).join(","));
+}
+
+QString DBColValList::updateString() const
+{
+    if(size() == 0) return QString();
+    QStringList colList;
+    for(int i=0; i<size(); i++)
+    {
+        HQ_QUERY_CONDITION data = at(i);
+        colList.append(QString("%1 = ?").arg(data.col));
+    }
+    return colList.join(",");
+}
 
 HQDBDataBase::HQDBDataBase(QObject *parent) : QObject(parent)
 {
@@ -93,13 +120,13 @@ bool HQDBDataBase::getSimilarCodeOfText(QStringList &codes, const QString &text)
     {
         sts = mSQLQuery.exec(QString("select %1 from %2 where %3 like '%%4%' limit 10")\
                              .arg(HQ_TABLE_COL_CODE)\
-                             .arg(HQ_SHARE_BASIC_INFO_TABLE)\
+                             .arg(TABLE_SHARE_BASIC_INFO)\
                              .arg(HQ_TABLE_COL_CODE)\
                              .arg(text));
-    }else {
+    } else {
         sts = mSQLQuery.exec(QString("select %1 from %2 where %3 like '%%4%' limit 10")\
                              .arg(HQ_TABLE_COL_CODE)\
-                             .arg(HQ_SHARE_BASIC_INFO_TABLE)\
+                             .arg(TABLE_SHARE_BASIC_INFO)\
                              .arg(HQ_TABLE_COL_PY_ABBR)\
                              .arg(text));
     }
@@ -115,7 +142,7 @@ bool HQDBDataBase::getBlockDataList(QMap<QString, BlockData*>& pBlockMap, int ty
 {
     QMutexLocker locker(&mSQlMutex);
     QString filter = (type != 0 ? tr(" where %1 = %2").arg(HQ_TABLE_COL_BLOCK_TYPE).arg(type) : "");
-    if(!mSQLQuery.exec(tr("select * from %1 %2").arg(HQ_BLOCK_TABLE).arg(filter))) return false;
+    if(!mSQLQuery.exec(tr("select * from %1 %2").arg(TABLE_BLOCK).arg(filter))) return false;
     while (mSQLQuery.next()) {
         QString code = mSQLQuery.value(HQ_TABLE_COL_CODE).toString();
         BlockData *info = pBlockMap.value(code, 0);
@@ -160,7 +187,7 @@ bool HQDBDataBase::isBlockExist(const QString &code)
 {
     QMutexLocker locker(&mSQlMutex);
     //先检查板块名是否存在
-    if(!mSQLQuery.exec(tr("select 1 from %1 where %2 = '%3'").arg(HQ_BLOCK_TABLE).arg(HQ_TABLE_COL_CODE).arg(code))) return false;
+    if(!mSQLQuery.exec(tr("select 1 from %1 where %2 = '%3'").arg(TABLE_BLOCK).arg(HQ_TABLE_COL_CODE).arg(code))) return false;
     while (mSQLQuery.next()) {
         return true;
     }
@@ -171,7 +198,7 @@ bool HQDBDataBase::addBlock(const BlockData &info)
 {
     QMutexLocker locker(&mSQlMutex);
     mSQLQuery.prepare(QString("insert into %1 values ("
-                      "?, ?, ?, ?, ?, ?, ?)").arg(HQ_BLOCK_TABLE));
+                      "?, ?, ?, ?, ?, ?, ?)").arg(TABLE_BLOCK));
     mSQLQuery.addBindValue(info.mCode);
     mSQLQuery.addBindValue(info.mName);
     mSQLQuery.addBindValue(info.mClose);
@@ -188,7 +215,7 @@ bool HQDBDataBase::modifyBlock(const BlockData &info)
     mSQLQuery.prepare(QString("update %1 set "
                       " %2 = ?, %3 = ?, %4 = ?, %5 = ? "
                       " where %6 = ? ")
-                      .arg(HQ_BLOCK_TABLE)
+                      .arg(TABLE_BLOCK)
                       .arg(HQ_TABLE_COL_CLOSE)
                       .arg(HQ_TABLE_COL_CHANGE_PERCENT)
                       .arg(HQ_TABLE_COL_SHARE_LIST)
@@ -205,7 +232,7 @@ bool HQDBDataBase::modifyBlock(const BlockData &info)
 
 bool HQDBDataBase::deleteBlock(const QString& code)
 {
-    return mSQLQuery.exec(tr("delete from %1 where %2 = %1").arg(HQ_BLOCK_TABLE).arg(HQ_TABLE_COL_CODE).arg(code));
+    return mSQLQuery.exec(tr("delete from %1 where %2 = %1").arg(TABLE_BLOCK).arg(HQ_TABLE_COL_CODE).arg(code));
 }
 
 bool HQDBDataBase::createDBTables()
@@ -213,15 +240,14 @@ bool HQDBDataBase::createDBTables()
     qDebug()<<__FUNCTION__<<__LINE__;
     if(!createBlockTable()) return false;
     if(!createShareBasicTable()) return false;
-    if(!createGeneralTable()) return false;
-    if(!createCloseDateTable()) return false;
+    if(!createDBUpdateDateTable()) return false;
     qDebug()<<__FUNCTION__<<__LINE__;
     return true;
 }
 
 bool HQDBDataBase::createBlockTable()
 {
-    if(isTableExist(HQ_BLOCK_TABLE)) return true;
+    if(isTableExist(TABLE_BLOCK)) return true;
     TableColList colist;
     colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
     colist.append({HQ_TABLE_COL_CODE, "VARCHAR(10) NOT NULL"});
@@ -231,14 +257,13 @@ bool HQDBDataBase::createBlockTable()
     colist.append({HQ_TABLE_COL_SHARE_LIST, "VARCHAR(10000) NULL"});
     colist.append({HQ_TABLE_COL_BLOCK_TYPE, "INTEGER NULL"});
     colist.append({HQ_TABLE_COL_DATE, "DATE NULL"});
-    return createTable(HQ_BLOCK_TABLE, colist);
+    return createTable(TABLE_BLOCK, colist);
 }
-
 
 
 bool HQDBDataBase::createShareBasicTable()
 {
-    if(isTableExist(HQ_SHARE_BASIC_INFO_TABLE)) return true;
+    if(isTableExist(TABLE_SHARE_BASIC_INFO)) return true;
     TableColList colist;
     colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
     colist.append({HQ_TABLE_COL_CODE, "VARCHAR(10) NOT NULL"});
@@ -251,18 +276,30 @@ bool HQDBDataBase::createShareBasicTable()
     colist.append({HQ_TABLE_COL_PROFIT, "NUMERIC NULL"});
     colist.append({HQ_TABLE_COL_BLOCK_LIST, "VARCHAR(10000) NULL"});
 
-    return createTable(HQ_SHARE_BASIC_INFO_TABLE, colist);
+    return createTable(TABLE_SHARE_BASIC_INFO, colist);
 }
 
-bool HQDBDataBase::createGeneralTable()
+bool HQDBDataBase::createShareHistoryInfoTable(const QString& code)
 {
-    if(isTableExist(HQ_GENERAL_TABLE)) return true;
+    if(code.length() == 0) return false;
+    if(isTableExist(HISTORY_TABLE(code))) return true;
     TableColList colist;
     colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
-    colist.append({HQ_TABLE_COL_TABLE_NM, "VARCHAR(100) NOT NULL"});
+    colist.append({HQ_TABLE_COL_CODE, "VARCHAR(6) NOT NULL"});
+    colist.append({HQ_TABLE_COL_NAME, "VARCHAR(100) NOT NULL"});
+    colist.append({HQ_TABLE_COL_CLOSE, "NUMERIC NULL"});
+    colist.append({HQ_TABLE_COL_CHANGE_PERCENT, "NUMERIC NULL"});
+    colist.append({HQ_TABLE_COL_VOL, "NUMERIC NULL"});
+    colist.append({HQ_TABLE_COL_MONEY, "NUMERIC NULL"});
+    colist.append({HQ_TABLE_COL_ZJLX, "NUMERIC NULL"});
+    colist.append({HQ_TABLE_COL_RZRQ, "NUMERIC NULL"});
+    colist.append({HQ_TABLE_COL_HSGT_HAVE, "NUMERIC NULL"});
+    colist.append({HQ_TABLE_COL_TOTALMNT, "NUMERIC NULL"});
+    colist.append({HQ_TABLE_COL_MUTAL, "NUMERIC NULL"});
     colist.append({HQ_TABLE_COL_DATE, "DATE NULL"});
-    return createTable(HQ_GENERAL_TABLE, colist);
+    return createTable(HISTORY_TABLE(code), colist);
 }
+
 
 bool HQDBDataBase::updateHistoryDataList(const ShareDataList &list, bool delDB)
 {
@@ -303,34 +340,16 @@ bool HQDBDataBase::updateHistoryDataList(const ShareDataList &list, bool delDB)
     return true;
 }
 
-bool HQDBDataBase::createShareHistoryInfoTable()
-{
-    if(isTableExist(HQ_SHARE_HISTORY_INFO_TABLE)) return true;
-    TableColList colist;
-    colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
-    colist.append({HQ_TABLE_COL_CODE, "VARCHAR(6) NOT NULL"});
-    colist.append({HQ_TABLE_COL_NAME, "VARCHAR(100) NOT NULL"});
-    colist.append({HQ_TABLE_COL_CLOSE, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_CHANGE_PERCENT, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_VOL, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_MONEY, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_ZJLX, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_RZRQ, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_HSGT_HAVE, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_TOTALMNT, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_MUTAL, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_DATE, "DATE NULL"});
-    return createTable(HQ_SHARE_HISTORY_INFO_TABLE, colist);
-}
 
-QDate HQDBDataBase::getLastUpdateDateOfTable(const QString& table)
+
+ShareDate HQDBDataBase::getLastUpdateDateOfTable(const QString& table)
 {
-    createGeneralTable();
+    createDBUpdateDateTable();
     QMutexLocker locker(&mSQlMutex);
-    QDate date = QDate(2017,3,16);
-    if(mSQLQuery.exec(tr("select %1 from %2 where %3 = %4")\
+    ShareDate date = ShareDate(2017,3,16);
+    if(mSQLQuery.exec(tr("select %1 from %2 where %3 = ‘%4’")\
                       .arg(HQ_TABLE_COL_DATE)\
-                      .arg(HQ_GENERAL_TABLE)\
+                      .arg(TABLE_DB_UPDATE)\
                       .arg(HQ_TABLE_COL_TABLE_NM)\
                       .arg(table)))
     {
@@ -347,7 +366,7 @@ QDate HQDBDataBase::getLastUpdateDateOfTable(const QString& table)
 
 bool HQDBDataBase::updateDateOfTable(const QString &table)
 {
-    QDate date = QDate::currentDate();
+    ShareDate date = ShareDate::currentDate();
     QList<HQ_QUERY_CONDITION> conList;
     conList.append({HQ_TABLE_COL_TABLE_NM, table});
     if(!deleteRecord(HQ_GENERAL_TABLE, conList)) return false;
@@ -365,7 +384,7 @@ bool HQDBDataBase::updateDateOfTable(const QString &table)
 bool HQDBDataBase::getBasicShareDataList(QMap<QString, ShareData*>& pShareMap)
 {
     QMutexLocker locker(&mSQlMutex);
-    if(!mSQLQuery.exec(tr("select * from %1").arg(HQ_SHARE_BASIC_INFO_TABLE))) return false;
+    if(!mSQLQuery.exec(tr("select * from %1").arg(TABLE_SHARE_BASIC_INFO))) return false;
     while (mSQLQuery.next()) {
         ShareData *info = new ShareData;
         info->setCode(mSQLQuery.value(HQ_TABLE_COL_CODE).toString());
@@ -392,7 +411,7 @@ bool HQDBDataBase::updateBasicShareDataList(QList<ShareData*> dataList)
         bool exist = false;
         QList<HQ_QUERY_CONDITION> conList;
         conList.append({HQ_TABLE_COL_CODE, data->mCode});
-        if(!isRecordExist(exist, HQ_SHARE_BASIC_INFO_TABLE, conList))
+        if(!isRecordExist(exist, TABLE_SHARE_BASIC_INFO, conList))
         {
             QSqlDatabase::database().rollback();
             return false;
@@ -405,7 +424,7 @@ bool HQDBDataBase::updateBasicShareDataList(QList<ShareData*> dataList)
     }
 
     //更新日期
-    if(!updateDateOfTable(HQ_SHARE_BASIC_INFO_TABLE))
+    if(!updateDateOfTable(TABLE_SHARE_BASIC_INFO))
     {
         QSqlDatabase::database().rollback();
         return false;
@@ -419,7 +438,7 @@ bool HQDBDataBase::clearAndUpdateBasicShareDataList(QList<ShareData*> dataList)
     qDebug()<<__FUNCTION__<<__LINE__<<dataList.size();
     if(dataList.length() == 0) return false;
     QSqlDatabase::database().transaction();
-    if(!deleteRecord(HQ_SHARE_BASIC_INFO_TABLE))
+    if(!deleteRecord(TABLE_SHARE_BASIC_INFO))
     {
         QSqlDatabase::database().rollback();
         return false;
@@ -434,7 +453,7 @@ bool HQDBDataBase::clearAndUpdateBasicShareDataList(QList<ShareData*> dataList)
     }
 
     //更新日期
-    if(!updateDateOfTable(HQ_SHARE_BASIC_INFO_TABLE))
+    if(!updateDateOfTable(TABLE_SHARE_BASIC_INFO))
     {
         QSqlDatabase::database().rollback();
         return false;
@@ -454,7 +473,7 @@ bool HQDBDataBase::updateBasicShare(const ShareData& data, bool exist)
                                   " values ("
                                   "?, ?, ?, ?, ?, "
                                   "?, ?, ?, ?)")\
-                          .arg(HQ_SHARE_BASIC_INFO_TABLE)
+                          .arg(TABLE_SHARE_BASIC_INFO)
                           .arg(HQ_TABLE_COL_NAME)\
                           .arg(HQ_TABLE_COL_PY_ABBR)\
                           .arg(HQ_TABLE_COL_FAVORITE)\
@@ -469,7 +488,7 @@ bool HQDBDataBase::updateBasicShare(const ShareData& data, bool exist)
         mSQLQuery.prepare(QString(" update %1 set "
                                   " %2 = ?,%3 = ?,%4 = ?,%5 = ?,%6 = ?, "
                                   " %7 = ?,%8 = ?,%9 = ? where %10 = ? ")
-                          .arg(HQ_SHARE_BASIC_INFO_TABLE)\
+                          .arg(TABLE_SHARE_BASIC_INFO)\
                           .arg(HQ_TABLE_COL_NAME)\
                           .arg(HQ_TABLE_COL_PY_ABBR)\
                           .arg(HQ_TABLE_COL_FAVORITE)\
@@ -602,28 +621,6 @@ bool HQDBDataBase::isRecordExist(bool& exist,const QString &table, const QList<H
     return true;
 }
 
-bool HQDBDataBase::deleteRecord(const QString &table, const QList<HQ_QUERY_CONDITION> &list)
-{
-    QMutexLocker locker(&mSQlMutex);
-    QStringList filterList;
-    QVariantList valList;
-    foreach (HQ_QUERY_CONDITION con, list) {
-        filterList.append(QString("%1=?").arg(con.col));
-        valList.append(con.val);
-    }
-    QString filter = "";
-    if(filterList.length() > 0)
-    {
-        filter = " where " + filterList.join(" and ");
-    }
-    mSQLQuery.prepare(QString("delete from %1 %2").arg(table).arg(filter));
-    foreach (QVariant val, valList) {
-        mSQLQuery.addBindValue(val);
-    }
-    if(!mSQLQuery.exec()) return false;
-    return true;
-}
-
 double HQDBDataBase::getMultiDaysChangePercent(const QString &code, HISTORY_CHANGEPERCENT type)
 {
     double change = 0.0;
@@ -713,7 +710,7 @@ bool HQDBDataBase::getHistoryDataOfCode(ShareDataList& list, const QString &code
         data.mChgPercent = mSQLQuery.value(HQ_TABLE_COL_CHANGE_PERCENT).toDouble();
         data.mHKExInfo.mForeignVol = mSQLQuery.value(HQ_TABLE_COL_HSGT_HAVE).toLongLong();
         data.mForeignCap = data.mClose * data.mHKExInfo.mForeignVol;
-        data.mTime = QDateTime(mSQLQuery.value(HQ_TABLE_COL_DATE).toDate()).toMSecsSinceEpoch();
+        data.mTime = ShareDateTime(mSQLQuery.value(HQ_TABLE_COL_DATE).toDate()).toMSecsSinceEpoch();
         if(list.size() > 0)
         {
             ShareData& last = list[list.size() -1];
@@ -725,67 +722,174 @@ bool HQDBDataBase::getHistoryDataOfCode(ShareDataList& list, const QString &code
     if(list.length() == 0) return false;
     return true;
 }
-
-//日期操作相关
-bool HQDBDataBase::createCloseDateTable()
+//分红送配信息的操作
+bool HQDBDataBase::createShareBonusIbfoTable()
 {
-    if(isTableExist(HQ_CLOSE_DATE_TABLE)) return true;
+    if(isTableExist(TABLE_SHARE_BONUS)) return true;
     TableColList colist;
     colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
-    colist.append({HQ_TABLE_COL_DATE, "DATE  NOT NULL"});
-    return createTable(HQ_CLOSE_DATE_TABLE, colist);
+    colist.append({HQ_TABLE_COL_CODE, "VARCHAR(6) NULL"});
+    colist.append({HQ_TABLE_COL_BONUS_SHARE, "DOUBLE NULL"});
+    colist.append({HQ_TABLE_COL_BONUS_MONEY, "DOUBLE NULL"});
+    colist.append({HQ_TABLE_COL_BONUS_YAGGR, "INTEGER NULL"});
+    colist.append({HQ_TABLE_COL_BONUS_GQDJR, "INTEGER NULL"});
+    colist.append({HQ_TABLE_COL_BONUS_DATE, "INTEGER NULL"});
+    return createTable(TABLE_SHARE_BONUS, colist);
 }
 
-bool HQDBDataBase::addDate(const QDate &date)
+bool HQDBDataBase::updateShareBonus(QList<ShareBonus>& bonusList)
+{
+    int size = bonusList.size();
+    if(size == 0) return false;
+    mDB.transaction();
+    for(int i=0; i<size; i++)
+    {
+        ShareBonus bonus = bonusList[i];
+        DBColValList list;
+        list.append({HQ_TABLE_COL_CODE, bonus.mCode});
+        list.append({HQ_TABLE_COL_BONUS_SHARE, bonus.mSZZG});
+        list.append({HQ_TABLE_COL_BONUS_MONEY, bonus.mXJFH});
+        list.append({HQ_TABLE_COL_BONUS_YAGGR, bonus.mYAGGR});
+        list.append({HQ_TABLE_COL_BONUS_GQDJR, bonus.mGQDJR});
+        list.append({HQ_TABLE_COL_BONUS_DATE, bonus.mDate});
+        if(updateTable(TABLE_SHARE_BONUS, list, list[0])){
+            mDB.rollback();
+        }
+    }
+    mDB.commit();
+}
+
+bool HQDBDataBase::queryShareBonus(QList<ShareBonus>& list, const QString& code, const ShareDate& date)
+{
+    QString sql = QString("select * from %1").arg(TABLE_SHARE_BONUS);
+    if(code.length() > 0 || !(date.isNull())){
+        sql.append(SQL_WHERE);
+        if(code.length() > 0) {
+            sql.append(QString("%1 = '%2'").arg(HQ_TABLE_COL_CODE).arg(code));
+        }
+        if(!date.isNull()) {
+            sql.append(QString("%1 = '%2'").arg(HQ_TABLE_COL_BONUS_DATE).arg(DATESTR(date)));
+        }
+    }
+    QMutexLocker locker(&mSQlMutex);
+    if(!mSQLQuery.exec(sql)) return false;
+    while (mSQLQuery.next()) {
+        ShareBonus bonus;
+        bonus.mCode = mSQLQuery.value(HQ_TABLE_COL_CODE).toString();
+        break;
+    }
+    return true;
+}
+
+bool HQDBDataBase::delShareBonus(const QString& code, const ShareDate& date)
+{
+    DBColValList list;
+    if(code.length() > 0)
+    {
+        list.append({HQ_TABLE_COL_CODE, code});
+    }
+    if(!date.isNull())
+    {
+        list.append({HQ_TABLE_COL_BONUS_DATE, date.toTime_t()});
+    }
+
+    return deleteRecord(TABLE_SHARE_BONUS, list);
+}
+
+//数据表更新日期的相关操作
+bool HQDBDataBase::createDBUpdateDateTable()
+{
+    if(isTableExist(TABLE_DB_UPDATE)) return true;
+    TableColList colist;
+    colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
+    colist.append({HQ_TABLE_COL_TABLE_NM, "VARCHAR(100) NULL"});
+    colist.append({HQ_TABLE_COL_DATE, "INTEGER  NOT NULL"});
+    return createTable(TABLE_DB_UPDATE, colist);
+}
+
+bool HQDBDataBase::queryDBUpdateDate(ShareDate &date, const QString &table)
 {
     QMutexLocker locker(&mSQlMutex);
-    mSQLQuery.prepare(QString("insert into %1 (%2) where (?)").arg(HQ_CLOSE_DATE_TABLE).arg(HQ_TABLE_COL_DATE));
-    mSQLQuery.addBindValue(date);
+    QString sql = QString("select %1 from %2 where %3 = '%4' ").arg(HQ_TABLE_COL_DATE).arg(TABLE_DB_UPDATE).arg(HQ_TABLE_COL_TABLE_NM).arg(table);
+    if(!mSQLQuery.exec(sql)) return false;
+    while (mSQLQuery.next()) {
+        date = ShareDate::fromTime_t(mSQLQuery.value(0).toInt());
+        break;
+    }
+    return true;
+}
+
+bool HQDBDataBase::updateDBUpdateDate(const ShareDate& date, const QString& table)
+{
+    DBColValList list;
+    list.append({HQ_TABLE_COL_TABLE_NM, table});
+    list.append({HQ_TABLE_COL_DATE, date.toTime_t()});
+    return updateTable(TABLE_DB_UPDATE, list, list[0]);
+}
+
+bool HQDBDataBase::delDBUpdateDate(const QString &table)
+{
+    DBColValList list;
+    if(table.length() > 0)
+    {
+        list.append({HQ_TABLE_COL_TABLE_NM, table});
+    }
+
+    return deleteRecord(TABLE_DB_UPDATE, list);
+}
+
+bool HQDBDataBase::updateTable(const QString& tableName, const DBColValList& values, const DBColVal& key )
+{
+    //检查记录已经添加
+    bool isRecordExist = false;
+    QMutexLocker locker(&mSQlMutex);
+    mSQLQuery.prepare(QString("select count(1) from %1 whrer %2 = ?").arg(tableName).arg(key.col));
+    mSQLQuery.addBindValue(key.val);
+    if(!mSQLQuery.exec()) return false;
+    while (mSQLQuery.next()) {
+        isRecordExist = true;
+        break;
+    }
+    if(isRecordExist){
+        //更新
+        mSQLQuery.prepare(QString("update %1 set %2 where %3 = ?").arg(tableName).arg(values.updateString()).arg(key.col));
+    } else {
+        //添加
+        mSQLQuery.prepare(QString("insert into %1 %2").arg(tableName).arg(values.insertString()));
+    }
+    for(int i=0; i<values.size(); i++)
+    {
+        mSQLQuery.addBindValue(values[i].val);
+    }
+    if(isRecordExist)
+    {
+        mSQLQuery.addBindValue(key.val);
+    }
     return mSQLQuery.exec();
 }
 
-bool HQDBDataBase::delDate(const QDate &date)
-{
-    QList<HQ_QUERY_CONDITION> list;
-    if(date.isValid())
-    {
-        HQ_QUERY_CONDITION con(HQ_TABLE_COL_DATE, QVariant(date));
-        list.append(con);
-    }
-    return deleteRecord(HQ_CLOSE_DATE_TABLE, list);
-}
-
-bool HQDBDataBase::updateDates(const QList<QDate> &dates)
-{
-    QSqlDatabase::database().transaction();
-    if(!deleteRecord(HQ_CLOSE_DATE_TABLE))
-    {
-        QSqlDatabase::database().rollback();
-        return false;
-    }
-    foreach (QDate date, dates) {
-        if(!addDate(date))
-        {
-            QSqlDatabase::database().rollback();
-            return false;
-        }
-    }
-
-    QSqlDatabase::database().commit();
-    return true;
-}
-
-bool HQDBDataBase::queryCloseDates(QList<QDate> &dates)
+bool HQDBDataBase::deleteRecord(const QString &table, const DBColValList &list)
 {
     QMutexLocker locker(&mSQlMutex);
-    QString sql = QString("select %1 from %2 ").arg(HQ_TABLE_COL_DATE).arg(HQ_CLOSE_DATE_TABLE);
-    if(!mSQLQuery.exec(sql)) return false;
-    while (mSQLQuery.next()) {
-        dates.append(mSQLQuery.value(0).toDate());
+    QStringList filterList;
+    QVariantList valList;
+    foreach (HQ_QUERY_CONDITION con, list) {
+        filterList.append(QString("%1=?").arg(con.col));
+        valList.append(con.val);
     }
-
+    QString filter = "";
+    if(filterList.length() > 0)
+    {
+        filter = " where " + filterList.join(" and ");
+    }
+    mSQLQuery.prepare(QString("delete from %1 %2").arg(table).arg(filter));
+    foreach (QVariant val, valList) {
+        mSQLQuery.addBindValue(val);
+    }
+    if(!mSQLQuery.exec()) return false;
     return true;
 }
+
 
 QString HQDBDataBase::errMsg()
 {

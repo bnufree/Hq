@@ -25,12 +25,16 @@ void QShareCodesWork::run()
 {
     ShareBaseDataList list;
     QByteArray http = QHttpGet::getContentOfURL("http://quote.eastmoney.com/stocklist.html");
+    FILE *fp = fopen("code.txt", "w");
+    fprintf(fp, "%s", http.data());
+    fclose(fp);
     int r = http.indexOf("(600036)");
     //qDebug()<<"mid:"<<http.mid(r - 10, 20);
     QTextCodec *codes = QTextCodec::codecForHtml(http);
+    qDebug()<<"code:"<<codes->name();
     QTextCodec *UTF8 = QTextCodec::codecForName("UTF8");
     QString result = codes->toUnicode(http);
-#if 0
+#if 1
     //QRegExp reg(">([\u4e00-\u9fa5A-Z0-9\*]{1,})\\(([0-9]{6})\\)<");
     QRegExp reg(">([\u4e00-\u9fffA-Z0-9\*]{1,})\\(([0-9]{6})\\)<");
     QString utf8_result = QString::fromUtf8(UTF8->fromUnicode(result));
@@ -39,15 +43,15 @@ void QShareCodesWork::run()
     while((index = reg.indexIn(utf8_result, index)) >= 0)
     {
         QString name = reg.cap(1);
-        QString code = reg.cap(2);
+        QString code = reg.cap(2);        
         if(reg_code.exactMatch(code))
         {
             ShareBaseData data;
             data.setCode(ShareBaseData::fullCode(code));
             data.setName(name);
-            data.setShareType(ShareBaseData::shareType(code));            
-            //data.setPY(HqUtils::GetFirstLetter(UTF8->toUnicode(name.toUtf8())));
-            qDebug()<<data.mCode<<data.mName;
+            data.setShareType(ShareBaseData::shareType(code));
+            qDebug()<<data.mCode<<data.mName<<name.toUtf8().toHex()<<name.toUtf8().size();
+            data.setPY(HqUtils::GetFirstLetter(UTF8->toUnicode(name.toUtf8())));
             list.append(data);
         }
         index += reg.matchedLength();

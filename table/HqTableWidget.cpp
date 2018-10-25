@@ -49,7 +49,7 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     //根据当前屏幕的大小来设定显示的行高和列宽
     QRect rect = QApplication::desktop()->availableGeometry();
     QFont font = this->font();
-    font.setBold(true);
+    font.setBold(false);
     font.setPointSize(20);
     this->setFont(font);
     //默认屏幕大小为1920*1080
@@ -124,10 +124,40 @@ void HqTableWidget::setItemText(int row, int column, const QString &text, const 
 
     item->setString(text);
     item->setTextColor(color);
-    item->setFont(this->font());
-
-    qDebug()<<item->font().pointSize()<<item->font().bold();
+    QFont font = this->font();
+    if(!this->isColumnHidden(column))
+    {
+        //字体自适应
+        int text_width = QFontMetrics(font).width(text);
+        while (text_width > this->columnWidth(column) - 10) {
+            font.setPointSize(font.pointSize()-1);
+            text_width = QFontMetrics(font).width(text);
+        }
+    }
+    item->setFont(font);
 }
+
+void HqTableWidget::updateColumn(int col)
+{
+    for(int i=0; i<this->rowCount();i++)
+    {
+        if(this->isRowHidden(i)) continue;
+        QTableWidgetItem *item = this->item(i, col);
+        if(!item) continue;
+        if(item->text().trimmed().length() == 0) continue;
+        QString text = item->text();
+        QFont font = item->font();
+        //字体自适应
+        int text_width = QFontMetrics(font).width(text);
+        while (text_width > this->columnWidth(col) - 10) {
+            font.setPointSize(font.pointSize()-1);
+            text_width = QFontMetrics(font).width(text);
+        }
+        item->setFont(font);
+    }
+}
+
+
 
 void HqTableWidget::setCodeName(int row, int column, const QString &code, const QString &name)
 {
@@ -462,6 +492,7 @@ void HqTableWidget::optMoveTable(OPT_MOVE_MODE mode)
             //还存在未显示的咧
             this->setColumnHidden(col_start, true);
             this->setColumnHidden(col_end + 1, false);
+            updateColumn(col_end+1);
         }
         //displayVisibleCols();
 
@@ -497,6 +528,7 @@ void HqTableWidget::optMoveTable(OPT_MOVE_MODE mode)
             //还存在未显示的咧
             this->setColumnHidden(col_end, true);
             this->setColumnHidden(col_start - 1, false);
+            updateColumn(col_start-1);
         }
         //displayVisibleCols();
 

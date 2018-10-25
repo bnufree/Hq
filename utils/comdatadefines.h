@@ -121,6 +121,7 @@ typedef struct struTableColData
 }TableColData;
 
 typedef QList<TableColData>         TableColDataList;
+
 #ifdef Q_OS_WIN
 #define         HQ_APP_DIR                  QApplication::applicationDirPath()
 #else

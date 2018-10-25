@@ -20,13 +20,14 @@ HqUtils::HqUtils()
 QString HqUtils::GetFirstLetter( const QString& unicode )
 {
     QTextCodec *gbkCodec = QTextCodec::codecForName("GBK");
-    QByteArray gbkArray = gbkCodec->fromUnicode(unicode).toUpper();
+    QByteArray gbkArray = gbkCodec->fromUnicode(unicode);
     char *strChs = gbkArray.data();
-    QByteArray unicodeArray;
-    for(int i=0; i<unicode.length(); i++)
-    {
-        unicodeArray.append(QByteArray::number(unicode[i].unicode(), 16));
-    }
+
+//    QByteArray unicodeArray;
+//    for(int i=0; i<unicode.length(); i++)
+//    {
+//        unicodeArray.append(QByteArray::number(unicode[i].unicode(), 16));
+//    }
     //qDebug()<<"chars:"<<gbkArray<<" src:"<<unicode<<" unicode:"<<unicodeArray.toUpper();
  //   char *strChs = unicode.toLocal8Bit().data();
     static int li_SecPosValue[] = {
@@ -76,6 +77,8 @@ QString HqUtils::GetFirstLetter( const QString& unicode )
             }
         }
     }
+
+    qDebug()<<"gbk:"<<gbkArray.toHex().toUpper()<<gbkArray.size()<<result.c_str();
     return QString::fromStdString(result);
 }
 
