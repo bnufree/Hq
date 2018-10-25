@@ -40,8 +40,11 @@
 #define         HQ_TABLE_COL_BLOCK_LIST         "block_list"
 #define         HQ_TABLE_COL_BLOCK_TYPE         "type"
 #define         HQ_TABLE_COL_TABLE_NM           "name"
-#define         HQ_TABLE_COL_MGSY               "MGSY"
-#define         HQ_TABLE_COL_JZCSYL             "JZCSYL"
+
+#define         HQ_TABLE_COL_FINANCE_MGSY               "MGSY"
+#define         HQ_TABLE_COL_FINANCE_JZCSYL             "JZCSYL"
+#define         HQ_TABLE_COL_FINANCE_JZC                "JZC"
+
 #define         HQ_TABLE_COL_BONUS_YAGGR        "YAGGR"
 #define         HQ_TABLE_COL_BONUS_GQDJR        "GQDJR"
 #define         HQ_TABLE_COL_BONUS_SHARE        "share"

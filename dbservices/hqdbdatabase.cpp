@@ -9,7 +9,9 @@
 
 #define     DB_FILE                     QString("%1db.data").arg(HQ_DATA_DIR)
 #define     SQL_WHERE                   " where "
-#define     DATESTR(date)               date.toString("yyyy-MM-dd")
+
+
+
 
 
 QString DBColValList::insertString() const
@@ -722,6 +724,77 @@ bool HQDBDataBase::getHistoryDataOfCode(ShareDataList& list, const QString &code
     if(list.length() == 0) return false;
     return true;
 }
+bool HQDBDataBase::createShareFinancialInfoTable()
+{
+    if(isTableExist(TABLE_SHARE_FINANCE)) return true;
+    TableColList colist;
+    colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
+    colist.append({HQ_TABLE_COL_CODE, "VARCHAR(6) NULL"});
+    colist.append({HQ_TABLE_COL_FINANCE_MGSY, "DOUBLE NULL"});
+    colist.append({HQ_TABLE_COL_FINANCE_JZC, "DOUBLE NULL"});
+    colist.append({HQ_TABLE_COL_FINANCE_JZCSYL, "DOUBLE NULL"});
+    colist.append({HQ_TABLE_COL_TOTALMNT, "double NULL"});
+    colist.append({HQ_TABLE_COL_MUTAL, "double NULL"});
+    return createTable(TABLE_SHARE_FINANCE, colist);
+}
+
+bool HQDBDataBase::updateShareFinance(const FinancialDataList& dataList)
+{
+    int size = dataList.size();
+    if(size == 0) return false;
+    mDB.transaction();
+    for(int i=0; i<size; i++)
+    {
+        FinancialData data = dataList[i];
+        DBColValList list;
+        list.append({HQ_TABLE_COL_CODE, data.mCode});
+        list.append({HQ_TABLE_COL_FINANCE_JZC, data.mBVPS});
+        list.append({HQ_TABLE_COL_FINANCE_JZCSYL, data.mROE});
+        list.append({HQ_TABLE_COL_FINANCE_MGSY, data.mEPS});
+        list.append({HQ_TABLE_COL_TOTALMNT, data.mTotalShare});
+        list.append({HQ_TABLE_COL_MUTAL, data.mMutalShare});
+        if(updateTable(TABLE_SHARE_BONUS, list, list[0])){
+            mDB.rollback();
+        }
+    }
+    mDB.commit();
+}
+
+bool HQDBDataBase::queryShareFinance(FinancialDataList& list, const QString& code)
+{
+    QString sql = QString("select * from %1").arg(TABLE_SHARE_FINANCE);
+    if(code.length() > 0){
+        sql.append(SQL_WHERE);
+        sql.append(QString("%1 = '%2'").arg(HQ_TABLE_COL_CODE).arg(code));
+    }
+    QMutexLocker locker(&mSQlMutex);
+    if(!mSQLQuery.exec(sql)) return false;
+    while (mSQLQuery.next()) {
+        FinancialData data;
+        data.mCode = mSQLQuery.value(HQ_TABLE_COL_CODE).toString();
+        data.mBVPS = mSQLQuery.value(HQ_TABLE_COL_FINANCE_JZC).toDouble();
+        data.mEPS = mSQLQuery.value(HQ_TABLE_COL_FINANCE_MGSY).toDouble();
+        data.mROE = mSQLQuery.value(HQ_TABLE_COL_FINANCE_JZCSYL).toDouble();
+        data.mTotalShare = mSQLQuery.value(HQ_TABLE_COL_TOTALMNT).toDouble();
+        data.mMutalShare = mSQLQuery.value(HQ_TABLE_COL_MUTAL).toDouble();
+        list.append(data);
+    }
+    return true;
+}
+
+bool HQDBDataBase::delShareFinance(const QString& code)
+{
+    DBColValList list;
+    if(code.length() > 0)
+    {
+        list.append({HQ_TABLE_COL_CODE, code});
+    }
+
+    return deleteRecord(TABLE_SHARE_FINANCE, list);
+}
+
+
+
 //分红送配信息的操作
 bool HQDBDataBase::createShareBonusIbfoTable()
 {
@@ -749,9 +822,9 @@ bool HQDBDataBase::updateShareBonus(QList<ShareBonus>& bonusList)
         list.append({HQ_TABLE_COL_CODE, bonus.mCode});
         list.append({HQ_TABLE_COL_BONUS_SHARE, bonus.mSZZG});
         list.append({HQ_TABLE_COL_BONUS_MONEY, bonus.mXJFH});
-        list.append({HQ_TABLE_COL_BONUS_YAGGR, bonus.mYAGGR});
-        list.append({HQ_TABLE_COL_BONUS_GQDJR, bonus.mGQDJR});
-        list.append({HQ_TABLE_COL_BONUS_DATE, bonus.mDate});
+        list.append({HQ_TABLE_COL_BONUS_YAGGR, bonus.mYAGGR.toTime_t()});
+        list.append({HQ_TABLE_COL_BONUS_GQDJR, bonus.mGQDJR.toTime_t()});
+        list.append({HQ_TABLE_COL_BONUS_DATE, bonus.mDate.toTime_t()});
         if(updateTable(TABLE_SHARE_BONUS, list, list[0])){
             mDB.rollback();
         }
@@ -768,7 +841,7 @@ bool HQDBDataBase::queryShareBonus(QList<ShareBonus>& list, const QString& code,
             sql.append(QString("%1 = '%2'").arg(HQ_TABLE_COL_CODE).arg(code));
         }
         if(!date.isNull()) {
-            sql.append(QString("%1 = '%2'").arg(HQ_TABLE_COL_BONUS_DATE).arg(DATESTR(date)));
+            sql.append(QString("%1 = %2").arg(HQ_TABLE_COL_BONUS_DATE).arg(date.toTime_t()));
         }
     }
     QMutexLocker locker(&mSQlMutex);
@@ -776,7 +849,12 @@ bool HQDBDataBase::queryShareBonus(QList<ShareBonus>& list, const QString& code,
     while (mSQLQuery.next()) {
         ShareBonus bonus;
         bonus.mCode = mSQLQuery.value(HQ_TABLE_COL_CODE).toString();
-        break;
+        bonus.mDate = ShareDate::fromTime_t(mSQLQuery.value(HQ_TABLE_COL_BONUS_DATE).toInt());
+        bonus.mGQDJR = ShareDate::fromTime_t(mSQLQuery.value(HQ_TABLE_COL_BONUS_GQDJR).toInt());
+        bonus.mSZZG = mSQLQuery.value(HQ_TABLE_COL_BONUS_SHARE).toDouble();
+        bonus.mXJFH = mSQLQuery.value(HQ_TABLE_COL_BONUS_MONEY).toDouble();
+        bonus.mYAGGR = ShareDate::fromTime_t(mSQLQuery.value(HQ_TABLE_COL_BONUS_YAGGR).toInt());
+        list.append(bonus);
     }
     return true;
 }

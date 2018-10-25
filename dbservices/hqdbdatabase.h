@@ -86,6 +86,12 @@ public:
     QString errMsg();
     bool getHistoryDataOfCode(ShareDataList& list, const QString &code);
     bool getSimilarCodeOfText(QStringList& codes, const QString& text);
+
+    //财务信息操作
+    bool updateShareFinance(const FinancialDataList& dataList);
+    bool queryShareFinance(FinancialDataList& list, const QString& code);
+    bool delShareFinance(const QString& code);
+
     //分红送配信息操作
     bool updateShareBonus(QList<ShareBonus>& bonusList);
     bool queryShareBonus(QList<ShareBonus>& list, const QString& code, const ShareDate& date);

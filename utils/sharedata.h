@@ -129,11 +129,12 @@ typedef    enum     share_type
 
 typedef struct Finance
 {
+    QString         mCode;
     double          mEPS;      //每股收益
     double          mBVPS;     //每股净资产
     double          mROE;    //净资产收益率
-    qint64          mTotalShare;
-    qint64          mMutalShare;
+    double          mTotalShare;
+    double          mMutalShare;
 
     Finance()
     {
@@ -143,7 +144,9 @@ typedef struct Finance
         mTotalShare = 0;
         mMutalShare = 0;
     }
-}FINANCE_DATA;
+}FinancialData;
+
+typedef QList<FinancialData>    FinancialDataList;
 
 struct ChinaShareEx
 {

@@ -29,6 +29,7 @@ public:
         return ShareDate(time_t);
     }
     QString toString(){
+        if(toTime_t() == 0) return "-";
         return mDate.toString("yyyy-MM-dd");
     }
     static ShareDate fromString(const QString& str)
