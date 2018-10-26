@@ -600,29 +600,6 @@ bool HQDBDataBase::deleteShare(const QString& table, const QString& col, const Q
     return mSQLQuery.exec();
 }
 
-bool HQDBDataBase::isRecordExist(bool& exist,const QString &table, const QList<HQ_QUERY_CONDITION>& list)
-{
-    exist = false;
-    QMutexLocker locker(&mSQlMutex);
-    QStringList filterList;
-    QVariantList valList;
-    foreach (HQ_QUERY_CONDITION con, list) {
-        filterList.append(QString("%1=?").arg(con.col));
-        valList.append(con.val);
-    }
-    QString filter = filterList.join(" and ");
-    mSQLQuery.prepare(QString("select count(1) from %1 where %2 ").arg(table).arg(filter));
-    foreach (QVariant val, valList) {
-        mSQLQuery.addBindValue(val);
-    }
-    if(!mSQLQuery.exec()) return false;
-    while (mSQLQuery.next()) {
-        exist = mSQLQuery.value(0).toBool();
-        break;
-    }
-    return true;
-}
-
 double HQDBDataBase::getMultiDaysChangePercent(const QString &code, HISTORY_CHANGEPERCENT type)
 {
     double change = 0.0;
@@ -724,6 +701,55 @@ bool HQDBDataBase::getHistoryDataOfCode(ShareDataList& list, const QString &code
     if(list.length() == 0) return false;
     return true;
 }
+//shareholders
+bool HQDBDataBase::createShareHoldersTable()
+{
+    if(isTableExist(TABLE_SHARE_HOLEDER)) return true;
+    TableColList colist;
+    colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
+    colist.append({HQ_TABLE_COL_SHARE_CODE, "VARCHAR(6) NULL"});
+    colist.append({HQ_TABLE_COL_HOLDER_CODE, "VARCHAR(10) NULL"});
+    colist.append({HQ_TABLE_COL_HOLDER_NAME, "VARCHAR(100) NULL"});
+    colist.append({HQ_TABLE_COL_HOLDER_VOL, "DOUBLE NULL"});
+    colist.append({HQ_TABLE_COL_HOLDER_FUND_PERCENT, "DOUBLE NULL"});
+    colist.append({HQ_TABLE_COL_HOLDER_DATE, "INTEGER NULL"});
+    return createTable(TABLE_SHARE_HOLEDER, colist);
+}
+
+bool HQDBDataBase::updateShareHolder(const ShareHolderList &dataList)
+{
+    int size = dataList.size();
+    if(size == 0) return false;
+    mDB.transaction();
+    for(int i=0; i<size; i++)
+    {
+        FinancialData data = dataList[i];
+        DBColValList list;
+        list.append({HQ_TABLE_COL_CODE, data.mCode});
+        list.append({HQ_TABLE_COL_FINANCE_JZC, data.mBVPS});
+        list.append({HQ_TABLE_COL_FINANCE_JZCSYL, data.mROE});
+        list.append({HQ_TABLE_COL_FINANCE_MGSY, data.mEPS});
+        list.append({HQ_TABLE_COL_TOTALMNT, data.mTotalShare});
+        list.append({HQ_TABLE_COL_MUTAL, data.mMutalShare});
+        if(updateTable(TABLE_SHARE_BONUS, list, list[0])){
+            mDB.rollback();
+        }
+    }
+    mDB.commit();
+}
+
+bool HQDBDataBase::queryShareHolder(ShareHolderList &list, const QString &code, const ShareDate &date)
+{
+
+}
+
+bool HQDBDataBase::delShareHolder(const QString &code, const ShareDate &date)
+{
+
+}
+
+
+//财务信息等操作
 bool HQDBDataBase::createShareFinancialInfoTable()
 {
     if(isTableExist(TABLE_SHARE_FINANCE)) return true;
@@ -916,7 +942,7 @@ bool HQDBDataBase::delDBUpdateDate(const QString &table)
     return deleteRecord(TABLE_DB_UPDATE, list);
 }
 
-bool HQDBDataBase::updateTable(const QString& tableName, const DBColValList& values, const DBColVal& key )
+bool HQDBDataBase::updateTable(const QString& tableName, const DBColValList& values, const DBColValList& key )
 {
     //检查记录已经添加
     bool isRecordExist = false;
@@ -967,6 +993,30 @@ bool HQDBDataBase::deleteRecord(const QString &table, const DBColValList &list)
     if(!mSQLQuery.exec()) return false;
     return true;
 }
+
+bool HQDBDataBase::isRecordExist(bool& exist,const QString &table, const QList<HQ_QUERY_CONDITION>& list)
+{
+    exist = false;
+    QMutexLocker locker(&mSQlMutex);
+    QStringList filterList;
+    QVariantList valList;
+    foreach (HQ_QUERY_CONDITION con, list) {
+        filterList.append(QString("%1=?").arg(con.col));
+        valList.append(con.val);
+    }
+    QString filter = filterList.join(" and ");
+    mSQLQuery.prepare(QString("select count(1) from %1 where %2 ").arg(table).arg(filter));
+    foreach (QVariant val, valList) {
+        mSQLQuery.addBindValue(val);
+    }
+    if(!mSQLQuery.exec()) return false;
+    while (mSQLQuery.next()) {
+        exist = true;
+        break;
+    }
+    return true;
+}
+
 
 
 QString HQDBDataBase::errMsg()

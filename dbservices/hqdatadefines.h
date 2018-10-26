@@ -41,6 +41,14 @@
 #define         HQ_TABLE_COL_BLOCK_TYPE         "type"
 #define         HQ_TABLE_COL_TABLE_NM           "name"
 
+#define         HQ_TABLE_COL_HOLDER_CODE                "holder_code"
+#define         HQ_TABLE_COL_HOLDER_NAME                "holder_name"
+#define         HQ_TABLE_COL_HOLDER_VOL                 "holder_vol"
+#define         HQ_TABLE_COL_HOLDER_FUND_PERCENT        "fund_percent"
+#define         HQ_TABLE_COL_SHARE_CODE                 "share_code"
+#define         HQ_TABLE_COL_HOLDER_DATE                 "date"
+
+
 #define         HQ_TABLE_COL_FINANCE_MGSY               "MGSY"
 #define         HQ_TABLE_COL_FINANCE_JZCSYL             "JZCSYL"
 #define         HQ_TABLE_COL_FINANCE_JZC                "JZC"

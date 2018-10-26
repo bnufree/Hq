@@ -47,6 +47,17 @@ private:
     QDate       mDate;
 };
 
+struct ShareHolder{
+    QString     mShareCode;
+    QString     mHolderCode;
+    QString     mName;
+    double      mShareCount;
+    double      mFundPercent;
+    ShareDate   mDate;
+};
+
+typedef QList<ShareHolder>  ShareHolderList;
+
 class HqUtils
 {
 

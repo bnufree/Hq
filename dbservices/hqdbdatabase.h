@@ -77,7 +77,6 @@ public:
     bool updateHistoryShare(const ShareData& data, bool exist);
     bool deleteShare(const QString& table, const QString& col = QString(), const QVariant& val = QVariant());
     bool updateHistoryDataList(const ShareDataList& list, bool delDB);
-    bool isRecordExist(bool& exist, const QString& table, const QList<HQ_QUERY_CONDITION>& list);
     double getMultiDaysChangePercent(const QString &code, HISTORY_CHANGEPERCENT type );
     double getLastMoney(const QString& code);
     bool   getLastForeignVol(qint64& vol, qint64& vol_chg, const QString& code);
@@ -86,6 +85,10 @@ public:
     QString errMsg();
     bool getHistoryDataOfCode(ShareDataList& list, const QString &code);
     bool getSimilarCodeOfText(QStringList& codes, const QString& text);
+    //股东明细信息信息
+    bool updateShareHolder(const ShareHolderList& dataList);
+    bool queryShareHolder(ShareHolderList& list, const QString& code, const ShareDate& date);
+    bool delShareHolder(const QString& code, const ShareDate& date);
 
     //财务信息操作
     bool updateShareFinance(const FinancialDataList& dataList);
@@ -124,8 +127,9 @@ private:
     bool createTable(const QString& pTable, const TableColList& cols);
 
     //表的通用操作
-    bool updateTable(const QString& tableName, const DBColValList& values, const DBColVal& key );
-    bool deleteRecord(const QString& table, const DBColValList& list = DBColValList());
+    bool updateTable(const QString& tableName, const DBColValList& values, const DBColValList& key );
+    bool deleteRecord(const QString& table, const DBColValList& list = DBColValList());    
+    bool isRecordExist(bool& exist, const QString& table, const DBColValList& list);
 
 signals:
 
