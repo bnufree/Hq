@@ -18,15 +18,42 @@ enum HISTORY_CHANGEPERCENT{
     DAYS_YEARS = 240,
 };
 
-typedef struct HQ_QUERY_CONDITION{
-    QString  col;
-    QVariant val;
+enum    HQ_DATA_TYPE{
+    HQ_DATA_TEXT = 1,
+    HQ_DATA_INT,
+    HQ_DATA_DOUBLE
+};
 
-    HQ_QUERY_CONDITION(const QString colStr, const QVariant& val1)
+struct HQ_COL_VAL{
+    QVariant mValue;
+    int mType;
+
+    HQ_COL_VAL()
     {
-        col = colStr;
-        val = val1;
+        mType = HQ_DATA_INT;
     }
+
+    HQ_COL_VAL(const QVariant& val, HQ_DATA_TYPE t)
+    {
+        mType = t;
+        mValue = val;
+    }
+};
+
+Q_DECLARE_METATYPE(HQ_COL_VAL)
+
+typedef struct HQ_QUERY_CONDITION{
+    QString  mColName;
+    HQ_COL_VAL  mColVal;
+
+    HQ_QUERY_CONDITION(const QString colStr, const QVariant& val, HQ_DATA_TYPE t)
+    {
+        mColName = colStr;
+        mColVal.mType = t;
+        mColVal.mValue = val;
+    }
+
+    HQ_QUERY_CONDITION(){}
 }DBColVal;
 
 class DBPlacementList:public QStringList
@@ -45,8 +72,10 @@ class DBColValList:public QList<HQ_QUERY_CONDITION>
 {
 public:
     DBColValList():QList<HQ_QUERY_CONDITION>() {}
+    DBColValList(const HQ_QUERY_CONDITION& val) : QList<HQ_QUERY_CONDITION>() {append(val);}
     QString insertString() const;
     QString updateString() const;
+    QString whereString() const;
 };
 
 
@@ -85,10 +114,15 @@ public:
     QString errMsg();
     bool getHistoryDataOfCode(ShareDataList& list, const QString &code);
     bool getSimilarCodeOfText(QStringList& codes, const QString& text);
+    //历史日线数据更新
+    bool updateShareHistory(const ShareDataList& dataList);
+    bool queryShareHistory(ShareDataList& list, const QString& share_code, const ShareDate& start, const ShareDate& end);
+    bool delShareHistory(const QString& share_code, const ShareDate& start, const ShareDate& end);
+
     //股东明细信息信息
     bool updateShareHolder(const ShareHolderList& dataList);
-    bool queryShareHolder(ShareHolderList& list, const QString& code, const ShareDate& date);
-    bool delShareHolder(const QString& code, const ShareDate& date);
+    bool queryShareHolder(ShareHolderList& list, const QString& share_code, const QString& holder_code, const ShareDate& date);
+    bool delShareHolder(const QString& share_code, const QString& holder_code, const ShareDate& date);
 
     //财务信息操作
     bool updateShareFinance(const FinancialDataList& dataList);
