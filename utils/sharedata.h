@@ -52,32 +52,27 @@ public:
     {
         mIsFav = 0;
         mDataType = DATA_UNDEFINED;
-    }
-    inline BaseData(bool isfav, int dataType, const char* code, const char* name, const char* py)
-    {
-        this->mIsFav = isfav;
-        this->mDataType = dataType;
-        memcpy(this->mCode, code, 10);
-        memcpy(this->mName, name, 20);
-        memcpy(this->mPY, py, 10);
+        mIsHsTop10 = 0;
     }
 
     inline BaseData(const BaseData& data)
     {
         this->mIsFav = data.mIsFav;
         this->mDataType = data.mDataType;
-        memcpy(this->mCode, data.mCode, 10);
-        memcpy(this->mName, data.mName, 20);
-        memcpy(this->mPY, data.mPY, 10);
+        this->mCode = data.mCode;
+        this->mName = data.mName;
+        this->mPY = data.mPY;
+        mIsHsTop10 = data.mIsHsTop10;
     }
 
-    inline BaseData(const QString& code, const QString& name, const QString& abbr, int type)
+    inline BaseData(const QString& code, const QString& name, const QString& py, int type, bool isFav)
     {
-        mIsFav = 0;
+        mIsFav = isFav;
         mDataType = type;
-        memcpy(mCode, code.toStdString().data(), 10);
-        memcpy(mName, name.toStdString().data(), 20);
-        memcpy(mPY, abbr.toStdString().data(), 10);
+        mCode = code;
+        mName = name;
+        mPY = py;
+        mIsHsTop10 = 0;
     }
 
     void setFav(bool fav)
@@ -87,25 +82,31 @@ public:
 
     void setCode(const QString& code)
     {
-        memcpy(mCode, code.toStdString().data(), 10);
+        mCode = code;
     }
 
     void setName(const QString& name)
     {
-        memcpy(mName, name.toStdString().data(), 20);
+        mName = name;
     }
 
     void setPY(const QString& abbr)
     {
-        memcpy(mPY, abbr.toStdString().data(), 10);
+        mPY = abbr;
+    }
+
+    void setTop10(bool sts)
+    {
+        mIsHsTop10 = sts;
     }
 
 public:
     bool        mIsFav;
+    bool        mIsHsTop10;
     int         mDataType;
-    char        mCode[10];
-    char        mName[20];
-    char        mPY[10];
+    QString     mCode;
+    QString     mName;
+    QString     mPY;
 };
 
 typedef    enum     share_type
@@ -148,8 +149,9 @@ typedef struct Finance
 
 typedef QList<FinancialData>    FinancialDataList;
 
-struct ChinaShareEx
+typedef struct ChinaShareEx
 {
+    QString     mCode;
     double      mBuyMoney;              //买入金额
     double      mSellMoney;             //卖出金额
     double      mPureMoney;
@@ -168,7 +170,9 @@ struct ChinaShareEx
         mIsTop10 = false;
         mDate = ShareDate::currentDate();
     }
-};
+}ShareHsgt;
+
+typedef QList<ChinaShareEx> ShareHsgtList;
 
 //分红信息
 struct  ShareBonus
@@ -190,7 +194,7 @@ class ShareBaseData : public BaseData
 {
 public:
     inline ShareBaseData(const ShareBaseData& data):\
-        BaseData(data.mIsFav, data.mDataType, data.mCode, data.mName, data.mPY)
+        BaseData(data.mCode, data.mName, data.mPY, data.mDataType, data.mIsFav)
     {
         mShareType = data.mShareType;
         mHKExInfo = data.mHKExInfo;
@@ -202,7 +206,7 @@ public:
     inline ShareBaseData(const QString& code = QString(), \
                          const QString& name= QString(), \
                          const QString& abbr= QString())\
-        :BaseData(code, name, abbr, DATA_SHARE)
+        :BaseData(code, name, abbr, DATA_SHARE, false)
     {
         mShareType = SHARE_UNDEFINED;
         mProfit = 0.0;
@@ -326,10 +330,6 @@ public:
     ShareData(const ShareBaseData& data):ShareBaseData(data)
     {
         mClose = 0.0;
-        for(int i=0; i<20; i++)
-        {
-            mBlockCode[i] = 0;
-        }
         mHsl = 0.0;
         mLastMoney = 0.0;
         mLastVol = 0;
@@ -366,15 +366,6 @@ public:
     {
         mTime = QDateTime(date.date()).toMSecsSinceEpoch();
         mClose = 0.0;
-        for(int i=0; i<20; i++)
-        {
-            mBlockCode[i] = 0;
-        }
-        mClose = 0.0;
-        for(int i=0; i<20; i++)
-        {
-            mBlockCode[i] = 0;
-        }
         mHsl = 0.0;
         mLastMoney = 0.0;
         mLastVol = 0;
@@ -465,47 +456,20 @@ public:
         return this->mCode == data.mCode && this->mTime == data.mTime && this->mShareType == data.mShareType;
     }
 
-    bool appendBlock(int code)
+    bool appendBlock(const QString& code)
     {
-        bool sts = false;
-        for(int i=0; i<20; i++)
-        {
-            if(mBlockCode[i] == 0)
-            {
-                mBlockCode[i] =code;
-                sts = true;
-                break;
-            }
-        }
-        return sts;
+        if(!mBlockCodeList.contains(code)) return false;
+        mBlockCodeList.append(code);
+        return true;
     }
 
-    bool isContainsBlock(int code)
+    bool isContainsBlock(const QString& code)
     {
-        bool exist = false;
-        for(int i=0; i<20; i++)
-        {
-            if(mBlockCode[i] == code)
-            {
-                exist = true;
-                break;
-            }
-        }
-        return exist;
+        return mBlockCodeList.contains(code);
     }
-    QStringList getBlockCodesList()
+    QStringList getBlockCodesList() const
     {
-        QStringList codes;
-        for(int i=0; i<20; i++)
-        {
-            if(mBlockCode[i] == 0)
-            {
-                break;
-            }
-            codes.append(QString::number(mBlockCode[i]));
-        }
-
-        return codes;
+        return mBlockCodeList;
     }
 
 public:
@@ -540,7 +504,7 @@ public:
     double          mRZRQ;
     qint64          mVol;    
     qint64          mTime;
-    int             mBlockCode[20];
+    QStringList            mBlockCodeList;
 };
 
 Q_DECLARE_METATYPE(ShareData)

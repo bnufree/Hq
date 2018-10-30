@@ -42,6 +42,7 @@ public:
     }
     QDate   date() const {return mDate;}
     bool    isNull() const {return mDate.isNull();}
+    qint64  mSecs() const {return QDateTime(mDate).toMSecsSinceEpoch();}
 
 private:
     QDate       mDate;
