@@ -495,7 +495,10 @@ bool HQDBDataBase::updateShareHistory(const ShareDataList &dataList, int mode)
         if(updateTable(table, list, key)){
             mDB.rollback();
         }
-
+        if(!updateDBUpdateDate(date, table))
+        {
+            mDB.rollback();
+        }
     }
     mDB.commit();
 
@@ -667,6 +670,11 @@ bool HQDBDataBase::updateShareHolder(const ShareHolderList &dataList)
             mDB.rollback();
         }
     }
+
+    if(!updateDBUpdateDate(ShareDate::currentDate(), TABLE_SHARE_HOLEDER))
+    {
+        mDB.rollback();
+    }
     mDB.commit();
 }
 
@@ -755,6 +763,10 @@ bool HQDBDataBase::updateShareFinance(const FinancialDataList& dataList)
             mDB.rollback();
         }
     }
+    if(!updateDBUpdateDate(ShareDate::currentDate(), TABLE_SHARE_FINANCE))
+    {
+        mDB.rollback();
+    }
     mDB.commit();
 }
 
@@ -828,6 +840,11 @@ bool HQDBDataBase::updateShareBonus(QList<ShareBonus>& bonusList)
         if(updateTable(TABLE_SHARE_BONUS, list, list[0])){
             mDB.rollback();
         }
+    }
+
+    if(!updateDBUpdateDate(ShareDate::currentDate(), TABLE_SHARE_BONUS))
+    {
+        mDB.rollback();
     }
     mDB.commit();
 }
@@ -909,6 +926,11 @@ bool HQDBDataBase::updateShareHsgtTop10List(const ShareHsgtList& dataList)
             mDB.rollback();
         }
     }
+
+    if(!updateDBUpdateDate(ShareDate::currentDate(), TABLE_HSGT_TOP10))
+    {
+        mDB.rollback();
+    }
     mDB.commit();
 }
 
@@ -923,18 +945,17 @@ bool HQDBDataBase::queryShareHsgtTop10List(ShareHsgtList& list, const QString& c
     {
         whereList.append(DBColVal(HQ_TABLE_COL_DATE, date.toTime_t(), HQ_DATA_INT));
     }
-    QString sql = QString("select * from %1 %2").arg(TABLE_HSGT_TOP10).arg(whereList.whereString());
+    QString sql = QString("select * from %1 %2 limit 100").arg(TABLE_HSGT_TOP10).arg(whereList.whereString());
     QMutexLocker locker(&mSQLMutex);
     if(!mSQLQuery.exec(sql)) return false;
     while (mSQLQuery.next()) {
         ShareHsgt data;
-        bonus.mCode = mSQLQuery.value(HQ_TABLE_COL_CODE).toString();
-        bonus.mDate = ShareDate::fromTime_t(mSQLQuery.value(HQ_TABLE_COL_BONUS_DATE).toInt());
-        bonus.mGQDJR = ShareDate::fromTime_t(mSQLQuery.value(HQ_TABLE_COL_BONUS_GQDJR).toInt());
-        bonus.mSZZG = mSQLQuery.value(HQ_TABLE_COL_BONUS_SHARE).toDouble();
-        bonus.mXJFH = mSQLQuery.value(HQ_TABLE_COL_BONUS_MONEY).toDouble();
-        bonus.mYAGGR = ShareDate::fromTime_t(mSQLQuery.value(HQ_TABLE_COL_BONUS_YAGGR).toInt());
-        list.append(bonus);
+        data.mCode = mSQLQuery.value(HQ_TABLE_COL_CODE).toString();
+        data.mBuyMoney = mSQLQuery.value(HQ_TABLE_COL_HSGT_TOP10_BUY).toDouble();
+        data.mSellMoney = mSQLQuery.value(HQ_TABLE_COL_HSGT_TOP10_SELL).toDouble();
+        data.mPureMoney = mSQLQuery.value(HQ_TABLE_COL_HSGT_TOP10_MONEY).toDouble();
+        data.mDate = ShareDate::fromTime_t(mSQLQuery.value(HQ_TABLE_COL_DATE).toInt());
+        list.append(data);
     }
     return true;
 }
@@ -948,10 +969,10 @@ bool HQDBDataBase::delShareHsgtTop10(const QString& code, const ShareDate& date)
     }
     if(!date.isNull())
     {
-        list.append(DBColVal(HQ_TABLE_COL_BONUS_DATE, date.toTime_t(),HQ_DATA_INT));
+        list.append(DBColVal(HQ_TABLE_COL_DATE, date.toTime_t(),HQ_DATA_INT));
     }
 
-    return deleteRecord(TABLE_SHARE_BONUS, list);
+    return deleteRecord(TABLE_HSGT_TOP10, list);
 }
 
 //数据表更新日期的相关操作

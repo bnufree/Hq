@@ -37,14 +37,88 @@ typedef QList<SHARE_HISTORY_INFO>       ShareHistoryList;
 #define         SZCYB_SHARE_REG        "(sz){0,1}(30[0-9]{4})"
 #define         HK_SHARE_REG        "(hk){0,1}\\d{5}"
 
-//定义基础的数据类型
-typedef enum data_type{
-    DATA_UNDEFINED = 0x00,
-    DATA_SHARE = 0x10,
-    DATA_BLOCK = 0x20,
-    DATA_RESERVED = 0x30,
-}DATA_TYPE;
 
+typedef    enum     share_type
+{
+    SHARE_UNDEFINED = 0,
+    SHARE_CHINA_SH = 1,
+    SHARE_CHINA_SZ_ZB,
+    SHARE_CHINA_SZ_ZXB,
+    SHARE_CHINA_SZ_CYB,
+    SHARE_CHINA_FUND_SH,
+    SHARE_CHINA_FUND_SZ,
+    SHARE_INDEX_SH,
+    SHARE_INDEX_SZ,
+    SHARE_INDEX_HK,
+    SHARE_INDEX_US,
+    SHARE_HK,
+    SHARE_US,
+    SHARE_CHINA_SZ = SHARE_CHINA_SZ_ZB | SHARE_CHINA_SZ_ZXB | SHARE_CHINA_SZ_CYB,
+    SHARE_CHINA = SHARE_CHINA_SH | SHARE_CHINA_SZ,
+}SHARE_TYPE;
+
+//财务数据
+typedef struct Finance
+{
+    QString         mCode;
+    double          mEPS;       //每股收益
+    double          mBVPS;      //每股净资产
+    double          mROE;       //净资产收益率
+    double          mTotalShare;
+    double          mMutalShare;
+    Finance()
+    {
+        mEPS = 0.0;
+        mBVPS = 0.0;
+        mROE = 0.0;
+        mTotalShare = 0;
+        mMutalShare = 0;
+    }
+}FinancialData;
+typedef QList<FinancialData>    FinancialDataList;
+
+//分红信息
+struct  ShareBonus
+{
+    QString         mCode;
+    double          mSZZG; //送转股比例
+    double          mXJFH;  //现金分红
+    ShareDate           mGQDJR; //股权登记日
+    ShareDate           mYAGGR; //预案公告日
+    ShareDate           mDate;
+    ShareBonus()
+    {
+        mSZZG = 0.0;
+        mXJFH = 0.0;
+    }
+};
+
+typedef struct ChinaShareEx
+{
+    QString     mCode;
+    double      mBuyMoney;              //买入金额
+    double      mSellMoney;             //卖出金额
+    double      mPureMoney;
+    qint64      mForeignVol;            //持股量
+    double      mTotalPercent;          //占流通股百分比
+    bool        mIsTop10;               //是否是当天10大成交
+    ShareDate       mDate;
+
+    ChinaShareEx()
+    {
+        mBuyMoney = 0.0;
+        mSellMoney = 0.0;
+        mPureMoney = mBuyMoney - mSellMoney;
+        mForeignVol = 0;
+        mTotalPercent = 0;
+        mIsTop10 = false;
+        mDate = ShareDate::currentDate();
+    }
+}ShareHsgt;
+
+typedef QList<ChinaShareEx> ShareHsgtList;
+
+//作为几类
 class BaseData
 {
 public:
@@ -109,86 +183,14 @@ public:
     QString     mPY;
 };
 
-typedef    enum     share_type
-{
-    SHARE_UNDEFINED = 0,
-    SHARE_CHINA_SH = 1,
-    SHARE_CHINA_SZ_ZB,
-    SHARE_CHINA_SZ_ZXB,
-    SHARE_CHINA_SZ_CYB,
-    SHARE_CHINA_FUND_SH,
-    SHARE_CHINA_FUND_SZ,
-    SHARE_INDEX_SH,
-    SHARE_INDEX_SZ,
-    SHARE_INDEX_HK,
-    SHARE_INDEX_US,
-    SHARE_HK,
-    SHARE_US,
-    SHARE_CHINA_SZ = SHARE_CHINA_SZ_ZB | SHARE_CHINA_SZ_ZXB | SHARE_CHINA_SZ_CYB,
-    SHARE_CHINA = SHARE_CHINA_SH | SHARE_CHINA_SZ,
-}SHARE_TYPE;
 
-typedef struct Finance
-{
-    QString         mCode;
-    double          mEPS;      //每股收益
-    double          mBVPS;     //每股净资产
-    double          mROE;    //净资产收益率
-    double          mTotalShare;
-    double          mMutalShare;
 
-    Finance()
-    {
-        mEPS = 0.0;
-        mBVPS = 0.0;
-        mROE = 0.0;
-        mTotalShare = 0;
-        mMutalShare = 0;
-    }
-}FinancialData;
 
-typedef QList<FinancialData>    FinancialDataList;
 
-typedef struct ChinaShareEx
-{
-    QString     mCode;
-    double      mBuyMoney;              //买入金额
-    double      mSellMoney;             //卖出金额
-    double      mPureMoney;
-    qint64      mForeignVol;            //持股量
-    double      mTotalPercent;          //占流通股百分比
-    bool        mIsTop10;               //是否是当天10大成交
-    ShareDate       mDate;
 
-    ChinaShareEx()
-    {
-        mBuyMoney = 0.0;
-        mSellMoney = 0.0;
-        mPureMoney = mBuyMoney - mSellMoney;
-        mForeignVol = 0;
-        mTotalPercent = 0;
-        mIsTop10 = false;
-        mDate = ShareDate::currentDate();
-    }
-}ShareHsgt;
 
-typedef QList<ChinaShareEx> ShareHsgtList;
 
-//分红信息
-struct  ShareBonus
-{
-    QString         mCode;
-    double          mSZZG; //送转股比例
-    double          mXJFH;  //现金分红
-    ShareDate           mGQDJR; //股权登记日
-    ShareDate           mYAGGR; //预案公告日
-    ShareDate           mDate;
-    ShareBonus()
-    {
-        mSZZG = 0.0;
-        mXJFH = 0.0;
-    }
-};
+
 
 class ShareBaseData : public BaseData
 {

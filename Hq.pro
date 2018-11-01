@@ -45,7 +45,7 @@ SOURCES += main.cpp\
     basic_info/qsharefhspwork.cpp \
     basic_info/qsharehsgttop10work.cpp \
     basic_info/qsharefinancialinfowork.cpp \
-    utils/sharedata.cpp \
+    data_structure/sharedata.cpp \
     utils/blockdata.cpp \
     hqtaskmagrcenter.cpp \
     history/qsharehistoryinfothread.cpp \
@@ -62,7 +62,9 @@ SOURCES += main.cpp\
     table/qsharemutualbundwidget.cpp \
     qandroidlistwidget.cpp \
     table/qsharecodenamewidget.cpp \
-    dbservices/qactivedate.cpp
+    dbservices/qactivedate.cpp \
+    data_structure/hqbasedata.cpp \
+    data_structure/hqblockdata.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -98,7 +100,7 @@ HEADERS  += dialog.h \
     basic_info/qsharefhspwork.h \
     basic_info/qsharehsgttop10work.h \
     basic_info/qsharefinancialinfowork.h \
-    utils/sharedata.h \
+    data_structure//sharedata.h \
     utils/blockdata.h \
     hqtaskmagrcenter.h \
     history/qsharehistoryinfothread.h \
@@ -115,7 +117,9 @@ HEADERS  += dialog.h \
     table/qshareMutualbundwidget.h \
     qandroidlistwidget.h \
     table/qsharecodenamewidget.h \
-    dbservices/qactivedate.h
+    dbservices/qactivedate.h \
+    data_structure/hqbasedata.h \
+    data_structure/hqblockdata.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \
