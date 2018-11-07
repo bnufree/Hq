@@ -4,7 +4,7 @@
 #include <QRunnable>
 #include <QDate>
 #include <QObject>
-#include "utils/sharedata.h"
+#include "data_structure/sharedata.h"
 #include <QMap>
 
 class QHKExchangeVolDataProcess : public QRunnable

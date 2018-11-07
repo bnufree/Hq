@@ -5,7 +5,7 @@
 #include <QDate>
 #include <QRunnable>
 #include <QObject>
-#include "utils/sharedata.h"
+#include "data_structure/sharedata.h"
 
 class QShareHistoryInfoThread : public QRunnable
 {
@@ -17,7 +17,7 @@ public:
     void run();
 private:
     QDate lastUpdateDate();
-    bool  write(const QList<SHARE_HISTORY_INFO>& list);
+    bool  write(const ShareDataList& list);
 private:
     QString         mCode;
     QMap<qint64, qint64> mForeignMap;

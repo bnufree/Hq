@@ -5,8 +5,8 @@
 #include <QtSql>
 #include <QMutex>
 #include "hqdatadefines.h"
-#include "utils/blockdata.h"
-#include "utils/sharedata.h"
+#include "data_structure/hqblockdata.h"
+#include "data_structure/sharedata.h"
 #include "utils/comdatadefines.h"
 
 enum HISTORY_CHANGEPERCENT{
@@ -47,15 +47,6 @@ struct HQ_COL_VAL{
     }
 };
 
-enum Share_Basic_Update_Mode{
-    Share_Basic_Update_Code = 0x01,
-    Share_Basic_Update_Hsgt = 0x02,
-    Share_Basic_Update_Profit = 0x04,
-    Share_Basic_Update_Fav = 0x08,
-    Share_Basic_Update_Block = 0x10,
-    Share_Basic_Update_All = Share_Basic_Update_Code | Share_Basic_Update_Hsgt | Share_Basic_Update_Profit | Share_Basic_Update_Fav | Share_Basic_Update_Block,
-
-};
 
 Q_DECLARE_METATYPE(HQ_COL_VAL)
 
@@ -118,13 +109,12 @@ public:
     ~HQDBDataBase();
     QString getErrorString();
     ShareDate getLastUpdateDateOfTable(const QString &table);
+    ShareDate getLastHistoryDateOfShare(const QString& code);
     bool isDBOK();
     //板块
-    bool getBlockDataList(QMap<QString, BlockData*>& pBlockMap, int type = 0);
-    bool saveBlockDataList(const QMap<QString, BlockData*>& pBlockMap );
-    bool addBlock(const BlockData& data);
-    bool modifyBlock(const BlockData& data);
-    bool deleteBlock(const QString& code);
+    bool queryBlockDataList(BlockDataMap& list, int type = 0);
+    bool updateBlockDataList(const BlockDataList& list );
+    bool deleteBlock(const QString& code = QString());
     bool isBlockExist(const QString& code);
     //个股
     //基本信息更新
@@ -135,13 +125,13 @@ public:
 
     //基本数据更新
     bool updateShareBasicInfo(const ShareDataList& dataList, int mode);
-    bool queryShareBasicInfo(ShareDataList& list);
+    bool queryShareBasicInfo(ShareDataMap& map);
     bool delShareBasicInfo(const QString& code);
     bool getSimilarCodeOfText(QStringList& codes, const QString& text);
 
     //历史日线数据更新
     bool updateShareHistory(const ShareDataList& dataList, int mode);
-    bool queryShareHistory(ShareDataList& list, const QString& share_code, const ShareDate& start, const ShareDate& end);
+    bool queryShareHistory(ShareDataList& list, const QString& share_code, const ShareDate& start = ShareDate(), const ShareDate& end = ShareDate());
     bool delShareHistory(const QString& share_code, const ShareDate& start, const ShareDate& end);
     double getMultiDaysChangePercent(const QString &code, HISTORY_CHANGEPERCENT type );
     double getLastMoney(const QString& code);

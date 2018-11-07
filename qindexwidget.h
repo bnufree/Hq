@@ -4,11 +4,10 @@
 #include <QStackedWidget>
 //#include "dbservices/sharedata.h"
 #include "qindexframe.h"
-#include "utils/sharedata.h"
+#include "data_structure/sharedata.h"
 #include <QTimer>
 #include <QResizeEvent>
 
-class ShareDataList;
 class QIndexWidget : public QStackedWidget
 {
     Q_OBJECT
@@ -21,7 +20,7 @@ signals:
 
 public slots:
     void updateData(const ShareDataList& list);
-    void updateData(const QList<NS_BOUND_DATA> &list);
+    void updateData(const ShareHsgtList &list);
     void insetWidget(const QString& code);
     void switchWidget();
 

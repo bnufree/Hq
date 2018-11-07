@@ -2,7 +2,7 @@
 #include <QDir>
 #include <QDebug>
 #include "comdatadefines.h"
-#include "hqutils.h"
+#include "data_structure/hqutils.h"
 
 #define     INI_FILE_NAME           "profiles.ini"
 

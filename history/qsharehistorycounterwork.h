@@ -3,16 +3,16 @@
 
 #include <QRunnable>
 #include <QObject>
-#include "utils/sharedata.h"
+#include "data_structure/sharedata.h"
 
 class QShareHistoryCounterWork : public QRunnable
 {
 public:
-    QShareHistoryCounterWork(const QString& code,const ShareHistoryList& list = ShareHistoryList(), QObject* parent = 0);
+    QShareHistoryCounterWork(const QString& code,const ShareDataList& list = ShareDataList(), QObject* parent = 0);
     ~QShareHistoryCounterWork();
     void run();
 private:
-    ShareHistoryList mList;
+    ShareDataList mList;
     QObject*    mParent;
     QString     mCode;
 };

@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QThread>
-#include "utils/blockdata.h"
+#include "data_structure/hqblockdata.h"
 
 class QEastMoneyBlockThread;
 class QTimer;
@@ -17,10 +17,10 @@ public:
 
 
 signals:
-    void signalBlockDataListUpdated(const BlockDataVList& list);
+    void signalBlockDataListUpdated(const BlockDataList& list);
     void start();
 public slots:
-    void slotRecvBlockDataList(const BlockDataPList& list);
+    void slotRecvBlockDataList(const BlockDataList& list);
     void slotStartRunMgr();
     void slotUpdateBlockInfo();    
     void    reverseSortRule();
@@ -30,7 +30,7 @@ private:
     int             mCurBlockType;
     QThread         mWorkThread;
     QTimer          *mWorkTimer;
-    BlockDataPList   mBlockDataList;
+    BlockDataList   mBlockDataList;
     int             mBlockRule;
 };
 

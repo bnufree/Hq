@@ -239,7 +239,7 @@ void Dialog::updateHqTable(const ShareDataList& pDataList)
     mShareTableWidget->setDataList(pDataList);
 }
 
-void Dialog::updateBlockTable(const BlockDataVList& pDataList)
+void Dialog::updateBlockTable(const BlockDataList& pDataList)
 {
     mBlockTableWidget->setDataList(pDataList);
 }

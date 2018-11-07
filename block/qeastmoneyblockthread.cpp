@@ -10,7 +10,7 @@
 #include "qeastmoneyblocksharethread.h"
 #include "utils/qhttpget.h"
 #include "dbservices/dbservices.h"
-#include "utils/hqutils.h"
+#include "data_structure/hqutils.h"
 #include <QThreadPool>
 #include "dbservices/qactivedate.h"
 
@@ -38,10 +38,9 @@ QEastMoneyBlockThread::QEastMoneyBlockThread(int pBlockID, QObject *parent) : QO
     }
     mSortRule = -1;
     mBlockDataList.clear();
-    qRegisterMetaType<BlockDataPList>("const BlockDataPList&");
-    qRegisterMetaType<QMap<QString, BlockDataPList> >("const QMap<QString, BlockDataPList>&");
+    qRegisterMetaType<BlockDataList>("const BlockDataList&");
+    qRegisterMetaType<QMap<QString, BlockDataList> >("const QMap<QString, BlockDataList>&");
     qRegisterMetaType<QMap<QString, BlockData*> >("const QMap<QString, BlockData*>&");
-    qRegisterMetaType<BlockDataVList>("const BlockDataVList&");
     this->moveToThread(&mWorkthread);
     connect(this, SIGNAL(start()), this, SLOT(slotUpdateBlockShare()));
     mWorkthread.start();
@@ -70,7 +69,7 @@ void QEastMoneyBlockThread::slotUpdateBlockInfos()
     QString wkURL = url.arg(blockthread[mWebBlockType]).arg(mWebBlockType).arg(mSortRule).arg(QDateTime::currentDateTime().toMSecsSinceEpoch());
 
     //开始解析数据
-    BlockDataPList list;
+    BlockDataList list;
     QByteArray bytes = QHttpGet::getContentOfURL(wkURL);
     QString result = QString::fromUtf8(bytes.data());
     //qDebug()<<"result:"<<result.split(QRegularExpression("[\(\[|\]\)|\"]"));
@@ -81,13 +80,15 @@ void QEastMoneyBlockThread::slotUpdateBlockInfos()
     {
         //qDebug()<<"rx:"<<rx.cap();
         QString code = rx.cap(1).replace("BK0", replaceStr);
-        BlockData *data = mBlockDataList[code];
-        if(data)
+        BlockData &data = mBlockDataList[code];
+        if(data.mType == HqBaseData::UNDEFINED)
         {
-            data->mName = rx.cap(2);
-            data->mChangePer = rx.cap(3).toDouble();
-            list.append(data);
+            data.mCode = code;
+            data.mType = HqBaseData::BLOCK;
         }
+            data.mName = rx.cap(2);
+            data.mChangePercent = rx.cap(3).toDouble();
+            list.append(data);
         index += (rx.matchedLength()+2);
     }
     //qDebug()<<__FUNCTION__<<__LINE__<<mBlockDataList.values().length();
@@ -97,7 +98,7 @@ void QEastMoneyBlockThread::slotUpdateBlockInfos()
 
 void QEastMoneyBlockThread::slotUpdateBlockShareCodeList(const QString &pBlockCode, const QStringList &pShareCodesList)
 {
-    mBlockDataList[pBlockCode]->mShareCodeList = pShareCodesList;
+    mBlockDataList[pBlockCode].mShareCodeList = pShareCodesList;
 }
 
 void QEastMoneyBlockThread::slotBlockShareThreadFinished()
@@ -125,15 +126,10 @@ void QEastMoneyBlockThread::slotUpdateBlockShare()
     while ((index = result.indexOf(QRegularExpression("BK0[0-9]{3}"), index)) > 0) {
         QString code = result.mid(index, 6).replace("BK0", replaceStr);
         BlockData* data = DATA_SERVICE->getBlockDataOfCode(code);
-        if(!data)
-        {
-            data = new BlockData;
-            data->mCode = code;
-            data->mIsFav = false;
-            DATA_SERVICE->setBlockData(data);
+        if(data){
+            data->mBlockType |= mUserBlockType;
+            mBlockDataList[data->mCode] = *data;
         }
-        data->mBlockType |= mUserBlockType;
-        mBlockDataList[data->mCode] = data;
         index += 6;
     }
     //开始根据板块代码，获取板块内的所有shares

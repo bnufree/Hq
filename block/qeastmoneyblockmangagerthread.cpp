@@ -59,9 +59,9 @@ void QEastMoneyBlockMangagerThread::reverseSortRule()
     qDebug()<<__FUNCTION__<<mBlockRule;
 }
 
-void QEastMoneyBlockMangagerThread::slotRecvBlockDataList(const BlockDataPList &list)
+void QEastMoneyBlockMangagerThread::slotRecvBlockDataList(const BlockDataList &list)
 {
-    foreach (BlockData* data, list) {
+    foreach (BlockData data, list) {
         if(mBlockDataList.contains(data)) continue;
         mBlockDataList.append(data);
     }
@@ -70,13 +70,13 @@ void QEastMoneyBlockMangagerThread::slotRecvBlockDataList(const BlockDataPList &
 
 void QEastMoneyBlockMangagerThread::slotUpdateBlockInfo()
 {
-    BlockDataVList wklist;
-    BlockDataPList plist = DATA_SERVICE->getAllBlock();
+    BlockDataList wklist;
+    BlockDataList plist = DATA_SERVICE->getAllBlock();
 
-    foreach (BlockData *data, plist) {
-        if(data->mBlockType & mCurBlockType)
+    foreach (BlockData data, plist) {
+        if(data.mBlockType & mCurBlockType)
         {
-            wklist.append(*data);
+            wklist.append(data);
         }
     }
     if(mBlockRule == BLOCK_DISPLAY_SORT_DESCEND)

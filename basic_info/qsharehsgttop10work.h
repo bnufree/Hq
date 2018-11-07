@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QRunnable>
-#include "utils/sharedata.h"
+#include "data_structure/sharedata.h"
 
 class QShareHsgtTop10Work :  public QObject,public QRunnable
 {
@@ -13,7 +13,7 @@ public:
     ~QShareHsgtTop10Work();
     void run();
 signals:
-    void signalChinaAShareTop10Updated(const ShareBaseDataList& list, const QString& date);
+    void signalChinaAShareTop10Updated(const ShareDataList& list, const QString& date);
 
 private:
     QObject*        mParent;

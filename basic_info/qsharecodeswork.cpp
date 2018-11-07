@@ -9,8 +9,8 @@
 #include "dbservices/dbservices.h"
 #include <QTextCodec>
 #include "utils/qhttpget.h"
-#include "utils/hqutils.h"
-#include "utils/sharedata.h"
+#include "data_structure/hqutils.h"
+#include "data_structure/sharedata.h"
 #include <QEventLoop>
 
 QShareCodesWork::QShareCodesWork(QObject *parent) : mParent(parent),QRunnable()
@@ -23,13 +23,8 @@ QShareCodesWork::~QShareCodesWork()
 
 void QShareCodesWork::run()
 {
-    ShareBaseDataList list;
+    ShareDataList list;
     QByteArray http = QHttpGet::getContentOfURL("http://quote.eastmoney.com/stocklist.html");
-    FILE *fp = fopen("code.txt", "w");
-    fprintf(fp, "%s", http.data());
-    fclose(fp);
-    int r = http.indexOf("(600036)");
-    //qDebug()<<"mid:"<<http.mid(r - 10, 20);
     QTextCodec *codes = QTextCodec::codecForHtml(http);
     qDebug()<<"code:"<<codes->name();
     QTextCodec *UTF8 = QTextCodec::codecForName("UTF8");
@@ -46,10 +41,10 @@ void QShareCodesWork::run()
         QString code = reg.cap(2);        
         if(reg_code.exactMatch(code))
         {
-            ShareBaseData data;
-            data.setCode(ShareBaseData::fullCode(code));
-            data.setName(name);
-            data.setShareType(ShareBaseData::shareType(code));
+            ShareData data;
+            data.mCode = code;
+            data.mName = name;
+            data.mShareType = ShareData::shareType(code);
             qDebug()<<data.mCode<<data.mName<<name.toUtf8().toHex()<<name.toUtf8().size();
             data.setPY(HqUtils::GetFirstLetter(UTF8->toUnicode(name.toUtf8())));
             list.append(data);
@@ -71,10 +66,18 @@ void QShareCodesWork::run()
         index += reg_code.matchedLength();
     }
 #endif
-    if(list.length() > 0 && mParent)
+    if(list.length() > 0)
     {
-        QMetaObject::invokeMethod(mParent, "slotUpdateShareCodesList", Qt::DirectConnection, Q_ARG(ShareBaseDataList,list ));
+#ifdef HQ_RUNNABLE
+        if(mParent)
+        {
+            QMetaObject::invokeMethod(mParent, "slotUpdateShareCodesList", Qt::DirectConnection, Q_ARG(ShareBaseDataList,list ));
+        }
+#else
+        DATA_SERVICE->signalUpdateShareBasicInfo(list);
+#endif
     }
+
     return;
 }
 

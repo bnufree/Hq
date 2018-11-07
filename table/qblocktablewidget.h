@@ -2,7 +2,7 @@
 #define QBLOCKTABLEWIDGET_H
 
 #include "HqTableWidget.h"
-#include "utils/blockdata.h"
+#include "data_structure/hqblockdata.h"
 
 class QBlockTableWidget : public HqTableWidget
 {
@@ -16,7 +16,7 @@ signals:
     void    signalDisplayBlockDetailCodesList(const QStringList& codes);
     void    signalSetBlockType(int mkt);
 public slots:
-    void    setDataList(const BlockDataVList& list);
+    void    setDataList(const BlockDataList& list);
     void    slotCustomContextMenuRequested(const QPoint &pos);
     void    setBlockType();
     void    slotCellDoubleClicked(int row, int col);

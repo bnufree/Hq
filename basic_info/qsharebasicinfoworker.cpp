@@ -1,6 +1,6 @@
 ﻿#include "qsharebasicinfoworker.h"
 #include "qsharecodeswork.h"
-#include "utils/hqutils.h"
+#include "data_structure/hqutils.h"
 #include "dbservices/hqdatadefines.h"
 #include <QThreadPool>
 #include "qsharecodeswork.h"
@@ -25,20 +25,52 @@ QShareBasicInfoWorker::QShareBasicInfoWorker(QObject *parent) : QObject(parent)
 
 void QShareBasicInfoWorker::slotGetBasicInfo()
 {
-    //从文件获取信息基本信息，包括代码，分红送配，财务信息
-    if(!getInfosFromFile(mShareBaseDataMap))
-    {
-        getInfossFromWeb(mShareBaseDataMap);
-        writeInfos(mShareBaseDataMap.values());
-    }
-    //获取陆股通TOP10数据
+    //获取数据库的更新时间.决定从数据库获取还是网络获取
+    //首先获取数据库的更新日期
+    ShareDate update_date = DATA_SERVICE->getLastUpdateDateOfBasicInfo();
+    if(update_date == ShareDate::latestActiveDay()) return;
+
+    //获取代码更新信息
+
     QThreadPool pool;
+    pool.setMaxThreadCount(8);
     pool.setExpiryTimeout(-1);
-    QDate queryDate = QActiveDateTime::latestActiveDay();
+
+    //取得代码
+    pool.start(new QShareCodesWork(this));
+    //取得分红送配
+    pool.start(new QShareFHSPWork("2017-12-31", this));
     //取得北向交易TOP10
-    pool.start(new QShareHsgtTop10Work(queryDate.toString(DATE_FORMAT), this));
+    pool.start(new QShareHsgtTop10Work(QActiveDateTime::latestActiveDay().toString(DATE_FORMAT), this));
     pool.waitForDone();
-    emit signalBaseDataListFinished(QStringList(mShareBaseDataMap.keys()), mShareBaseDataMap.values());
+    //取得财务信息
+    QStringList allCodes(mShareBaseDataMap.keys());
+    int pos = 0;
+    int section = 200;
+    while(pos < allCodes.length())
+    {
+        QStringList sublist = allCodes.mid(pos, section);
+        pos += section;
+        pool.start(new QShareFinancialInfoWork(sublist, this));
+    }
+    pool.waitForDone();
+    return true;
+
+
+//    //从文件获取信息基本信息，包括代码，分红送配，财务信息
+//    if(!getInfosFromFile(mShareBaseDataMap))
+//    {
+//        getInfossFromWeb(mShareBaseDataMap);
+//        writeInfos(mShareBaseDataMap.values());
+//    }
+//    //获取陆股通TOP10数据
+//    QThreadPool pool;
+//    pool.setExpiryTimeout(-1);
+//    QDate queryDate = QActiveDateTime::latestActiveDay();
+//    //取得北向交易TOP10
+//    pool.start(new QShareHsgtTop10Work(queryDate.toString(DATE_FORMAT), this));
+//    pool.waitForDone();
+//    emit signalBaseDataListFinished(QStringList(mShareBaseDataMap.keys()), mShareBaseDataMap.values());
 
 }
 

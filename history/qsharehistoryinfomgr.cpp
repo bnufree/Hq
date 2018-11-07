@@ -5,7 +5,7 @@
 #include "dbservices/dbservices.h"
 #include <QDebug>
 #include "qhkexchangevoldataprocess.h"
-#include "utils/hqutils.h"
+#include "data_structure/hqutils.h"
 #include "utils/profiles.h"
 #include "dbservices/qactivedate.h"
 #include "utils/comdatadefines.h"
@@ -64,7 +64,7 @@ void QShareHistoryInfoMgr::slotUpdateForignVolInfo(const QStringList& list, cons
 //                                arg(mDates.size() < 10 ? mDates.join(","):""));
 }
 
-void QShareHistoryInfoMgr::slotUpdateShareHistoryProcess(const ShareHistoryList& list)
+void QShareHistoryInfoMgr::slotUpdateShareHistoryProcess(const ShareDataList& list)
 {
 //    QMutexLocker locker(&mShareHistoryMutex);
 //    //将历史数据更新到map
@@ -159,7 +159,7 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
     mCurCnt = 0;
     foreach(QString code, mCodesList)
     {
-        QShareHistoryCounterWork * process = new QShareHistoryCounterWork(code,ShareHistoryList(), 0);
+        QShareHistoryCounterWork * process = new QShareHistoryCounterWork(code,ShareDataList(), 0);
         mPool.start(process);
     }
     mPool.waitForDone();

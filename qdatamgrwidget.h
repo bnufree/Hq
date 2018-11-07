@@ -2,7 +2,7 @@
 #define QDATAMGRWIDGET_H
 
 #include <QWidget>
-#include "utils/sharedata.h"
+#include "data_structure/sharedata.h"
 
 namespace Ui {
 class QDataMgrWidget;
@@ -25,7 +25,7 @@ public:
     void setDataType(int type);
 public slots:
     void   setDislayDataType(int index);
-    void   slotUpdateShareHsgtTop10List(const ShareBaseDataList& list, const QString& date);
+    void   slotUpdateShareHsgtTop10List(const ShareDataList& list, const QString& date);
     void   slotDayChanged();
 
 private:

@@ -8,7 +8,7 @@
 #include <QMutex>
 #include <QThreadPool>
 #include <QDate>
-#include "utils/sharedata.h"
+#include "data_structure/sharedata.h"
 
 class QEastmoneyShareHistoryInfoThread;
 
@@ -35,7 +35,7 @@ public slots:
     void slotStartGetHistory();
     void slotUpdateAllShareFromDate(bool deldb, const QDate& date = QDate(2017,3,17));
     void slotUpdateForignVolInfo(const QStringList& list, const QDate& date);
-    void slotUpdateShareHistoryProcess(const ShareHistoryList& list);
+    void slotUpdateShareHistoryProcess(const ShareDataList& list);
     void slotDbUpdateHistoryFinished();
     void slotUpdateShareHistoryInfoFinished(const QString& code);
     void slotUpdateReadHistoryInfo(const ShareDataList& list);

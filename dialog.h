@@ -4,8 +4,8 @@
 #include <QDialog>
 #include <QSystemTrayIcon>
 #include <QTableWidget>
-#include "utils/blockdata.h"
-#include "utils/sharedata.h"
+#include "data_structure/hqbasedata.h"
+#include "data_structure/sharedata.h"
 #include "table/qsharetablewidget.h"
 #include "table/qblocktablewidget.h"
 #include "qdatamgrwidget.h"
@@ -71,7 +71,7 @@ protected:
 public slots:
     void setTargetSize(const QSize& size);
     void slotRecvIndexCodesList(const QStringList& list);
-    void updateBlockTable(const BlockDataVList& pDataList);
+    void updateBlockTable(const BlockDataList& pDataList);
     void updateHqTable(const ShareDataList& pDataList);
     void setDlgShow(QSystemTrayIcon::ActivationReason val);
     void slotUpdateMsg(const QString& msg);

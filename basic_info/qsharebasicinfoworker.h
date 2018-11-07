@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QThread>
 #include <QMutex>
-#include "utils/sharedata.h"
+#include "data_structure/sharedata.h"
 
 class QShareBasicInfoWorker : public QObject
 {
@@ -15,22 +15,23 @@ public:
 
 signals:
     void signalGetBasicInfo();
-    void signalBaseDataListFinished(const QStringList& codes, const ShareBaseDataList& list);
+    void signalBaseDataListFinished(const QStringList& codes, const ShareDataList& list);
     void signalUpdateFavCode(const QString& code);
 public slots:
     void slotGetBasicInfo();
-    void slotUpdateShareCodesList(const ShareBaseDataList& list);
-    void slotUpdateShareFHSPList(const ShareBaseDataList &list);
-    void slotUpdateShareHsgtTop10List(const ShareBaseDataList &list);
-    void slotUpdateShareFinancialList(const ShareBaseDataList &list);
+    void slotUpdateShareCodesList(const ShareDataList& list);
+    void slotUpdateShareFHSPList(const ShareDataList &list);
+    void slotUpdateShareHsgtTop10List(const ShareDataList &list);
+    void slotUpdateShareFinancialList(const ShareDataList &list);
     void updateShareFavCode(const QString& code);
 private:
-    bool getInfosFromFile(QMap<QString, ShareBaseData>& map);
-    bool getInfossFromWeb(QMap<QString, ShareBaseData>& map);
-    bool writeInfos(const ShareBaseDataList& list);
+    bool getInfosFromFile(ShareDataMap& map);
+    bool getInfossFromWeb(ShareDataMap& map);
+    bool writeInfos(const ShareDataList& list);
+
 private:
-    QThread     mWorkThread;
-    QMap<QString, ShareBaseData>        mShareBaseDataMap;
+    QThread             mWorkThread;
+    ShareDataMap       mShareBaseDataMap;
     QMutex      mUpdateMutex;
     bool        mNeedUpdateCurrentTop10;
 

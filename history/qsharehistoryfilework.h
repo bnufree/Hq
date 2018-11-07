@@ -3,7 +3,7 @@
 
 #include <QRunnable>
 #include <QObject>
-#include "utils/sharedata.h"
+#include "data_structure/sharedata.h"
 
 #define     FILE_READ           0
 #define     FILE_WRITE          1

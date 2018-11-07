@@ -2,8 +2,8 @@
 #define QSHARETABLEWIDGET_H
 
 #include "HqTableWidget.h"
-//#include "dbservices/sharedata.h"
-class ShareDataList;
+#include "data_structure/sharedata.h"
+
 class QShareTablewidget : public HqTableWidget
 {
     Q_OBJECT

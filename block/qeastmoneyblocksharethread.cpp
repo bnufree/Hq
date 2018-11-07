@@ -31,7 +31,7 @@ void QEastMoneyBlockShareThread::run()
     {
         QString code = exp.cap(1);
         index += exp.matchedLength();
-        sharecodeslist.append(ShareBaseData::fullCode(code));
+        sharecodeslist.append(ShareData::fullCode(code));
         DATA_SERVICE->setShareBlock(code, mBlockCode);
     }
     if(sharecodeslist.length() > 0)

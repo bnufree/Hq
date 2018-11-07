@@ -2,8 +2,9 @@
 #define HQBASEDATA_H
 
 #include <QString>
+#include "hqutils.h"
 
-class HqBaseData
+struct HqBaseData
 {
 public:
     //定义基础的数据类型
@@ -18,20 +19,173 @@ public:
     HqBaseData(const HqBaseData& data);
     HqBaseData(const QString& code, const QString& name, const QString& py, int type, bool isFav);
     HqBaseData& operator =(const HqBaseData& other);
-    void setFav(bool fav) { mIsFav = fav;}
-    bool isFav() const {return mIsFav;}
-    void setCode(const QString& code){ mCode = code;}
-    QString code() const {return mCode;}
-    void setName(const QString& name){ mName = name;}
-    QString name() const { return mName;}
-    void setPY(const QString& abbr){mPY = abbr;}
-    QString& py() const {return mPY;}
-private:
+    bool operator ==(const HqBaseData& other)
+    {
+        return mCode == other.mCode && mPY == other.mPY && mIsFav == other.mIsFav;
+    }
+    void update(const QString& name, const QString& py)
+    {
+        mName = name;
+        mPY = py;
+    }
+    void update(bool isFav)
+    {
+        mIsFav = isFav;
+    }
+
+public:
     bool        mIsFav;
     int         mType;
     QString     mCode;
     QString     mName;
     QString     mPY; //拼音简称
+    bool        mStatus;    //是否停牌
+
 };
+
+typedef     QList<HqBaseData>   HqBaseDataList;
+Q_DECLARE_METATYPE(HqBaseData)
+Q_DECLARE_METATYPE(HqBaseDataList)
+
+struct ShareHolder{
+    QString     mShareCode;
+    QString     mHolderCode;
+    QString     mName;
+    double      mShareCount;
+    double      mFundPercent;
+    ShareDate   mDate;
+};
+typedef QList<ShareHolder>  ShareHolderList;
+Q_DECLARE_METATYPE(ShareHolder)
+Q_DECLARE_METATYPE(ShareHolderList)
+
+
+//财务数据
+typedef struct Finance
+{
+    QString         mCode;
+    double          mEPS;       //每股收益
+    double          mBVPS;      //每股净资产
+    double          mROE;       //净资产收益率
+    double          mTotalShare;
+    double          mMutalShare;
+    Finance()
+    {
+        mEPS = 0.0;
+        mBVPS = 0.0;
+        mROE = 0.0;
+        mTotalShare = 0;
+        mMutalShare = 0;
+    }
+}FinancialData;
+
+typedef QList<FinancialData>    FinancialDataList;
+Q_DECLARE_METATYPE(FinancialData)
+Q_DECLARE_METATYPE(FinancialDataList)
+
+
+//分红信息
+struct  ShareBonus
+{
+    QString             mCode;
+    double              mSZZG; //送转股比例
+    double              mXJFH;  //现金分红
+    ShareDate           mGQDJR; //股权登记日
+    ShareDate           mYAGGR; //预案公告日
+    ShareDate           mDate;
+    ShareBonus()
+    {
+        mSZZG = 0.0;
+        mXJFH = 0.0;
+    }
+};
+
+typedef QList<ShareBonus>       ShareBonusList;
+
+Q_DECLARE_METATYPE(ShareBonus)
+Q_DECLARE_METATYPE(ShareBonusList)
+
+typedef struct North_South_Bound_Data
+{
+    QString             mCode;
+    QString             mName;
+    double              mBuy;
+    double              mSell;
+    double              mTotal;
+    double              mPure;
+    double              mChange;
+    double              mVol;
+    double              mVolDelta;
+    double              mVolMutablePercent;
+    bool                mIsTop10;
+    ShareDateTime       mDate;
+
+    bool operator <(const North_South_Bound_Data& data) const
+    {
+        return ((*this).mPure) < (data.mPure);
+    }
+
+    bool operator >(const North_South_Bound_Data& data) const
+    {
+        return ((*this).mPure) > (data.mPure);
+    }
+
+}ShareHsgt;
+
+typedef QList<ShareHsgt>       ShareHsgtList;
+
+Q_DECLARE_METATYPE(ShareHsgt)
+Q_DECLARE_METATYPE(ShareHsgtList)
+
+struct ShareZjlx
+{
+    QString             mCode;
+    double              mPure;
+    ShareDateTime       mDate;
+
+    bool operator <(const ShareZjlx& data) const
+    {
+        return ((*this).mPure) < (data.mPure);
+    }
+
+    bool operator >(const ShareZjlx& data) const
+    {
+        return ((*this).mPure) > (data.mPure);
+    }
+
+};
+
+typedef QList<ShareZjlx>       ShareZjlxList;
+
+Q_DECLARE_METATYPE(ShareZjlx)
+Q_DECLARE_METATYPE(ShareZjlxList)
+
+
+struct ShareRzRq
+{
+    QString             mCode;
+    double              mRZRQ;
+    ShareDateTime       mDate;
+
+    bool operator <(const ShareRzRq& data) const
+    {
+        return ((*this).mRZRQ) < (data.mRZRQ);
+    }
+
+    bool operator >(const ShareRzRq& data) const
+    {
+        return ((*this).mRZRQ) > (data.mRZRQ);
+    }
+
+};
+
+typedef QList<ShareRzRq>       ShareRzrqList;
+
+Q_DECLARE_METATYPE(ShareRzRq)
+Q_DECLARE_METATYPE(ShareRzrqList)
+
+
+
+
 
 #endif // HQBASEDATA_H

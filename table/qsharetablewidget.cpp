@@ -1,7 +1,7 @@
 ﻿#include "qsharetablewidget.h"
 #include <QDebug>
-#include "utils/hqutils.h"
-#include "utils/sharedata.h"
+#include "data_structure/hqutils.h"
+#include "data_structure/sharedata.h"
 #include "dbservices/dbservices.h"
 
 
@@ -55,26 +55,26 @@ void QShareTablewidget::setDataList(const ShareDataList &list)
         mShareMap[data.mCode] = data.mChgPercent;
         this->setItemText(i, k++, QString("").sprintf("%.2f", data.mMoney / 10000.0));
         this->setItemText(i, k++, QString("").sprintf("%.2f",data.mMoneyRatio));
-        this->setItemText(i, k++, QString("").sprintf("%.2f",data.mLast3DaysChgPers));
-        this->setItemText(i, k++, QString("").sprintf("%.2f",data.mLast5DaysChgPers));
-        this->setItemText(i, k++, QString("").sprintf("%.2f",data.mLast10DaysChgPers));
-        this->setItemText(i, k++, QString("").sprintf("%.2f",data.mLastMonthChgPers));
-        this->setItemText(i, k++, QString("").sprintf("%.2f",data.mChgPersFromYear));
+        this->setItemText(i, k++, QString("").sprintf("%.2f",data.mHistory.mLast3DaysChgPers));
+        this->setItemText(i, k++, QString("").sprintf("%.2f",data.mHistory.mLast5DaysChgPers));
+        this->setItemText(i, k++, QString("").sprintf("%.2f",data.mHistory.mLast10DaysChgPers));
+        this->setItemText(i, k++, QString("").sprintf("%.2f",data.mHistory.mLastMonthChgPers));
+        this->setItemText(i, k++, QString("").sprintf("%.2f",data.mHistory.mChgPersFromYear));
         this->setItemText(i, k++, QString("").sprintf("%.0f", data.mZJLX));
         this->setItemText(i, k++, QString("").sprintf("%.2f",data.mGXL * 100));
-        this->setItemText(i, k++, QString("").sprintf("%.0f",data.mFhspInfo.mSZZG));
+        this->setItemText(i, k++, QString("").sprintf("%.0f",data.mBonusData.mSZZG));
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mTotalCap / 100000000.0 ));
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mMutalbleCap/ 100000000.0 ));
 
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mProfit));
-        this->setItemText(i, k++, QString("").sprintf("%.0f", data.mHKExInfo.mForeignVol / 10000.0));
+        this->setItemText(i, k++, QString("").sprintf("%.0f", data.mHsgtData.mVol / 10000.0));
         this->setItemText(i, k++, QString("").sprintf("%.0f", data.mForeignVolChg / 10000.0));
         this->setItemText(i, k++, QString("").sprintf("%.0f", data.mForeignCap / 100000000.0));
         this->setItemText(i, k++, QString("").sprintf("%.0f", data.mForeignCapChg / 100000000.0));
         this->setItemText(i, k++, QString("").sprintf("%.2f",data.mHsl * 100));
-        this->setItemText(i, k++, data.mFhspInfo.mGQDJR.toString());
-        this->setItemText(i, k++, data.mFhspInfo.mYAGGR.toString());
-        this->setItemText(i, k++, QDateTime::fromMSecsSinceEpoch(data.mTime).toString("hh:mm:ss"));
+        this->setItemText(i, k++, data.mBonusData.mGQDJR.toString());
+        this->setItemText(i, k++, data.mBonusData.mYAGGR.toString());
+        this->setItemText(i, k++, data.mTime.toString(true));
         this->updateFavShareIconOfRow(i, data.mIsFav);
         this->item(i, 0)->setData(Qt::UserRole, data.mCode);
 //        this->item(i, 0)->setData(Qt::UserRole+1, QVariant::fromValue(data.mBlockList));
@@ -179,10 +179,11 @@ void QShareTablewidget::slotCustomContextMenuRequested(const QPoint &pos)
                 foreach (QString code, list)
                 {
                     //qDebug()<<stkCode<<code;
-                    BlockData *block = DATA_SERVICE->getBlockDataOfCode(code);
+                    BlockData* block = DATA_SERVICE->getBlockDataOfCode(code);
+                    if(!block) continue;
                     if(block->mName.length() == 0) continue;
                     QAction *act = new QAction(this);
-                    act->setText(QString("%1:%2%").arg(block->mName).arg(block->mChangePer));
+                    act->setText(QString("%1:%2%").arg(block->mName).arg(block->mChangePercent));
                     act->setData(block->mShareCodeList);
                     connect(act, &QAction::triggered, this, &QShareTablewidget::setDisplayBlockDetail);
                     wk->addAction(act);

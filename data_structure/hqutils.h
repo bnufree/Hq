@@ -6,7 +6,6 @@
 #include <QDateTime>
 #include <QStringList>
 
-
 #define         ANDROID_FILE_PATH       "/mnt/sdcard/com.hq.info"
 
 class ShareDate
@@ -21,6 +20,15 @@ public:
             this->mDate = other.mDate;
         }
         return *this;
+    }
+    bool operator ==(const ShareDate& other)
+    {
+        return mDate == other.mDate;
+    }
+
+    bool operator !=(const ShareDate& other)
+    {
+        return mDate != other.mDate;
     }
 
     uint toTime_t() const {return QDateTime(mDate).toTime_t();}
@@ -43,21 +51,51 @@ public:
     QDate   date() const {return mDate;}
     bool    isNull() const {return mDate.isNull();}
     qint64  mSecs() const {return QDateTime(mDate).toMSecsSinceEpoch();}
+    bool    isWeekend() const {return mDate.dayOfWeek() == 6 || mDate.dayOfWeek() == 7;}
+    static ShareDate latestActiveDay()
+    {
+        ShareDate date = ShareDate::currentDate();
+        if(!date.isWeekend()) return date;
+        int day = date.date().dayOfWeek();
+        return ShareDate(date.date().addDays(5-day));
+    }
 
 private:
     QDate       mDate;
 };
 
-struct ShareHolder{
-    QString     mShareCode;
-    QString     mHolderCode;
-    QString     mName;
-    double      mShareCount;
-    double      mFundPercent;
-    ShareDate   mDate;
+
+class ShareDateTime : public QDateTime
+{
+public:
+    ShareDateTime():QDateTime() {}
+    ShareDateTime(const QDate& date):QDateTime(date){}
+    ShareDateTime(uint time_t):QDateTime(QDateTime::fromTime_t(time_t).date()){}
+    static ShareDateTime fromTime_t(uint time_t)
+    {
+        return ShareDateTime(time_t);
+    }
+    QString toString(bool time = false){
+        if(this->toTime_t() == 0) return "-";
+        if(time) return QDateTime::toString("hh:mm:ss");
+        else return QDateTime::toString("yyyy-MM-dd");
+    }
+    static ShareDateTime fromString(const QString& str, bool secs = false)
+    {
+        if(!secs) return ShareDateTime(QDate::fromString(str, "yyyy-MM-dd"));
+        else return ShareDateTime(QDate::fromString(str, "yyyy-MM-dd hh:mm:ss"));
+    }
+
+    static ShareDateTime currentDateTime(){
+        return ShareDateTime(QDateTime::currentDateTime().toTime_t());
+    }
+    QDate   date() const {return this->date();}
+    bool    isNull() const {return this->date().isNull();}
+    qint64  mSecs() const {return this->toMSecsSinceEpoch();}
 };
 
-typedef QList<ShareHolder>  ShareHolderList;
+typedef     ShareDateTime       BlockDateTime;
+
 
 class HqUtils
 {

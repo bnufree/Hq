@@ -8,6 +8,7 @@
 QT       += core gui network sql concurrent
 
 #DEFINES *= Q_QDOC
+DEFINES *= HQ_RUNNABLE
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -35,7 +36,6 @@ SOURCES += main.cpp\
     table/qblocktablewidget.cpp \
     dbservices/hqdbdatabase.cpp \
     dbservices/dbservices.cpp \
-    utils/hqutils.cpp \
     history/qsharehistorydialog.cpp \
     history/qsharegraphicwidget.cpp \
     history/qhkexchangevoldataprocess.cpp \
@@ -46,7 +46,6 @@ SOURCES += main.cpp\
     basic_info/qsharehsgttop10work.cpp \
     basic_info/qsharefinancialinfowork.cpp \
     data_structure/sharedata.cpp \
-    utils/blockdata.cpp \
     hqtaskmagrcenter.cpp \
     history/qsharehistoryinfothread.cpp \
     history/qsharehistorycounterwork.cpp \
@@ -63,6 +62,7 @@ SOURCES += main.cpp\
     qandroidlistwidget.cpp \
     table/qsharecodenamewidget.cpp \
     dbservices/qactivedate.cpp \
+    data_structure/hqutils.cpp \
     data_structure/hqbasedata.cpp \
     data_structure/hqblockdata.cpp
 
@@ -89,8 +89,7 @@ HEADERS  += dialog.h \
     table/qblocktablewidget.h \
     dbservices/hqdbdatabase.h \
     dbservices/dbservices.h \
-    dbservices/hqdatadefines.h \
-    utils/hqutils.h \
+    dbservices/hqdatadefines.h \    
     history/qsharehistorydialog.h \
     history/qsharegraphicwidget.h \
     history/qhkexchangevoldataprocess.h \
@@ -101,7 +100,6 @@ HEADERS  += dialog.h \
     basic_info/qsharehsgttop10work.h \
     basic_info/qsharefinancialinfowork.h \
     data_structure//sharedata.h \
-    utils/blockdata.h \
     hqtaskmagrcenter.h \
     history/qsharehistoryinfothread.h \
     history/qsharehistorycounterwork.h \
@@ -118,6 +116,7 @@ HEADERS  += dialog.h \
     qandroidlistwidget.h \
     table/qsharecodenamewidget.h \
     dbservices/qactivedate.h \
+    data_structure/hqutils.h \
     data_structure/hqbasedata.h \
     data_structure/hqblockdata.h
 

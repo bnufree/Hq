@@ -4,7 +4,7 @@
 #include <QThread>
 #include <QMap>
 #include <QList>
-#include "utils/blockdata.h"
+#include "data_structure/hqblockdata.h"
 
 
 typedef enum enBlockDisplayRule
@@ -25,11 +25,11 @@ public:
     void    reverseSortRule();
     void    stop();
 signals:
-    void    sendBlockDataList(const BlockDataPList& list);
+    void    sendBlockDataList(const BlockDataList& list);
     void    sendStkinfoUpdateProgress(int cur, int total);
     void    signalUpdateMsg(const QString& msg);
     void    start();
-    void    sendShareBlockDataMap(const QMap<QString, BlockDataPList>& map);
+    void    sendShareBlockDataMap(const QMap<QString, BlockDataList>& map);
 public slots:
     void    slotUpdateBlockShare();
     void    slotUpdateBlockInfos();
@@ -40,7 +40,7 @@ private:
     int         mSortRule;
     int         mUserBlockType;
     int         mWebBlockType;
-    QMap<QString,   BlockData*> mBlockDataList;
+    QMap<QString,   BlockData> mBlockDataList;
     QThread     mWorkthread;
     bool        mUpdateRealInfo;
 };

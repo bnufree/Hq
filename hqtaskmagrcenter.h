@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QThread>
-#include "utils/sharedata.h"
+#include "data_structure/sharedata.h"
 
 class QSinaStkResultMergeThread;
 class QEastMoneyBlockMangagerThread;
@@ -23,8 +23,8 @@ signals:
     void        signalSendIndexCodesList(const QStringList& list);
     void        signalSendIndexRealDataList(const ShareDataList& list);
     void        signalSendShareRealDataList(const ShareDataList& list);
-    void        signalSendNotrhBoundDataList(const QList<NS_BOUND_DATA> &list);
-    void        signalBlockDataListUpdated(const BlockDataVList& list);
+    void        signalSendNotrhBoundDataList(const ShareHsgtList& list);
+    void        signalBlockDataListUpdated(const BlockDataList& list);
     void        signalSearchCodesOfText(const QString& input);
     void        signalSetFavCode(const QString& code);
     void        signalUpdateAllShareHistoryFromDate(bool deldb, const QDate& date);
@@ -32,7 +32,7 @@ signals:
 public slots:
     void        slotStart();
     void        slotDBInitFinished();
-    void        slotBaseDataListFinished(const QStringList& codes, const ShareBaseDataList& list);
+    void        slotBaseDataListFinished(const QStringList& codes, const ShareDataList& list);
     void        slotUpdateHistoryFinished();
     void        slotSetFavCode(const QString& code);
 
