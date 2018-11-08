@@ -3,7 +3,7 @@
 
 #include "HqTableWidget.h"
 //#include "dbservices/sharedata.h"
-#include "utils/sharedata.h"
+#include "data_structure/sharedata.h"
 class QShareMutualBundwidget : public HqTableWidget
 {
     Q_OBJECT
@@ -14,7 +14,7 @@ signals:
     void    signalDisplayMutualBundHistory(const QString& code);
 
 public slots:
-    void    setDataList(const ShareBaseDataList& list);
+    void    setDataList(const ShareDataList& list);
 private:
 
 };

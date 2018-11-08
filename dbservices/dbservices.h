@@ -25,9 +25,13 @@ public:
     double getProfit(const QString& code);
     foreignHolder amountForeigner(const QString& code);
     QStringList  getExchangeCodeList();
+    QStringList  getAllShareCodes() {return mRealShareMap.keys();}
     ShareDate  getLastUpdateDateOfHSGT();
     ShareDate  getLastUpdateDateOfHSGTVol();
     ShareDate  getLastUpdateDateOfBasicInfo();
+    ShareDate  getLastUpdateDateOfBonusInfo();
+    ShareDate  getLastUpdateDateOfHsgtTop10();
+    ShareDate  getLastUpdateDateOfFinanceInfo();
     ShareDate  getLastUpdateDateOfHistoryInfo(const QString& code);
     bool   GetHistoryInfoWithDate(const QString& table, const QDate& date, double& close, double& money, qint64& total_share, qint64& mutalble_share);
     double   GetMultiDaysChangePercent(const QString& table, int days);
@@ -61,7 +65,8 @@ signals:
     //开始创建数据库需要的表信息，初始化数据库
     void signalInitDBTables();
     void signalDbInitFinished();
-    void signalUpdateShareBasicInfo(const ShareDataList& list, int mode);
+    void signalAllShareCodeList(const QStringList& codes);
+    void signalUpdateShareBasicInfo(const ShareDataList& list);
 
     //从数据库查询板块信息
     void signalQueryBlockInfo(int type = 1);
@@ -95,9 +100,14 @@ signals:
     //沪港通持股写入数据据
     void signalAddShareAmoutByForeigner(const ShareDataList& list);
     void signalUpdateShareAmountByForeigner();
+    void signalUpdateShareBonusInfo(const ShareBonusList& list);
+    void signalUpdateShareHsgtTop10Info(const ShareHsgtList& list);
+    void signalUpdateShareFinanceInfo(const FinancialDataList& list);
     //实时数据查询信息获取
     void signalSearchCodesOfText(const QString& text);
     void signalSendSearchCodesOfText(const QStringList& codes);
+    //错误信息输出
+    void signalDBErrorMsg(const QString& msg);
 
 public slots:
     void slotSearchCodesOfText(const QString &text);
@@ -122,7 +132,10 @@ public slots:
     void slotUpdateStkProfitList(const ShareDataList& list);
     void slotAddShareAmoutByForeigner(const ShareDataList& list);
     void slotUpdateShareAmountByForeigner();
-    void slotUpdateShareBasicInfo(const ShareDataList& list, int mode);
+    void slotUpdateShareBasicInfo(const ShareDataList& list);
+    void slotUpdateShareBonusInfo(const ShareBonusList& list);
+    void slotUpdateHsgtTop10Info(const ShareHsgtList& list);
+    void slotUpdateShareFinanceInfo(const FinancialDataList& list);
 
 private:
     void initSignalSlot();

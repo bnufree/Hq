@@ -2,7 +2,7 @@
 #include <QDebug>
 #include <QThread>
 #include <QEventLoop>
-#include "utils/hqutils.h"
+#include "data_structure/hqutils.h"
 #include "dbservices/dbservices.h"
 #include "dbservices/qactivedate.h"
 

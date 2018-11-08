@@ -2,7 +2,7 @@
 #include "utils/qhttpget.h"
 #include "QRegExp"
 #include <QDebug>
-#include "utils/sharedata.h"
+#include "data_structure/sharedata.h"
 
 
 QEastmoneyNorthBoundThread::QEastmoneyNorthBoundThread(QObject *parent):QObject(parent)
@@ -110,7 +110,7 @@ void QEastmoneyNorthBoundThread::slotRecvHttpContent(const QByteArray &bytes)
         {
             QStringList hgt = splitstr[i].split(",");
             QString code = hgt[0];
-            NS_BOUND_DATA& data = mBoundDataList[code];
+            ShareHsgt& data = mBoundDataList[code];
             data.mCode = code;
             data.mName = hgt[2];
             data.mChange = hgt[3].left(hgt[3].length() -1).toDouble();
@@ -129,7 +129,7 @@ void QEastmoneyNorthBoundThread::slotRecvHttpContent(const QByteArray &bytes)
         //qDebug()<<list.length()<<list;
         if(list.length() >=3)
         {
-            NS_BOUND_DATA& data = mBoundDataList[name];
+            ShareHsgt& data = mBoundDataList[name];
             data.mCode = name;
             data.mTotal = list[0] * 100.0;
             data.mBuy = list[1]*100;
@@ -138,7 +138,7 @@ void QEastmoneyNorthBoundThread::slotRecvHttpContent(const QByteArray &bytes)
         }
     }
     //qDebug()<<
-    foreach (NS_BOUND_DATA data, mBoundDataList) {
+    foreach (ShareHsgt data, mBoundDataList) {
         //qDebug()<<data.mCode<<data.mName<<data.mPure;
     }
     emit signalUpdateNorthBoundList(mBoundDataList.values());

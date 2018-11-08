@@ -92,7 +92,7 @@ struct  ShareBonus
     double              mXJFH;  //现金分红
     ShareDate           mGQDJR; //股权登记日
     ShareDate           mYAGGR; //预案公告日
-    ShareDate           mDate;
+    ShareDate           mDate;  //报告日期的记录
     ShareBonus()
     {
         mSZZG = 0.0;
@@ -101,6 +101,7 @@ struct  ShareBonus
 };
 
 typedef QList<ShareBonus>       ShareBonusList;
+typedef QMap<QString, ShareBonusList> ShareBonusMap;
 
 Q_DECLARE_METATYPE(ShareBonus)
 Q_DECLARE_METATYPE(ShareBonusList)

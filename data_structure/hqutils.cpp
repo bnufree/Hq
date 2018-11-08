@@ -1,7 +1,7 @@
 ﻿#include "hqutils.h"
 #include <QTextCodec>
 //#include <Windows.h>
-#include "profiles.h"
+#include "utils/profiles.h"
 #include <QDir>
 
 #define         DATE_STR_FORMAT         "yyyy-MM-dd"

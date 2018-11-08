@@ -15,6 +15,9 @@
 #define         TABLE_SHARE_FINANCE                 "share_finance"
 #define         TABLE_DB_UPDATE                     "share_db_update"
 #define         TABLE_SHARE_HOLEDER                 "share_holder"
+#define         TABLE_FAVORITE                      "share_favor"
+#define         TABLE_PROFIT                        "share_profit"
+#define         TABLE_BLOCK_SHARE                   "block_share"
 
 //列名
 #define         HQ_TABLE_COL_ID                 "id"
@@ -32,8 +35,8 @@
 #define         HQ_TABLE_COL_FAVORITE           "favorite"
 #define         HQ_TABLE_COL_ZJLX               "zjlx"
 #define         HQ_TABLE_COL_RZRQ               "rzrq"
-#define         HQ_TABLE_COL_SHARE_LIST         "share_list"
-#define         HQ_TABLE_COL_BLOCK_LIST         "block_list"
+#define         HQ_TABLE_COL_BLOCK_SHARE_LIST         "share_list"
+#define         HQ_TABLE_COL_BLOCK_LIST0         "block_list"
 #define         HQ_TABLE_COL_BLOCK_TYPE         "type"
 #define         HQ_TABLE_COL_TABLE_NM           "name"
 
@@ -42,7 +45,7 @@
 #define         HQ_TABLE_COL_HSGT_TOP10_MONEY      "foreign_money"
 #define         HQ_TABLE_COL_HSGT_TOP10_BUY         "buy"
 #define         HQ_TABLE_COL_HSGT_TOP10_SELL        "sell"
-#define         HQ_TABLE_COL_HSGT_TOP10             "hsgt"
+#define         HQ_TABLE_COL_HSGT_TOP10_FLAG             "hsgt"
 #define         HQ_TABLE_COL_HSGT_HAVE       "foreign_amount"
 #define         HQ_TABLE_COL_HSGT_HAVE_PERCENT  "foreign_percent"
 

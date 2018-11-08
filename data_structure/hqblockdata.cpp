@@ -7,7 +7,6 @@ HQBlockData::HQBlockData():HqBaseData()
     mDownNum = 0;
     mEqualNum = 0;
     mTotalMoney = 0;
-    mPureInMoney = 0;
     mCur = 0;
     mLastClose = 0;
     mChg = 0;

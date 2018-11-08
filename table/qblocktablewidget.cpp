@@ -11,7 +11,7 @@ QBlockTableWidget::QBlockTableWidget(QWidget *parent) : HqTableWidget(parent)
     initMenu();
 }
 
-void QBlockTableWidget::setDataList(const BlockDataVList &list)
+void QBlockTableWidget::setDataList(const BlockDataList &list)
 {
     prepareUpdateTable(list.size());
     int i = 0;
@@ -19,7 +19,7 @@ void QBlockTableWidget::setDataList(const BlockDataVList &list)
         int k =0;
         this->setRowHeight(i, 20);
         this->setItemText(i, k++, data.mName);
-        this->setItemText(i, k++, QString("%1%").arg(data.mChangePer, 0, 'f', 2 ));
+        this->setItemText(i, k++, QString("%1%").arg(data.mChangePercent, 0, 'f', 2 ));
         this->updateFavShareIconOfRow(i, data.mIsFav);
         this->item(i, 0)->setData(Qt::UserRole, data.mShareCodeList);
         i++;

@@ -20,7 +20,6 @@ QMutex HqInfoService::mutex;
 HqInfoService::HqInfoService(QObject *parent) :
     QObject(parent)
 {
-    qRegisterMetaType<ShareDataList>("const ShareDataList&");
     mFavCodeList = Profiles::instance()->value(FAV_CODE_SEC, FAV_CODE_KEY, QStringList()).toStringList();
     QActiveDateTime::mCloseDateList = PROFILES_INS->value(CLOSE_DATE_SEC, CLOSE_DATE_KEY, QStringList()).toStringList();
     qDebug()<<"close:"<<QActiveDateTime::mCloseDateList;
@@ -49,8 +48,8 @@ void HqInfoService::slotInitDBTables()
     qDebug()<<__FUNCTION__<<__LINE__;
     if(mDataBase.createDBTables())
     {
-        //initBlockData();
-        //initShareData();
+//        initBlockData();
+//        initShareData();
         emit signalDbInitFinished();
     } else
     {
@@ -100,11 +99,23 @@ bool HqInfoService::createHistoryTable(const QString &pTableName)
 
 void HqInfoService::initSignalSlot()
 {
-    connect(this, SIGNAL(signalInitDBTables()), this, SLOT(slotInitDBTables()));
+    qRegisterMetaType<ShareData>("const ShareData&");
+    qRegisterMetaType<ShareDataList>("const ShareDataList&");
+    qRegisterMetaType<ShareHsgtList >("const ShareHsgtList&");
+    qRegisterMetaType<ShareHsgt>("const ShareHsgt&");
+    qRegisterMetaType<ShareBonusList >("const ShareBonusList&");
+    qRegisterMetaType<ShareBonus>("const ShareBonus&");
+    qRegisterMetaType<BlockDataList>("const BlockDataList&");
+    qRegisterMetaType<QMap<QString, BlockDataList> >("const QMap<QString, BlockDataList>&");
+    qRegisterMetaType<QMap<QString, BlockData*> >("const QMap<QString, BlockData*>&");
+
+    connect(this, SIGNAL(signalInitDBTables()), this, SLOT(slotInitDBTables()));    
+    connect(this, SIGNAL(signalUpdateShareBasicInfo(ShareDataList)), this, SLOT(slotUpdateShareBasicInfo(ShareDataList)));
+    connect(this, SIGNAL(signalUpdateShareBonusInfo(ShareBonusList)), this, SLOT(slotUpdateShareBonusInfo(ShareBonusList)));
+
     connect(this, SIGNAL(signalRecvShareHistoryInfos(ShareDataList, int)), this, SLOT(slotRecvShareHistoryInfos(ShareDataList, int)));
     connect(this, SIGNAL(signalUpdateShareinfoWithHistory(QString,double,double,double,double,double,double, qint64, qint64,ShareHistoryList)),\
             this, SLOT(slotUpdateShareinfoWithHistory(QString,double,double,double,double,double,double, qint64, qint64,ShareHistoryList)));
-    connect(this, SIGNAL(signalUpdateShareBasicInfo(ShareDataList, int)), this, SLOT(slotUpdateShareBasicInfo(ShareDataList, int)));
     connect(this, SIGNAL(signalQueryShareForeignVol(QString)), this, SLOT(slotQueryShareForeignVol(QString)));
     connect(this, SIGNAL(signalSetFavCode(QString)), this, SLOT(slotSetFavCode(QString)));
     connect(this, SIGNAL(signalSearchCodesOfText(QString)), this, SLOT(slotSearchCodesOfText(QString)));
@@ -137,6 +148,7 @@ void HqInfoService::initShareData()
     QMutexLocker locker(&mShareMutex);
     mRealShareMap.clear();
     mDataBase.queryShareBasicInfo(mRealShareMap);
+    emit signalAllShareCodeList(mRealShareMap.keys());
 }
 
 void HqInfoService::saveShares()
@@ -188,6 +200,22 @@ ShareDate HqInfoService::getLastUpdateDateOfBasicInfo()
 {
     return getLastUpdateDateOfTable(TABLE_SHARE_BASIC_INFO);
 }
+
+ShareDate HqInfoService::getLastUpdateDateOfBonusInfo()
+{
+    return getLastUpdateDateOfTable(TABLE_SHARE_BONUS);
+}
+
+ShareDate HqInfoService::getLastUpdateDateOfHsgtTop10()
+{
+    return getLastUpdateDateOfTable(TABLE_HSGT_TOP10);
+}
+
+ShareDate HqInfoService::getLastUpdateDateOfFinanceInfo()
+{
+    return getLastUpdateDateOfTable(TABLE_SHARE_FINANCE);
+}
+
 
 ShareDate HqInfoService::getLastUpdateDateOfHistoryInfo(const QString& code)
 {
@@ -308,39 +336,49 @@ ShareData* HqInfoService::getShareData(const QString &code)
     if(!mRealShareMap.contains(code))
     {
         ShareData data;
-        data.mCode = code;
+        data.mCode = code.right(6);
         mRealShareMap[code] = data;
     }
     return (ShareData*)(&mRealShareMap[code]);
 }
 
-void HqInfoService::slotUpdateShareBasicInfo(const ShareDataList &list, int mode)
+void HqInfoService::slotUpdateShareBasicInfo(const ShareDataList &list)
 {
-    ShareDataList updateList;
-    {
-        //更新数据库避免锁，将锁添加到括号内的局部变量
-        QMutexLocker locker(&mShareMutex);
-        //更新本地缓存
-        foreach (ShareData data, list) {
-            if(!mRealShareMap.contains(data.mCode))
-            {
-                updateList.append(data);
-                mRealShareMap[data.mCode] = data;
-                continue;
-            }
-            ShareData& ref = mRealShareMap[data.mCode];
-            if(!ref.isUpdated(data, mode)) continue;
-            updateList.append(data);
-        }
-    }
-
     //更新数据库
-    if(!mDataBase.updateShareBasicInfo(updateList, mode))
+    if(!mDataBase.updateShareBasicInfo(list))
     {
-        qDebug()<<"error:"<<mDataBase.getErrorString();
+        qDebug()<<"update share basic info error:"<<mDataBase.getErrorString();
+        return;
     }
+    initShareData();
+    return;
+}
 
-    qDebug()<<__FUNCTION__<<__LINE__;
+void HqInfoService::slotUpdateShareBonusInfo(const ShareBonusList &list)
+{
+    if(!mDataBase.updateShareBonus(list))
+    {
+        qDebug()<<"update share bonus info error:"<<mDataBase.getErrorString();
+        return;
+    }
+}
+
+void HqInfoService::slotUpdateHsgtTop10Info(const ShareHsgtList &list)
+{
+    if(!mDataBase.updateShareHsgtTop10List(list))
+    {
+        qDebug()<<"update share bonus info error:"<<mDataBase.getErrorString();
+        return;
+    }
+}
+
+void HqInfoService::slotUpdateShareFinanceInfo(const FinancialDataList& list)
+{
+    if(!mDataBase.updateShareFinance(list))
+    {
+        qDebug()<<"update share bonus info error:"<<mDataBase.getErrorString();
+        return;
+    }
 }
 
 double HqInfoService::GetMultiDaysChangePercent(const QString &table, int days)
@@ -390,7 +428,12 @@ void HqInfoService::GetForeignVolChange(const QString &code, qint64 &cur, qint64
 
 void HqInfoService::slotUpdateStkProfitList(const ShareDataList &list)
 {
-    slotUpdateShareBasicInfo(list, Share_Basic_Update_Profit);
+    if(!mDataBase.updateShareProfitInfo(list))
+    {
+        emit signalDBErrorMsg(tr("update db profit error:%1").arg(mDataBase.errMsg()));
+        return;
+    }
+    if(!mDataBase.queryShareProfitInfo(mRealShareMap)) return;
 }
 
 void HqInfoService::slotAddShareAmoutByForeigner(const ShareDataList &list)

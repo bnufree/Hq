@@ -9,7 +9,7 @@ class QShareHsgtTop10Work :  public QObject,public QRunnable
 {
     Q_OBJECT
 public:
-    explicit QShareHsgtTop10Work(const QString& date, QObject *parent = 0);
+    explicit QShareHsgtTop10Work( QObject *parent = 0);
     ~QShareHsgtTop10Work();
     void run();
 signals:
@@ -17,7 +17,6 @@ signals:
 
 private:
     QObject*        mParent;
-    QString         mDate;
     QString         mFileName;
 };
 

@@ -14,7 +14,6 @@ public:
     explicit QEastMoneyZjlxThread(QObject *parent = 0);
     ~QEastMoneyZjlxThread();
 signals:
-    void sendZjlxDataList(const QList<zjlxData>& zjlxDataList);
 public slots:
     void slotRecvHttpContent(const QByteArray& bytes);
 private:

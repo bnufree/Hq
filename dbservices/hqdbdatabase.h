@@ -124,10 +124,23 @@ public:
     QString errMsg();
 
     //基本数据更新
-    bool updateShareBasicInfo(const ShareDataList& dataList, int mode);
+    bool updateShareBasicInfo(const ShareDataList& dataList);
     bool queryShareBasicInfo(ShareDataMap& map);
     bool delShareBasicInfo(const QString& code);
     bool getSimilarCodeOfText(QStringList& codes, const QString& text);
+
+    //自选股更新
+    bool updateShareFavInfo(const ShareDataList& dataList);
+    bool queryShareFavInfo(ShareDataMap& map);
+    bool delShareFavInfo(const QString& code);
+    //利润表更新
+    bool updateShareProfitInfo(const ShareDataList& dataList);
+    bool queryShareProfitInfo(ShareDataMap& map);
+    bool delShareProfitInfo(const QString& code);
+    //板块明细更新
+    bool updateShareBlockInfo(const BlockDataList& dataList);
+    bool queryShareBlockInfo(ShareDataMap& share, BlockDataMap& block);
+    bool delShareBlockInfo(const QString& code);
 
     //历史日线数据更新
     bool updateShareHistory(const ShareDataList& dataList, int mode);
@@ -148,7 +161,7 @@ public:
     bool delShareFinance(const QString& code);
 
     //分红送配信息操作
-    bool updateShareBonus(QList<ShareBonus>& bonusList);
+    bool updateShareBonus(const ShareBonusList& bonusList);
     bool queryShareBonus(QList<ShareBonus>& list, const QString& code, const ShareDate& date);
     bool delShareBonus(const QString& code, const ShareDate& date);
 
@@ -170,6 +183,9 @@ private:
     bool createBlockTable();
     //基本信息
     bool createShareBasicTable();
+    bool createShareFavoriteTable();
+    bool createShareProfitTable();
+    bool createShareBlockTable();
     //历史日线数据表
     bool createShareHistoryInfoTable(const QString& code);
     //股东明细表

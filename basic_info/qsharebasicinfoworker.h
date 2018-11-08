@@ -15,25 +15,12 @@ public:
 
 signals:
     void signalGetBasicInfo();
-    void signalBaseDataListFinished(const QStringList& codes, const ShareDataList& list);
-    void signalUpdateFavCode(const QString& code);
 public slots:
     void slotGetBasicInfo();
-    void slotUpdateShareCodesList(const ShareDataList& list);
-    void slotUpdateShareFHSPList(const ShareDataList &list);
-    void slotUpdateShareHsgtTop10List(const ShareDataList &list);
-    void slotUpdateShareFinancialList(const ShareDataList &list);
-    void updateShareFavCode(const QString& code);
 private:
-    bool getInfosFromFile(ShareDataMap& map);
-    bool getInfossFromWeb(ShareDataMap& map);
-    bool writeInfos(const ShareDataList& list);
 
 private:
     QThread             mWorkThread;
-    ShareDataMap       mShareBaseDataMap;
-    QMutex      mUpdateMutex;
-    bool        mNeedUpdateCurrentTop10;
 
 };
 

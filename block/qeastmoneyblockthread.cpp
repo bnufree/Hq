@@ -38,9 +38,6 @@ QEastMoneyBlockThread::QEastMoneyBlockThread(int pBlockID, QObject *parent) : QO
     }
     mSortRule = -1;
     mBlockDataList.clear();
-    qRegisterMetaType<BlockDataList>("const BlockDataList&");
-    qRegisterMetaType<QMap<QString, BlockDataList> >("const QMap<QString, BlockDataList>&");
-    qRegisterMetaType<QMap<QString, BlockData*> >("const QMap<QString, BlockData*>&");
     this->moveToThread(&mWorkthread);
     connect(this, SIGNAL(start()), this, SLOT(slotUpdateBlockShare()));
     mWorkthread.start();

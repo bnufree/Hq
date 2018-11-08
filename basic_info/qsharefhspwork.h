@@ -7,13 +7,12 @@
 class QShareFHSPWork : public QRunnable
 {
 public:
-    explicit QShareFHSPWork(const QString& date, QObject *parent = 0);
+    explicit QShareFHSPWork(QObject *parent = 0);
     ~QShareFHSPWork();
     void run();
 
 private:
     QObject*        mParent;
-    QString         mDate;
 };
 
 #endif // QSHAREFHSPWORK_H

@@ -3,7 +3,7 @@
 
 #include <QThread>
 #include "utils/qhttpget.h"
-#include "utils/sharedata.h"
+#include "data_structure/sharedata.h"
 
 class QHttpGet;
 class QEastmoneyNorthBoundThread : public QObject
@@ -17,12 +17,12 @@ public slots:
     void    run();
     void    slotRecvHttpContent(const QByteArray& bytes);
 signals:
-    void    signalUpdateNorthBoundList(const QList<NS_BOUND_DATA> &list);
+    void    signalUpdateNorthBoundList(const ShareHsgtList &list);
     void    start();
 private:
     QList<QHttpGet*> mNorthBoudProxyList;
     QThread         mWorkThread;
-    QMap<QString, NS_BOUND_DATA>       mBoundDataList;
+    QMap<QString, ShareHsgt>       mBoundDataList;
 };
 
 #endif // QEASTMONEYNORTHBOUNDTHREAD_H
