@@ -28,10 +28,8 @@ void QShareBasicInfoWorker::slotGetBasicInfo()
     //获取数据库的更新时间.决定从数据库获取还是网络获取
     //首先获取数据库的更新日期
     ShareDate update_date = DATA_SERVICE->getLastUpdateDateOfBasicInfo();
-    if(update_date == ShareDate::latestActiveDay()) return;
-
-    //获取代码更新信息
-
+    if(update_date == ShareDate::latestActiveDay())return;
+    //开始从网络获取数据
     QThreadPool pool;
     pool.setMaxThreadCount(8);
     pool.setExpiryTimeout(-1);

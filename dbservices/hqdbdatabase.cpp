@@ -329,9 +329,12 @@ bool HQDBDataBase::updateShareBasicInfo(const ShareDataList& dataList, int mode)
             mDB.rollback();
         }
     }
-    if(!updateDBUpdateDate(ShareDate::currentDate(), TABLE_SHARE_BASIC_INFO))
+    if(mode & Share_Basic_Update_Code)
     {
-        mDB.rollback();
+        if(!updateDBUpdateDate(ShareDate::currentDate(), TABLE_SHARE_BASIC_INFO))
+        {
+            mDB.rollback();
+        }
     }
     mDB.commit();
 }

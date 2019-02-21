@@ -42,12 +42,12 @@ void QIndexWidget::insetWidget(const QString &code)
 {
     ShareDataList list;
     ShareData data;
-    data.setCode(code.right(6));
+    data.mCode = code.right(6);
     list<<data;
     updateData(list);
 }
 
-void QIndexWidget::updateData(const QList<NS_BOUND_DATA> &list)
+void QIndexWidget::updateData(const ShareHsgtList &list)
 {
 #if 1
     qDebug()<<list.length();
