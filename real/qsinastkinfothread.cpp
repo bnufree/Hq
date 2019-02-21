@@ -3,8 +3,8 @@
 #include <QDateTime>
 #include "qexchangedatamanage.h"
 #include "dbservices/dbservices.h"
-#include "utils/hqutils.h"
-#include "utils/sharedata.h"
+#include "data_structure/hqutils.h"
+#include "data_structure/sharedata.h"
 
 
 QSinaStkInfoThread::QSinaStkInfoThread(QObject *parent) : QObject(parent), mHttp(0)
@@ -42,7 +42,7 @@ void QSinaStkInfoThread::setStkList(const QStringList &list)
     foreach (QString code, list) {
         if(code.length() == 6)
         {
-            mStkList.append("s_"+ShareBaseData::prefixCode(code)+code);
+            mStkList.append("s_"+ShareData::prefixCode(code)+code);
         } else if(code.length() == 8)
         {
             mStkList.append("s_"+code);
@@ -92,9 +92,9 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
         QStringList detailList = detail.split(QRegExp("[\",=]"), QString::SkipEmptyParts);
         if(detailList.length() < 7) continue;
         QString code = detailList[0];
-        ShareData * data = DATA_SERVICE->getBasicStkData(code);
+        ShareData * data = DATA_SERVICE->getShareData(code);
         if(!data) continue;
-        data->setName(detailList[1]);
+        data->mName = detailList[1];
         data->mCur = detailList[2].toDouble();
         data->mChg = detailList[3].toDouble();
         data->mChgPercent = detailList[4].toDouble();
@@ -102,29 +102,29 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
         data->mMoney = detailList[6].toDouble();
         data->mHsl = 0.0;
         data->mMoneyRatio = 0.0;
-        if(data->mLastMoney> 0){
-            data->mMoneyRatio = data->mMoney / data->mLastMoney;
+        if(data->mHistory.mLastMoney> 0){
+            data->mMoneyRatio = data->mMoney / data->mHistory.mLastMoney;
         }
         //qDebug()<<data->mCode<<data->mName<<data->mMoney<<data->mLastMoney<<data->mMoneyRatio;
         if(data->mCur == 0)
         {
-            data->mCur = data->mLastClose;
+            data->mCur = data->mHistory.mLastClose;
         }
         if(data->mCur != 0)
         {
-            data->mGXL = data->mFhspInfo.mXJFH / data->mCur;
+            data->mGXL = data->mBonusData.mXJFH / data->mCur;
         }
-        data->mTotalCap = data->mCur * data->mFinanceInfo.mTotalShare;
-        data->mMutalbleCap = data->mCur * data->mFinanceInfo.mMutalShare;
-        if(data->mFinanceInfo.mMutalShare > 0)
+        data->mTotalCap = data->mCur * data->mFinanceData.mTotalShare;
+        data->mMutalbleCap = data->mCur * data->mFinanceData.mMutalShare;
+        if(data->mFinanceData.mMutalShare > 0)
         {
-            data->mHsl = data->mVol / (double)(data->mFinanceInfo.mMutalShare);
+            data->mHsl = data->mVol / (double)(data->mFinanceData.mMutalShare);
         }
         if(data->mProfit == 0)
         {
             data->mProfit = DATA_SERVICE->getProfit(code);
         }
-        data->mForeignCap = data->mHKExInfo.mForeignVol * data->mCur ;
+        data->mForeignCap = data->mHsgtData.mVol * data->mCur ;
         data->mForeignCapChg = data->mForeignVolChg * data->mCur ;
 //        data->mUpdateTime = QDateTime::currentMSecsSinceEpoch();
         datalist.append(*data);

@@ -1,7 +1,7 @@
 ﻿#include "qsinastkresultmergethread.h"
 #include "qsinastkinfothread.h"
 #include <QDebug>
-#include "utils/sharedata.h"
+#include "data_structure/sharedata.h"
 
 QSinaStkResultMergeThread::QSinaStkResultMergeThread(QObject *parent) : QThread(parent)
 {
@@ -15,7 +15,6 @@ QSinaStkResultMergeThread::QSinaStkResultMergeThread(QObject *parent) : QThread(
     mSortRule = -1;
     mActive = true;
     QEastMoneyZjlxThread *zjt = new QEastMoneyZjlxThread();
-    connect(zjt, SIGNAL(sendZjlxDataList(QList<zjlxData>)), this, SLOT(slotRevZjlxData(QList<zjlxData>)));
 }
 
 QSinaStkResultMergeThread::~QSinaStkResultMergeThread()
@@ -80,15 +79,14 @@ void QSinaStkResultMergeThread::run()
         {
             foreach (QString key, mMidStkDataMapList.keys()) {
                 ShareData data = mMidStkDataMapList.value(key);
-                bool sts = (mMktType == MKT_SH && data.mShareType == SHARE_CHINA_SH)||\
-                        (mMktType == MKT_SZ && (data.mShareType == SHARE_CHINA_SZ_ZB ||\
-                                                data.mShareType == SHARE_CHINA_SZ_ZXB || data.mShareType == SHARE_CHINA_SZ_CYB)) ||\
-                        (mMktType == MKT_ZXB && data.mShareType == SHARE_CHINA_SZ_ZXB)||\
-                        (mMktType == MKT_CYB && data.mShareType == SHARE_CHINA_SZ_CYB)||\
+                bool sts = (mMktType == MKT_SH && (data.mShareType & SHARE_SH))||\
+                        (mMktType == MKT_SZ && (data.mShareType & SHARE_SZ)) ||\
+                        (mMktType == MKT_ZXB && (data.mShareType & SHARE_SZ_ZXB))||\
+                        (mMktType == MKT_CYB && (data.mShareType & SHARE_SZ_CYB))||\
                         (mMktType == MKT_ZXG && data.mIsFav)||\
-                        (mMktType == MKT_LGT_TOP10 && data.mHKExInfo.mIsTop10) ||\
-                        (mMktType == MKT_JJ && (data.mShareType == SHARE_CHINA_FUND_SH || data.mShareType == SHARE_CHINA_FUND_SZ))||\
-                        (mMktType == MKT_OTHER && mSelfCodesList.contains(ShareBaseData::fullCode(data.mCode)));
+                        (mMktType == MKT_LGT_TOP10 && data.mHsgtData.mIsTop10) ||\
+                        (mMktType == MKT_JJ && (data.mShareType & SHARE_FUND))||\
+                        (mMktType == MKT_OTHER && mSelfCodesList.contains(data.mCode));
                 if(sts)
                 {
                     wklist.append(data);
@@ -529,13 +527,6 @@ void QSinaStkResultMergeThread::setSelfCodesList(const QStringList &list)
 MktType QSinaStkResultMergeThread::getMktType()
 {
     return mMktType;
-}
-
-void QSinaStkResultMergeThread::slotRevZjlxData(const QList<zjlxData> &zjlist)
-{
-    foreach (zjlxData data, zjlist) {
-        mZjlxMaplist[data.code] = data.zjlx;
-    }
 }
 
 void QSinaStkResultMergeThread::displayFirst()

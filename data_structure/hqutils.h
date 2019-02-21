@@ -21,14 +21,34 @@ public:
         }
         return *this;
     }
-    bool operator ==(const ShareDate& other)
+    bool operator ==(const ShareDate& other) const
     {
         return mDate == other.mDate;
     }
 
-    bool operator !=(const ShareDate& other)
+    bool operator !=(const ShareDate& other) const
     {
         return mDate != other.mDate;
+    }
+
+    bool operator <(const ShareDate& other) const
+    {
+        return mDate < other.mDate;
+    }
+
+    bool operator <=(const ShareDate& other) const
+    {
+        return mDate <= other.mDate;
+    }
+
+    bool operator >(const ShareDate& other) const
+    {
+        return mDate > other.mDate;
+    }
+
+    bool operator >=(const ShareDate& other) const
+    {
+        return mDate >= other.mDate;
     }
 
     uint toTime_t() const {return QDateTime(mDate).toTime_t();}
@@ -59,6 +79,9 @@ public:
         int day = date.date().dayOfWeek();
         return ShareDate(date.date().addDays(5-day));
     }
+    void setDate(const QDate& date) {mDate = date;}
+    void    next() {mDate = mDate.addDays(1);}
+    void    previous() {mDate = mDate.addDays(-1);}
 
 private:
     QDate       mDate;
@@ -92,6 +115,7 @@ public:
     QDate   date() const {return this->date();}
     bool    isNull() const {return this->date().isNull();}
     qint64  mSecs() const {return this->toMSecsSinceEpoch();}
+    ShareDate shareDate() {return ShareDate(date());}
 };
 
 typedef     ShareDateTime       BlockDateTime;

@@ -1,5 +1,5 @@
 ﻿#include "qsharehistoryfilework.h"
-#include "utils/sharedata.h"
+#include "data_structure/sharedata.h"
 #include <QFile>
 
 QShareHistoryFileWork::QShareHistoryFileWork(int mode, const QString& fileName, \
@@ -82,7 +82,7 @@ void QShareHistoryFileWork::write()
         for(int i=0; i<size; i++)
         {
             ShareData data = mHistoryList[i];
-            if(qstrlen(data.mCode) != 6)
+            if(data.mCode.length() != 6)
             {
                 //qDebug()<<__FUNCTION__<<__LINE__<<data.mCode<<data.mName;
             }

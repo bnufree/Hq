@@ -17,7 +17,6 @@ struct HQBlockData:public HqBaseData
 {
 public:
     HQBlockData();
-    ~HQBlockData();
 
     static bool sortByChangeAsc(const HQBlockData& d1, const HQBlockData& d2)
     {

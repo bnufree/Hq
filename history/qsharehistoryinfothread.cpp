@@ -2,7 +2,7 @@
 #include <QDateTime>
 #include <QDebug>
 #include "utils/qhttpget.h"
-#include "utils/hqutils.h"
+#include "data_structure/hqutils.h"
 #include "dbservices/dbservices.h"
 #include "dbservices/qactivedate.h"
 #include "utils/comdatadefines.h"
@@ -43,14 +43,14 @@ QDate QShareHistoryInfoThread::lastUpdateDate()
     }
     int size = file.size();
     int totalNum = 0;
-    if(size >= sizeof(SHARE_HISTORY_INFO))
+    if(size >= sizeof(ShareData))
     {
-        if(file.seek(size - sizeof(SHARE_HISTORY_INFO)))
+        if(file.seek(size - sizeof(ShareData)))
         {
             //读取最后一个的日期
-            SHARE_HISTORY_INFO info;
-            file.read((char*)(&info), sizeof(SHARE_HISTORY_INFO));
-            date = QDate::fromJulianDay(info.date);
+            ShareData info;
+            file.read((char*)(&info), sizeof(ShareData));
+            //date = QDate::fromJulianDay(info.date);
         } else
         {
         }
@@ -59,14 +59,14 @@ QDate QShareHistoryInfoThread::lastUpdateDate()
     return date;
 }
 
-bool QShareHistoryInfoThread::write(const QList<SHARE_HISTORY_INFO> &list)
+bool QShareHistoryInfoThread::write(const ShareDataList &list)
 {
     FILE *fp = fopen(mFileName.toStdString().data(), "ab+");
     if(fp)
     {
         for(int i=list.size()-1; i>=0; i--)
         {
-            fwrite(&(list[i]), sizeof(SHARE_HISTORY_INFO), 1, fp);
+            fwrite(&(list[i]), sizeof(ShareData), 1, fp);
         }
         fclose(fp);
     }
@@ -79,7 +79,7 @@ void QShareHistoryInfoThread::run()
     if(mCode.left(1) == "5" || mCode.left(1) == "1") return;
     QDate start = QActiveDateTime(lastUpdateDate()).nextActiveDay();
     QDate end = QActiveDateTime::latestActiveDay();
-    ShareHistoryList list;
+    ShareDataList list;
     if(start <= end)
     {
         QString wkCode;
@@ -106,15 +106,15 @@ void QShareHistoryInfoThread::run()
                 QDate curDate = QDate::fromString(cols[0], "yyyy-MM-dd");
                 if(!QActiveDateTime(curDate).isDayActive()) continue;
                 if(cols[3].toDouble() < 0.001) continue;
-                SHARE_HISTORY_INFO data;
-                data.date = curDate.toJulianDay();
-                data.close = cols[3].toDouble();
-                data.change = cols[9].toDouble();
-                data.total_share = round(cols[13].toDouble() / data.close);
-                data.mutal_share = round(cols[14].toDouble() / data.close);
-                data.foreign_vol = mForeignMap[data.date];
-                data.money = cols[12].toDouble();
-                data.vol = cols[11].toDouble();
+                ShareData data;
+//                data.date = curDate.toJulianDay();
+//                data.close = cols[3].toDouble();
+//                data.change = cols[9].toDouble();
+//                data.total_share = round(cols[13].toDouble() / data.close);
+//                data.mutal_share = round(cols[14].toDouble() / data.close);
+//                data.foreign_vol = mForeignMap[data.date];
+//                data.money = cols[12].toDouble();
+//                data.vol = cols[11].toDouble();
                 list.append(data);
             }
         }
@@ -130,7 +130,7 @@ FUNC_END:
     {
         QMetaObject::invokeMethod(mParent,\
                                   "slotUpdateShareHistoryProcess",\
-                                  Qt::DirectConnection, Q_ARG(ShareHistoryList,list ));
+                                  Qt::DirectConnection, Q_ARG(ShareDataList,list ));
     }
     return;
 }

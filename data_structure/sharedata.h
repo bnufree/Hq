@@ -95,7 +95,8 @@ public:
     FinancialData           mFinanceData;
     ShareBonus              mBonusData;
     ShareHsgt               mHsgtData;
-
+public:
+    ShareData();
     static bool sortByPerDesc(const ShareData& d1, const ShareData& d2);
     static bool sortByPerAsc(const ShareData& d1, const ShareData& d2);
     static bool sortByCurDesc(const ShareData& d1, const ShareData& d2);

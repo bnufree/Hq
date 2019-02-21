@@ -47,7 +47,6 @@ private slots:
     //StockDataList   RealtimeInfo(const QStringList& codes);
     void            SortResultList(ShareDataList& result, const ShareDataList& mid);
     void         slotRevResList(const ShareDataList& mid);
-    void         slotRevZjlxData(const QList<zjlxData>& zjlist);
 
 signals:
     void    sendStkDataList(const ShareDataList& list);

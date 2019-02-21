@@ -8,8 +8,8 @@
 //#include <QStringList>
 #include <QTimer>
 #include "utils/qhttpget.h"
+#include "data_structure/sharedata.h"
 
-class ShareDataList;
 class QSinaStkInfoThread : public QObject
 {
     Q_OBJECT

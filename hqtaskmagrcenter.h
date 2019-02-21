@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QThread>
 #include "data_structure/sharedata.h"
+#include "data_structure/hqblockdata.h"
 
 class QSinaStkResultMergeThread;
 class QEastMoneyBlockMangagerThread;
@@ -32,6 +33,7 @@ signals:
 public slots:
     void        slotStart();
     void        slotDBInitFinished();
+    void        slotShareCodesListFinished(const QStringList& codes);
     void        slotBaseDataListFinished(const QStringList& codes, const ShareDataList& list);
     void        slotUpdateHistoryFinished();
     void        slotSetFavCode(const QString& code);

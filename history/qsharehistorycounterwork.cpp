@@ -2,7 +2,7 @@
 #include "dbservices/dbservices.h"
 #include "dbservices/qactivedate.h"
 
-QShareHistoryCounterWork::QShareHistoryCounterWork(const QString& code,const ShareHistoryList& list, QObject* parent)
+QShareHistoryCounterWork::QShareHistoryCounterWork(const QString& code,const ShareDataList& list, QObject* parent)
     :mCode(code),mList(list),mParent(parent),QRunnable()
 {
 
@@ -30,12 +30,12 @@ void QShareHistoryCounterWork::run()
         if(!file.open(QIODevice::ReadOnly)) return ;
         int size = file.size();
         int totalNum = 0;
-        if(size >= sizeof(SHARE_HISTORY_INFO))
+        if(size >= sizeof(ShareData))
         {
             while(!file.atEnd())
             {
-                SHARE_HISTORY_INFO info;
-                file.read((char*)(&info), sizeof(SHARE_HISTORY_INFO));
+                ShareData info;
+                file.read((char*)(&info), sizeof(ShareData));
                 mList.append(info);
             }
         }
@@ -53,7 +53,7 @@ void QShareHistoryCounterWork::run()
     double last1HYearChange = 0.0;
     qint64 vol_change = 0;
     qint64 vol = 0;
-
+#if 0
     if(size > 0)
     {
         lastMoney = mList[size-1].money;
@@ -98,6 +98,7 @@ void QShareHistoryCounterWork::run()
             vol_change -= mList[size-2].foreign_vol;
         }
     }
+#endif
     DATA_SERVICE->signalUpdateShareinfoWithHistory(mCode, lastMoney, last3Change, last5Change, last10Change, lastMonthChange, last1HYearChange, vol, vol_change, mList);
 
 //    qDebug()<<mCode<<lastMoney<<last3Change<<last5Change<<last10Change<<lastMonthChange<<last1HYearChange<<vol<<vol_change;

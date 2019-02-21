@@ -74,10 +74,10 @@ void QDataMgrWidget::updateData()
 {
     if(mDataType == DATA_MUTUAL_MARKET)
     {
-        ui->mDataTableWidget->setDataList(ShareBaseDataList());
-        QShareHsgtTop10Work *job = new QShareHsgtTop10Work(ui->mCurDayText->text());
-        connect(job, SIGNAL(signalChinaAShareTop10Updated(ShareBaseDataList,QString)), this, SLOT(slotUpdateShareHsgtTop10List(ShareBaseDataList,QString)));
-        QThreadPool::globalInstance()->start(job);
+        ui->mDataTableWidget->setDataList(ShareDataList());
+//        QShareHsgtTop10Work *job = new QShareHsgtTop10Work(ui->mCurDayText->text());
+//        connect(job, SIGNAL(signalChinaAShareTop10Updated(ShareDataList,QString)), this, SLOT(slotUpdateShareHsgtTop10List(ShareDataList,QString)));
+//        QThreadPool::globalInstance()->start(job);
     } else if(mDataType == DATA_LHB)
     {
 
@@ -85,7 +85,7 @@ void QDataMgrWidget::updateData()
 
 }
 
-void QDataMgrWidget::slotUpdateShareHsgtTop10List(const ShareBaseDataList &list, const QString& date)
+void QDataMgrWidget::slotUpdateShareHsgtTop10List(const ShareDataList &list, const QString& date)
 {
     if(list.length() == 0)
     {
