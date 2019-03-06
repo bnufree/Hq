@@ -497,18 +497,6 @@ bool HQDBDataBase::updateShareBasicInfo(const ShareDataList& dataList)
             return false;
         }
     }
-    if(mode & Share_Basic_Update_Code)
-    {
-<<<<<<< HEAD
-        if(!updateDBUpdateDate(ShareDate::currentDate(), TABLE_SHARE_BASIC_INFO))
-        {
-            mDB.rollback();
-        }
-=======
-        mDB.rollback();
-        return false;
->>>>>>> c3e20bfc50cfd7f11c19b3ff55625200506659c7
-    }
     mDB.commit();
     return true;
 }

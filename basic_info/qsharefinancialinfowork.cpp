@@ -2,8 +2,8 @@
 #include "utils/qhttpget.h"
 #include "dbservices/dbservices.h"
 
-QShareFinancialInfoWork::QShareFinancialInfoWork(const QStringList& list, QObject* parent)
-    :mCodesList(list),mParent(parent),QRunnable()
+QShareFinancialInfoWork::QShareFinancialInfoWork(QObject* parent)
+    :mParent(parent),QRunnable()
 {
 
 }

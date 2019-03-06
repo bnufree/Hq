@@ -22,7 +22,6 @@ QShareBasicInfoWorker::QShareBasicInfoWorker(QObject *parent) : QObject(parent)
 
 void QShareBasicInfoWorker::slotGetBasicInfo()
 {
-<<<<<<< HEAD
     //获取数据库的更新时间.决定从数据库获取还是网络获取
     //首先获取数据库的更新日期
     ShareDate update_date = DATA_SERVICE->getLastUpdateDateOfBasicInfo();
@@ -35,22 +34,13 @@ void QShareBasicInfoWorker::slotGetBasicInfo()
     //取得代码
     pool.start(new QShareCodesWork(this));
     //取得分红送配
-    pool.start(new QShareFHSPWork("2017-12-31", this));
+    pool.start(new QShareFHSPWork(this));
     //取得北向交易TOP10
-    pool.start(new QShareHsgtTop10Work(QActiveDateTime::latestActiveDay().toString(DATE_FORMAT), this));
+    pool.start(new QShareHsgtTop10Work(this));
     pool.waitForDone();
     //取得财务信息
-    QStringList allCodes(mShareBaseDataMap.keys());
-    int pos = 0;
-    int section = 200;
-    while(pos < allCodes.length())
-    {
-        QStringList sublist = allCodes.mid(pos, section);
-        pos += section;
-        pool.start(new QShareFinancialInfoWork(sublist, this));
-    }
+    pool.start(new QShareFinancialInfoWork(this));
     pool.waitForDone();
-    return true;
 
 
 //    //从文件获取信息基本信息，包括代码，分红送配，财务信息
@@ -70,6 +60,7 @@ void QShareBasicInfoWorker::slotGetBasicInfo()
 
 }
 
+#if 0
 void QShareBasicInfoWorker::updateShareFavCode(const QString &code)
 {
     qDebug()<<__func__<<code;
@@ -132,8 +123,6 @@ bool QShareBasicInfoWorker::getInfosFromFile(QMap<QString, ShareBaseData>& map)
 
 bool QShareBasicInfoWorker::getInfossFromWeb(QMap<QString, ShareBaseData>& map)
 {
-=======
->>>>>>> c3e20bfc50cfd7f11c19b3ff55625200506659c7
     QThreadPool pool;
     pool.setMaxThreadCount(8);
     pool.setExpiryTimeout(-1);
@@ -158,3 +147,4 @@ bool QShareBasicInfoWorker::getInfossFromWeb(QMap<QString, ShareBaseData>& map)
 #endif
     pool.waitForDone();
 }
+#endif

@@ -42,11 +42,7 @@ void QIndexWidget::insetWidget(const QString &code)
 {
     ShareDataList list;
     ShareData data;
-<<<<<<< HEAD
     data.mCode = code.right(6);
-=======
-    data.mCode = code;
->>>>>>> c3e20bfc50cfd7f11c19b3ff55625200506659c7
     list<<data;
     updateData(list);
 }
