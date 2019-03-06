@@ -49,7 +49,7 @@ void HqInfoService::slotInitDBTables()
     if(mDataBase.createDBTables())
     {
 //        initBlockData();
-//        initShareData();
+        initShareData();
         emit signalDbInitFinished();
     } else
     {

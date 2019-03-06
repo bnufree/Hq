@@ -408,6 +408,7 @@ void Dialog::slotDisplayHqCenterPage(int val)
 {
     QAndroidListWidget* widget = qobject_cast<QAndroidListWidget*>(sender());
     if(!widget) return;
+    mShareTableWidget->resetDisplayRows();
     mTaskMgr->setMktType(val);
     widget->hide();
     widget->deleteLater();

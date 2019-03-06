@@ -17,7 +17,9 @@
 HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     mCurScrollBar(0),
     mMoveDir(-1),
-    mCustomContextMenu(0)
+    mCustomContextMenu(0),
+    mDisplayRowStart(0),
+    mDisplayRowEnd(0)
 {
     this->setItemDelegate(new RowDelegate);
     this->setRowCount(PAGE_SIZE);
@@ -91,10 +93,8 @@ void HqTableWidget::setHeaders(const TableColDataList &list)
 
 void HqTableWidget::slotHeaderClicked(int col)
 {
-    emit signalSetSortType(this->horizontalHeaderItem(col)->data(COL_TYPE_ROLE).toInt());/*
-    int *rule = (int*)(this->horizontalHeaderItem(col)->data(COL_SORT_ROLE).value<void*>());
-    *rule = !(rule);
-    emit signalSetSortRule(*rule);*/
+    emit signalSetSortType(this->horizontalHeaderItem(col)->data(COL_TYPE_ROLE).toInt());
+    resetDisplayRows();
 }
 
 void HqTableWidget::slotSetColDisplay(bool isDisplay)
@@ -129,7 +129,7 @@ void HqTableWidget::setItemText(int row, int column, const QString &text, const 
     {
         //字体自适应
         int text_width = QFontMetrics(font).width(text);
-        while (text_width > this->columnWidth(column) - 10) {
+        while (text_width > this->columnWidth(column) - 10 && font.pointSize() > 1) {
             font.setPointSize(font.pointSize()-1);
             text_width = QFontMetrics(font).width(text);
         }
@@ -149,7 +149,7 @@ void HqTableWidget::updateColumn(int col)
         QFont font = item->font();
         //字体自适应
         int text_width = QFontMetrics(font).width(text);
-        while (text_width > this->columnWidth(col) - 10) {
+        while (text_width > this->columnWidth(col) - 10 && font.pointSize() > 1) {
             font.setPointSize(font.pointSize()-1);
             text_width = QFontMetrics(font).width(text);
         }
@@ -312,8 +312,12 @@ void HqTableWidget::resizeEvent(QResizeEvent *event)
     QTableWidget::resizeEvent(event);
     QSize size = event->size();
     qDebug()<<__func__<<__LINE__<<size;
-    mMaxDisplayRow = size.height() / mRowHeight;
+    mMaxDisplayRow = (size.height() + mRowHeight - 1) / mRowHeight;
     mMaxDisplayCol = size.width() / mColWidth;
+    mDisplayRowStart = 0;
+    mDisplayRowEnd = mMaxDisplayRow-1;
+    qDebug()<<"maxrow:"<<mMaxDisplayRow<<mDisplayRowStart<<mDisplayRowEnd;
+
     for(int i=0; i<this->columnCount(); i++)
     {
         this->setColumnWidth(i, mColWidth);
@@ -329,21 +333,6 @@ void HqTableWidget::resizeEvent(QResizeEvent *event)
             this->setColumnHidden(i, true);
         }
     }
-
-    for(int i=0; i<this->rowCount(); i++)
-    {
-        if(i<mMaxDisplayRow)
-        {
-            this->setRowHidden(i, false);
-        } else
-        {
-            this->setRowHidden(i, true);
-        }
-    }
-
-
-
-
 
 }
 
@@ -535,75 +524,27 @@ void HqTableWidget::optMoveTable(OPT_MOVE_MODE mode)
     } else if(mode == OPT_UP)
     {
         //向上滑动，显示下面的列
-        int row_start = 0, row_end = 0;
-        bool start_init = false, end_init = false;
-        for(int i=0; i<this->rowCount(); i++)
+        if(mDisplayRowEnd == rowCount()-1)
         {
-            if(!this->isRowHidden(i))
-            {
-                if(!start_init)
-                {
-                    row_start = i;
-                    start_init = true;
-                }
-            } else
-            {
-                if(!start_init) continue;
-                if(!end_init)
-                {
-                    row_end = i-1;
-                    end_init = true;
-                    break;
-                }
-            }
-        }
-        qDebug()<<"display bottom:"<<row_start<<mMaxDisplayRow<<this->rowCount();
-        if(row_start + mMaxDisplayRow >= this->rowCount()-1) return;
-        if(!end_init)
-        {
-            //已经到了最后，不操作
+            //next page
+            emit signalDisplayPage(NEXT_PAGE);
+            resetDisplayRows();
         } else
         {
-            //还存在未显示的咧
-            this->setRowHidden(row_start, true);
-            this->setRowHidden(row_end + 1, false);
+            mDisplayRowStart++;
+            mDisplayRowEnd++;
         }
         displayVisibleRows();
     } else if(mode == OPT_DOWN)
     {
         //向下滑动，显示上面的行
-        int row_start = 0, row_end = 0;
-        bool start_init = false, end_init = false;
-        for(int i=this->rowCount()-1; i>=0; i--)
+        if(mDisplayRowStart == 0)
         {
-            if(!this->isRowHidden(i))
-            {
-                if(end_init == 0)
-                {
-                    row_end = i;
-                    end_init = true;
-                }
-            } else
-            {
-                if(end_init == 0) continue;
-                if(start_init == 0)
-                {
-                    row_start = i+1;
-                    start_init = true;
-                    break;
-                }
-            }
-        }
-        //qDebug()<<"start:"<<row_start<<" end:"<<row_end;
-        //设定新的显示的列
-        if(start_init == 0)
-        {
-            //已经到了最左，不操作
-        } else
-        {
-            //还存在未显示的咧
-            this->setRowHidden(row_end, true);
-            this->setRowHidden(row_start - 1, false);
+            emit signalDisplayPage(PRE_PAGE);
+            resetDisplayRows();
+        } else {
+            mDisplayRowStart--;
+            mDisplayRowEnd--;
         }
         displayVisibleRows();
 
@@ -621,10 +562,11 @@ void HqTableWidget::displayVisibleCols()
 
 void HqTableWidget::displayVisibleRows()
 {
+    //qDebug()<<"row display:"<<mDisplayRowStart<<mDisplayRowEnd;
     for(int i=0; i<rowCount(); i++)
     {
-        if(isRowHidden(i)) continue;
-        //qDebug()<<"row:"<<i;
+        if(i<mDisplayRowStart || i>mDisplayRowEnd) setRowHidden(i, true);
+        else setRowHidden(i, false);
     }
 }
 

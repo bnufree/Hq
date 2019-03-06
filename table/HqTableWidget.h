@@ -21,6 +21,11 @@ class HqTableWidget : public QTableWidget
     Q_OBJECT
 public:
     explicit HqTableWidget(QWidget *parent = 0);
+    void  resetDisplayRows() {
+        mDisplayRowEnd = mMaxDisplayRow-1;
+        mDisplayRowStart = 0;
+        displayVisibleRows();
+    }
     void setHeaders(const TableColDataList& list);
     void appendRow();
     void setCodeName(int row, int column,const QString& code,const QString& name);
@@ -77,6 +82,9 @@ private:
     int                     mMoveDir;
     int                     mMaxDisplayCol;
     int                     mMaxDisplayRow;
+protected:
+    int                     mDisplayRowStart;
+    int                     mDisplayRowEnd;
 };
 
 #endif // HqTableWidget_H

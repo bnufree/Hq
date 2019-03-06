@@ -497,6 +497,11 @@ bool HQDBDataBase::updateShareBasicInfo(const ShareDataList& dataList)
             return false;
         }
     }
+    if(!updateDBUpdateDate(ShareDate::currentDate(), TABLE_SHARE_BASIC_INFO))
+    {
+        mDB.rollback();
+        return false;
+    }
     mDB.commit();
     return true;
 }

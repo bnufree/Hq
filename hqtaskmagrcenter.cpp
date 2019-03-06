@@ -98,7 +98,6 @@ void HQTaskMagrCenter::setCurBlockType(int type)
 void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
 {
     qDebug()<<"update code finshed:"<<codes.length();
-    return;
     //更新实时的指数
     QStringList indexlist;
     indexlist<<"s_sh000001"<<"s_sh000300"<<"s_sz399001"<<"s_sz399006"<<"s_sh000016";
