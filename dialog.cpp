@@ -118,7 +118,7 @@ Dialog::Dialog(QWidget *parent) :
     connect(mBlockTableWidget, SIGNAL(signalSetSortType(int)), mTaskMgr, SLOT(reverseSortRule()));
     connect(mBlockTableWidget, SIGNAL(signalSetBlockType(int)), mTaskMgr, SLOT(setCurBlockType(int)));
     connect(mTaskMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SLOT(slotUpdateMsg(QString)));
-    connect(mTaskMgr, SIGNAL(signalSendNotrhBoundDataList(QList<NS_BOUND_DATA>)), mIndexWidget, SLOT(updateData(QList<NS_BOUND_DATA>)));
+    connect(mTaskMgr, SIGNAL(signalSendNotrhBoundDataList(ShareHsgtList)), mIndexWidget, SLOT(updateData(ShareHsgtList)));
     //
 
     mTaskMgr->signalStart();

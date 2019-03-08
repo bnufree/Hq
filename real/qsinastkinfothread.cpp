@@ -42,10 +42,10 @@ void QSinaStkInfoThread::setStkList(const QStringList &list)
     foreach (QString code, list) {
         if(code.length() == 6)
         {
-            mStkList.append("s_"+ShareData::prefixCode(code)+code);
+            mStkList.append(ShareData::prefixCode(code)+code);
         } else if(code.length() == 8)
         {
-            mStkList.append("s_"+code);
+            mStkList.append(code);
         } else
         {
             mStkList.append(code);
@@ -86,20 +86,20 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
     ShareDataList datalist;
     foreach (QString detail, resultlist)
     {
-        //qDebug()<<detail;
-        detail.replace("var hq_str_s_", "");
+        //var hq_str_sz399006="创业板指,1647.848,1692.416,1680.387,1718.384,1635.450,0.000,0.000,10414641478,126326323478.810
+        detail.replace("var hq_str_", "");
         //qDebug()<<detail;
         QStringList detailList = detail.split(QRegExp("[\",=]"), QString::SkipEmptyParts);
-        if(detailList.length() < 7) continue;
+        if(detailList.length() < 11) continue;
         QString code = detailList[0];
         ShareData * data = DATA_SERVICE->getShareData(code);
         if(!data) continue;
         data->mName = detailList[1];
-        data->mCur = detailList[2].toDouble();
-        data->mChg = detailList[3].toDouble();
-        data->mChgPercent = detailList[4].toDouble();
-        data->mVol = detailList[5].toInt() * 100;
-        data->mMoney = detailList[6].toDouble();
+        data->mCur = detailList[4].toDouble();
+        data->mChg = detailList[4].toDouble() - detailList[3].toDouble();
+        data->mChgPercent = data->mChg / detailList[3].toDouble();
+        data->mVol = detailList[10].toInt();
+        data->mMoney = detailList[10].toDouble() / 10000;
         data->mHsl = 0.0;
         data->mMoneyRatio = 0.0;
         if(data->mHistory.mLastMoney> 0){

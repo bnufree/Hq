@@ -68,7 +68,6 @@ void QShareHsgtTop10Work::run()
             data.mPure = data.mBuy - data.mSell;
             data.mDate = ShareDateTime(last_update_date.date());
             list.append(data);
-            qDebug()<<data.mCode<<data.mName<<data.mPure<<data.mDate.toString();
         }
 
         last_update_date.next();

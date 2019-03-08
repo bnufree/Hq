@@ -100,7 +100,7 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     qDebug()<<"update code finshed:"<<codes.length();
     //更新实时的指数
     QStringList indexlist;
-    indexlist<<"s_sh000001"<<"s_sh000300"<<"s_sz399001"<<"s_sz399006"<<"s_sh000016";
+    indexlist<<"sh000001"<<"sh000300"<<"sz399001"<<"sz399006"<<"sh000016";
     QSinaStkInfoThread* indexInfoThread = new QSinaStkInfoThread;
     mRealWorkObjList.append(indexInfoThread);
     connect(indexInfoThread, SIGNAL(sendStkDataList(ShareDataList)), this, SIGNAL(signalSendIndexRealDataList(ShareDataList)));

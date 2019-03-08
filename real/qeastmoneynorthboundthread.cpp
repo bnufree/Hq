@@ -87,6 +87,7 @@ void QEastmoneyNorthBoundThread::slotRecvHttpContent(const QByteArray &bytes)
     if(!get) return;
     QString name = get->objectName();
     QString result = QString::fromUtf8(bytes);
+    //qDebug()<<"res:"<<result;
     //qDebug()<<"res:"<<result.replace(QRegExp("[\\r\\n\\t]"), "");
     if(name == "EAST")
     {
