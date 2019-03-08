@@ -112,10 +112,10 @@ public:
     static ShareDateTime currentDateTime(){
         return ShareDateTime(QDateTime::currentDateTime().toTime_t());
     }
-    QDate   date() const {return this->date();}
+    //QDate   date() const {return this->date();}
     bool    isNull() const {return this->date().isNull();}
     qint64  mSecs() const {return this->toMSecsSinceEpoch();}
-    ShareDate shareDate() {return ShareDate(date());}
+    ShareDate shareDate() const {return ShareDate(date());}
 };
 
 typedef     ShareDateTime       BlockDateTime;

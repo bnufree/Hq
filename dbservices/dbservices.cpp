@@ -49,7 +49,7 @@ void HqInfoService::slotInitDBTables()
     if(mDataBase.createDBTables())
     {
 //        initBlockData();
-        initShareData();
+//        initShareData();
         emit signalDbInitFinished();
     } else
     {
@@ -99,6 +99,7 @@ bool HqInfoService::createHistoryTable(const QString &pTableName)
 
 void HqInfoService::initSignalSlot()
 {
+    qRegisterMetaType<ShareDate>("const ShareDate&");
     qRegisterMetaType<ShareData>("const ShareData&");
     qRegisterMetaType<ShareDataList>("const ShareDataList&");
     qRegisterMetaType<ShareHsgtList >("const ShareHsgtList&");
@@ -112,6 +113,10 @@ void HqInfoService::initSignalSlot()
     connect(this, SIGNAL(signalInitDBTables()), this, SLOT(slotInitDBTables()));    
     connect(this, SIGNAL(signalUpdateShareBasicInfo(ShareDataList)), this, SLOT(slotUpdateShareBasicInfo(ShareDataList)));
     connect(this, SIGNAL(signalUpdateShareBonusInfo(ShareBonusList)), this, SLOT(slotUpdateShareBonusInfo(ShareBonusList)));
+    connect(this, SIGNAL(signalUpdateShareHsgtTop10Info(ShareHsgtList)),
+            this, SLOT(slotUpdateHsgtTop10Info(ShareHsgtList)));
+    connect(this, SIGNAL(signalQueryShareHsgtTop10List(QString,ShareDate)),
+            this, SLOT(slotQueryShareHsgtTop10List(QString,ShareDate)));
 
     connect(this, SIGNAL(signalRecvShareHistoryInfos(ShareDataList, int)), this, SLOT(slotRecvShareHistoryInfos(ShareDataList, int)));
     connect(this, SIGNAL(signalUpdateShareinfoWithHistory(QString,double,double,double,double,double,double, qint64, qint64,ShareHistoryList)),\
@@ -367,9 +372,22 @@ void HqInfoService::slotUpdateHsgtTop10Info(const ShareHsgtList &list)
 {
     if(!mDataBase.updateShareHsgtTop10List(list))
     {
-        qDebug()<<"update share bonus info error:"<<mDataBase.getErrorString();
+        qDebug()<<"update share hsgt info error:"<<mDataBase.getErrorString();
         return;
     }
+}
+
+void HqInfoService::slotQueryShareHsgtTop10List(const QString &code, const ShareDate &date)
+{
+    ShareHsgtList list;
+    if(!mDataBase.queryShareHsgtTop10List(list, code, date))
+    {
+        qDebug()<<"update share hsgt info error:"<<mDataBase.getErrorString();
+        return;
+    }
+
+    emit signalSendShareHsgtTop10List(list);
+
 }
 
 void HqInfoService::slotUpdateShareFinanceInfo(const FinancialDataList& list)

@@ -19,7 +19,8 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     mMoveDir(-1),
     mCustomContextMenu(0),
     mDisplayRowStart(0),
-    mDisplayRowEnd(0)
+    mDisplayRowEnd(0),
+    mAutoChangePage(false)
 {
     this->setItemDelegate(new RowDelegate);
     this->setRowCount(PAGE_SIZE);
@@ -56,7 +57,7 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     this->setFont(font);
     //默认屏幕大小为1920*1080
     int font_height1 = this->fontMetrics().height();
-    mRowHeight = (/*1080.0 * 1.0 / rect.height() * 40*/this->fontMetrics().height()* 2);
+    mRowHeight = (/*1080.0 * 1.0 / rect.height() * 40*/this->fontMetrics().height()* 1.5);
 
     qDebug()<<"height:"<<font_height1<<rect.height()<<mRowHeight;
     mColWidth = qRound(1920.0 * 1.0 / rect.width() * 140);
@@ -312,7 +313,7 @@ void HqTableWidget::resizeEvent(QResizeEvent *event)
     QTableWidget::resizeEvent(event);
     QSize size = event->size();
     qDebug()<<__func__<<__LINE__<<size;
-    mMaxDisplayRow = (size.height() + mRowHeight - 1) / mRowHeight;
+    mMaxDisplayRow = size.height() / mRowHeight;
     mMaxDisplayCol = size.width() / mColWidth;
     mDisplayRowStart = 0;
     mDisplayRowEnd = mMaxDisplayRow-1;
@@ -323,7 +324,7 @@ void HqTableWidget::resizeEvent(QResizeEvent *event)
         this->setColumnWidth(i, mColWidth);
     }
 
-    for(int i=0; i<this->columnCount(); i++)
+    for(int i=2; i<this->columnCount(); i++)
     {
         if(i <mMaxDisplayCol)
         {
@@ -453,7 +454,7 @@ void HqTableWidget::optMoveTable(OPT_MOVE_MODE mode)
     {
         //显示右边的列
         int col_start = 0, col_end = 0;
-        for(int i=1; i<this->columnCount(); i++)
+        for(int i=2; i<this->columnCount(); i++)
         {
             if(!this->isColumnHidden(i))
             {
@@ -489,7 +490,7 @@ void HqTableWidget::optMoveTable(OPT_MOVE_MODE mode)
     {
         //显示左边的列
         int col_start = 0, col_end = 0;
-        for(int i=this->columnCount()-1; i>=1; i--)
+        for(int i=this->columnCount()-1; i>=2; i--)
         {
             if(!this->isColumnHidden(i))
             {
@@ -527,8 +528,11 @@ void HqTableWidget::optMoveTable(OPT_MOVE_MODE mode)
         if(mDisplayRowEnd == rowCount()-1)
         {
             //next page
-            emit signalDisplayPage(NEXT_PAGE);
-            resetDisplayRows();
+            if(mAutoChangePage)
+            {
+                emit signalDisplayPage(NEXT_PAGE);
+                resetDisplayRows();
+            }
         } else
         {
             mDisplayRowStart++;
@@ -540,8 +544,11 @@ void HqTableWidget::optMoveTable(OPT_MOVE_MODE mode)
         //向下滑动，显示上面的行
         if(mDisplayRowStart == 0)
         {
-            emit signalDisplayPage(PRE_PAGE);
-            resetDisplayRows();
+            if(mAutoChangePage)
+            {
+                emit signalDisplayPage(PRE_PAGE);
+                resetDisplayRows();
+            }
         } else {
             mDisplayRowStart--;
             mDisplayRowEnd--;

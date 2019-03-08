@@ -32,7 +32,7 @@ void QShareFHSPWork::run()
     ShareDate start_report_date(QDate(curDate.date().addYears(-1)));
     if(last_update_date.isNull())
     {
-        start_report_date.setDate(QDate(2006,06,30));
+        start_report_date.setDate(QDate(2018,12,31));
     }
 
     int start_year = start_report_date.date().year();

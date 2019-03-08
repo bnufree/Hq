@@ -38,6 +38,7 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
 
     setHeaders(datalist);
     initMenu();
+    setAutoChangePage(true);
 }
 
 void QShareTablewidget::setDataList(const ShareDataList &list)

@@ -14,7 +14,8 @@ signals:
     void    signalDisplayMutualBundHistory(const QString& code);
 
 public slots:
-    void    setDataList(const ShareDataList& list);
+    void    setDataList(const ShareHsgtList& list);
+    void    slotCellDoubleClicked(int row, int col);
 private:
 
 };

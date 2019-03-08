@@ -103,11 +103,15 @@ signals:
     void signalUpdateShareBonusInfo(const ShareBonusList& list);
     void signalUpdateShareHsgtTop10Info(const ShareHsgtList& list);
     void signalUpdateShareFinanceInfo(const FinancialDataList& list);
+    void signalQueryShareHsgtTop10List(const QString& code, const ShareDate& date = ShareDate());
+    void signalSendShareHsgtTop10List(const ShareHsgtList& list);
+
     //实时数据查询信息获取
     void signalSearchCodesOfText(const QString& text);
     void signalSendSearchCodesOfText(const QStringList& codes);
     //错误信息输出
     void signalDBErrorMsg(const QString& msg);
+    //
 
 public slots:
     void slotSearchCodesOfText(const QString &text);
@@ -136,6 +140,8 @@ public slots:
     void slotUpdateShareBonusInfo(const ShareBonusList& list);
     void slotUpdateHsgtTop10Info(const ShareHsgtList& list);
     void slotUpdateShareFinanceInfo(const FinancialDataList& list);
+    //查询
+    void slotQueryShareHsgtTop10List(const QString& code, const ShareDate& date);
 
 private:
     void initSignalSlot();

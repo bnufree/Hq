@@ -17,6 +17,10 @@ QDataMgrWidget::QDataMgrWidget(QWidget *parent) :
     connect(ui->mPreDayBtn, SIGNAL(clicked()), this, SLOT(slotDayChanged()));
     connect(ui->mNextDayBtn, SIGNAL(clicked()), this, SLOT(slotDayChanged()));
     ui->mNextDayBtn->setVisible(false);
+    connect(DATA_SERVICE, SIGNAL(signalSendShareHsgtTop10List(ShareHsgtList)),
+            this, SLOT(slotUpdateShareHsgtTop10List(ShareHsgtList)));
+    connect(ui->mDataTableWidget, SIGNAL(signalDisplayMutualBundHistory(QString)),
+            this, SLOT(slotDisplayMutualBundHistory(QString)));
     //updateData();
 }
 
@@ -74,7 +78,8 @@ void QDataMgrWidget::updateData()
 {
     if(mDataType == DATA_MUTUAL_MARKET)
     {
-        ui->mDataTableWidget->setDataList(ShareDataList());
+        ui->mDataTableWidget->setDataList(ShareHsgtList());
+        emit DATA_SERVICE->signalQueryShareHsgtTop10List("", ShareDate(QDate::fromString(ui->mCurDayText->text(), DATE_FORMAT)));
 //        QShareHsgtTop10Work *job = new QShareHsgtTop10Work(ui->mCurDayText->text());
 //        connect(job, SIGNAL(signalChinaAShareTop10Updated(ShareDataList,QString)), this, SLOT(slotUpdateShareHsgtTop10List(ShareDataList,QString)));
 //        QThreadPool::globalInstance()->start(job);
@@ -85,21 +90,17 @@ void QDataMgrWidget::updateData()
 
 }
 
-void QDataMgrWidget::slotUpdateShareHsgtTop10List(const ShareDataList &list, const QString& date)
+void QDataMgrWidget::slotUpdateShareHsgtTop10List(const ShareHsgtList &list)
 {
     if(list.length() == 0)
     {
         QMessageBox::warning(0, QStringLiteral(""), QStringLiteral("数据未找到."));
     }
     ui->mDataTableWidget->setDataList(list);
+}
 
-    QDate curDate = QDate::fromString(date, DATE_FORMAT);
-    if(curDate == QActiveDateTime::latestActiveDay())
-    {
-        ui->mNextDayBtn->setVisible(false);
-    } else
-    {
-        ui->mNextDayBtn->setVisible(true);
-    }
-    ui->mCurDayText->setText(curDate.toString(DATE_FORMAT));
+void QDataMgrWidget::slotDisplayMutualBundHistory(const QString &code)
+{
+    ui->mDataTableWidget->setDataList(ShareHsgtList());
+    emit DATA_SERVICE->signalQueryShareHsgtTop10List(code, ShareDate());
 }

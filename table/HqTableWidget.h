@@ -26,6 +26,7 @@ public:
         mDisplayRowStart = 0;
         displayVisibleRows();
     }
+    void setAutoChangePage(bool sts) {mAutoChangePage = sts;}
     void setHeaders(const TableColDataList& list);
     void appendRow();
     void setCodeName(int row, int column,const QString& code,const QString& name);
@@ -82,9 +83,11 @@ private:
     int                     mMoveDir;
     int                     mMaxDisplayCol;
     int                     mMaxDisplayRow;
+    bool                    mAutoChangePage;
 protected:
     int                     mDisplayRowStart;
     int                     mDisplayRowEnd;
+
 };
 
 #endif // HqTableWidget_H

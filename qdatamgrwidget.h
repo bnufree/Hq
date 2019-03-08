@@ -25,8 +25,9 @@ public:
     void setDataType(int type);
 public slots:
     void   setDislayDataType(int index);
-    void   slotUpdateShareHsgtTop10List(const ShareDataList& list, const QString& date);
+    void   slotUpdateShareHsgtTop10List(const ShareHsgtList& list);
     void   slotDayChanged();
+    void   slotDisplayMutualBundHistory(const QString& code);
 
 private:
     Ui::QDataMgrWidget *ui;

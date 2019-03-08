@@ -23,8 +23,12 @@ QShareHsgtTop10Work::~QShareHsgtTop10Work()
 void QShareHsgtTop10Work::run()
 {
     ShareDate last_update_date = DATA_SERVICE->getLastUpdateDateOfHsgtTop10();
+    qDebug()<<"last date:"<<last_update_date.toString()<<last_update_date.isNull();
     if(last_update_date == ShareDate::currentDate()) return;
     ShareDate curDate = ShareDate::currentDate();
+    if(last_update_date.isNull()) last_update_date.setDate(curDate.date().addDays(-30));
+
+     ShareHsgtList list;
     while (last_update_date <= curDate) {
         if(last_update_date.isWeekend())
         {
@@ -39,7 +43,7 @@ void QShareHsgtTop10Work::run()
         if(err.error != QJsonParseError::NoError) return;
         if(!doc.isArray())  return;
         //开始解析
-        ShareHsgtList list;
+
         QJsonArray result = doc.array();
         for(int i=0; i<result.size(); i++)
         {
@@ -64,11 +68,13 @@ void QShareHsgtTop10Work::run()
             data.mPure = data.mBuy - data.mSell;
             data.mDate = ShareDateTime(last_update_date.date());
             list.append(data);
+            qDebug()<<data.mCode<<data.mName<<data.mPure<<data.mDate.toString();
         }
-        if(list.size() > 0)
-        {
-            DATA_SERVICE->signalUpdateShareHsgtTop10Info(list);
-        }
+
         last_update_date.next();
+    }
+    if(list.size() > 0)
+    {
+        DATA_SERVICE->signalUpdateShareHsgtTop10Info(list);
     }
 }

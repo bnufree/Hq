@@ -78,7 +78,7 @@ QString HqUtils::GetFirstLetter( const QString& unicode )
         }
     }
 
-    qDebug()<<"gbk:"<<gbkArray.toHex().toUpper()<<gbkArray.size()<<result.c_str();
+    //qDebug()<<"gbk:"<<gbkArray.toHex().toUpper()<<gbkArray.size()<<result.c_str();
     return QString::fromStdString(result);
 }
 

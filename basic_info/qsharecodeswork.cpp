@@ -31,7 +31,7 @@ void QShareCodesWork::run()
     {
         QByteArray http = QHttpGet::getContentOfURL("http://quote.eastmoney.com/stocklist.html");
         QTextCodec *codes = QTextCodec::codecForHtml(http);
-        qDebug()<<"code:"<<codes->name();
+        //qDebug()<<"code:"<<codes->name();
         QTextCodec *UTF8 = QTextCodec::codecForName("UTF8");
         QString result = codes->toUnicode(http);
         //QRegExp reg(">([\u4e00-\u9fa5A-Z0-9\*]{1,})\\(([0-9]{6})\\)<");
@@ -49,13 +49,13 @@ void QShareCodesWork::run()
                 data.mCode = code;
                 data.mName = name;
                 data.mShareType = ShareData::shareType(code);
-                qDebug()<<data.mCode<<data.mName<<name.toUtf8().toHex()<<name.toUtf8().size();
+                //qDebug()<<data.mCode<<data.mName<<name.toUtf8().toHex()<<name.toUtf8().size();
                 data.mPY = HqUtils::GetFirstLetter(UTF8->toUnicode(name.toUtf8()));
                 list.append(data);
             }
             index += reg.matchedLength();
         }
-        qDebug()<<"code length:"<<list.length();
+        //qDebug()<<"code length:"<<list.length();
     }
     DATA_SERVICE->signalUpdateShareBasicInfo(list);
     return;
