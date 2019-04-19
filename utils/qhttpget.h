@@ -5,6 +5,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QTimer>
+#include "networkcookie.h"
 
 class QHttpGet : public QThread
 {
@@ -16,7 +17,7 @@ public:
     void setSequential(bool sts);
     //void startGet();
     void setUpdateInterval(int secs);           //刷新间隔
-    QByteArray static getContentOfURL(const QString& url);
+    QByteArray static getContentOfURL(const QString& url, const QList<QNetworkCookie>& list = QList<QNetworkCookie>());
     QByteArray static getContentOfURLWithPost(const QString &url, const QByteArray& post);
 signals:
     void signalSendHttpConent(const QByteArray& content);

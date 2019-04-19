@@ -29,6 +29,7 @@ signals:
     void        signalSearchCodesOfText(const QString& input);
     void        signalSetFavCode(const QString& code);
     void        signalUpdateAllShareHistoryFromDate(bool deldb, const QDate& date);
+    void        signalNewHsgtTop10Now();
 
 public slots:
     void        slotStart();
@@ -37,6 +38,7 @@ public slots:
     void        slotBaseDataListFinished(const QStringList& codes, const ShareDataList& list);
     void        slotUpdateHistoryFinished();
     void        slotSetFavCode(const QString& code);
+    void        slotStartUpdateHSGTTop10(const ShareDate& date);
 
     //
     void        setMktType(int type);

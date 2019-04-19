@@ -19,7 +19,7 @@ void QShareFinancialInfoWork::run()
     if(!last_update_date.isNull() && last_update_date >= ShareDate::latestActiveDay()) return;
     FinancialDataList dataList;
 
-    QStringList allCodes = DATA_SERVICE->getAllShareCodes();
+    QStringList allCodes = mShareCodeList;
     int pos = 0;
     int section = 200;
     while(pos < allCodes.length())

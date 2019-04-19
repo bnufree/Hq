@@ -6,6 +6,8 @@
 #include "real/qeastmoneynorthboundthread.h"
 #include "real/qsinastkresultmergethread.h"
 #include "block/qeastmoneyblockmangagerthread.h"
+#include "basic_info/qsharecodeswork.h"
+#include "basic_info/qsharehsgttop10work.h"
 
 HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
     QObject(parent),\
@@ -13,6 +15,7 @@ HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
     mBlockMgr(0)
 {
     connect(this, SIGNAL(signalStart()), this, SLOT(slotStart()));
+    connect(DATA_SERVICE, SIGNAL(signalSendLastHSGTUpdateDate(ShareDate)), this, SLOT(slotStartUpdateHSGTTop10(ShareDate)));
     connect(DATA_SERVICE, SIGNAL(signalDbInitFinished()), this, SLOT(slotDBInitFinished()));
     connect(DATA_SERVICE, SIGNAL(signalAllShareCodeList(QStringList)), this, SLOT(slotShareCodesListFinished(QStringList)));
     connect(this, SIGNAL(signalSearchCodesOfText(QString)), DATA_SERVICE, SIGNAL(signalSearchCodesOfText(QString)));
@@ -37,11 +40,26 @@ void HQTaskMagrCenter::slotStart()
 void HQTaskMagrCenter::slotDBInitFinished()
 {
     qDebug()<<__FUNCTION__<<__LINE__;
-    //数据库初始化完成，开始取得基本的信息
-    QShareBasicInfoWorker *basic  = new QShareBasicInfoWorker;
-    if(!basic) return;
-    basic->signalGetBasicInfo();
+    //数据库初始化完成,开始获取最新的代码列表
+    QShareCodesWork *codeWorker = new QShareCodesWork(this);
+    connect(codeWorker, SIGNAL(finished()), codeWorker, SLOT(deleteLater()));
+    codeWorker->start();
+    //开始获取当日沪深股通数据，线程常驻，直到当日数据确定获取
+    QShareHsgtTop10Work* hsgtTop10 = new QShareHsgtTop10Work(this);
+    connect(hsgtTop10, SIGNAL(finished()), codeWorker, SLOT(deleteLater()));
+    hsgtTop10->start();
+}
 
+void HQTaskMagrCenter::slotStartUpdateHSGTTop10(const ShareDate &date)
+{
+    if(date == ShareDate::latestActiveDay())
+    {
+        emit signalNewHsgtTop10Now();
+        return;
+    }
+    QShareHsgtTop10Work* hsgtTop10 = new QShareHsgtTop10Work(this);
+    connect(hsgtTop10, SIGNAL(finished()), hsgtTop10, SLOT(deleteLater()));
+    hsgtTop10->start();
 }
 
 void HQTaskMagrCenter::slotSetFavCode(const QString &code)
@@ -100,7 +118,7 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     qDebug()<<"update code finshed:"<<codes.length();
     //更新实时的指数
     QStringList indexlist;
-    indexlist<<"sh000001"<<"sh000300"<<"sz399001"<<"sz399006"<<"sh000016";
+    indexlist<<"sh000001"<<"sh000300"<<"sz399001"<<"sz399006"<<"sh000016"<<"sz399293";
     QSinaStkInfoThread* indexInfoThread = new QSinaStkInfoThread;
     mRealWorkObjList.append(indexInfoThread);
     connect(indexInfoThread, SIGNAL(sendStkDataList(ShareDataList)), this, SIGNAL(signalSendIndexRealDataList(ShareDataList)));
@@ -121,6 +139,11 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     mShareInfoMergeThread->setActive(true);
     mShareInfoMergeThread->setMktType(MKT_ZXG);
     mShareInfoMergeThread->start();
+    //更新日线数据
+    QShareHistoryInfoMgr* historyMgr = new QShareHistoryInfoMgr(codes);
+    connect(historyMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SIGNAL(signalUpdateHistoryMsg(QString)));
+    connect(historyMgr, SIGNAL(signalUpdateHistoryFinished()), this, SLOT(slotUpdateHistoryFinished()));
+    historyMgr->signalStartGetHistory();
 #if 0
     return;
     //板块行情初始化
@@ -129,11 +152,6 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataVList)), this, SIGNAL(signalBlockDataListUpdated(BlockDataVList)));
     mBlockMgr->start();
     return;
-    //更新日线数据
-    QShareHistoryInfoMgr* historyMgr = new QShareHistoryInfoMgr(codes);
-    connect(historyMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SIGNAL(signalUpdateHistoryMsg(QString)));
-    connect(historyMgr, SIGNAL(signalUpdateHistoryFinished()), this, SLOT(slotUpdateHistoryFinished()));
-    historyMgr->signalStartGetHistory();
 
 #endif
 }

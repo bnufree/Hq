@@ -3,10 +3,10 @@
 #include <QDir>
 #include <QRegularExpression>
 #include "utils/comdatadefines.h"
+#include <QTextCodec>
 
-#define     POST_VAL        "__VIEWSTATE=hfdegH8vXbYKMlAzFdRLabzEpRCND3OAIeQspbX5N8aDTZyKVNgZguPgAGFS2IKx2z7HtjF3bZ2rpgFw3bRIkQjGUivXs1rltkHxELBtK6Gb%2Fc9edA64kxXJCRnJrYPvsDKi3%2BmYQRRioHFrjk%2FXHvE5TC3zeVT07dozLfa2VcdxQXKnbeo5Bps%2F4snmILAYFwYJ1g%3D%3D&__VIEWSTATEGENERATOR=EC4ACD6F&__EVENTVALIDATION=Thovyr9ostDjYwd7geVYart4EmuDg%2FVRN0QVtFX4pGMAD2t2fBZ44pi%2F9W0HRNg%2BH2crk3bxMQJnOiahnz5MxDmItriKi7LKRwr61Iqon2oCatX%2FSJc73rku4ThwGD0kENg8NCFiRlKI6u%2BeiA7yu0eU9QJUlX6S1NA2PibwE0S%2BNp8CaoUSr%2BMbFsn6L7ItTWoxfM%2BsxsqRGVy6Nb1nAI8xS3fxU9PrPD2AyViiGwwl1U9MHImWFhYe3axkt4EM%2BBlw%2BItyoTk67NPmJCfQI4R%2Bt9j1VdQKSg968U0%2FqXhTM0iX%2FO2tsDESWKNZo9Wd2X%2FgplexC9vsWOjAVysRGiuazEmGcLkPGu7jhduJdL3vMXk%2Bt%2Bsn5bTgD%2BH%2F2U8FBamRcQu%2FrJxnYMDrn%2BUeeSIKtYxblzntAVAC%2BmW7DPfWwXqQrw%2BojX2c5WyzXDM2GJclbOs%2BHwdkN3Z%2BYPJeWNH%2FjRwS6b2Fd2khhG%2BiKsX3Dt1dalsAx4n2OlPL6eAerfAgsLx0jc89yw3IVntyS9LXKdKCKqU5ESkxFaWNXYlKl5b%2B8PK6vjSFEEpdmTRbn0voFF1Q4insBbIORE9P085u4lmDWshlLyXlFtkUz5XFaUIHsOoKfZMO9k%2FU%2FSspqs71dFd0crIrjlmJDiMNTFWCIRvb8npTZZELTegoF2CzxIrUvPI5JHD3ue9EF1Shz1pLAqf16lP8cmwa35DOghaXUj3gemmxwxmNqJlDD1xUugll6yFinOnhNYETgX1e00zfOyblBhdZwtorBR7BITHKEFez%2F3g8M9iX4QPceku5XyCMcF77qU%2BHjBw1oz0rbLVqTXNPyN711yQUfeupvaeijhoOtNG%2ByrXyMdVo7d2vxy67%2BVVOA8%2F4MNkjEM0oZnnsHp%2Fv8JQ1FAO7GWWL0l6yTCl2yPm2z4ESd%2BwqWKCG5rCiFWLmFsRqNBSpgz%2Fxe1nKeJaVDYJXH2%2Fwh0jqJTJ1QHYTG10O34WEc2tXcqMAJ2mzJvSmvfo3R5cg0Y8xw4yH%2BQw%2BXeCLLJigyXqn%2F%2BVwhVtRisPCPfQSq4OBEmkoerfl%2BGzf%2FPRrUC6Byw55Qo6mL9RYZWSUkb0mjd0hnXjWmiaNqTQrbYhuqU0DyDbCPfkvWWGu5p7ilCbocg0zEizZEF96uPH%2FvsyHkMCnDbpTwZE%3D&today=TODAY_DATE&sortBy=&alertMsg=&ddlShareholdingDay=TARDAY&ddlShareholdingMonth=TARMONTH&ddlShareholdingYear=TARYEAR&btnSearch.x=26&btnSearch.y=11"
-
-#define     HK_URL      "http://sc.hkexnews.hk/TuniS/www.hkexnews.hk/sdw/search/mutualmarket_c.aspx?t=%1"
+#define     POST_VAL        "__VIEWSTATE=%2FwEPDwUJNjIxMTYzMDAwZGSFj8kdzCLeVLiJkFRvN5rjsPotqw%3D%3D&__VIEWSTATEGENERATOR=3C67932C&__EVENTVALIDATION=%2FwEdAAdbi0fj%2BZSDYaSP61MAVoEdVobCVrNyCM2j%2BbEk3ygqmn1KZjrCXCJtWs9HrcHg6Q64ro36uTSn%2FZ2SUlkm9HsG7WOv0RDD9teZWjlyl84iRMtpPncyBi1FXkZsaSW6dwqO1N1XNFmfsMXJasjxX85ju3P1WAPUeweM%2Fr0%2FuwwyYLgN1B8%3D&today=TODAY_DATE&sortBy=stockcode&sortDirection=asc&alertMsg=&txtShareholdingDate=TXTSHAREDATE&btnSearch=Search"
+#define     HK_URL      "http://www.hkexnews.hk/sdw/search/mutualmarket.aspx?t=%1"
 
 QHKExchangeVolDataProcess::QHKExchangeVolDataProcess(const QDate& date, QObject* parent) : QRunnable()
 {
@@ -18,29 +18,23 @@ void QHKExchangeVolDataProcess::getMktVolInfo(QStringList& list, int& num, const
 {
     QString postVal = POST_VAL;
     postVal.replace("TODAY_DATE", QDate::currentDate().toString("yyyyMMdd"));
-    postVal.replace("TARDAY", QString("").sprintf("%02d", date.day()));
-    postVal.replace("TARMONTH", QString("").sprintf("%02d", date.month()));
-    postVal.replace("TARYEAR", QString("").sprintf("%04d", date.year()));
+    postVal.replace("TXTSHAREDATE", QString("").sprintf("%s", date.toString("yyyy/MM/dd").toStdString().data()));
     QByteArray value = QHttpGet::getContentOfURLWithPost(QString(HK_URL).arg(mkt == 0? "sh":"sz"), postVal.toLatin1());
-    QString res = QString::fromUtf8(value).remove(QRegularExpression("[\\s]"));
-    res.remove(QRegularExpression("[\\s]"));
-//    qDebug()<<"start analysis!!!!!!!!!!!!!!";
+    QString res = QString::fromUtf8(value);
     int start_index = 0;
+    qDebug()<<__FUNCTION__<<start_index;
     QRegExp codeExp("7[072]{1}[0-9]{3}|9[0-9]{4}");
     //QRegExp nameExp("[\u4e00-\u9fa5A-Z]{1,}");
     QRegExp volExp(">(([0-9]{1,3},){0,}[0-9]{1,})<");
-    QRegExp dateExp("\\d{2}/\\d{2}/\\d{4}");
+    QRegExp dateExp("Shareholding Date: (\\d{4}/\\d{2}/\\d{2})");
 
     start_index = dateExp.indexIn(res, start_index);
     QDate resDate;
     if(start_index >=0 )
     {
-        resDate = QDate::fromString(dateExp.cap(), "dd/MM/yyyy");
-    } else
-    {
-        return;
+        resDate = QDate::fromString(dateExp.cap(1), "yyyy/MM/dd");
     }
- //   qDebug()<<resDate<<mDate;
+    qDebug()<<__FUNCTION__<<resDate<<mDate<<date;
     if(resDate != date) return;
 
     while ( (start_index = codeExp.indexIn(res, start_index)) >= 0) {
@@ -73,6 +67,7 @@ void QHKExchangeVolDataProcess::getMktVolInfo(QStringList& list, int& num, const
             //qDebug()<<"code:"<<tmpCode<<"not found";
             break;
         }
+        qDebug()<<list.last();
     }
     num = list.size();
     return;
@@ -122,6 +117,7 @@ void QHKExchangeVolDataProcess::run()
         int errorNUm = 0;
         int sh_num = 0, sz_num = 0;
         do {
+            list.clear();
             getMktVolInfo(list, sh_num, mDate, 0);
             getMktVolInfo(list, sz_num, mDate, 1);
             errorNUm++;

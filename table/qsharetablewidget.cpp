@@ -52,7 +52,7 @@ void QShareTablewidget::setDataList(const ShareDataList &list)
         this->setItemText(i, k++, HqUtils::double2Str(data.mCur), dis_color);
         double val = mShareMap[data.mCode];
         QString flag = val < data.mChgPercent ? QStringLiteral("↑") : val > data.mChgPercent ? QStringLiteral("↓") : "";
-        this->setItemText(i, k++, QString("%1%2").arg(flag).arg(QString::number(data.mChgPercent, 'f', 2)));
+        this->setItemText(i, k++, QString("%1%2").arg(flag).arg(QString::number(data.mChgPercent * 100, 'f', 2)));
         mShareMap[data.mCode] = data.mChgPercent;
         this->setItemText(i, k++, QString("").sprintf("%.2f", data.mMoney / 10000.0));
         this->setItemText(i, k++, QString("").sprintf("%.2f",data.mMoneyRatio));

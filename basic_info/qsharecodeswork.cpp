@@ -10,10 +10,9 @@
 #include <QTextCodec>
 #include "utils/qhttpget.h"
 #include "data_structure/hqutils.h"
-#include "data_structure/sharedata.h"
 #include <QEventLoop>
 
-QShareCodesWork::QShareCodesWork(QObject *parent) : mParent(parent),QRunnable()
+QShareCodesWork::QShareCodesWork(QObject *parent) : QThread(parent)
 {
 }
 
@@ -26,39 +25,50 @@ void QShareCodesWork::run()
     //首先获取数据库的更新日期
     ShareDataList list;
     ShareDate update_date = DATA_SERVICE->getLastUpdateDateOfBasicInfo();
-    qDebug()<<update_date.date();
+    qDebug()<<update_date.date()<<ShareDate::latestActiveDay().date()<<(update_date != ShareDate::latestActiveDay());
     if(update_date != ShareDate::latestActiveDay())
     {
-        QByteArray http = QHttpGet::getContentOfURL("http://quote.eastmoney.com/stocklist.html");
-        QTextCodec *codes = QTextCodec::codecForHtml(http);
-        //qDebug()<<"code:"<<codes->name();
-        QTextCodec *UTF8 = QTextCodec::codecForName("UTF8");
-        QString result = codes->toUnicode(http);
-        //QRegExp reg(">([\u4e00-\u9fa5A-Z0-9\*]{1,})\\(([0-9]{6})\\)<");
-        QRegExp reg(">([\u4e00-\u9fffA-Z0-9\*]{1,})\\(([0-9]{6})\\)<");
-        QString utf8_result = QString::fromUtf8(UTF8->fromUnicode(result));
-        QRegExp reg_code("60[013][0-9]{3}|300[0-9]{3}|00[012][0-9]{3}|510[0-9]{3}|1599[0-9]{2}");
-        int index = 0;
-        while((index = reg.indexIn(utf8_result, index)) >= 0)
-        {
-            QString name = reg.cap(1);
-            QString code = reg.cap(2);
-            if(reg_code.exactMatch(code))
-            {
-                ShareData data;
-                data.mCode = code;
-                data.mName = name;
-                data.mShareType = ShareData::shareType(code);
-                //qDebug()<<data.mCode<<data.mName<<name.toUtf8().toHex()<<name.toUtf8().size();
-                data.mPY = HqUtils::GetFirstLetter(UTF8->toUnicode(name.toUtf8()));
-                list.append(data);
-            }
-            index += reg.matchedLength();
-        }
-        //qDebug()<<"code length:"<<list.length();
+        QString stock_code_url = "https://nufm1.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&cmd=C._A&sty=MPNSBAS&st=(Close)&sr=-1&p=1&ps=50000&lvl=&cb=&token=4f1862fc3b5e77c150a2b985b12db0fd&_=09383";
+        QString fund_code_url = "http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?cb=&type=CT&token=4f1862fc3b5e77c150a2b985b12db0fd&sty=FCOIATC&js=(%7Bdata%3A%5B(x)%5D%2CrecordsFiltered%3A(tot)%7D)&cmd=C.__2850013&st=(Amount)&sr=-1&p=1&ps=2000&_=1555572794676";
+        parseHttp(list, stock_code_url, 1);
+//        parseHttp(list, fund_code_url, 2);
     }
     DATA_SERVICE->signalUpdateShareBasicInfo(list);
     return;
 }
+
+void QShareCodesWork::parseHttp(ShareDataList& list, const QString& url, int mode)
+{
+    QByteArray http = QHttpGet::getContentOfURL(url);
+    QTextCodec *UTF8 = QTextCodec::codecForName("UTF-8");
+    QString result = QString::fromUtf8(http);
+    QRegExp reg("([0-9]{6}),([\u4e00-\u9fffA-Z0-9\*]{1,})");  //([\u4e00-\u9fffA-Z0-9\*]{1,})
+    QString utf8_result = QString::fromUtf8(UTF8->fromUnicode(result));
+    QRegExp reg_code("60[013][0-9]{3}|300[0-9]{3}|00[012][0-9]{3}|51[0-9]{4}|159[0-9]{3}");
+    if(mode == 2)
+    {
+        reg_code.setPattern(QString("51[0-9]{4}|159[0-9]{3}"));
+    }
+    int index = 0;
+    while((index = reg.indexIn(utf8_result, index)) >= 0)
+    {
+        QString name = reg.cap(2);
+        QString code = reg.cap(1);
+        if(reg_code.exactMatch(code))
+        {
+            ShareData data;
+            data.mCode = code;
+            data.mName = name;
+            data.mShareType = ShareData::shareType(code);
+            //qDebug()<<data.mCode<<data.mName<<name.toUtf8().toHex()<<name.toUtf8().size();
+            data.mPY = HqUtils::GetFirstLetter(UTF8->toUnicode(name.toUtf8()));
+            //qDebug()<<data.mCode<<data.mName<<data.mPY;
+            list.append(data);
+        }
+        index += reg.matchedLength();
+    }
+}
+
+//
 
 

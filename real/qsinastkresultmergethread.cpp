@@ -359,6 +359,7 @@ void QSinaStkResultMergeThread::setMktType(int type)
 {
     mMktType = (MKT_TYPE)type;
     mCurPage = 1;
+    qDebug()<<"set mkt:"<<mMktType;
     //updateStkCodes(mMktType);
 }
 

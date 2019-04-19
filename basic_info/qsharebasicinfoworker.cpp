@@ -27,20 +27,20 @@ void QShareBasicInfoWorker::slotGetBasicInfo()
 //    ShareDate update_date = DATA_SERVICE->getLastUpdateDateOfBasicInfo();
 //    if(update_date == ShareDate::latestActiveDay())return;
     //开始从网络获取数据
-    QThreadPool pool;
-    pool.setMaxThreadCount(8);
-    pool.setExpiryTimeout(-1);
+//    QThreadPool pool;
+//    pool.setMaxThreadCount(8);
+//    pool.setExpiryTimeout(-1);
 
-    //取得代码
-    pool.start(new QShareCodesWork(this));
-    //取得分红送配
-    pool.start(new QShareFHSPWork(this));
-    //取得北向交易TOP10
-    pool.start(new QShareHsgtTop10Work(this));
-    pool.waitForDone();
-    //取得财务信息
-    pool.start(new QShareFinancialInfoWork(this));
-    pool.waitForDone();
+//    //取得代码
+//    pool.start(new QShareCodesWork(this));
+//    //取得分红送配
+//    pool.start(new QShareFHSPWork(this));
+//    //取得北向交易TOP10
+//    pool.start(new QShareHsgtTop10Work(this));
+//    pool.waitForDone();
+//    //取得财务信息
+//    pool.start(new QShareFinancialInfoWork(this));
+//    pool.waitForDone();
 
 
 //    //从文件获取信息基本信息，包括代码，分红送配，财务信息

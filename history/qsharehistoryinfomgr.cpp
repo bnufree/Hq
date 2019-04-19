@@ -19,7 +19,7 @@ QShareHistoryInfoMgr::QShareHistoryInfoMgr(const QStringList& codes, QObject *pa
     PROFILES_INS ->setDefault(UPDATE_SEC, UPDATE_DATE, QActiveDateTime(QDate::currentDate().addDays(-365)).toString(DATE_FORMAT));
     mCodesList = codes;
     mPool.setExpiryTimeout(-1);
-    mPool.setMaxThreadCount(16);
+    mPool.setMaxThreadCount(8);
     connect(this, SIGNAL(signalStartGetHistory()), this, SLOT(slotStartGetHistory()));
     connect(this, SIGNAL(signalUpdateAllShareFromDate(bool,QDate)), this, SLOT(slotUpdateAllShareFromDate(bool,QDate)));
     connect(DATA_SERVICE, SIGNAL(signalUpdateHistoryInfoFinished()), this, SLOT(slotDbUpdateHistoryFinished()));
@@ -98,6 +98,7 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
             mDates.append(wkDate.toString(DATE_FORMAT));
             QHKExchangeVolDataProcess * process = new QHKExchangeVolDataProcess(wkDate, this);
             mPool.start(process);
+            break;
         }
         wkDate = QActiveDateTime(wkDate).nextActiveDay();
     }

@@ -56,7 +56,7 @@ public:
     {
         return ShareDate(time_t);
     }
-    QString toString(){
+    QString toString() const{
         if(toTime_t() == 0) return "-";
         return mDate.toString("yyyy-MM-dd");
     }

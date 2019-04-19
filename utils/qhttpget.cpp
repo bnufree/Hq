@@ -2,6 +2,8 @@
 #include <QDebug>
 #include <QThread>
 #include <QEventLoop>
+#include <QNetworkCookie>
+#include <QNetworkCookieJar>
 #include "data_structure/hqutils.h"
 #include "dbservices/dbservices.h"
 #include "dbservices/qactivedate.h"
@@ -129,10 +131,16 @@ void QHttpGet::slotReadHttpContent()
     mReply->deleteLater();
 }
 
-QByteArray QHttpGet::getContentOfURL(const QString &url)
+QByteArray QHttpGet::getContentOfURL(const QString &url, const QList<QNetworkCookie>& list)
 {
     QByteArray recv;
     QNetworkAccessManager mgr;
+    NetworkCookie cookie;
+    if(list.size() > 0)
+    {
+        cookie.setCookies(list);
+        mgr.setCookieJar(&cookie);
+    }
     QNetworkReply *reply = mgr.get(QNetworkRequest(url));
     if(!reply) return recv;
 
@@ -152,6 +160,7 @@ QByteArray QHttpGet::getContentOfURL(const QString &url)
     {
         recv = reply->readAll();
     }
+
     reply->abort();
     reply->close();
     delete reply;
