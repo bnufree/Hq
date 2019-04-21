@@ -478,6 +478,7 @@ bool HQDBDataBase::createShareBasicTable()
     colist.append({HQ_TABLE_COL_CODE, "VARCHAR(10) NOT NULL"});
     colist.append({HQ_TABLE_COL_NAME, "VARCHAR(100) NULL"});
     colist.append({HQ_TABLE_COL_PY_ABBR, "VARCHAR(10) NULL"});
+    colist.append({HQ_TABLE_COL_TYPE, "INTEGER NOT NULL"});
     return createTable(TABLE_SHARE_BASIC_INFO, colist);
 }
 
@@ -492,6 +493,7 @@ bool HQDBDataBase::updateShareBasicInfo(const ShareDataList& dataList)
         list.append(DBColVal(HQ_TABLE_COL_CODE, data.mCode, HQ_DATA_TEXT));
         list.append(DBColVal(HQ_TABLE_COL_NAME, data.mName, HQ_DATA_TEXT));
         list.append(DBColVal(HQ_TABLE_COL_PY_ABBR, data.mPY, HQ_DATA_TEXT));
+        list.append(DBColVal(HQ_TABLE_COL_TYPE, data.mShareType, HQ_DATA_TEXT));
         if(!updateTable(TABLE_SHARE_BASIC_INFO, list, list[0])){
             mDB.rollback();
             return false;
@@ -513,10 +515,13 @@ bool HQDBDataBase::queryShareBasicInfo(ShareDataMap& map)
     if(!mSQLQuery.exec(tr("select * from %1").arg(TABLE_SHARE_BASIC_INFO))) return false;
     while (mSQLQuery.next()) {
         QString code = mSQLQuery.value(HQ_TABLE_COL_CODE).toString();
+        if(code.length() == 6) code.insert(0, ShareData::prefixCode(code));
         ShareData& info = map[code];
         if(info.mCode.length() == 0) info.mCode = code;
         info.mName = mSQLQuery.value(HQ_TABLE_COL_NAME).toString();
         info.mPY = mSQLQuery.value(HQ_TABLE_COL_PY_ABBR).toString();
+        info.mShareType =  (SHARE_DATA_TYPE)(mSQLQuery.value(HQ_TABLE_COL_TYPE).toInt());
+
     }
     return true;
 }

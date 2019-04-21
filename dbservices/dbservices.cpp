@@ -341,10 +341,10 @@ ShareData* HqInfoService::getShareData(const QString &code)
     if(!mRealShareMap.contains(code))
     {
         ShareData data;
-        data.mCode = code.right(6);
+        data.mCode = code;
         mRealShareMap[code] = data;
     }
-    return (ShareData*)(&mRealShareMap[code]);
+    return (ShareData*)(&(mRealShareMap[code]));
 }
 
 void HqInfoService::slotUpdateShareBasicInfo(const ShareDataList &list)

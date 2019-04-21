@@ -94,10 +94,11 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
         QString code = detailList[0];
         ShareData * data = DATA_SERVICE->getShareData(code);
         if(!data) continue;
+        //qDebug()<<data->mCode<<data->mName<<data->mShareType;
         data->mName = detailList[1];
         data->mCur = detailList[4].toDouble();
         data->mChg = detailList[4].toDouble() - detailList[3].toDouble();
-        data->mChgPercent = data->mChg / detailList[3].toDouble();
+        data->mChgPercent = data->mChg * 100 / detailList[3].toDouble() ;
         data->mVol = detailList[10].toInt();
         data->mMoney = detailList[10].toDouble() / 10000;
         data->mHsl = 0.0;

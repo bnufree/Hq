@@ -24,6 +24,8 @@ QShareCodesWork::~QShareCodesWork()
 void QShareCodesWork::run()
 {
     //首先获取数据库的更新日期
+    //http://query.sse.com.cn/security/stock/downloadStockListFile.do?csrcCode=&stockCode=&areaName=&stockType=1
+
     ShareDataList list;
     ShareDate update_date = DATA_SERVICE->getLastUpdateDateOfBasicInfo();
     qDebug()<<update_date.date();
@@ -49,7 +51,7 @@ void QShareCodesWork::run()
                 data.mCode = code;
                 data.mName = name;
                 data.mShareType = ShareData::shareType(code);
-                //qDebug()<<data.mCode<<data.mName<<name.toUtf8().toHex()<<name.toUtf8().size();
+                qDebug()<<data.mCode<<data.mName<<ShareData::shareTypeString(data.mShareType);
                 data.mPY = HqUtils::GetFirstLetter(UTF8->toUnicode(name.toUtf8()));
                 list.append(data);
             }

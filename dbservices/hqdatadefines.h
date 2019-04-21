@@ -24,6 +24,7 @@
 #define         HQ_TABLE_COL_CODE               "code"
 #define         HQ_TABLE_COL_NAME               "name"
 #define         HQ_TABLE_COL_PY_ABBR            "abbr"
+#define         HQ_TABLE_COL_TYPE               "type"
 #define         HQ_TABLE_COL_PROFIT             "profit"
 #define         HQ_TABLE_COL_TOTALMNT           "total_amount"
 #define         HQ_TABLE_COL_MUTAL              "mutable_amount"

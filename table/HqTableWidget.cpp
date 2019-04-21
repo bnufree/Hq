@@ -1,4 +1,4 @@
-﻿#include "HqTableWidget.h"
+#include "HqTableWidget.h"
 #include "utils/comdatadefines.h"
 #include <QHeaderView>
 #include <QAction>
@@ -315,8 +315,7 @@ void HqTableWidget::resizeEvent(QResizeEvent *event)
     qDebug()<<__func__<<__LINE__<<size;
     mMaxDisplayRow = size.height() / mRowHeight;
     mMaxDisplayCol = size.width() / mColWidth;
-    mDisplayRowStart = 0;
-    mDisplayRowEnd = mMaxDisplayRow-1;
+    resetDisplayRows();
     qDebug()<<"maxrow:"<<mMaxDisplayRow<<mDisplayRowStart<<mDisplayRowEnd;
 
     for(int i=0; i<this->columnCount(); i++)

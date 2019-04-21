@@ -64,7 +64,8 @@ SOURCES += main.cpp\
     dbservices/qactivedate.cpp \
     data_structure/hqutils.cpp \
     data_structure/hqbasedata.cpp \
-    data_structure/hqblockdata.cpp
+    data_structure/hqblockdata.cpp \
+    qsharecodenamelable.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -118,7 +119,8 @@ HEADERS  += dialog.h \
     dbservices/qactivedate.h \
     data_structure/hqutils.h \
     data_structure/hqbasedata.h \
-    data_structure/hqblockdata.h
+    data_structure/hqblockdata.h \
+    qsharecodenamelable.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \
@@ -126,7 +128,8 @@ FORMS    += dialog.ui \
     exchange/qexchangefiledlg.ui \
     history/qsharehistorydialog.ui \
     real/qsahrerealdisplaywidget.ui \
-    qdatamgrwidget.ui
+    qdatamgrwidget.ui \
+    qsharecodenamelable.ui
 
 RESOURCES += \
     image.qrc

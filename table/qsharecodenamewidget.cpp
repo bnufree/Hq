@@ -1,4 +1,4 @@
-﻿#include "qsharecodenamewidget.h"
+#include "qsharecodenamewidget.h"
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -15,8 +15,10 @@ QShareCodeNameWidget::QShareCodeNameWidget(const QString& code, const QString& n
     this->setLayout(vlay);
     mCodeLbl = new QLabel(code, this);
     mNameLbl = new QLabel(name, this);
-    vlay->addWidget(mCodeLbl, 0,  Qt::AlignCenter);
     vlay->addWidget(mNameLbl, 0,  Qt::AlignCenter);
+    vlay->addWidget(mCodeLbl, 0,  Qt::AlignCenter);
+    mCodeLbl->setStyleSheet("font-size:8pt;");
+    mNameLbl->setStyleSheet("font-size:12pt;");
 }
 
 void QShareCodeNameWidget::setCode(const QString &str)
