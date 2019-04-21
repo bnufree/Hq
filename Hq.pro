@@ -8,7 +8,7 @@
 QT       += core gui network sql concurrent
 
 #DEFINES *= Q_QDOC
-DEFINES *= HQ_RUNNABLE
+#DEFINES *= HQ_RUNNABLE
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -65,7 +65,8 @@ SOURCES += main.cpp\
     data_structure/hqutils.cpp \
     data_structure/hqbasedata.cpp \
     data_structure/hqblockdata.cpp \
-    qsharecodenamelable.cpp
+    qsharecodenamelable.cpp\
+    utils/networkcookie.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -120,7 +121,8 @@ HEADERS  += dialog.h \
     data_structure/hqutils.h \
     data_structure/hqbasedata.h \
     data_structure/hqblockdata.h \
-    qsharecodenamelable.h
+    qsharecodenamelable.h\
+    utils/networkcookie.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

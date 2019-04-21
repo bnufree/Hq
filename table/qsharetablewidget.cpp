@@ -1,4 +1,4 @@
-﻿#include "qsharetablewidget.h"
+#include "qsharetablewidget.h"
 #include <QDebug>
 #include "data_structure/hqutils.h"
 #include "data_structure/sharedata.h"

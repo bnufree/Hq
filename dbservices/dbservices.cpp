@@ -1,4 +1,4 @@
-﻿#include <QDebug>
+#include <QDebug>
 #include <QSharedPointer>
 #include <QSqlError>
 #include <QDir>
@@ -338,13 +338,14 @@ void HqInfoService::slotUpdateHistoryChange(const QString &code)
 ShareData* HqInfoService::getShareData(const QString &code)
 {
     QMutexLocker locker(&mShareMutex);
-    if(!mRealShareMap.contains(code))
+    QString wkCode = code.right(6);
+    if(!mRealShareMap.contains(wkCode))
     {
         ShareData data;
-        data.mCode = code;
-        mRealShareMap[code] = data;
+        data.mCode = wkCode;
+        mRealShareMap[wkCode] = data;
     }
-    return (ShareData*)(&(mRealShareMap[code]));
+    return (ShareData*)(&mRealShareMap[wkCode]);
 }
 
 void HqInfoService::slotUpdateShareBasicInfo(const ShareDataList &list)
@@ -373,8 +374,9 @@ void HqInfoService::slotUpdateHsgtTop10Info(const ShareHsgtList &list)
     if(!mDataBase.updateShareHsgtTop10List(list))
     {
         qDebug()<<"update share hsgt info error:"<<mDataBase.getErrorString();
-        return;
     }
+    ShareDate last_update_date = DATA_SERVICE->getLastUpdateDateOfHsgtTop10();
+    emit signalSendLastHSGTUpdateDate(last_update_date);
 }
 
 void HqInfoService::slotQueryShareHsgtTop10List(const QString &code, const ShareDate &date)

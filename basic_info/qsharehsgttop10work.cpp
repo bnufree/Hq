@@ -11,7 +11,7 @@
 #include "dbservices/dbservices.h"
 #include <QFile>
 
-QShareHsgtTop10Work::QShareHsgtTop10Work(QObject *parent) : mParent(parent),QRunnable()
+QShareHsgtTop10Work::QShareHsgtTop10Work(QObject *parent) : QThread(parent)
 {
 }
 
@@ -28,7 +28,8 @@ void QShareHsgtTop10Work::run()
     ShareDate curDate = ShareDate::currentDate();
     if(last_update_date.isNull()) last_update_date.setDate(curDate.date().addDays(-30));
 
-     ShareHsgtList list;
+    ShareHsgtList list;
+    last_update_date.next();
     while (last_update_date <= curDate) {
         if(last_update_date.isWeekend())
         {

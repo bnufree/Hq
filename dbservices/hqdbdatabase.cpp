@@ -1,4 +1,4 @@
-﻿#include "hqdbdatabase.h"
+#include "hqdbdatabase.h"
 #include <QMutexLocker>
 #include <QDebug>
 #include <QFile>
@@ -261,7 +261,7 @@ bool HQDBDataBase::createBlockTable()
     colist.append({HQ_TABLE_COL_FAVORITE, "BOOL NULL"});
     colist.append({HQ_TABLE_COL_CHANGE_PERCENT, "NUMERIC NULL"});
     colist.append({HQ_TABLE_COL_BLOCK_TYPE, "INTEGER NULL"});
-    colist.append({HQ_TABLE_COL_DATE, "INTEGER NULL"});
+    colist.append({HQ_TABLE_COL_DATE, "VARCHAR(10) NOT NULL"});
     return createTable(TABLE_BLOCK, colist);
 }
 
@@ -515,7 +515,6 @@ bool HQDBDataBase::queryShareBasicInfo(ShareDataMap& map)
     if(!mSQLQuery.exec(tr("select * from %1").arg(TABLE_SHARE_BASIC_INFO))) return false;
     while (mSQLQuery.next()) {
         QString code = mSQLQuery.value(HQ_TABLE_COL_CODE).toString();
-        if(code.length() == 6) code.insert(0, ShareData::prefixCode(code));
         ShareData& info = map[code];
         if(info.mCode.length() == 0) info.mCode = code;
         info.mName = mSQLQuery.value(HQ_TABLE_COL_NAME).toString();
@@ -969,7 +968,7 @@ bool HQDBDataBase::createShareBonusIbfoTable()
     colist.append({HQ_TABLE_COL_BONUS_MONEY, "DOUBLE NULL"});
     colist.append({HQ_TABLE_COL_BONUS_YAGGR, "INTEGER NULL"});
     colist.append({HQ_TABLE_COL_BONUS_GQDJR, "INTEGER NULL"});
-    colist.append({HQ_TABLE_COL_BONUS_DATE, "INTEGER NULL"});
+    colist.append({HQ_TABLE_COL_BONUS_DATE, "VARCHAR(10) NOT NULL"});
     return createTable(TABLE_SHARE_BONUS, colist);
 }
 
@@ -1061,7 +1060,7 @@ bool HQDBDataBase::createShareHsgTop10Table()
     colist.append({HQ_TABLE_COL_HSGT_TOP10_BUY, "DOUBLE NULL"});
     colist.append({HQ_TABLE_COL_HSGT_TOP10_SELL, "DOUBLE NULL"});
     colist.append({HQ_TABLE_COL_HSGT_TOP10_MONEY, "DOUBLE NULL"});
-    colist.append({HQ_TABLE_COL_DATE, "INTEGER NULL"});
+    colist.append({HQ_TABLE_COL_DATE, "VARCHAR(10) NOT NULL"});
     return createTable(TABLE_HSGT_TOP10, colist);
 }
 
@@ -1077,7 +1076,7 @@ bool HQDBDataBase::updateShareHsgtTop10List(const ShareHsgtList& dataList)
             DBColValList list;
             list.append(DBColVal(HQ_TABLE_COL_CODE, data.mCode, HQ_DATA_TEXT));
             list.append(DBColVal(HQ_TABLE_COL_NAME, data.mName, HQ_DATA_TEXT));
-            list.append(DBColVal(HQ_TABLE_COL_DATE, data.mDate.toTime_t(), HQ_DATA_INT));
+            list.append(DBColVal(HQ_TABLE_COL_DATE, data.mDate.toString(), HQ_DATA_TEXT));
             list.append(DBColVal(HQ_TABLE_COL_HSGT_TOP10_BUY, data.mBuy, HQ_DATA_DOUBLE));
             list.append(DBColVal(HQ_TABLE_COL_HSGT_TOP10_SELL, data.mSell, HQ_DATA_DOUBLE));
             list.append(DBColVal(HQ_TABLE_COL_HSGT_TOP10_MONEY, data.mPure, HQ_DATA_DOUBLE));
@@ -1089,15 +1088,14 @@ bool HQDBDataBase::updateShareHsgtTop10List(const ShareHsgtList& dataList)
                 return false;
             }
         }
-        if(update_date.isNull())
+        if(update_date.isNull() && dataList.size() > 0)
         {
             update_date = dataList.last().mDate.shareDate();
-        }
-
-        if(!updateDBUpdateDate(update_date, TABLE_HSGT_TOP10))
-        {
-            mDB.rollback();
-            return false;
+            if(!updateDBUpdateDate(update_date, TABLE_HSGT_TOP10))
+            {
+                mDB.rollback();
+                return false;
+            }
         }
         mDB.commit();
     }
@@ -1153,7 +1151,7 @@ bool HQDBDataBase::createDBUpdateDateTable()
     TableColList colist;
     colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
     colist.append({HQ_TABLE_COL_TABLE_NM, "VARCHAR(100) NULL"});
-    colist.append({HQ_TABLE_COL_DATE, "INTEGER  NOT NULL"});
+    colist.append({HQ_TABLE_COL_DATE, "VARCHAR(10) NOT NULL"});
     return createTable(TABLE_DB_UPDATE, colist);
 }
 
@@ -1163,7 +1161,7 @@ bool HQDBDataBase::queryDBUpdateDate(ShareDate &date, const QString &table)
     QString sql = QString("select %1 from %2 where %3 = '%4' ").arg(HQ_TABLE_COL_DATE).arg(TABLE_DB_UPDATE).arg(HQ_TABLE_COL_TABLE_NM).arg(table);
     if(!mSQLQuery.exec(sql)) return false;
     while (mSQLQuery.next()) {
-        date = ShareDate::fromTime_t(mSQLQuery.value(0).toInt());
+        date = ShareDate::fromString(mSQLQuery.value(0).toString());
         break;
     }
     return true;
@@ -1173,7 +1171,7 @@ bool HQDBDataBase::updateDBUpdateDate(const ShareDate& date, const QString& tabl
 {
     DBColValList list;
     list.append(DBColVal(HQ_TABLE_COL_TABLE_NM, table, HQ_DATA_TEXT));
-    list.append(DBColVal(HQ_TABLE_COL_DATE, date.toTime_t(), HQ_DATA_INT));
+    list.append(DBColVal(HQ_TABLE_COL_DATE, date.toString(), HQ_DATA_TEXT));
     return updateTable(TABLE_DB_UPDATE, list, list[0]);
 }
 

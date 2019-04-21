@@ -4,6 +4,7 @@
 #include <QRunnable>
 #include <QObject>
 #include <QThread>
+#include "data_structure/sharedata.h"
 
 #ifdef HQ_RUNNABLE
 class QShareCodesWork : public QRunnable
@@ -24,7 +25,7 @@ public:
     ~QShareCodesWork();
     void run();
 private:
-    QObject* mParent;
+    void parseHttp(ShareDataList& list, const QString& url, int mode = 1); //1:stock 2:fund
 };
 #endif
 

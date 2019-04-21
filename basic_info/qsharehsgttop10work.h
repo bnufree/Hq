@@ -1,11 +1,10 @@
 ﻿#ifndef QSHAREHSGTTOP10WORK_H
 #define QSHAREHSGTTOP10WORK_H
 
-#include <QObject>
-#include <QRunnable>
+#include <QThread>
 #include "data_structure/sharedata.h"
 
-class QShareHsgtTop10Work :  public QObject,public QRunnable
+class QShareHsgtTop10Work :  public QThread
 {
     Q_OBJECT
 public:
@@ -16,8 +15,6 @@ signals:
     void signalChinaAShareTop10Updated(const ShareDataList& list, const QString& date);
 
 private:
-    QObject*        mParent;
-    QString         mFileName;
 };
 
 #endif // QSHAREHSGTTOP10WORK_H

@@ -1,4 +1,4 @@
-﻿#include "qsinastkresultmergethread.h"
+#include "qsinastkresultmergethread.h"
 #include "qsinastkinfothread.h"
 #include <QDebug>
 #include "data_structure/sharedata.h"
@@ -87,6 +87,7 @@ void QSinaStkResultMergeThread::run()
                         (mMktType == MKT_LGT_TOP10 && data.mHsgtData.mIsTop10) ||\
                         (mMktType == MKT_JJ && (data.mShareType & SHARE_FUND))||\
                         (mMktType == MKT_OTHER && mSelfCodesList.contains(data.mCode));
+
                 if(sts)
                 {
                     wklist.append(data);
@@ -360,6 +361,7 @@ void QSinaStkResultMergeThread::setMktType(int type)
     qDebug()<<"mkt:"<<type;
     mMktType = (MKT_TYPE)type;
     mCurPage = 1;
+    qDebug()<<"set mkt:"<<mMktType;
     //updateStkCodes(mMktType);
 }
 
