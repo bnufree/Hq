@@ -2,19 +2,19 @@
 #define QSHAREFINANCIALINFOWORK_H
 
 #include <QObject>
-#include <QRunnable>
+#include <QThread>
 
 
-class QShareFinancialInfoWork:public QRunnable
+class QShareFinancialInfoWork : public QThread
 {
+    Q_OBJECT
 public:
-    explicit QShareFinancialInfoWork(QObject *parent = 0);
+    explicit QShareFinancialInfoWork(const QStringList& list, QObject *parent = 0);
     ~QShareFinancialInfoWork();
     void        setShareCodeList(const QStringList& list) {mShareCodeList = list;}
     void run();
 
 private:
-    QObject*        mParent;
     QStringList     mShareCodeList;
 };
 

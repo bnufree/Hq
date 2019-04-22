@@ -26,6 +26,7 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
     datalist.append(TableColData(QStringLiteral("送转"), STK_DISPLAY_SORT_TYPE_SZZBL, true));
     datalist.append(TableColData(QStringLiteral("总市值(亿)"), STK_DISPLAY_SORT_TYPE_TCAP));
     datalist.append(TableColData(QStringLiteral("流通市值(亿)"), STK_DISPLAY_SORT_TYPE_MCAP, true));
+    datalist.append(TableColData(QStringLiteral("净资产收益率(%)"), STK_DISPLAY_SORT_TYPE_JZCSYL, true));
     datalist.append(TableColData(QStringLiteral("盈亏"), STK_DISPLAY_SORT_TYPE_PROFIT, false));
     datalist.append(TableColData(QStringLiteral("外资持股(万)"), STK_DISPLAY_SORT_TYPE_FOREIGN_VOL));
     datalist.append(TableColData(QStringLiteral("外资持股△(万)"), STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG));
@@ -66,7 +67,7 @@ void QShareTablewidget::setDataList(const ShareDataList &list)
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mBonusData.mSZZG));
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mTotalCap / 100000000.0 ));
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mMutalbleCap/ 100000000.0 ));
-
+        this->setItemText(i, k++, QString("").sprintf("%.0f",data.mFinanceData.mROE));
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mProfit));
         this->setItemText(i, k++, QString("").sprintf("%.0f", data.mHsgtData.mVol / 10000.0));
         this->setItemText(i, k++, QString("").sprintf("%.0f", data.mForeignVolChg / 10000.0));

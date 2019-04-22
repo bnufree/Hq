@@ -2,17 +2,17 @@
 #define QSHAREFHSPWORK_H
 
 #include <QObject>
-#include <QRunnable>
+#include <QThread>
 
-class QShareFHSPWork : public QRunnable
+class QShareFHSPWork : public QThread
 {
+    Q_OBJECT
 public:
     explicit QShareFHSPWork(QObject *parent = 0);
     ~QShareFHSPWork();
     void run();
 
 private:
-    QObject*        mParent;
 };
 
 #endif // QSHAREFHSPWORK_H

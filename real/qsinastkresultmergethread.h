@@ -56,8 +56,8 @@ private:
     int                                                     mTotalPage;
     int                                                     mCurPage;
     int                                                     mPageSize;
-    int                                                     mSortType;
-    int                                                     mSortRule;
+//    int                                                     mSortType;
+//    int                                                     mSortRule;
     MKT_TYPE                                                mMktType;
     QList<QSinaStkInfoThread*>                              mThreadList;
     QList<QStringList>                                      mSecCodesList;

@@ -8,6 +8,7 @@
 #include <QRegExp>
 #include "hqbasedata.h"
 #include "hqutils.h"
+#include "utils/comdatadefines.h"
 
 #define         SH_FUND_REG         "(sh){0,1}5[0-9]{5}"
 #define         SH_INDEX_REG        "sh0[0-9]{5}"
@@ -97,57 +98,9 @@ public:
     ShareHsgt               mHsgtData;
 public:
     ShareData();
-    static bool sortByPerDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortByPerAsc(const ShareData& d1, const ShareData& d2);
-    static bool sortByCurDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortByCurAsc(const ShareData& d1, const ShareData& d2);
-    static bool sortByMonDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortByMonAsc(const ShareData& d1, const ShareData& d2);
-    static bool sortByHslDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortByHslAsc(const ShareData& d1, const ShareData& d2);
-    static bool sortByMonRatioDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortByMonRatioAsc(const ShareData& d1, const ShareData& d2);
-    static bool sortBy3DayChgDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortBy3DayChgAsc(const ShareData& d1, const ShareData& d2);
-
-    static bool sortBy5DayChgDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortBy5DayChgAsc(const ShareData& d1, const ShareData& d2);
-
-    static bool sortBy10DayChgDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortBy10DayChgAsc(const ShareData& d1, const ShareData& d2);
-
-    static bool sortByMonthChgDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortByMonthChgAsc(const ShareData& d1, const ShareData& d2);
-
-    static bool sortByYearChgDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortByYearChgAsc(const ShareData& d1, const ShareData& d2);
-
-    static bool sortBy3DayZjlxDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortBy3DayZjlxAsc(const ShareData& d1, const ShareData& d2);
-    static bool sortByGxlDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortByGxlAsc(const ShareData& d1, const ShareData& d2);
-    static bool sortBySzzblDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortBySzzblAsc(const ShareData& d1, const ShareData& d2);
-    static bool sortByGqdjrDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortByGqdjrAsc(const ShareData& d1, const ShareData& d2);
-    static bool sortByTcapDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortByTcapAsc(const ShareData& d1, const ShareData& d2);
-    static bool sortByMcapDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortByMcapAsc(const ShareData& d1, const ShareData& d2);
-    static bool sortByProfitDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortByProfitAsc(const ShareData& d1, const ShareData& d2);
-    static bool sortByForVolDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortByForVolAsc(const ShareData& d1, const ShareData& d2);
-    static bool sortByForCapDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortByForCapAsc(const ShareData& d1, const ShareData& d2);
-
-    static bool sortByForVolChgDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortByForVolChgAsc(const ShareData& d1, const ShareData& d2);
-    static bool sortByForCapChgDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortByForCapChgAsc(const ShareData& d1, const ShareData& d2);
-
-    static bool sortByDateDesc(const ShareData& d1, const ShareData& d2);
-    static bool sortByDateAsc(const ShareData& d1, const ShareData& d2);
+    static int  stk_sort_type;
+    static int  stk_sort_rule;
+    static bool ShareSort(const ShareData& d1, const ShareData& d2);
 
     bool operator ==(const ShareData& data)
     {

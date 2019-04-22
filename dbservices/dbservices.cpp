@@ -106,6 +106,7 @@ void HqInfoService::initSignalSlot()
     qRegisterMetaType<ShareHsgt>("const ShareHsgt&");
     qRegisterMetaType<ShareBonusList >("const ShareBonusList&");
     qRegisterMetaType<ShareBonus>("const ShareBonus&");
+    qRegisterMetaType<FinancialDataList >("const FinancialDataList&");
     qRegisterMetaType<BlockDataList>("const BlockDataList&");
     qRegisterMetaType<QMap<QString, BlockDataList> >("const QMap<QString, BlockDataList>&");
     qRegisterMetaType<QMap<QString, BlockData*> >("const QMap<QString, BlockData*>&");
@@ -124,6 +125,9 @@ void HqInfoService::initSignalSlot()
     connect(this, SIGNAL(signalQueryShareForeignVol(QString)), this, SLOT(slotQueryShareForeignVol(QString)));
     connect(this, SIGNAL(signalSetFavCode(QString)), this, SLOT(slotSetFavCode(QString)));
     connect(this, SIGNAL(signalSearchCodesOfText(QString)), this, SLOT(slotSearchCodesOfText(QString)));
+    connect(this, SIGNAL(signalUpdateShareFinanceInfo(FinancialDataList)), this, SLOT(slotUpdateShareFinanceInfo(FinancialDataList)));
+    connect(this, SIGNAL(signalQueryShareFinanceInfo(QStringList)), this, SLOT(slotQueryShareFinanceList(QStringList)));
+    connect(this, SIGNAL(signalQueryShareFHSP(QString,ShareDate)), this, SLOT(slotQueryShareFHSP(QString,ShareDate)));
 }
 
 
@@ -367,6 +371,9 @@ void HqInfoService::slotUpdateShareBonusInfo(const ShareBonusList &list)
         qDebug()<<"update share bonus info error:"<<mDataBase.getErrorString();
         return;
     }
+    //更新最近的消息
+    signalQueryShareFHSP();
+
 }
 
 void HqInfoService::slotUpdateHsgtTop10Info(const ShareHsgtList &list)
@@ -396,9 +403,45 @@ void HqInfoService::slotUpdateShareFinanceInfo(const FinancialDataList& list)
 {
     if(!mDataBase.updateShareFinance(list))
     {
-        qDebug()<<"update share bonus info error:"<<mDataBase.getErrorString();
+        qDebug()<<"update share finance info error:"<<mDataBase.getErrorString();
         return;
     }
+    //更新对应的财务数据
+    emit signalQueryShareFinanceInfo();
+}
+
+void HqInfoService::slotQueryShareFinanceList(const QStringList& codes)
+{
+    FinancialDataList list;
+    if(!mDataBase.queryShareFinance(list, codes)) return;
+    foreach (FinancialData data, list) {
+        ShareData* share = getShareData(data.mCode.right(6));
+        if(share)
+        {
+            share->mFinanceData = data;
+            //qDebug()<<share->mFinanceData.mCode<<share->mFinanceData.mROE<<share->mFinanceData.mEPS;
+        }
+    }
+
+}
+
+void HqInfoService::slotQueryShareFHSP(const QString &code, const ShareDate &date)
+{
+    ShareBonusList list;
+    //根据各种情况查询分红送配信息, 如果两个都不设定,查询对应的单独的最近的送配信息,否则就查询指定的信息并且推送出去
+    if(!mDataBase.queryShareBonus(list, code, date)) return;
+    if(code.length() == 0 && date.isNull())
+    {
+        foreach (ShareBonus data, list) {
+            ShareData* share = getShareData(data.mCode.right(6));
+            if(share)
+            {
+                share->mBonusData  = data;
+            }
+        }
+    }
+
+
 }
 
 double HqInfoService::GetMultiDaysChangePercent(const QString &table, int days)

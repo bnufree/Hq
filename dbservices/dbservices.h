@@ -100,10 +100,9 @@ signals:
     //沪港通持股写入数据据
     void signalAddShareAmoutByForeigner(const ShareDataList& list);
     void signalUpdateShareAmountByForeigner();
-    void signalUpdateShareBonusInfo(const ShareBonusList& list);
+
     void signalUpdateShareHsgtTop10Info(const ShareHsgtList& list);
     void signalSendLastHSGTUpdateDate(const ShareDate& date);
-    void signalUpdateShareFinanceInfo(const FinancialDataList& list);
     void signalQueryShareHsgtTop10List(const QString& code, const ShareDate& date = ShareDate());
     void signalSendShareHsgtTop10List(const ShareHsgtList& list);
 
@@ -112,7 +111,12 @@ signals:
     void signalSendSearchCodesOfText(const QStringList& codes);
     //错误信息输出
     void signalDBErrorMsg(const QString& msg);
-    //
+    //财务数据
+    void signalUpdateShareFinanceInfo(const FinancialDataList& list);
+    void signalQueryShareFinanceInfo(const QStringList& list = QStringList());
+    //分红数据
+    void signalUpdateShareBonusInfo(const ShareBonusList& list);
+    void signalQueryShareFHSP(const QString& code = QString(), const ShareDate& date = ShareDate());
 
 public slots:
     void slotSearchCodesOfText(const QString &text);
@@ -143,6 +147,8 @@ public slots:
     void slotUpdateShareFinanceInfo(const FinancialDataList& list);
     //查询
     void slotQueryShareHsgtTop10List(const QString& code, const ShareDate& date);
+    void slotQueryShareFinanceList(const QStringList& list = QStringList());
+    void slotQueryShareFHSP(const QString& code, const ShareDate& date);
 
 private:
     void initSignalSlot();

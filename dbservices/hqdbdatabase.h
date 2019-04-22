@@ -29,6 +29,7 @@ enum    HQ_DATA_COMPARE{
     HQ_COMPARE_LESS,
     HQ_COMPARE_GREAT,
     HQ_COMPARE_STRLIKE,
+    HQ_COMPARE_TEXTIN,
 };
 
 struct HQ_COL_VAL{
@@ -84,6 +85,7 @@ class DBColValList:public QList<HQ_QUERY_CONDITION>
 public:
     DBColValList():QList<HQ_QUERY_CONDITION>() {}
     DBColValList(const HQ_QUERY_CONDITION& val) : QList<HQ_QUERY_CONDITION>() {append(val);}
+    DBColValList(const QList<HQ_QUERY_CONDITION>& list) : QList<HQ_QUERY_CONDITION>(list) {}
     QString insertString() const;
     QString updateString() const;
     QString whereString() const;
@@ -157,7 +159,7 @@ public:
 
     //财务信息操作
     bool updateShareFinance(const FinancialDataList& dataList);
-    bool queryShareFinance(FinancialDataList& list, const QString& code);
+    bool queryShareFinance(FinancialDataList& list, const QStringList& codes);
     bool delShareFinance(const QString& code);
 
     //分红送配信息操作

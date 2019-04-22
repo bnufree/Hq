@@ -72,9 +72,20 @@ QString DBColValList::whereString() const
             if(data.mColCompare == HQ_COMPARE_EQUAL)
             {
                 valStrlist.append(QString("%1 = '%2'").arg(data.mColName).arg(data.mColVal.mValue.toString()));
-            } else
+            } else if(data.mColCompare == HQ_COMPARE_STRLIKE)
             {
                 valStrlist.append(QString("%1 like '%2'").arg(data.mColName).arg(data.mColVal.mValue.toString()));
+            } else if(data.mColCompare == HQ_COMPARE_TEXTIN)
+            {
+                QStringList list = data.mColVal.mValue.toStringList();
+                if(list.size() > 0)
+                {
+                    QStringList resList;
+                    foreach (QString str, list) {
+                        resList.append(QString("'%1'").arg(str));
+                    }
+                    valStrlist.append(QString("%1 in () ").arg(data.mColName).arg(resList.join(",")));
+                }
             }
         } else if(data.mColVal.mType == HQ_DATA_INT)
         {
@@ -894,38 +905,40 @@ bool HQDBDataBase::createShareFinancialInfoTable()
 bool HQDBDataBase::updateShareFinance(const FinancialDataList& dataList)
 {
     int size = dataList.size();
-    if(size == 0) return false;
-    mDB.transaction();
-    for(int i=0; i<size; i++)
+    if(size > 0)
     {
-        FinancialData data = dataList[i];
-        DBColValList list;
-        list.append(DBColVal(HQ_TABLE_COL_CODE, data.mCode,HQ_DATA_TEXT));
-        list.append(DBColVal(HQ_TABLE_COL_FINANCE_JZC, data.mBVPS,HQ_DATA_DOUBLE));
-        list.append(DBColVal(HQ_TABLE_COL_FINANCE_JZCSYL, data.mROE,HQ_DATA_DOUBLE));
-        list.append(DBColVal(HQ_TABLE_COL_FINANCE_MGSY, data.mEPS,HQ_DATA_DOUBLE));
-        list.append(DBColVal(HQ_TABLE_COL_TOTALMNT, data.mTotalShare,HQ_DATA_DOUBLE));
-        list.append(DBColVal(HQ_TABLE_COL_MUTAL, data.mMutalShare,HQ_DATA_DOUBLE));
-        if(!updateTable(TABLE_SHARE_BONUS, list, list[0])){
+        mDB.transaction();
+        for(int i=0; i<size; i++)
+        {
+            FinancialData data = dataList[i];
+            DBColValList list;
+            list.append(DBColVal(HQ_TABLE_COL_CODE, data.mCode,HQ_DATA_TEXT));
+            list.append(DBColVal(HQ_TABLE_COL_FINANCE_JZC, data.mBVPS,HQ_DATA_DOUBLE));
+            list.append(DBColVal(HQ_TABLE_COL_FINANCE_JZCSYL, data.mROE,HQ_DATA_DOUBLE));
+            list.append(DBColVal(HQ_TABLE_COL_FINANCE_MGSY, data.mEPS,HQ_DATA_DOUBLE));
+            list.append(DBColVal(HQ_TABLE_COL_TOTALMNT, data.mTotalShare,HQ_DATA_DOUBLE));
+            list.append(DBColVal(HQ_TABLE_COL_MUTAL, data.mMutalShare,HQ_DATA_DOUBLE));
+            if(!updateTable(TABLE_SHARE_FINANCE, list, list[0])){
+                mDB.rollback();
+                return false;
+            }
+        }
+        if(!updateDBUpdateDate(ShareDate::currentDate(), TABLE_SHARE_FINANCE))
+        {
             mDB.rollback();
             return false;
         }
+        mDB.commit();
     }
-    if(!updateDBUpdateDate(ShareDate::currentDate(), TABLE_SHARE_FINANCE))
-    {
-        mDB.rollback();
-        return false;
-    }
-    mDB.commit();
     return true;
 }
 
-bool HQDBDataBase::queryShareFinance(FinancialDataList& list, const QString& code)
+bool HQDBDataBase::queryShareFinance(FinancialDataList& list, const QStringList& codes)
 {
     DBColValList where;
-    if(code.length() > 0)
+    if(codes.length() > 0)
     {
-        where.append(DBColVal(HQ_TABLE_COL_CODE, code, HQ_DATA_TEXT));
+        where.append(DBColVal(HQ_TABLE_COL_CODE, codes, HQ_DATA_TEXT, HQ_COMPARE_TEXTIN));
     }
 
     QString sql = QString("select * from %1 %2").arg(TABLE_SHARE_FINANCE).arg(where.whereString());
@@ -966,8 +979,8 @@ bool HQDBDataBase::createShareBonusIbfoTable()
     colist.append({HQ_TABLE_COL_CODE, "VARCHAR(6) NULL"});
     colist.append({HQ_TABLE_COL_BONUS_SHARE, "DOUBLE NULL"});
     colist.append({HQ_TABLE_COL_BONUS_MONEY, "DOUBLE NULL"});
-    colist.append({HQ_TABLE_COL_BONUS_YAGGR, "INTEGER NULL"});
-    colist.append({HQ_TABLE_COL_BONUS_GQDJR, "INTEGER NULL"});
+    colist.append({HQ_TABLE_COL_BONUS_YAGGR, "VARCHAR(10) NULL"});
+    colist.append({HQ_TABLE_COL_BONUS_GQDJR, "VARCHAR(10) NULL"});
     colist.append({HQ_TABLE_COL_BONUS_DATE, "VARCHAR(10) NOT NULL"});
     return createTable(TABLE_SHARE_BONUS, colist);
 }
@@ -975,34 +988,32 @@ bool HQDBDataBase::createShareBonusIbfoTable()
 bool HQDBDataBase::updateShareBonus(const ShareBonusList& bonusList)
 {
     int size = bonusList.size();
-    qDebug()<<__FUNCTION__<<__LINE__<<" total size:"<<size;
-    if(size == 0) return false;
-    QElapsedTimer timer;
-    timer.start();
-    mDB.transaction();
-    for(int i=0; i<size; i++)
+    if(size > 0)
     {
-        ShareBonus bonus = bonusList[i];
-        DBColValList list;
-        list.append(DBColVal(HQ_TABLE_COL_CODE, bonus.mCode, HQ_DATA_TEXT));
-        list.append(DBColVal(HQ_TABLE_COL_BONUS_SHARE, bonus.mSZZG, HQ_DATA_DOUBLE));
-        list.append(DBColVal(HQ_TABLE_COL_BONUS_MONEY, bonus.mXJFH, HQ_DATA_DOUBLE));
-        list.append(DBColVal(HQ_TABLE_COL_BONUS_YAGGR, bonus.mYAGGR.toTime_t(), HQ_DATA_INT));
-        list.append(DBColVal(HQ_TABLE_COL_BONUS_GQDJR, bonus.mGQDJR.toTime_t(), HQ_DATA_INT));
-        list.append(DBColVal(HQ_TABLE_COL_BONUS_DATE, bonus.mDate.toTime_t(), HQ_DATA_INT));
-        if(!updateTable(TABLE_SHARE_BONUS, list, list[0])){
+        mDB.transaction();
+        for(int i=0; i<size; i++)
+        {
+            ShareBonus bonus = bonusList[i];
+            DBColValList list;
+            list.append(DBColVal(HQ_TABLE_COL_CODE, bonus.mCode, HQ_DATA_TEXT));
+            list.append(DBColVal(HQ_TABLE_COL_BONUS_DATE, bonus.mDate.toString(), HQ_DATA_TEXT));
+            list.append(DBColVal(HQ_TABLE_COL_BONUS_SHARE, bonus.mSZZG, HQ_DATA_DOUBLE));
+            list.append(DBColVal(HQ_TABLE_COL_BONUS_MONEY, bonus.mXJFH, HQ_DATA_DOUBLE));
+            list.append(DBColVal(HQ_TABLE_COL_BONUS_YAGGR, bonus.mYAGGR.toString(), HQ_DATA_TEXT));
+            list.append(DBColVal(HQ_TABLE_COL_BONUS_GQDJR, bonus.mGQDJR.toString(), HQ_DATA_TEXT));
+            if(!updateTable(TABLE_SHARE_BONUS, list, list.mid(0, 2))){
+                mDB.rollback();
+                return false;
+            }
+        }
+
+        if(!updateDBUpdateDate(bonusList.last().mDate, TABLE_SHARE_BONUS))
+        {
             mDB.rollback();
             return false;
         }
+        mDB.commit();
     }
-
-    if(!updateDBUpdateDate(ShareDate::currentDate(), TABLE_SHARE_BONUS))
-    {
-        mDB.rollback();
-        return false;
-    }
-    mDB.commit();
-    qDebug()<<__FUNCTION__<<__LINE__<<" total secs:"<<timer.elapsed();
     return true;
 }
 
@@ -1015,19 +1026,22 @@ bool HQDBDataBase::queryShareBonus(QList<ShareBonus>& list, const QString& code,
             sql.append(QString("%1 = '%2'").arg(HQ_TABLE_COL_CODE).arg(code));
         }
         if(!date.isNull()) {
-            sql.append(QString("%1 = %2").arg(HQ_TABLE_COL_BONUS_DATE).arg(date.toTime_t()));
+            sql.append(QString("%1 = '%2'").arg(HQ_TABLE_COL_BONUS_DATE).arg(date.toString()));
         }
+    } else
+    {
+        sql = "select * from share_bonus  group by code order by code desc";
     }
     QMutexLocker locker(&mSQLMutex);
     if(!mSQLQuery.exec(sql)) return false;
     while (mSQLQuery.next()) {
         ShareBonus bonus;
         bonus.mCode = mSQLQuery.value(HQ_TABLE_COL_CODE).toString();
-        bonus.mDate = ShareDate::fromTime_t(mSQLQuery.value(HQ_TABLE_COL_BONUS_DATE).toInt());
-        bonus.mGQDJR = ShareDate::fromTime_t(mSQLQuery.value(HQ_TABLE_COL_BONUS_GQDJR).toInt());
+        bonus.mDate = ShareDate::fromString(mSQLQuery.value(HQ_TABLE_COL_BONUS_DATE).toString());
+        bonus.mGQDJR = ShareDate::fromString(mSQLQuery.value(HQ_TABLE_COL_BONUS_GQDJR).toString());
         bonus.mSZZG = mSQLQuery.value(HQ_TABLE_COL_BONUS_SHARE).toDouble();
         bonus.mXJFH = mSQLQuery.value(HQ_TABLE_COL_BONUS_MONEY).toDouble();
-        bonus.mYAGGR = ShareDate::fromTime_t(mSQLQuery.value(HQ_TABLE_COL_BONUS_YAGGR).toInt());
+        bonus.mYAGGR = ShareDate::fromString(mSQLQuery.value(HQ_TABLE_COL_BONUS_YAGGR).toString());
         list.append(bonus);
     }
     return true;

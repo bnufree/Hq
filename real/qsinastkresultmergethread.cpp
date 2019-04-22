@@ -11,8 +11,6 @@ QSinaStkResultMergeThread::QSinaStkResultMergeThread(QObject *parent) : QThread(
     mPageSize = 50;
     mCurPage = 1;
     mMktType = MKT_ALL;
-    mSortType = STK_DISPLAY_SORT_TYPE_CHGPER;
-    mSortRule = -1;
     mActive = true;
     QEastMoneyZjlxThread *zjt = new QEastMoneyZjlxThread();
 }
@@ -35,14 +33,14 @@ bool QSinaStkResultMergeThread::isActive()
 void QSinaStkResultMergeThread::setSortType(int type)
 {
     mCurPage = 1;
-    if(mSortType == type)
+    if(ShareData::stk_sort_type == type)
     {
-        mSortRule = (mSortRule == -1 ? 1: -1);
+        ShareData::stk_sort_rule = (ShareData::stk_sort_rule == 1 ? -1: 1);
 
     } else
     {
-        mSortType = type;
-        mSortRule = -1;
+        ShareData::stk_sort_type = type;
+        ShareData::stk_sort_rule = -1;
     }
 }
 
@@ -100,223 +98,7 @@ void QSinaStkResultMergeThread::run()
         if(wklist.length())
         {
             //开始排序
-            if(mSortType == STK_DISPLAY_SORT_TYPE_CHGPER)
-            {
-                if(mSortRule == -1)
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByPerDesc);
-                } else
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByPerAsc);
-                }
-            }
-
-            else if(mSortType == STK_DISPLAY_SORT_TYPE_CJE)
-            {
-                if(mSortRule == -1)
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByMonDesc);
-                } else
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByMonAsc);
-                }
-            }
-
-            else if(mSortType == STK_DISPLAY_SORT_TYPE_PRICE)
-            {
-                if(mSortRule == -1)
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByCurDesc);
-                } else
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByCurAsc);
-                }
-            }else if(mSortType == STK_DISPLAY_SORT_TYPE_HSL)
-            {
-                if(mSortRule == -1)
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByHslDesc);
-                } else
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByHslAsc);
-                }
-            }else if(mSortType == STK_DISPLAY_SORT_TYPE_MONEYR)
-            {
-                if(mSortRule == -1)
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByMonRatioDesc);
-                } else
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByMonRatioAsc);
-                }
-            }
-            else if(mSortType == STK_DISPLAY_SORT_TYPE_LAST3)
-            {
-                if(mSortRule == -1)
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortBy3DayChgDesc);
-                } else
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortBy3DayChgAsc);
-                }
-            }
-            else if(mSortType == STK_DISPLAY_SORT_TYPE_LAST5)
-            {
-                if(mSortRule == -1)
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortBy5DayChgDesc);
-                } else
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortBy5DayChgAsc);
-                }
-            }
-
-            else if(mSortType == STK_DISPLAY_SORT_TYPE_LAST10)
-            {
-                if(mSortRule == -1)
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortBy10DayChgDesc);
-                } else
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortBy10DayChgAsc);
-                }
-            }
-
-            else if(mSortType == STK_DISPLAY_SORT_TYPE_LAST_MONTH)
-            {
-                if(mSortRule == -1)
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByMonthChgDesc);
-                } else
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByMonthChgAsc);
-                }
-            }
-
-            else if(mSortType == STK_DISPLAY_SORT_TYPE_LAST_YEAR)
-            {
-                if(mSortRule == -1)
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByYearChgDesc);
-                } else
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByYearChgAsc);
-                }
-            }
-
-            else if(mSortType == STK_DISPLAY_SORT_TYPE_ZJLX)
-            {
-                if(mSortRule == -1)
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortBy3DayZjlxDesc);
-                } else
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortBy3DayZjlxAsc);
-                }
-            }
-            else if(mSortType == STK_DISPLAY_SORT_TYPE_GXL)
-            {
-                if(mSortRule == -1)
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByGxlDesc);
-                } else
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByGxlAsc);
-                }
-            }
-            else if(mSortType == STK_DISPLAY_SORT_TYPE_SZZBL)
-            {
-                if(mSortRule == -1)
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortBySzzblDesc);
-                } else
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortBySzzblAsc);
-                }
-            }
-            else if(mSortType == STK_DISPLAY_SORT_TYPE_GQDJR)
-            {
-                if(mSortRule == -1)
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByGqdjrDesc);
-                } else
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByGqdjrAsc);
-                }
-            }
-            else if(mSortType == STK_DISPLAY_SORT_TYPE_TCAP)
-            {
-                if(mSortRule == -1)
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByTcapDesc);
-                } else
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByTcapAsc);
-                }
-            }
-            else if(mSortType == STK_DISPLAY_SORT_TYPE_MCAP)
-            {
-                if(mSortRule == -1)
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByMcapDesc);
-                } else
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByMcapAsc);
-                }
-            }
-
-            else if(mSortType == STK_DISPLAY_SORT_TYPE_PROFIT)
-            {
-                if(mSortRule == -1)
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByProfitDesc);
-                } else
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByProfitAsc);
-                }
-            }
-            else if(mSortType == STK_DISPLAY_SORT_TYPE_FOREIGN_VOL)
-            {
-                if(mSortRule == -1)
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByForVolDesc);
-                } else
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByForVolAsc);
-                }
-            }
-            else if(mSortType == STK_DISPLAY_SORT_TYPE_FOREIGN_CAP)
-            {
-                if(mSortRule == -1)
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByForCapDesc);
-                } else
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByForCapAsc);
-                }
-            }
-
-            else if(mSortType == STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG)
-            {
-                if(mSortRule == -1)
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByForVolChgDesc);
-                } else
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByForVolChgAsc);
-                }
-            }
-            else if(mSortType == STK_DISPLAY_SORT_TYPE_FOREIGN_CAP_CHG)
-            {
-                if(mSortRule == -1)
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByForCapChgDesc);
-                } else
-                {
-                    qSort(wklist.begin(), wklist.end(), ShareData::sortByForCapChgAsc);
-                }
-            }
-
+            qSort(wklist.begin(), wklist.end(), ShareData::ShareSort);
             if(mActive)
             {
                 ShareDataList mid = wklist.mid((mCurPage - 1) * mPageSize, mPageSize);

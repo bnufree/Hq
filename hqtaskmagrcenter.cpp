@@ -8,6 +8,9 @@
 #include "block/qeastmoneyblockmangagerthread.h"
 #include "basic_info/qsharecodeswork.h"
 #include "basic_info/qsharehsgttop10work.h"
+#include "basic_info/qsharefhspwork.h"
+#include "basic_info/qsharefinancialinfowork.h"
+
 
 HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
     QObject(parent),\
@@ -44,6 +47,8 @@ void HQTaskMagrCenter::slotDBInitFinished()
     QShareCodesWork *codeWorker = new QShareCodesWork(this);
     connect(codeWorker, SIGNAL(finished()), codeWorker, SLOT(deleteLater()));
     codeWorker->start();
+
+
 
     //开始获取当日沪深股通数据，线程常驻，直到当日数据确定获取
     QShareHsgtTop10Work* hsgtTop10 = new QShareHsgtTop10Work(this);
@@ -117,6 +122,15 @@ void HQTaskMagrCenter::setCurBlockType(int type)
 void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
 {
     qDebug()<<"update code finshed:"<<codes.length();
+    //获取财务信息
+    QShareFinancialInfoWork* finance = new QShareFinancialInfoWork(codes, this);
+    connect(finance, SIGNAL(finished()), finance, SLOT(deleteLater()));
+    finance->start();
+    //获取分配信息
+    QShareFHSPWork* fhsp = new QShareFHSPWork(this);
+    connect(fhsp, SIGNAL(finished()), fhsp, SLOT(deleteLater()));
+    fhsp->start();
+
     //更新实时的指数
     QStringList indexlist;
     indexlist<<"sh000001"<<"sh000300"<<"sz399001"<<"sz399006"<<"sh000016"<<"sz399293";

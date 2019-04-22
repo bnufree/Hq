@@ -1,5 +1,8 @@
 ﻿#include "sharedata.h"
 
+int ShareData::stk_sort_type = STK_DISPLAY_SORT_TYPE_CHGPER;
+int ShareData::stk_sort_rule = 1;
+
 ShareData::ShareData():HqBaseData()
 {
     qRegisterMetaType<ShareDataList>("const ShareDataList&");
@@ -26,223 +29,79 @@ ShareData::ShareData():HqBaseData()
     mTime = 0;
 }
 
-bool ShareData::sortByPerDesc(const ShareData& d1, const ShareData& d2)
+bool ShareData::ShareSort(const ShareData &d1, const ShareData &d2)
 {
-    return d1.mChgPercent > d2.mChgPercent;
-}
-
-bool ShareData::sortByPerAsc(const ShareData &d1, const ShareData &d2)
-{
-    return d1.mChgPercent < d2.mChgPercent;
-}
-
-bool ShareData::sortByCurDesc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mCur > d2.mCur;
-}
-
-bool ShareData::sortByCurAsc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mCur < d2.mCur;
-}
-
-bool ShareData::sortByMonDesc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mMoney > d2.mMoney;
-}
-
-bool ShareData::sortByMonAsc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mMoney < d2.mMoney;
-}
-
-bool ShareData::sortByHslDesc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mHsl > d2.mHsl;
-}
-
-bool ShareData::sortByHslAsc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mHsl < d2.mHsl;
-}
-
-bool ShareData::sortByMonRatioDesc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mMoneyRatio > d2.mMoneyRatio;
-}
-
-bool ShareData::sortByMonRatioAsc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mMoneyRatio < d2.mMoneyRatio;
-}
-
-bool ShareData::sortBy3DayChgAsc(const ShareData &d1, const ShareData &d2)
-{
-    return d1.mHistory.mLast3DaysChgPers < d2.mHistory.mLast3DaysChgPers;
-}
-
-bool ShareData::sortBy3DayChgDesc(const ShareData &d1, const ShareData &d2)
-{
-    return d1.mHistory.mLast3DaysChgPers > d2.mHistory.mLast3DaysChgPers;
-}
-
-bool ShareData::sortBy3DayZjlxAsc(const ShareData &d1, const ShareData &d2)
-{
-    return d1.mZJLX < d2.mZJLX;
-}
-
-bool ShareData::sortBy3DayZjlxDesc(const ShareData &d1, const ShareData &d2)
-{
-    return d1.mZJLX > d2.mZJLX;
-}
-
-bool ShareData::sortByGxlDesc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mGXL> d2.mGXL;
-}
-
-bool ShareData::sortByGxlAsc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mGXL < d2.mGXL;
-}
-
-bool ShareData::sortBySzzblDesc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mBonusData.mSZZG > d2.mBonusData.mSZZG;
-}
-
-bool ShareData::sortBySzzblAsc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mBonusData.mSZZG < d2.mBonusData.mSZZG;
-}
-
-bool ShareData::sortByGqdjrDesc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mBonusData.mGQDJR > d2.mBonusData.mGQDJR;
-}
-
-bool ShareData::sortByGqdjrAsc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mBonusData.mGQDJR < d2.mBonusData.mGQDJR;
-}
-
-bool ShareData::sortByTcapDesc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mTotalCap > d2.mTotalCap;
-}
-
-bool ShareData::sortByTcapAsc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mTotalCap < d2.mTotalCap;
-}
-
-bool ShareData::sortByMcapDesc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mMutalbleCap > d2.mMutalbleCap;
-}
-
-bool ShareData::sortByMcapAsc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mMutalbleCap < d2.mMutalbleCap;
-}
-
-bool ShareData::sortByProfitDesc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mProfit > d2.mProfit;
-}
-
-bool ShareData::sortByProfitAsc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mProfit < d2.mProfit;
-}
-
-bool ShareData::sortByForVolDesc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mHsgtData.mVol > d2.mHsgtData.mVol;
-}
-
-bool ShareData::sortByForVolAsc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mHsgtData.mVol < d2.mHsgtData.mVol;
-}
-
-bool ShareData::sortByForCapDesc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mForeignCap > d2.mForeignCap;
-}
-
-bool ShareData::sortByForCapAsc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mForeignCap < d2.mForeignCap;
-}
-
-bool ShareData::sortByForVolChgDesc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mForeignVolChg > d2.mForeignVolChg;
-}
-
-bool ShareData::sortByForVolChgAsc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mForeignVolChg < d2.mForeignVolChg;
-}
-
-bool ShareData::sortByForCapChgDesc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mForeignCapChg > d2.mForeignCapChg;
-}
-
-bool ShareData::sortByForCapChgAsc(const ShareData& d1, const ShareData& d2)
-{
-    return d1.mForeignCapChg < d2.mForeignCapChg;
-}
-
-bool ShareData::sortBy5DayChgAsc(const ShareData &d1, const ShareData &d2)
-{
-    return d1.mHistory.mLast5DaysChgPers < d2.mHistory.mLast5DaysChgPers;
-}
-
-bool ShareData::sortBy5DayChgDesc(const ShareData &d1, const ShareData &d2)
-{
-    return d1.mHistory.mLast5DaysChgPers > d2.mHistory.mLast5DaysChgPers;
-}
-
-bool ShareData::sortBy10DayChgAsc(const ShareData &d1, const ShareData &d2)
-{
-    return d1.mHistory.mLast10DaysChgPers < d2.mHistory.mLast10DaysChgPers;
-}
-
-bool ShareData::sortBy10DayChgDesc(const ShareData &d1, const ShareData &d2)
-{
-    return d1.mHistory.mLast10DaysChgPers > d2.mHistory.mLast10DaysChgPers;
-}
-
-bool ShareData::sortByMonthChgAsc(const ShareData &d1, const ShareData &d2)
-{
-    return d1.mHistory.mLastMonthChgPers < d2.mHistory.mLastMonthChgPers;
-}
-
-bool ShareData::sortByMonthChgDesc(const ShareData &d1, const ShareData &d2)
-{
-    return d1.mHistory.mLastMonthChgPers > d2.mHistory.mLastMonthChgPers;
-}
-
-bool ShareData::sortByYearChgAsc(const ShareData &d1, const ShareData &d2)
-{
-    return d1.mHistory.mChgPersFromYear < d2.mHistory.mChgPersFromYear;
-}
-
-bool ShareData::sortByYearChgDesc(const ShareData &d1, const ShareData &d2)
-{
-    return d1.mHistory.mChgPersFromYear > d2.mHistory.mChgPersFromYear;
-}
-
-bool ShareData::sortByDateAsc(const ShareData &d1, const ShareData &d2)
-{
-    return d1.mTime < d2.mTime;
-}
-
-bool ShareData::sortByDateDesc(const ShareData &d1, const ShareData &d2)
-{
-    return d1.mTime > d2.mTime;
+    bool sts = true;
+    switch (stk_sort_type) {
+    case STK_DISPLAY_SORT_TYPE_CHGPER:
+        sts = stk_sort_rule == 1? d1.mChgPercent > d2.mChgPercent : d1.mChgPercent < d2.mChgPercent;
+        break;
+    case STK_DISPLAY_SORT_TYPE_PRICE:
+        sts = stk_sort_rule == 1? d1.mCur > d2.mCur : d1.mCur < d2.mCur;
+        break;
+    case STK_DISPLAY_SORT_TYPE_CJE:
+        sts = stk_sort_rule == 1? d1.mMoney > d2.mMoney : d1.mMoney < d2.mMoney;
+        break;
+    case STK_DISPLAY_SORT_TYPE_HSL:
+        sts = stk_sort_rule == 1? d1.mHsl > d2.mHsl : d1.mHsl < d2.mHsl;
+        break;
+    case STK_DISPLAY_SORT_TYPE_MONEYR:
+        sts = stk_sort_rule == 1? d1.mMoneyRatio > d2.mMoneyRatio : d1.mMoneyRatio < d2.mMoneyRatio;
+        break;
+    case STK_DISPLAY_SORT_TYPE_LAST3:
+        sts = stk_sort_rule == 1? d1.mHistory.mLast3DaysChgPers > d2.mHistory.mLast3DaysChgPers : d1.mHistory.mLast3DaysChgPers < d2.mHistory.mLast3DaysChgPers;
+        break;
+    case STK_DISPLAY_SORT_TYPE_ZJLX:
+        sts = stk_sort_rule == 1? d1.mZJLX > d2.mZJLX : d1.mZJLX < d2.mZJLX;
+        break;
+    case STK_DISPLAY_SORT_TYPE_GXL:
+        sts = stk_sort_rule == 1? d1.mGXL > d2.mGXL : d1.mGXL < d2.mGXL;
+        break;
+    case STK_DISPLAY_SORT_TYPE_SZZBL:
+        sts = stk_sort_rule == 1? d1.mBonusData.mSZZG > d2.mBonusData.mSZZG : d1.mBonusData.mSZZG < d2.mBonusData.mSZZG;
+        break;
+    case STK_DISPLAY_SORT_TYPE_GQDJR:
+        sts = stk_sort_rule == 1? d1.mBonusData.mGQDJR > d2.mBonusData.mGQDJR : d1.mBonusData.mGQDJR < d2.mBonusData.mGQDJR;
+        break;
+    case STK_DISPLAY_SORT_TYPE_TCAP:
+        sts = stk_sort_rule == 1? d1.mTotalCap > d2.mTotalCap : d1.mTotalCap < d2.mTotalCap;
+        break;
+    case STK_DISPLAY_SORT_TYPE_MCAP:
+        sts = stk_sort_rule == 1? d1.mMutalbleCap > d2.mMutalbleCap : d1.mMutalbleCap < d2.mMutalbleCap;
+        break;
+    case STK_DISPLAY_SORT_TYPE_PROFIT:
+        sts = stk_sort_rule == 1? d1.mProfit > d2.mProfit : d1.mProfit < d2.mProfit;
+        break;
+    case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL:
+        sts = stk_sort_rule == 1? d1.mHsgtData.mVol > d2.mHsgtData.mVol : d1.mHsgtData.mVol < d2.mHsgtData.mVol;
+        break;
+    case STK_DISPLAY_SORT_TYPE_FOREIGN_CAP:
+        sts = stk_sort_rule == 1? d1.mForeignCap > d2.mForeignCap : d1.mForeignCap < d2.mForeignCap;
+        break;
+    case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG:
+        sts = stk_sort_rule == 1? d1.mForeignVolChg > d2.mForeignVolChg : d1.mForeignVolChg < d2.mForeignVolChg;
+        break;
+    case STK_DISPLAY_SORT_TYPE_FOREIGN_CAP_CHG:
+        sts = stk_sort_rule == 1? d1.mForeignCapChg > d2.mForeignCapChg :d1.mForeignCapChg < d2.mForeignCapChg;
+        break;
+    case STK_DISPLAY_SORT_TYPE_LAST5:
+        sts = stk_sort_rule == 1? d1.mHistory.mLast5DaysChgPers > d2.mHistory.mLast5DaysChgPers : d1.mHistory.mLast5DaysChgPers < d2.mHistory.mLast5DaysChgPers;
+        break;
+    case STK_DISPLAY_SORT_TYPE_LAST10:
+        sts = stk_sort_rule == 1? d1.mHistory.mLast10DaysChgPers > d2.mHistory.mLast10DaysChgPers : d1.mHistory.mLast10DaysChgPers < d2.mHistory.mLast10DaysChgPers;
+        break;
+    case STK_DISPLAY_SORT_TYPE_LAST_MONTH:
+        sts = stk_sort_rule == 1?  d1.mHistory.mLastMonthChgPers > d2.mHistory.mLastMonthChgPers : d1.mHistory.mLastMonthChgPers < d2.mHistory.mLastMonthChgPers;
+        break;
+    case STK_DISPLAY_SORT_TYPE_LAST_YEAR:
+        sts = stk_sort_rule == 1? d1.mHistory.mChgPersFromYear > d2.mHistory.mChgPersFromYear : d1.mHistory.mChgPersFromYear < d2.mHistory.mChgPersFromYear;
+        break;
+    case STK_DISPLAY_SORT_TYPE_JZCSYL:
+        sts = stk_sort_rule == 1? d1.mFinanceData.mROE > d2.mFinanceData.mROE : d1.mFinanceData.mROE < d2.mFinanceData.mROE;
+        break;
+    default:
+        break;
+    }
+        return sts;
 }
 
