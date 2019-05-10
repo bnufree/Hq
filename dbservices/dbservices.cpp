@@ -432,7 +432,14 @@ void HqInfoService::slotQueryShareFHSP(const QString &code, const ShareDate &dat
     if(!mDataBase.queryShareBonus(list, code, date)) return;
     if(code.length() == 0 && date.isNull())
     {
+        QDateTime cur = QDateTime::currentDateTime();
+        int year = cur.date().year();
+        QStringList dateList;
+        dateList.append(QDate(year-1, 12, 31).toString("yyyy-MM-dd"));
+        dateList.append(QDate(year-1, 6, 30).toString("yyyy-MM-dd"));
+        dateList.append(QDate(year, 12, 31).toString("yyyy-MM-dd"));
         foreach (ShareBonus data, list) {
+            if(!dateList.contains(data.mDate.toString())) continue;
             ShareData* share = getShareData(data.mCode.right(6));
             if(share)
             {

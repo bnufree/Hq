@@ -43,12 +43,10 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->horizontalScrollBar()->setPageStep(1);
     this->verticalScrollBar()->setPageStep(1);
-#ifndef HQ_NO_GESTURE
-    grabGesture(Qt::TapGesture);
-    grabGesture(Qt::SwipeGesture);
-    grabGesture(Qt::PanGesture);
+//    grabGesture(Qt::TapGesture);
+//    grabGesture(Qt::SwipeGesture);
+//    grabGesture(Qt::PanGesture);
     grabGesture(Qt::TapAndHoldGesture);
-#endif
     //根据当前屏幕的大小来设定显示的行高和列宽
     QRect rect = QApplication::desktop()->availableGeometry();
     QFont font = this->font();
@@ -63,6 +61,20 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     mColWidth = qRound(1920.0 * 1.0 / rect.width() * 140);
     //设定item的大小
     //this->setStyleSheet(QString("QTableview::item{height:%1;font-weight:bold;font-size:20pt;}").arg(mRowHeight));
+}
+
+bool HqTableWidget::gestureEvent(QGestureEvent *event)
+{
+    if(event->type() == Qt::TapAndHoldGesture)
+    {
+        qDebug()<<event->widget();
+        event->accept();
+    } else
+    {
+        event->ignore();
+    }
+
+    return true;
 }
 
 void HqTableWidget::setHeaders(const TableColDataList &list)

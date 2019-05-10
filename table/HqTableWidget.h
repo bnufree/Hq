@@ -46,14 +46,10 @@ protected:
     void resizeEvent(QResizeEvent *event);
     void displayVisibleCols();
     void displayVisibleRows();
-#ifdef HQ_NO_GESTURE
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
-#else
-    bool event(QEvent *e);
     bool gestureEvent(QGestureEvent* event);
-#endif
 private slots:
 
 signals:

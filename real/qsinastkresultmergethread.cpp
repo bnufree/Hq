@@ -35,12 +35,12 @@ void QSinaStkResultMergeThread::setSortType(int type)
     mCurPage = 1;
     if(ShareData::stk_sort_type == type)
     {
-        ShareData::stk_sort_rule = (ShareData::stk_sort_rule == 1 ? -1: 1);
+        ShareData::stk_sort_rule = (ShareData::stk_sort_rule == -1 ? 1: -1);
 
     } else
     {
         ShareData::stk_sort_type = type;
-        ShareData::stk_sort_rule = -1;
+        ShareData::stk_sort_rule = 1;
     }
 }
 

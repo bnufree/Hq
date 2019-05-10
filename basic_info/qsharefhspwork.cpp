@@ -28,8 +28,6 @@ void QShareFHSPWork::run()
     //首先获取数据库的更新日期,获取最近10年的分红送配记录,主要是半年报或者年报
     ShareBonusList list;
     ShareDate last_update_date = DATA_SERVICE->getLastUpdateDateOfBonusInfo();
-    if(last_update_date.isNull() || last_update_date < ShareDate::latestActiveDay())
-    {
         ShareDate curDate = ShareDate::currentDate();
         ShareDate start_report_date(QDate(curDate.date().addYears(-3)));
         if(last_update_date.isNull())
@@ -37,7 +35,7 @@ void QShareFHSPWork::run()
             start_report_date.setDate(ShareDate::currentDate().date().addYears(-3));
         } else
         {
-            start_report_date = last_update_date;
+            start_report_date.setDate(last_update_date.date().addYears(-1));
         }
 
         int start_year = start_report_date.date().year();
@@ -98,6 +96,5 @@ void QShareFHSPWork::run()
 //                qDebug()<<data.mCode<<data.mSZZG<<data.mXJFH<<data.mDate.toString();
             }
         }
-    }
     DATA_SERVICE->signalUpdateShareBonusInfo(list);
 }
