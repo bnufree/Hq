@@ -124,6 +124,7 @@ void HqInfoService::initSignalSlot()
             this, SLOT(slotUpdateShareinfoWithHistory(QString,double,double,double,double,double,double, qint64, qint64,ShareHistoryList)));
     connect(this, SIGNAL(signalQueryShareForeignVol(QString)), this, SLOT(slotQueryShareForeignVol(QString)));
     connect(this, SIGNAL(signalSetFavCode(QString)), this, SLOT(slotSetFavCode(QString)));
+    connect(this, SIGNAL(signalSaveFavCode(QString,bool)), this, SLOT(slotSaveFavCode(QString,bool)));
     connect(this, SIGNAL(signalSearchCodesOfText(QString)), this, SLOT(slotSearchCodesOfText(QString)));
     connect(this, SIGNAL(signalUpdateShareFinanceInfo(FinancialDataList)), this, SLOT(slotUpdateShareFinanceInfo(FinancialDataList)));
     connect(this, SIGNAL(signalQueryShareFinanceInfo(QStringList)), this, SLOT(slotQueryShareFinanceList(QStringList)));
@@ -337,6 +338,28 @@ void HqInfoService::slotUpdateShareinfoWithHistory(const QString& code,\
 void HqInfoService::slotUpdateHistoryChange(const QString &code)
 {
 
+}
+
+void HqInfoService::slotSetFavCode(const QString &code)
+{
+    ShareData* data = getShareData(code);
+    data->mIsFav = !(data->mIsFav);
+    emit signalSaveFavCode(code, data->mIsFav);
+}
+
+void HqInfoService::slotSaveFavCode(const QString &code, bool fav)
+{
+    ShareDataList list;
+    ShareData data;
+    data.mCode = code.right(6);
+    data.mIsFav = fav;
+    list.append(data);
+    if(!mDataBase.updateShareFavInfo(list))
+    {
+        qDebug()<<"update share fav info error:"<<mDataBase.getErrorString();
+    }
+
+    return;
 }
 
 ShareData* HqInfoService::getShareData(const QString &code)

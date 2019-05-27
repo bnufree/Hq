@@ -67,7 +67,7 @@ void QHKExchangeVolDataProcess::getMktVolInfo(QStringList& list, int& num, const
             //qDebug()<<"code:"<<tmpCode<<"not found";
             break;
         }
-        qDebug()<<list.last();
+//        qDebug()<<list.last();
     }
     num = list.size();
     return;

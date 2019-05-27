@@ -6,15 +6,32 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>51</height>
+    <width>541</width>
+    <height>78</height>
    </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>微软雅黑</family>
+    <pointsize>10</pointsize>
+    <weight>75</weight>
+    <bold>true</bold>
+   </font>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true"/>
+   <string notr="true">QLabel{
+	font-family:微软雅黑;
+	font-weight:bold;
+	font-size:20pt;
+	color:white;
+	alignment:center;
+}
+#name,#cur{
+	font-size:16pt;
+}</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>

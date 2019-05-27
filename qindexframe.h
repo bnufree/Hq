@@ -19,6 +19,8 @@ public:
     void updateBound(double shVal, QString shName, double szVal, QString szName);
     void updateBound(double pure, const QString& name);
     void setName(const QString& name);
+protected:
+    QSize calSize() const;
 
 private:
     Ui::QIndexFrame *ui;

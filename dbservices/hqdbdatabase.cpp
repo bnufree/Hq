@@ -382,7 +382,7 @@ bool HQDBDataBase::updateShareFavInfo(const ShareDataList& dataList)
         DBColValList list;
         list.append(DBColVal(HQ_TABLE_COL_CODE, data.mCode, HQ_DATA_TEXT));
         list.append(DBColVal(HQ_TABLE_COL_FAVORITE, data.mIsFav, HQ_DATA_INT));
-        if(!updateTable(TABLE_FAVORITE, list, list[0])){
+        if(!updateTable(TABLE_SHARE_BASIC_INFO, list, list[0])){
             mDB.rollback();
             return false;
         }
@@ -490,6 +490,7 @@ bool HQDBDataBase::createShareBasicTable()
     colist.append({HQ_TABLE_COL_NAME, "VARCHAR(100) NULL"});
     colist.append({HQ_TABLE_COL_PY_ABBR, "VARCHAR(10) NULL"});
     colist.append({HQ_TABLE_COL_TYPE, "INTEGER NOT NULL"});
+    colist.append({HQ_TABLE_COL_FAVORITE, "BOOL NULL"});
     return createTable(TABLE_SHARE_BASIC_INFO, colist);
 }
 
@@ -531,6 +532,7 @@ bool HQDBDataBase::queryShareBasicInfo(ShareDataMap& map)
         info.mName = mSQLQuery.value(HQ_TABLE_COL_NAME).toString();
         info.mPY = mSQLQuery.value(HQ_TABLE_COL_PY_ABBR).toString();
         info.mShareType =  (SHARE_DATA_TYPE)(mSQLQuery.value(HQ_TABLE_COL_TYPE).toInt());
+        info.mIsFav = mSQLQuery.value(HQ_TABLE_COL_FAVORITE).toBool();
 
     }
     return true;
@@ -1125,7 +1127,7 @@ bool HQDBDataBase::queryShareHsgtTop10List(ShareHsgtList& list, const QString& c
     }
     if(!date.isNull())
     {
-        whereList.append(DBColVal(HQ_TABLE_COL_DATE, date.toTime_t(), HQ_DATA_INT));
+        whereList.append(DBColVal(HQ_TABLE_COL_DATE, date.toString(), HQ_DATA_TEXT));
     }
     QString sql = QString("select * from %1 %2 order by %3 desc, %4 desc limit 100").arg(TABLE_HSGT_TOP10).arg(whereList.whereString()).arg(HQ_TABLE_COL_DATE).arg(HQ_TABLE_COL_HSGT_TOP10_MONEY);
     QMutexLocker locker(&mSQLMutex);
@@ -1137,7 +1139,7 @@ bool HQDBDataBase::queryShareHsgtTop10List(ShareHsgtList& list, const QString& c
         data.mBuy = mSQLQuery.value(HQ_TABLE_COL_HSGT_TOP10_BUY).toDouble();
         data.mSell = mSQLQuery.value(HQ_TABLE_COL_HSGT_TOP10_SELL).toDouble();
         data.mPure = mSQLQuery.value(HQ_TABLE_COL_HSGT_TOP10_MONEY).toDouble();
-        data.mDate = ShareDateTime::fromTime_t(mSQLQuery.value(HQ_TABLE_COL_DATE).toInt());
+        data.mDate = ShareDateTime::fromString(mSQLQuery.value(HQ_TABLE_COL_DATE).toString());
         list.append(data);
     }
     return true;
@@ -1152,7 +1154,7 @@ bool HQDBDataBase::delShareHsgtTop10(const QString& code, const ShareDate& date)
     }
     if(!date.isNull())
     {
-        list.append(DBColVal(HQ_TABLE_COL_DATE, date.toTime_t(),HQ_DATA_INT));
+        list.append(DBColVal(HQ_TABLE_COL_DATE, date.toString(),HQ_DATA_TEXT));
     }
 
     return deleteRecord(TABLE_HSGT_TOP10, list);

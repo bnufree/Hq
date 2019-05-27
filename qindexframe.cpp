@@ -1,5 +1,6 @@
 ﻿#include "qindexframe.h"
 #include "ui_qindexframe.h"
+#include <QDebug>
 
 QIndexFrame::QIndexFrame(const QString& name, QWidget *parent) :
     QWidget(parent),
@@ -7,15 +8,33 @@ QIndexFrame::QIndexFrame(const QString& name, QWidget *parent) :
 {
     ui->setupUi(this);
     ui->name->setText(name.trimmed());
-    QFont font = this->font();
-    font.setBold(true);
-    this->setFont(font);
+    setFixedSize(calSize());
 }
 
 QIndexFrame::~QIndexFrame()
 {
     delete ui;
 }
+
+
+QSize QIndexFrame::calSize() const
+{
+    QFont font(tr("微软雅黑"));
+    font.setBold(true);
+    font.setPointSize(16);
+    int height = 78;
+    int width = 18;
+    //测试frame的宽度
+    width += QFontMetrics(font).width(tr("上证指数"));
+    font.setPointSize(20);
+    width += QFontMetrics(font).width(tr("+300.00"));
+    width += QFontMetrics(font).width(tr("+10.12%"));
+    width += QFontMetrics(font).width(tr("10000亿"));
+    width += 18;
+    qDebug()<<"frame size:"<<width<<height;
+    return QSize(width, height);
+}
+
 
 void QIndexFrame::setName(const QString &name)
 {
@@ -29,16 +48,10 @@ void QIndexFrame::updateVal(double cur, double chg, double chgper, double money)
     ui->chgper->setText(QString("").sprintf("%.2f%", chgper));
     ui->money->setText(QStringLiteral("%1亿").arg(QString::number(money / 10000.0, 'f', 0)));
     int chgint = (int)(chg*100);
-    this->setStyleSheet(QString("QLabel{"
-                            "font-weight:bold;"
-                                "font-size:20pt;"
-                            "color:%1;"
-                            "alignment:center;"
-                                "}"
-                                "#name,#cur{"
-                                "font-size:14pt;"
-                                "}")
-                        .arg(chgint == 0? "black" : chgint > 0? "red":"green"));
+    QString newColor = QString("color:%1").arg(chgint == 0? "black" : chgint > 0? "red":"green");
+    QString oldStyleSheet = this->styleSheet();
+    oldStyleSheet.replace(QRegularExpression("color:[a-z0-9\\(\\),]{1,}"), newColor);
+    this->setStyleSheet(oldStyleSheet);
 }
 
 void QIndexFrame::updateBound(double shVal, QString shName, double szVal, QString szName)
@@ -68,13 +81,10 @@ void QIndexFrame::updateBound(double pure, const QString &name)
     ui->chgper->setVisible(false);
     ui->money->setVisible(false);
     int chgint = (int)(pure);
-    this->setStyleSheet(QString("QLabel{"
-                            "font-weight:bold;"
-                                "font-size:20pt;"
-                            "color:%1;"
-                            "alignment:center;"
-                                "}")
-                        .arg(chgint == 0? "black" : chgint > 0? "red":"green"));
+    QString newColor = QString("color:%1").arg(chgint == 0? "black" : chgint > 0? "red":"green");
+    QString oldStyleSheet = this->styleSheet();
+    oldStyleSheet.replace(QRegularExpression("color:[a-z0-9\\(\\),]{1,}"), newColor);
+    this->setStyleSheet(oldStyleSheet);
 }
 
 void QIndexFrame::updateBound(double buy, double sell, double pure, double total)

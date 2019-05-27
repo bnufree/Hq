@@ -96,7 +96,9 @@ signals:
                                           const ShareDataList& list);
     void signalUpdateStkProfitList(const ShareDataList& list);
     void signalInitShareRealInfos(const QStringList& codes);
+    //自选股
     void signalSetFavCode(const QString& code);
+    void signalSaveFavCode(const QString& code, bool fav);
     //沪港通持股写入数据据
     void signalAddShareAmoutByForeigner(const ShareDataList& list);
     void signalUpdateShareAmountByForeigner();
@@ -120,6 +122,8 @@ signals:
 
 public slots:
     void slotSearchCodesOfText(const QString &text);
+    void slotSetFavCode(const QString& code);
+    void slotSaveFavCode(const QString& code, bool fav);
     void slotInitDBTables();
     void slotRecvShareHistoryInfos(const ShareDataList& list, int mode);
     //void slotUpdateShareHistoryInfos(const QMap<QString, ShareDataList> map);

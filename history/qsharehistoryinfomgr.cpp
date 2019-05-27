@@ -98,11 +98,11 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
             mDates.append(wkDate.toString(DATE_FORMAT));
             QHKExchangeVolDataProcess * process = new QHKExchangeVolDataProcess(wkDate, this);
             mPool.start(process);
-            break;
         }
         wkDate = QActiveDateTime(wkDate).nextActiveDay();
     }
     mPool.waitForDone();
+    return;
 
     //开始更新日线数据
     emit signalUpdateHistoryMsg(QStringLiteral("开始更新日线数据..."));

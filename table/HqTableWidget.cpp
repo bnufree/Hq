@@ -34,7 +34,10 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     this->setEditTriggers(QAbstractItemView::NoEditTriggers);
     //this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     //鼠标右键选择
+#ifdef Q_OS_WIN
+    this->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotCustomContextMenuRequested(QPoint)));
+#endif
     connect(this, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(slotCellDoubleClicked(int,int)));
     this->horizontalHeader()->setHighlightSections(false);
     connect(this->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(slotHeaderClicked(int)));

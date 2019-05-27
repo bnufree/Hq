@@ -21,8 +21,10 @@ signals:
 public slots:
     void updateData(const ShareDataList& list);
     void updateData(const ShareHsgtList &list);
-    void insetWidget(const QString& code);
+    void insertWidget(const QString& code);
     void switchWidget();
+    void insertWidget(QWidget* w);
+    void insertWidget(const QWidgetList& list);
 
 private:
     QMap<QString, QWidget*> mIndexWidgetMap;

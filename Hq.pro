@@ -66,7 +66,8 @@ SOURCES += main.cpp\
     data_structure/hqbasedata.cpp \
     data_structure/hqblockdata.cpp \
     qsharecodenamelable.cpp\
-    utils/networkcookie.cpp
+    utils/networkcookie.cpp \
+    qcontainerwidget.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -122,7 +123,8 @@ HEADERS  += dialog.h \
     data_structure/hqbasedata.h \
     data_structure/hqblockdata.h \
     qsharecodenamelable.h\
-    utils/networkcookie.h
+    utils/networkcookie.h \
+    qcontainerwidget.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

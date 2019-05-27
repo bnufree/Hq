@@ -2,21 +2,12 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QDebug>
+#include "qcontainerwidget.h"
 
 
 QIndexWidget::QIndexWidget(QWidget *parent) : QStackedWidget(parent)
 {
-//    this->setMinimumHeight(120);
-//    this->setMaximumHeight(120);
     mIndexWidgetMap.clear();
-//    if(layout() == 0)
-//    {
-//        QVBoxLayout *lay = new QVBoxLayout(this);
-//        this->setLayout(lay);
-//    }
-//    QLayout *lay = layout();
-//    lay->setMargin(30);
-//    lay->setSpacing(3);
     mSwitchTimer = new QTimer(this);
     mSwitchTimer->setInterval(3000);
     connect(mSwitchTimer, SIGNAL(timeout()), this, SLOT(switchWidget()));
@@ -36,9 +27,52 @@ void QIndexWidget::resizeEvent(QResizeEvent *e)
 {
     qDebug()<<"QIndexWidget"<<__func__<<e->size();
     QStackedWidget::resizeEvent(e);
+    //检查indexMapWidget的数量,进行重新布局
+    if(count() == 0) return;
+    //检查widget里边包含的indexframe的数量
+    QWidgetList list;
+    while(count())
+    {
+        QContainerWidget *w = qobject_cast<QContainerWidget*> (this->widget(0));
+        if(!w) continue;
+        list.append(w->getWidgetList());
+        this->removeWidget(w);
+        delete w;
+    }
+    qDebug()<<"stacked widget count:"<<count();
+    insertWidget(list);
 }
 
-void QIndexWidget::insetWidget(const QString &code)
+void QIndexWidget::insertWidget(const QWidgetList &list)
+{
+    qDebug()<<"list:"<<list.count();
+    foreach (QWidget* w, list) {
+        qDebug()<<"w:"<<w;
+        insertWidget(w);
+    }
+}
+
+void QIndexWidget::insertWidget(QWidget *w)
+{
+    QContainerWidget *target = 0;
+    bool insert_new = true;
+    qDebug()<<"stacked widget count:"<<count();
+    if(count())
+    {
+        target = qobject_cast<QContainerWidget*> (this->widget(count() - 1));
+        if( target && target->appendWidget(w)) insert_new = false;
+    }
+    if(insert_new)
+    {
+        target = new QContainerWidget();
+        target->resize(this->geometry().size());
+        target->appendWidget(w);
+        this->addWidget(target);
+    }
+
+}
+
+void QIndexWidget::insertWidget(const QString &code)
 {
     ShareDataList list;
     ShareData data;
@@ -49,7 +83,7 @@ void QIndexWidget::insetWidget(const QString &code)
 
 void QIndexWidget::updateData(const ShareHsgtList &list)
 {
-#if 1
+#if 0
     qDebug()<<list.length();
     if(list.length() != 2) return;
     QWidget* w = NULL;
@@ -74,20 +108,20 @@ void QIndexWidget::updateData(const ShareHsgtList &list)
         frame->updateBound(list[i].mPure, list[i].mName);
     }
  #else
-    foreach (NS_BOUND_DATA data, list) {
+    foreach (ShareHsgt data, list) {
         //qDebug()<<"data:"<<data.mCode<<" "<<data.mName<<" "<<data.mChg<<" "<<data.mChgPercent;
         QIndexFrame* w = NULL;
         if(mIndexWidgetMap.contains(data.mCode))
         {
-            w = mIndexWidgetMap[data.mCode];
+            w = (QIndexFrame*)(mIndexWidgetMap[data.mCode]);
             w->setName(data.mName);
         } else
         {
             w = new QIndexFrame(data.mName, this);
-            this->addWidget(w);
             mIndexWidgetMap[data.mCode] = w;
+            insertWidget(w);
         }
-        w->updateBound(data.mBuy, data.mSell, data.mPure, data.mTotal);
+        w->updateBound(data.mPure, data.mName);
     }
 #endif
 }
@@ -104,8 +138,8 @@ void QIndexWidget::updateData(const ShareDataList &list)
         } else
         {
             w = new QIndexFrame(data.mName, this);
-            this->addWidget(w);
             mIndexWidgetMap[data.mCode] = w;
+            insertWidget(w);
         }
         w->updateVal(data.mCur, data.mChg, data.mChgPercent, data.mMoney);
     }

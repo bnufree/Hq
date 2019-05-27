@@ -65,18 +65,23 @@ Dialog::Dialog(QWidget *parent) :
     //指数显示
     QHBoxLayout *indexLayout = new QHBoxLayout;
     ui->indexframe->setLayout(indexLayout);
-    indexLayout->setContentsMargins(50, 5, 50, 5);
+    indexLayout->setContentsMargins(5, 5, 5, 5);
     if(!mIndexWidget)
     {
         mIndexWidget = new QIndexWidget(this);
         ui->indexframe->layout()->addWidget(mIndexWidget);
     }
+//#ifdef Q_OS_WIN
+//    this->setWindowFlags(this->windowFlags() | Qt::WindowCloseButtonHint );
+//#elif
     this->setWindowFlags(Qt::FramelessWindowHint);
+//#endif
     this->setMouseTracking(true);
     mDisplayMode = E_DISPLAY_ALL;
     //ui->closeBtn->setIcon(style()->standardPixmap(QStyle::SP_TitleBarCloseButton));
     //ui->minBtn->setIcon(style()->standardIcon(QStyle::SP_TitleBarMinButton));
     //ui->srchBtn->setIcon(style()->standardIcon(QStyle::SP_BrowserReload));
+#ifdef Q_OS_WIN
     //系统托盘
     QIcon appIcon = QIcon(":/icon/image/Baidu_96px.png");
     if(appIcon.isNull())
@@ -88,10 +93,9 @@ Dialog::Dialog(QWidget *parent) :
     systemIcon->setIcon(appIcon);
     systemIcon->show();
     connect(systemIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(setDlgShow(QSystemTrayIcon::ActivationReason)));
-
 //    //创建快捷事件
-//    QShortcut *shotcut = new QShortcut(QKeySequence("Alt+X"), this);  //隐藏
-//    connect(shotcut, SIGNAL(activated()), this, SLOT(slotWhetherDisplay()));
+    QShortcut *shotcut = new QShortcut(QKeySequence("Alt+X"), this);  //隐藏
+    connect(shotcut, SIGNAL(activated()), this, SLOT(slotWhetherDisplay()));
 //    QShortcut *shotcut1 = new QShortcut(QKeySequence("Alt+A"), this);
 //    connect(shotcut1, SIGNAL(activated()), this, SLOT(slotDisplayAll()));
 //    QShortcut *shotcut2 = new QShortcut(QKeySequence("Alt+S"), this);
@@ -99,6 +103,7 @@ Dialog::Dialog(QWidget *parent) :
 //    QShortcut *shotcut3 = new QShortcut(QKeySequence("Alt+D"), this);
 //    connect(shotcut3, SIGNAL(activated()), this, SLOT(slotDisplayShareMini()));
     //    setHook(this);
+#endif
 
 
 
@@ -124,14 +129,13 @@ Dialog::Dialog(QWidget *parent) :
     mTaskMgr->signalStart();
 
     ui->mainStackWidget->setCurrentIndex(0);
-    mTaskMgr->setMktType(MKT_ALL);
 }
 
 
 void Dialog::slotRecvIndexCodesList(const QStringList &list)
 {
     foreach (QString code, list) {
-        mIndexWidget->insetWidget(code);
+        mIndexWidget->insertWidget(code);
     }
 }
 
