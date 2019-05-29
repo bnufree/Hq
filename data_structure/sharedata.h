@@ -188,6 +188,11 @@ public:
         return HqBaseData(mCode, mName, mPY, mType, mIsFav);
     }
 
+    QString keyOfCodeTime() const
+    {
+        return QString("%1_%2").arg(mCode).arg(mTime.date().toString("yyyy-MM-dd"));
+    }
+
     bool    isUpdated(const ShareData& tar, int mode)
     {
         bool change = false;

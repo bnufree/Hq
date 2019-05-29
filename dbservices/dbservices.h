@@ -32,7 +32,7 @@ public:
     ShareDate  getLastUpdateDateOfBonusInfo();
     ShareDate  getLastUpdateDateOfHsgtTop10();
     ShareDate  getLastUpdateDateOfFinanceInfo();
-    ShareDate  getLastUpdateDateOfHistoryInfo(const QString& code);
+    ShareDate  getLastUpdateDateOfHistoryInfo();
     bool   GetHistoryInfoWithDate(const QString& table, const QDate& date, double& close, double& money, qint64& total_share, qint64& mutalble_share);
     double   GetMultiDaysChangePercent(const QString& table, int days);
     void   GetForeignVolChange(const QString& code, qint64& cur, qint64& pre);

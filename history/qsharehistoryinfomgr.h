@@ -34,7 +34,7 @@ signals:
 public slots:
     void slotStartGetHistory();
     void slotUpdateAllShareFromDate(bool deldb, const QDate& date = QDate(2017,3,17));
-    void slotUpdateForignVolInfo(const QStringList& list, const QDate& date);
+    void slotUpdateForignVolInfo(const ShareDataList& list);
     void slotUpdateShareHistoryProcess(const ShareDataList& list);
     void slotDbUpdateHistoryFinished();
     void slotUpdateShareHistoryInfoFinished(const QString& code);
@@ -50,7 +50,7 @@ private:
     int                 mCurCnt;
     QThreadPool         mPool;
     QDate               mLastUpdateDate;
-    QMap<QString, ShareDataList>  mShareInfoHistoryMap;
+    QMap<QString,       ShareData>  mShareInfoHistoryMap;
     int                 mHistoryFileNum;
     int                 mCountCodeNum;
     QStringList         mDates;

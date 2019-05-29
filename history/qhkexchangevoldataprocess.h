@@ -15,7 +15,7 @@ public:
 
 public:
     void run();
-    void getMktVolInfo(QStringList& list,int& num, const QDate& date, int mkt = 0);
+    void getMktVolInfo(ShareDataList& list,int& num, const QDate& date, int mkt = 0);
     void getMktVolInfo(QStringList& list, const QDate& date, const QString& fileName);
 private:
     QDate       mDate;

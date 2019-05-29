@@ -154,7 +154,6 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     mShareInfoMergeThread->setActive(true);
     mShareInfoMergeThread->setMktType(MKT_ZXG);
     mShareInfoMergeThread->start();
-    return;
     //更新日线数据
     QShareHistoryInfoMgr* historyMgr = new QShareHistoryInfoMgr(codes);
     connect(historyMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SIGNAL(signalUpdateHistoryMsg(QString)));

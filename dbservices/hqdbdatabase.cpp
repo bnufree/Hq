@@ -360,6 +360,7 @@ bool HQDBDataBase::createDBTables()
     if(!createShareFinancialInfoTable()) return false;
     if(!createShareBonusIbfoTable()) return false;
     if(!createShareHsgTop10Table()) return false;
+    if(!createShareHistoryInfoTable()) return false;
     qDebug()<<__FUNCTION__<<__LINE__;
     return true;
 }
@@ -583,10 +584,9 @@ bool HQDBDataBase::getSimilarCodeOfText(QStringList &codes, const QString &text)
 }
 
 
-bool HQDBDataBase::createShareHistoryInfoTable(const QString& code)
+bool HQDBDataBase::createShareHistoryInfoTable(/*const QString& code*/)
 {
-    if(code.length() == 0) return false;
-    if(isTableExist(HISTORY_TABLE(code))) return true;
+    if(isTableExist(TABLE_SHARE_HISTORY)) return true;
     TableColList colist;
     colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
     colist.append({HQ_TABLE_COL_CODE, "VARCHAR(6) NOT NULL"});
@@ -603,21 +603,20 @@ bool HQDBDataBase::createShareHistoryInfoTable(const QString& code)
     colist.append({HQ_TABLE_COL_HSGT_TOP10_FLAG, "BOOL NULL"});
     colist.append({HQ_TABLE_COL_TOTALMNT, "NUMERIC NULL"});
     colist.append({HQ_TABLE_COL_MUTAL, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_DATE, "DATE NULL"});
-    return createTable(HISTORY_TABLE(code), colist);
+    colist.append({HQ_TABLE_COL_DATE, "VARCHAR(10) NOT NULL"});
+    return createTable(TABLE_SHARE_HISTORY, colist);
 }
 
 bool HQDBDataBase::updateShareHistory(const ShareDataList &dataList, int mode)
 {
     if(dataList.size() == 0) return true;
+    if(!createShareHistoryInfoTable()) return false;
     mDB.transaction();
     foreach (ShareData data, dataList) {
-        QString table = HISTORY_TABLE(data.mCode);
-        if(!createShareHistoryInfoTable(table)) continue;
         ShareDate date(data.mTime.date());
         DBColValList list;
         list.append(DBColVal(HQ_TABLE_COL_CODE, data.mCode, HQ_DATA_TEXT));
-        list.append(DBColVal(HQ_TABLE_COL_DATE, date.toTime_t(), HQ_DATA_INT));
+        list.append(DBColVal(HQ_TABLE_COL_DATE, date.toString(), HQ_DATA_TEXT));
         list.append(DBColVal(HQ_TABLE_COL_NAME, data.mName, HQ_DATA_TEXT));
         if(mode & History_Zjlx)
         {
@@ -649,11 +648,11 @@ bool HQDBDataBase::updateShareHistory(const ShareDataList &dataList, int mode)
         DBColValList key;
         key.append(list[0]);
         key.append(list[1]);
-        if(!updateTable(table, list, key)){
+        if(!updateTable(TABLE_SHARE_HISTORY, list, key)){
             mDB.rollback();
             return false;
         }
-        if(!updateDBUpdateDate(date, table))
+        if(!updateDBUpdateDate(date, TABLE_SHARE_HISTORY))
         {
             mDB.rollback();
             return false;
@@ -670,7 +669,7 @@ bool HQDBDataBase::queryShareHistory(ShareDataList &list, const QString &share_c
     DBColValList wherelist;
     if(!start.isNull())
     {
-        wherelist.append(DBColVal(HQ_TABLE_COL_DATE, start.toTime_t(), HQ_DATA_INT, HQ_COMPARE_GREAT));
+        wherelist.append(DBColVal(HQ_TABLE_COL_DATE, start.toString(), HQ_DATA_TEXT, HQ_COMPARE_GREAT));
     }
     if(share_code.length() > 0)
     {
@@ -678,9 +677,9 @@ bool HQDBDataBase::queryShareHistory(ShareDataList &list, const QString &share_c
     }
     if(!end.isNull())
     {
-        wherelist.append(DBColVal(HQ_TABLE_COL_DATE, end.toTime_t(), HQ_DATA_INT, HQ_COMPARE_LESS));
+        wherelist.append(DBColVal(HQ_TABLE_COL_DATE, end.toString(), HQ_DATA_TEXT, HQ_COMPARE_LESS));
     }
-    QString sql = QString("select * from %1 %2").arg(HISTORY_TABLE(share_code)).arg(wherelist.whereString());
+    QString sql = QString("select * from %1 %2").arg(TABLE_SHARE_HISTORY).arg(wherelist.whereString());
     QMutexLocker locker(&mSQLMutex);
     if(!mSQLQuery.exec(sql)) return false;
     while (mSQLQuery.next()) {
@@ -700,7 +699,7 @@ bool HQDBDataBase::queryShareHistory(ShareDataList &list, const QString &share_c
         data.mHsgtData.mIsTop10 = mSQLQuery.value(HQ_TABLE_COL_HSGT_TOP10_FLAG).toDouble();
         data.mFinanceData.mMutalShare = mSQLQuery.value(HQ_TABLE_COL_MUTAL).toDouble();
         data.mFinanceData.mTotalShare = mSQLQuery.value(HQ_TABLE_COL_TOTALMNT).toDouble();
-        data.mTime = ShareDateTime(mSQLQuery.value(HQ_TABLE_COL_DATE).toInt());
+        data.mTime = ShareDateTime::fromString(mSQLQuery.value(HQ_TABLE_COL_DATE).toString());
         list.append(data);
     }
     return true;
@@ -712,13 +711,17 @@ bool HQDBDataBase::delShareHistory(const QString &share_code, const ShareDate &s
     DBColValList wherelist;
     if(!start.isNull())
     {
-        wherelist.append(DBColVal(HQ_TABLE_COL_DATE, start.toTime_t(), HQ_DATA_INT, HQ_COMPARE_GREAT));
+        wherelist.append(DBColVal(HQ_TABLE_COL_DATE, start.toString(), HQ_DATA_TEXT, HQ_COMPARE_GREAT));
+    }
+    if(share_code.length() > 0)
+    {
+        wherelist.append(DBColVal(HQ_TABLE_COL_CODE, share_code, HQ_DATA_TEXT));
     }
     if(!end.isNull())
     {
-        wherelist.append(DBColVal(HQ_TABLE_COL_DATE, end.toTime_t(), HQ_DATA_INT, HQ_COMPARE_LESS));
+        wherelist.append(DBColVal(HQ_TABLE_COL_DATE, end.toString(), HQ_DATA_TEXT, HQ_COMPARE_LESS));
     }
-    return deleteRecord(HISTORY_TABLE(share_code), wherelist);
+    return deleteRecord(TABLE_SHARE_HISTORY, wherelist);
 }
 
 double HQDBDataBase::getMultiDaysChangePercent(const QString &code, HISTORY_CHANGEPERCENT type)
@@ -1245,9 +1248,9 @@ ShareDate HQDBDataBase::getLastUpdateDateOfTable(const QString &table)
     return date;
 }
 
-ShareDate HQDBDataBase::getLastHistoryDateOfShare(const QString &code)
+ShareDate HQDBDataBase::getLastHistoryDateOfShare(/*const QString &code*/)
 {
-    return getLastUpdateDateOfTable(HISTORY_TABLE(code));
+    return getLastUpdateDateOfTable(TABLE_SHARE_HISTORY);
 }
 
 

@@ -18,6 +18,7 @@
 #define         TABLE_FAVORITE                      "share_favor"
 #define         TABLE_PROFIT                        "share_profit"
 #define         TABLE_BLOCK_SHARE                   "block_share"
+#define         TABLE_SHARE_HISTORY                 "share_history"
 
 //列名
 #define         HQ_TABLE_COL_ID                 "id"

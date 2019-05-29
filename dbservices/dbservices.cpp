@@ -227,9 +227,9 @@ ShareDate HqInfoService::getLastUpdateDateOfFinanceInfo()
 }
 
 
-ShareDate HqInfoService::getLastUpdateDateOfHistoryInfo(const QString& code)
+ShareDate HqInfoService::getLastUpdateDateOfHistoryInfo()
 {
-    return mDataBase.getLastHistoryDateOfShare(code);
+    return getLastUpdateDateOfTable(TABLE_SHARE_HISTORY);
 }
 
 ShareDate HqInfoService::getLastUpdateDateOfTable(const QString& table)

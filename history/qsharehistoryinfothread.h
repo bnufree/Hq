@@ -10,19 +10,16 @@
 class QShareHistoryInfoThread : public QRunnable
 {
 public:
-    explicit QShareHistoryInfoThread(const QString& code, const QMap<qint64, qint64>& foreign_map, QObject* parent = 0);
+    explicit QShareHistoryInfoThread(const QString& code, const ShareDate& start, const ShareDate& end, QObject* parent = 0);
     ~QShareHistoryInfoThread();
     QString getCode();
 public:
     void run();
 private:
-    QDate lastUpdateDate();
-    bool  write(const ShareDataList& list);
-private:
     QString         mCode;
-    QMap<qint64, qint64> mForeignMap;
     QObject         *mParent;
-    QString         mFileName;
+    ShareDate       mStart;
+    ShareDate       mEnd;
 };
 
 #endif // QSHAREHISTORYINFOTHREAD_H

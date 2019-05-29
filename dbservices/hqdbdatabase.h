@@ -111,7 +111,7 @@ public:
     ~HQDBDataBase();
     QString getErrorString();
     ShareDate getLastUpdateDateOfTable(const QString &table);
-    ShareDate getLastHistoryDateOfShare(const QString& code);
+    ShareDate getLastHistoryDateOfShare(/*const QString& code*/);
     bool isDBOK();
     //板块
     bool queryBlockDataList(BlockDataMap& list, int type = 0);
@@ -189,7 +189,7 @@ private:
     bool createShareProfitTable();
     bool createShareBlockTable();
     //历史日线数据表
-    bool createShareHistoryInfoTable(const QString& code);
+    bool createShareHistoryInfoTable(/*const QString& code*/);
     //股东明细表
     bool createShareHoldersTable();
     //财务信息表
