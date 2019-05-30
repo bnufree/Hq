@@ -8,9 +8,10 @@
 #define     POST_VAL        "__VIEWSTATE=%2FwEPDwUJNjIxMTYzMDAwZGSFj8kdzCLeVLiJkFRvN5rjsPotqw%3D%3D&__VIEWSTATEGENERATOR=3C67932C&__EVENTVALIDATION=%2FwEdAAdbi0fj%2BZSDYaSP61MAVoEdVobCVrNyCM2j%2BbEk3ygqmn1KZjrCXCJtWs9HrcHg6Q64ro36uTSn%2FZ2SUlkm9HsG7WOv0RDD9teZWjlyl84iRMtpPncyBi1FXkZsaSW6dwqO1N1XNFmfsMXJasjxX85ju3P1WAPUeweM%2Fr0%2FuwwyYLgN1B8%3D&today=TODAY_DATE&sortBy=stockcode&sortDirection=asc&alertMsg=&txtShareholdingDate=TXTSHAREDATE&btnSearch=Search"
 #define     HK_URL      "http://www.hkexnews.hk/sdw/search/mutualmarket.aspx?t=%1"
 
-QHKExchangeVolDataProcess::QHKExchangeVolDataProcess(const QDate& date, QObject* parent) : QRunnable()
+QHKExchangeVolDataProcess::QHKExchangeVolDataProcess(const QDate& start, const QDate& end, QObject* parent) : QRunnable()
 {
-    mDate = date;
+    mStartDate = start;
+    mEndDate = end;
     mParent = parent;
 }
 
@@ -34,7 +35,6 @@ void QHKExchangeVolDataProcess::getMktVolInfo(ShareDataList& list, int& num, con
     {
         resDate = QDate::fromString(dateExp.cap(1), "yyyy/MM/dd");
     }
-    qDebug()<<__FUNCTION__<<resDate<<mDate<<date;
     if(resDate != date) return;
 
     while ( (start_index = codeExp.indexIn(res, start_index)) >= 0) {
@@ -108,15 +108,13 @@ void QHKExchangeVolDataProcess::getMktVolInfo(QStringList& list, const QDate& da
     return ;
 }
 
-void QHKExchangeVolDataProcess::run()
+void QHKExchangeVolDataProcess::getVolofDate(ShareDataList &list, const QDate &date)
 {
     int errorNUm = 0;
     int sh_num = 0, sz_num = 0;
-    ShareDataList list;
     do {
-        list.clear();
-        getMktVolInfo(list, sh_num, mDate, 0);
-        getMktVolInfo(list, sz_num, mDate, 1);
+        getMktVolInfo(list, sh_num, date, 0);
+        getMktVolInfo(list, sz_num, date, 1);
         errorNUm++;
         if(errorNUm == 3)
         {
@@ -127,19 +125,29 @@ void QHKExchangeVolDataProcess::run()
     if((sh_num == 0) ^ (sz_num == 0))
     {
         while (sh_num == 0) {
-            getMktVolInfo(list, sh_num, mDate, 0);
+            getMktVolInfo(list, sh_num, date, 0);
         }
         while (sz_num == 0) {
-            getMktVolInfo(list, sz_num, mDate, 1);
+            getMktVolInfo(list, sz_num, date, 1);
         }
     }
-    if(mParent)
-    {
-        QMetaObject::invokeMethod(mParent,\
-                                  "slotUpdateForignVolInfo",\
-                                  Qt::DirectConnection,\
-                                  Q_ARG(ShareDataList, list),\
-                                  );
+}
 
+void QHKExchangeVolDataProcess::run()
+{
+    while(mStartDate <= mEndDate)
+    {
+        ShareDataList list;
+        getVolofDate(list, mStartDate);
+        mStartDate = mStartDate.addDays(1);
+        if(mParent)
+        {
+            QMetaObject::invokeMethod(mParent,\
+                                      "slotUpdateForignVolInfo",\
+                                      Qt::DirectConnection,\
+                                      Q_ARG(ShareDataList, list)\
+                                      );
+
+        }
     }
 }

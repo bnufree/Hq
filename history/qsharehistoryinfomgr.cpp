@@ -22,7 +22,7 @@ QShareHistoryInfoMgr::QShareHistoryInfoMgr(const QStringList& codes, QObject *pa
     mPool.setMaxThreadCount(8);
     connect(this, SIGNAL(signalStartGetHistory()), this, SLOT(slotStartGetHistory()));
     connect(this, SIGNAL(signalUpdateAllShareFromDate(bool,QDate)), this, SLOT(slotUpdateAllShareFromDate(bool,QDate)));
-    connect(DATA_SERVICE, SIGNAL(signalUpdateHistoryInfoFinished()), this, SLOT(slotDbUpdateHistoryFinished()));
+//    connect(DATA_SERVICE, SIGNAL(signalUpdateHistoryInfoFinished()), this, SLOT(slotDbUpdateHistoryFinished()));
     //connect(DATA_SERVICE, SIGNAL(signalUpdateShareHistoryFinished(QString)), this, SLOT(slotUpdateShareHistoryInfoFinished(QString)));
     this->moveToThread(&mWorkThread);
     mWorkThread.start();
@@ -95,74 +95,46 @@ void QShareHistoryInfoMgr::slotUpdateShareHistoryProcess(const ShareDataList& li
 void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& date)
 {
     qDebug()<<__func__<<date;
+    QDate start = date;
+    QDate end = ShareDate::latestActiveDay().date();
     QTime t;
     t.start();
-//    //开始更新日线数据
-//    foreach (QString code, mCodesList) {
-//        QShareHistoryInfoThread* thread = new QShareHistoryInfoThread(code, date, ShareDate::latestActiveDay().date(), this);
-//        mPool.start(thread);
-//    }
-//    mPool.waitForDone();
+    //开始更新日线数据
+    foreach (QString code, mCodesList) {
+        QShareHistoryInfoThread* thread = new QShareHistoryInfoThread(code, start,  end, this);
+        mPool.start(thread);
+    }
+    mPool.waitForDone();
     qDebug()<<tr("更新日线数据耗时:")<<t.elapsed()<<date<<ShareDate::latestActiveDay().date();
     //更新外资持股数据，然后传递给个股日线合成
-    QDate wkDate = date;
-    qDebug()<<__func__<<wkDate<<ShareDate::latestActiveDay().date();
-    while(wkDate < ShareDate::latestActiveDay().date())
+    t.start();
+    int day_count = start.daysTo(end);
+    //分成10个线程处理
+    int day_gap = day_count / 10;
+    if(day_gap == 0) day_gap = 1;
+    while(start <= end)
     {
-        if(!ShareDate(wkDate).isWeekend())
+        QDate wkend = start.addDays(day_gap);
+        if(wkend > end)
         {
-            QHKExchangeVolDataProcess * process = new QHKExchangeVolDataProcess(wkDate, this);
-            mPool.start(process);
-            break;
+            wkend = end;
         }
-        wkDate = wkDate.addDays(1);
+        QHKExchangeVolDataProcess * process = new QHKExchangeVolDataProcess(start, wkend, this);
+        mPool.start(process);
+        start = wkend.addDays(1);
     }
     mPool.waitForDone();
-    return;
+    qDebug()<<tr("更新外资数据耗时:")<<t.elapsed();
 
-
-#if 0
-    emit signalUpdateHistoryMsg(QStringLiteral("开始将日线数据写入文件"));
-
-    wkDate = date;
-    mCurCnt = 0;
-    //qDebug()<<"write info total size:"<<mShareInfoMap.size();
-    while(wkDate < QActiveDateTime::latestActiveDay())
-    {
-        QString key = wkDate.toString(DATE_FORMAT);
-        if(mShareInfoMap.contains(key))
-        {
-            QString fileName = QString("%1%2.dat").arg(SAVE_DIR).arg(wkDate.toString("yyyyMMdd"));
-            ShareDataList list = mShareInfoMap[key];
-            if(list.size() > 0)
-            {
-                QShareHistoryFileWork * process = new QShareHistoryFileWork(FILE_WRITE, fileName, list, this);
-                mPool.start(process);
-            }
-        }
-        wkDate = wkDate.addDays(1);
-    }
-    mPool.waitForDone();
-    mShareInfoMap.clear();
-
-    PROFILES_INS->setValue(UPDATE_SEC, UPDATE_DATE, QActiveDateTime::latestActiveDay().toString(DATE_FORMAT));
-    emit signalUpdateHistoryMsg(QStringLiteral("开始读入日线数据"));
-    mCurCnt = 0;
-    wkDate = QActiveDateTime::getActiveDayBefore1HYear();
-    mHistoryFileNum = QActiveDateTime::activeDaysNum(wkDate);
-    while(wkDate < QActiveDateTime::latestActiveDay())
-    {
-        if(QActiveDateTime(wkDate).isDayActive())
-        {
-            QString fileName = QString("%1%2.dat").arg(SAVE_DIR).arg(wkDate.toString("yyyyMMdd"));
-            QShareHistoryFileWork * process = new QShareHistoryFileWork(FILE_READ, fileName, ShareDataList(), this);
-            mPool.start(process);
-        }
-        wkDate = wkDate.addDays(1);
-    }
-    mPool.waitForDone();
-#endif
-//    emit signalUpdateHistoryMsg(QStringLiteral("开始进行日线数据统计"));
+    //数据更新完成,开始更新到数据库
+    int mode = Share_History_Mode::History_Close | Share_History_Mode::History_HsgtVol;
+    emit DATA_SERVICE->signalRecvShareHistoryInfos(mShareInfoHistoryMap.values(), mode);
+    //等到数据更新完成,开始进行数据的整理和统计
+    QEventLoop subloop;
+    connect(DATA_SERVICE, SIGNAL(signalUpdateHistoryInfoFinished()), &subloop, SLOT(quit()));
+    subloop.exec();
+    //开始进行数据统计
+    //emit signalUpdateHistoryMsg(QStringLiteral("开始进行日线数据统计"));
 //    mCountCodeNum = mCodesList.count();
 //    mCurCnt = 0;
 //    foreach(QString code, mCodesList)

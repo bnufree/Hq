@@ -10,7 +10,7 @@
 class QHKExchangeVolDataProcess : public QRunnable
 {
 public:
-    explicit QHKExchangeVolDataProcess(const QDate& date, QObject* parent = 0);
+    explicit QHKExchangeVolDataProcess(const QDate& start, const QDate& end, QObject* parent = 0);
     ~QHKExchangeVolDataProcess() {}
 
 public:
@@ -18,7 +18,10 @@ public:
     void getMktVolInfo(ShareDataList& list,int& num, const QDate& date, int mkt = 0);
     void getMktVolInfo(QStringList& list, const QDate& date, const QString& fileName);
 private:
-    QDate       mDate;
+    void getVolofDate(ShareDataList& list, const QDate& date);
+private:
+    QDate       mStartDate;
+    QDate       mEndDate;
     QObject*    mParent;
 };
 

@@ -245,7 +245,15 @@ void HqInfoService::slotRecvShareHistoryInfos(const ShareDataList &list, int mod
     if(!mDataBase.updateShareHistory(list, mode))
     {
         qDebug()<<mDataBase.errMsg();
+        return;
     }
+    //
+    if(!mDataBase.delShareHistory("", ShareDate(), ShareDate(ShareDate::latestActiveDay().date().addYears(-1))))
+    {
+        qDebug()<<mDataBase.errMsg();
+        return;
+    }
+    emit signalUpdateHistoryInfoFinished();
 }
 
 
