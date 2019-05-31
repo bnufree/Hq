@@ -57,11 +57,36 @@ void QShareHistoryInfoMgr::slotStartGetHistory()
 void QShareHistoryInfoMgr::slotUpdateForignVolInfo(const ShareDataList& list)
 {
     QMutexLocker locker(&mShareInfoMutex);
-    foreach (ShareData data, list) {
-        ShareData& wkdata =  mShareInfoHistoryMap[data.keyOfCodeTime()];
-        wkdata.mCode = data.mCode;
-        wkdata.mTime = data.mTime;
-        wkdata.mHsgtData.mVol = data.mHsgtData.mVol;
+    QList<QDate> dateList;
+    foreach (ShareData data, list)
+    {
+        QDate date = data.mTime.date();
+        if(!dateList.contains(date)) dateList.append(date);
+        if(mShareInfoHistoryMap.contains(date))
+        {
+            QMap<QString, ShareData> &dateData = mShareInfoHistoryMap[date];
+            if(dateData.contains(data.mCode))
+            {
+                ShareData& wkdata =  dateData[data.mCode];
+                wkdata.mHsgtData.mVol = data.mHsgtData.mVol;
+                if(wkdata.mFinanceData.mMutalShare > 100)
+                {
+                    wkdata.mHsgtData.mVolMutablePercent = wkdata.mHsgtData.mVol / (wkdata.mFinanceData.mMutalShare *1.0);
+                }
+            }
+        }
+    }
+
+    //数据更新完成,开始更新到数据库
+    int mode = Share_History_Mode::History_Close | Share_History_Mode::History_HsgtVol;
+    foreach (QDate date, dateList) {
+        ShareDataList list = mShareInfoHistoryMap[date].values();
+        if(list.size() > 0)
+        {
+            qDebug()<<list.first().mCode<<list.first().mName<<list.first().mHsgtData.mVol<<list.first().mTime.date();
+        }
+        emit DATA_SERVICE->signalRecvShareHistoryInfos(list, mode);
+        mShareInfoHistoryMap.remove(date);
     }
 //    emit signalUpdateHistoryMsg(QString("%1:%2/%3").\
 //                                arg(QStringLiteral("外资持股数据更新完成")).\
@@ -77,7 +102,8 @@ void QShareHistoryInfoMgr::slotUpdateShareHistoryProcess(const ShareDataList& li
     foreach (ShareData data, list) {
         //if(i== 0) qDebug()<<"更新日线数据:"<<data.mCode<<data.mName<<list.size();
         i++;
-        ShareData& wkdata =  mShareInfoHistoryMap[data.keyOfCodeTime()];
+        QMap<QString, ShareData> &dateData = mShareInfoHistoryMap[data.mTime.date()];
+        ShareData& wkdata =  dateData[data.mCode];
         wkdata.mCode = data.mCode;
         wkdata.mTime = data.mTime;
         wkdata.mClose = data.mClose;
@@ -94,7 +120,10 @@ void QShareHistoryInfoMgr::slotUpdateShareHistoryProcess(const ShareDataList& li
 
 void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& date)
 {
-    qDebug()<<__func__<<date;
+    //等到数据更新完成,开始进行数据的整理和统计
+    QEventLoop subloop;
+    connect(DATA_SERVICE, SIGNAL(signalUpdateHistoryInfoFinished()), &subloop, SLOT(quit()));
+
     QDate start = date;
     QDate end = ShareDate::latestActiveDay().date();
     QTime t;
@@ -105,36 +134,42 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
         mPool.start(thread);
     }
     mPool.waitForDone();
-    qDebug()<<tr("更新日线数据耗时:")<<t.elapsed()<<date<<ShareDate::latestActiveDay().date();
+    qDebug()<<tr("更新日线数据耗时:")<<t.elapsed()<<start<<end;
     //更新外资持股数据，然后传递给个股日线合成
-    t.start();
-    int day_count = start.daysTo(end);
-    //分成10个线程处理
-    int day_gap = day_count / 10;
-    if(day_gap == 0) day_gap = 1;
-    while(start <= end)
+    QList<QDate> dateList = mShareInfoHistoryMap.keys();
+    DATA_SERVICE->setHistoryInfoCount(dateList.size());
+    if(dateList.size() > 0)
     {
-        QDate wkend = start.addDays(day_gap);
-        if(wkend > end)
+        start = dateList.first();
+        end = dateList.last();
+        int day_count = start.daysTo(end);
+        //分成10个线程处理
+        int day_gap = day_count / 50;
+        if(day_gap == 0) day_gap = 1;
+        while(start <= end)
         {
-            wkend = end;
+            QDate wkend = start.addDays(day_gap);
+            if(wkend > end)
+            {
+                wkend = end;
+            }
+            QHKExchangeVolDataProcess * process = new QHKExchangeVolDataProcess(start, wkend, this);
+            mPool.start(process);
+            start = wkend.addDays(1);
         }
-        QHKExchangeVolDataProcess * process = new QHKExchangeVolDataProcess(start, wkend, this);
-        mPool.start(process);
-        start = wkend.addDays(1);
+        mPool.waitForDone();
+        qDebug()<<tr("更新外资数据耗时:")<<t.elapsed();
+    } else
+    {
+        end = end.addDays(-1);
     }
-    mPool.waitForDone();
-    qDebug()<<tr("更新外资数据耗时:")<<t.elapsed();
-
-    //数据更新完成,开始更新到数据库
-    int mode = Share_History_Mode::History_Close | Share_History_Mode::History_HsgtVol;
-    emit DATA_SERVICE->signalRecvShareHistoryInfos(mShareInfoHistoryMap.values(), mode);
-    //等到数据更新完成,开始进行数据的整理和统计
-    QEventLoop subloop;
-    connect(DATA_SERVICE, SIGNAL(signalUpdateHistoryInfoFinished()), &subloop, SLOT(quit()));
+    //update db base time
+    emit DATA_SERVICE->signalSendShareHistoryUpdateDate(ShareDate(end));
+    //
     subloop.exec();
     //开始进行数据统计
     //emit signalUpdateHistoryMsg(QStringLiteral("开始进行日线数据统计"));
+    qDebug()<<tr("开始进行日线数据统计");
 //    mCountCodeNum = mCodesList.count();
 //    mCurCnt = 0;
 //    foreach(QString code, mCodesList)

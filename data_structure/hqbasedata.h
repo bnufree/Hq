@@ -54,6 +54,11 @@ struct ShareHolder{
     double      mShareCount;
     double      mFundPercent;
     ShareDate   mDate;
+
+    ShareHolder(){
+        mShareCount = 0;
+        mFundPercent = 0.0;
+    }
 };
 typedef QList<ShareHolder>  ShareHolderList;
 Q_DECLARE_METATYPE(ShareHolder)
@@ -121,6 +126,18 @@ typedef struct North_South_Bound_Data
     bool                mIsTop10;
     ShareDateTime       mDate;
 
+    North_South_Bound_Data()
+    {
+        mBuy = 0.0;
+        mSell = 0.0;
+        mTotal = 0.0;
+        mPure = 0.0;
+        mChange = 0.0;
+        mVol = 0.0;
+        mVolDelta = 0.0;
+        mVolMutablePercent = 0.0;
+    }
+
     bool operator <(const North_South_Bound_Data& data) const
     {
         return ((*this).mPure) < (data.mPure);
@@ -143,6 +160,11 @@ struct ShareZjlx
     QString             mCode;
     double              mPure;
     ShareDateTime       mDate;
+
+    ShareZjlx()
+    {
+        mPure = 0.0;
+    }
 
     bool operator <(const ShareZjlx& data) const
     {
@@ -167,6 +189,11 @@ struct ShareRzRq
     QString             mCode;
     double              mRZRQ;
     ShareDateTime       mDate;
+
+    ShareRzRq()
+    {
+        mRZRQ = 0.0;
+    }
 
     bool operator <(const ShareRzRq& data) const
     {

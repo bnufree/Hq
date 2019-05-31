@@ -652,11 +652,11 @@ bool HQDBDataBase::updateShareHistory(const ShareDataList &dataList, int mode)
             mDB.rollback();
             return false;
         }
-        if(!updateDBUpdateDate(date, TABLE_SHARE_HISTORY))
-        {
-            mDB.rollback();
-            return false;
-        }
+//        if(!updateDBUpdateDate(date, TABLE_SHARE_HISTORY))
+//        {
+//            mDB.rollback();
+//            return false;
+//        }
     }
     mDB.commit();
     return true;

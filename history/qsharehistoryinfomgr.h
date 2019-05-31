@@ -50,7 +50,7 @@ private:
     int                 mCurCnt;
     QThreadPool         mPool;
     QDate               mLastUpdateDate;
-    QMap<QString,       ShareData>  mShareInfoHistoryMap;
+    QMap<QDate,         QMap<QString, ShareData>>  mShareInfoHistoryMap;
     int                 mHistoryFileNum;
     int                 mCountCodeNum;
     QStringList         mDates;

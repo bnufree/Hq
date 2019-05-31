@@ -16,10 +16,15 @@ HqInfoService* HqInfoService::m_pInstance = 0;
 HqInfoService::CGarbo HqInfoService::s_Garbo;
 QMutex HqInfoService::mutex;
 
+#define         HISTORY_CLOSE           "share_history_close"
+#define         HISTORY_FOREIGN           "share_history_foreign_vol"
+
+
 
 HqInfoService::HqInfoService(QObject *parent) :
     QObject(parent)
 {
+    mHistoryInfoCount = 0;
     mFavCodeList = Profiles::instance()->value(FAV_CODE_SEC, FAV_CODE_KEY, QStringList()).toStringList();
     QActiveDateTime::mCloseDateList = PROFILES_INS->value(CLOSE_DATE_SEC, CLOSE_DATE_KEY, QStringList()).toStringList();
     qDebug()<<"close:"<<QActiveDateTime::mCloseDateList;
@@ -119,7 +124,19 @@ void HqInfoService::initSignalSlot()
     connect(this, SIGNAL(signalQueryShareHsgtTop10List(QString,ShareDate)),
             this, SLOT(slotQueryShareHsgtTop10List(QString,ShareDate)));
 
-    connect(this, SIGNAL(signalRecvShareHistoryInfos(ShareDataList, int)), this, SLOT(slotRecvShareHistoryInfos(ShareDataList, int)));
+    connect(this, SIGNAL(signalRecvShareHistoryInfos(ShareDataList, int)),
+            this, SLOT(slotRecvShareHistoryInfos(ShareDataList, int)));
+    connect(this, SIGNAL(signalSendShareHistoryUpdateDate(ShareDate)),
+            this, SLOT(slotSendShareHistoryUpdateDate(ShareDate)));
+//    connect(this, SIGNAL(signalSendShareHistoryCloseInfo(ShareDataList)),
+//            this, SLOT(slotSendShareHistoryCloseInfo(ShareDataList)));
+//    connect(this, SIGNAL(signalSendShareHistoryForeignVolInfo(ShareDataList)),
+//            this, SLOT(slotSendShareHistoryForeignVolInfo(ShareDataList)));
+//    connect(this, SIGNAL(signalSendShareHistoryRzrqInfo(ShareDataList)),
+//            this, SLOT(slotSendShareHistoryRzrqInfo(ShareDataList)));
+//    connect(this, SIGNAL(signalSendShareHistoryZjlxInfo(ShareDataList)),
+//            this, SLOT(slotSendShareHistoryZjlxInfo(ShareDataList)));
+
     connect(this, SIGNAL(signalUpdateShareinfoWithHistory(QString,double,double,double,double,double,double, qint64, qint64,ShareHistoryList)),\
             this, SLOT(slotUpdateShareinfoWithHistory(QString,double,double,double,double,double,double, qint64, qint64,ShareHistoryList)));
     connect(this, SIGNAL(signalQueryShareForeignVol(QString)), this, SLOT(slotQueryShareForeignVol(QString)));
@@ -241,20 +258,34 @@ ShareDate HqInfoService::getLastUpdateDateOfTable(const QString& table)
 
 void HqInfoService::slotRecvShareHistoryInfos(const ShareDataList &list, int mode)
 {
-    //更新到数据库
-    if(!mDataBase.updateShareHistory(list, mode))
+    if(list.size() > 0)
     {
-        qDebug()<<mDataBase.errMsg();
-        return;
+        if(!mDataBase.updateShareHistory(list, mode))
+        {
+            qDebug()<<mDataBase.errMsg();
+            return;
+        }
+        //
+
     }
     //
-    if(!mDataBase.delShareHistory("", ShareDate(), ShareDate(ShareDate::latestActiveDay().date().addYears(-1))))
+//    if(!mDataBase.delShareHistory("", ShareDate(), ShareDate(ShareDate::latestActiveDay().date().addYears(-1))))
+//    {
+//        qDebug()<<mDataBase.errMsg();
+//        return;
+//    }
+}
+
+void HqInfoService::slotSendShareHistoryUpdateDate(const ShareDate &date)
+{
+    if(!mDataBase.updateDBUpdateDate(date, TABLE_SHARE_HISTORY))
     {
         qDebug()<<mDataBase.errMsg();
+        emit signalUpdateHistoryInfoFinished();
         return;
     }
-    emit signalUpdateHistoryInfoFinished();
 }
+
 
 
 bool HqInfoService::slotAddHistoryData(const ShareData &info)

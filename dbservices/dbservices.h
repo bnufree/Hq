@@ -16,7 +16,9 @@ protected:
     HqInfoService(QObject *parent = 0);
     ~HqInfoService();
 
+public:
     ShareDate  getLastUpdateDateOfTable(const QString& table);
+    void        setHistoryInfoCount(int count) {mHistoryInfoCount = count;}
 public:
     bool   isDBInitOk();
     friend class CGarbo;
@@ -75,7 +77,14 @@ signals:
      void signalQueryShareForeignVol(const QString& code);
     void signalSendShareForeignVol(const ShareDataList& list);
     //历史数据写入数据库
+    void signalSendShareHistoryCloseInfo(const ShareDataList& list);
+    void signalSendShareHistoryForeignVolInfo(const ShareDataList &list);
+    void signalSendShareHistoryRzrqInfo(const ShareDataList &list);
+    void signalSendShareHistoryZjlxInfo(const ShareDataList &list);
+
     void signalRecvShareHistoryInfos(const ShareDataList& list, int mode);
+    void signalSendShareHistoryUpdateDate(const ShareDate& date);
+
     void signalQueryShareHistoryLastDate(const QString& code);
     void signalSendShareHistoryLastDate(const QString& code, const QDate& date);
     void signalUpdateHistoryInfoFinished();
@@ -125,7 +134,14 @@ public slots:
     void slotSetFavCode(const QString& code);
     void slotSaveFavCode(const QString& code, bool fav);
     void slotInitDBTables();
+    //历史数据
     void slotRecvShareHistoryInfos(const ShareDataList& list, int mode);
+    void slotSendShareHistoryUpdateDate(const ShareDate& date);
+//    void slotSendShareHistoryCloseInfo(const ShareDataList& list);
+//    void slotSendShareHistoryForeignVolInfo(const ShareDataList &list);
+//    void slotSendShareHistoryRzrqInfo(const ShareDataList &list);
+//    void slotSendShareHistoryZjlxInfo(const ShareDataList &list);
+
     //void slotUpdateShareHistoryInfos(const QMap<QString, ShareDataList> map);
     bool slotAddHistoryData(const ShareData& data);
     void initBlockData(int type = 0);
@@ -197,6 +213,7 @@ private:    //本类使用的变量
     HQDBDataBase                mDataBase;
     QStringList                 mFavCodeList;
     QStringList                 mClosedDateList;
+    int                         mHistoryInfoCount;
 };
 
 #endif // DBSERVICE_H
