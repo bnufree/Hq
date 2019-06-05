@@ -28,6 +28,7 @@ void QHKExchangeVolDataProcess::getMktVolInfo(ShareDataList& list, int& num, con
     //QRegExp nameExp("[\u4e00-\u9fa5A-Z]{1,}");
     QRegExp volExp(">(([0-9]{1,3},){0,}[0-9]{1,})<");
     QRegExp dateExp("Shareholding Date: (\\d{4}/\\d{2}/\\d{2})");
+    QRegExp volPercentExp("([0-9]{1,3}\.[0-9]{2})%");
 
     start_index = dateExp.indexIn(res, start_index);
     QDate resDate;
@@ -60,11 +61,22 @@ void QHKExchangeVolDataProcess::getMktVolInfo(ShareDataList& list, int& num, con
         {
             ShareData data;
             data.mCode = tmpCode.right(6);
-            data.mHsgtData.mVol = volExp.cap(1).remove(",").toLongLong();
+            data.mHsgtData.mVolTotal = volExp.cap(1).remove(",").toLongLong();
             data.mTime.setDate(date);
             //qDebug()<<"res:"<<volExp.cap();
             start_index += volExp.cap().length();
-            list.append(data);
+            start_index = volPercentExp.indexIn(res, start_index);
+            if(start_index >= 0)
+            {
+                data.mHsgtData.mVolMutablePercent = volPercentExp.cap(1).toDouble();
+                list.append(data);
+                //qDebug()<<data.mCode<<data.mHsgtData.mVolTotal<<data.mHsgtData.mVolMutablePercent;
+                start_index += volPercentExp.cap().length();
+            } else
+            {
+                break;
+            }
+
         } else
         {
             //qDebug()<<"code:"<<tmpCode<<"not found";

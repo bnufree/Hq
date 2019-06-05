@@ -21,7 +21,8 @@ enum HISTORY_CHANGEPERCENT{
 enum    HQ_DATA_TYPE{
     HQ_DATA_TEXT = 1,
     HQ_DATA_INT,
-    HQ_DATA_DOUBLE
+    HQ_DATA_DOUBLE,
+    HQ_DATA_LONG,
 };
 
 enum    HQ_DATA_COMPARE{
@@ -205,7 +206,7 @@ private:
     bool createTable(const QString& pTable, const TableColList& cols);
 
     //表的通用操作
-    bool updateTable(const QString& tableName, const DBColValList& values, const DBColValList& key );
+    bool updateTable(const QString& tableName, const DBColValList& values, const DBColValList& key, bool check = true );
     bool deleteRecord(const QString& table, const DBColValList& list = DBColValList());    
     bool isRecordExist(bool& exist, const QString& table, const DBColValList& list);
 

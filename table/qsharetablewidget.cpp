@@ -69,7 +69,7 @@ void QShareTablewidget::setDataList(const ShareDataList &list)
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mMutalbleCap/ 100000000.0 ));
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mFinanceData.mROE));
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mProfit));
-        this->setItemText(i, k++, QString("").sprintf("%.0f", data.mHsgtData.mVol / 10000.0));
+        this->setItemText(i, k++, QString("").sprintf("%.0f", data.mHsgtData.mVolTotal / 10000.0));
         this->setItemText(i, k++, QString("").sprintf("%.0f", data.mForeignVolChg / 10000.0));
         this->setItemText(i, k++, QString("").sprintf("%.0f", data.mForeignCap / 100000000.0));
         this->setItemText(i, k++, QString("").sprintf("%.0f", data.mForeignCapChg / 100000000.0));
