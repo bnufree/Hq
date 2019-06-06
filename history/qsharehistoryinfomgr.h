@@ -1,4 +1,4 @@
-﻿#ifndef QSHAREHISTORYINFOMGR_H
+#ifndef QSHAREHISTORYINFOMGR_H
 #define QSHAREHISTORYINFOMGR_H
 
 #include <QObject>
@@ -50,7 +50,7 @@ private:
     int                 mCurCnt;
     QThreadPool         mPool;
     QDate               mLastUpdateDate;
-    QMap<QDate,         QMap<QString, ShareData>>  mShareInfoHistoryMap;
+    QMap<QDate,         QMap<QString, ShareData> >  mShareInfoHistoryMap;
     int                 mHistoryFileNum;
     int                 mCountCodeNum;
     QStringList         mDates;

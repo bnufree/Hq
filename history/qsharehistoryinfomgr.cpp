@@ -1,4 +1,4 @@
-﻿#include "qsharehistoryinfomgr.h"
+#include "qsharehistoryinfomgr.h"
 #include "qsharehistoryinfothread.h"
 #include "qsharehistoryfilework.h"
 #include "qsharehistorycounterwork.h"
@@ -78,7 +78,7 @@ void QShareHistoryInfoMgr::slotUpdateForignVolInfo(const ShareDataList& list)
     }
 
     //数据更新完成,开始更新到数据库
-    int mode = Share_History_Mode::History_Close | Share_History_Mode::History_HsgtVol;
+    int mode = History_Close | History_HsgtVol;
     foreach (QDate date, dateList) {
         ShareDataList list = mShareInfoHistoryMap[date].values();
         if(list.size() > 0)
