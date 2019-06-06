@@ -260,11 +260,14 @@ void HqInfoService::slotRecvShareHistoryInfos(const ShareDataList &list, int mod
 {
     if(list.size() > 0)
     {
+        QTime t;
+        t.start();
         if(!mDataBase.updateShareHistory(list, mode))
         {
             qDebug()<<mDataBase.errMsg();
             return;
         }
+        qDebug()<<"update history to db elapsed time:"<<t.elapsed() / 1000.0;
         //
 
     }
@@ -369,8 +372,8 @@ void HqInfoService::slotUpdateShareinfoWithHistory(const QString& code,\
     data.mHistory.mLast10DaysChgPers = last10Change;
     data.mHistory.mLastMonthChgPers = lastMonthChange;
     data.mHistory.mChgPersFromYear = lastYearChange;
-    data.mHsgtData.mVol = vol;
-    data.mHsgtData.mVolDelta = vol_chnage;
+    data.mHsgtData.mVolTotal = vol;
+    data.mHsgtData.mVolChange = vol_chnage;
     emit signalUpdateShareHistoryFinished(code);
 }
 

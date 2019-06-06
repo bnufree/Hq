@@ -68,11 +68,12 @@ void QShareHistoryInfoMgr::slotUpdateForignVolInfo(const ShareDataList& list)
             if(dateData.contains(data.mCode))
             {
                 ShareData& wkdata =  dateData[data.mCode];
-                wkdata.mHsgtData.mVol = data.mHsgtData.mVol;
-                if(wkdata.mFinanceData.mMutalShare > 100)
-                {
-                    wkdata.mHsgtData.mVolMutablePercent = wkdata.mHsgtData.mVol / (wkdata.mFinanceData.mMutalShare *1.0);
-                }
+                wkdata.mHsgtData.mVolTotal = data.mHsgtData.mVolTotal;
+                wkdata.mHsgtData.mVolMutablePercent = data.mHsgtData.mVolMutablePercent;
+//                if(wkdata.mFinanceData.mMutalShare > 100)
+//                {
+//                    wkdata.mHsgtData.mVolMutablePercent = wkdata.mHsgtData.mVol / (wkdata.mFinanceData.mMutalShare *1.0);
+//                }
             }
         }
     }
@@ -81,10 +82,10 @@ void QShareHistoryInfoMgr::slotUpdateForignVolInfo(const ShareDataList& list)
     int mode = History_Close | History_HsgtVol;
     foreach (QDate date, dateList) {
         ShareDataList list = mShareInfoHistoryMap[date].values();
-        if(list.size() > 0)
-        {
-            qDebug()<<list.first().mCode<<list.first().mName<<list.first().mHsgtData.mVol<<list.first().mTime.date();
-        }
+//        if(list.size() > 0)
+//        {
+//            qDebug()<<list.first().mCode<<list.first().mName<<list.first().mHsgtData.mVolTotal<<list.first().mTime.date();
+//        }
         emit DATA_SERVICE->signalRecvShareHistoryInfos(list, mode);
         mShareInfoHistoryMap.remove(date);
     }
@@ -101,29 +102,41 @@ void QShareHistoryInfoMgr::slotUpdateShareHistoryProcess(const ShareDataList& li
     int i = 0;
     foreach (ShareData data, list) {
         //if(i== 0) qDebug()<<"更新日线数据:"<<data.mCode<<data.mName<<list.size();
+        data.mHsgtData.mVolTotal = 0;
+        data.mHsgtData.mVolMutablePercent = 0;
         i++;
-        QMap<QString, ShareData> &dateData = mShareInfoHistoryMap[data.mTime.date()];
-        ShareData& wkdata =  dateData[data.mCode];
-        wkdata.mCode = data.mCode;
-        wkdata.mTime = data.mTime;
-        wkdata.mClose = data.mClose;
-        wkdata.mChg = data.mChg;
-        wkdata.mChgPercent = data.mChgPercent;
-        wkdata.mName = data.mName;
-        wkdata.mHsl = data.mHsl;
-        wkdata.mVol = data.mVol;
-        wkdata.mFinanceData.mTotalShare = data.mFinanceData.mTotalShare;
-        wkdata.mFinanceData.mMutalShare = data.mFinanceData.mMutalShare;
-        wkdata.mMoney = data.mMoney;
+        if(mShareInfoHistoryMap.contains(data.mTime.date()))
+        {
+            QMap<QString, ShareData> &dateData = mShareInfoHistoryMap[data.mTime.date()];
+            if(dateData.contains(data.mCode))
+            {
+                ShareData& wkdata =  dateData[data.mCode];
+                wkdata.mCode = data.mCode;
+                wkdata.mTime = data.mTime;
+                wkdata.mClose = data.mClose;
+                wkdata.mChg = data.mChg;
+                wkdata.mChgPercent = data.mChgPercent;
+                wkdata.mName = data.mName;
+                wkdata.mHsl = data.mHsl;
+                wkdata.mVol = data.mVol;
+                wkdata.mFinanceData.mTotalShare = data.mFinanceData.mTotalShare;
+                wkdata.mFinanceData.mMutalShare = data.mFinanceData.mMutalShare;
+                wkdata.mMoney = data.mMoney;
+            } else
+            {
+                dateData[data.mCode] = data;
+            }
+        } else
+        {
+            QMap<QString, ShareData> dateData;
+            dateData[data.mCode] = data;
+            mShareInfoHistoryMap[data.mTime.date()] = dateData;
+        }
     }
 }
 
 void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& date)
 {
-    //等到数据更新完成,开始进行数据的整理和统计
-    QEventLoop subloop;
-    connect(DATA_SERVICE, SIGNAL(signalUpdateHistoryInfoFinished()), &subloop, SLOT(quit()));
-
     QDate start = date;
     QDate end = ShareDate::latestActiveDay().date();
     QTime t;
@@ -165,8 +178,6 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
     }
     //update db base time
     emit DATA_SERVICE->signalSendShareHistoryUpdateDate(ShareDate(end));
-    //
-    subloop.exec();
     //开始进行数据统计
     //emit signalUpdateHistoryMsg(QStringLiteral("开始进行日线数据统计"));
     qDebug()<<tr("开始进行日线数据统计");

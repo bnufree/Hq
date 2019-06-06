@@ -31,7 +31,11 @@ QString DBColValList::insertString() const
         } else if(val.mType == HQ_DATA_INT)
         {
             valStrlist.append(QString("%1").arg(val.mValue.toInt()));
-        } else
+        } else if(val.mType == HQ_DATA_LONG)
+        {
+            valStrlist.append(QString("%1").arg(val.mValue.toLongLong()));
+        }
+        else
         {
             valStrlist.append(QString("%1").arg(val.mValue.toDouble(), 0, 'f', 3));
         }
@@ -52,7 +56,11 @@ QString DBColValList::updateString() const
         } else if(data.mColVal.mType == HQ_DATA_INT)
         {
             valStrlist.append(QString("%1 = %2").arg(data.mColName).arg(data.mColVal.mValue.toInt()));
-        } else
+        } else if(data.mColVal.mType == HQ_DATA_LONG)
+        {
+            valStrlist.append(QString("%1 = %2").arg(data.mColName).arg(data.mColVal.mValue.toLongLong()));
+        }
+        else
         {
             valStrlist.append(QString("%1 = %2").arg(data.mColName).arg(data.mColVal.mValue.toDouble(), 0, 'f', 3));
         }
@@ -99,7 +107,20 @@ QString DBColValList::whereString() const
             {
                 valStrlist.append(QString("%1 < %2").arg(data.mColName).arg(data.mColVal.mValue.toInt()));
             }
-        } else
+        } else if(data.mColVal.mType == HQ_DATA_LONG)
+        {
+            if(data.mColCompare == HQ_COMPARE_EQUAL)
+            {
+                valStrlist.append(QString("%1 = %2").arg(data.mColName).arg(data.mColVal.mValue.toLongLong()));
+            } else if(data.mColCompare == HQ_COMPARE_GREAT)
+            {
+                valStrlist.append(QString("%1 > %2").arg(data.mColName).arg(data.mColVal.mValue.toLongLong()));
+            } else
+            {
+                valStrlist.append(QString("%1 < %2").arg(data.mColName).arg(data.mColVal.mValue.toLongLong()));
+            }
+        }
+        else
         {
             if(data.mColCompare == HQ_COMPARE_EQUAL)
             {
@@ -628,7 +649,7 @@ bool HQDBDataBase::updateShareHistory(const ShareDataList &dataList, int mode)
         }
         if(mode & History_HsgtVol)
         {
-            list.append(DBColVal(HQ_TABLE_COL_HSGT_HAVE, data.mHsgtData.mVol, HQ_DATA_DOUBLE));
+            list.append(DBColVal(HQ_TABLE_COL_HSGT_HAVE, data.mHsgtData.mVolTotal, HQ_DATA_LONG));
             list.append(DBColVal(HQ_TABLE_COL_HSGT_HAVE_PERCENT, data.mHsgtData.mVolMutablePercent, HQ_DATA_DOUBLE));
         }
         if(mode & History_HsgtTop10)
@@ -648,7 +669,7 @@ bool HQDBDataBase::updateShareHistory(const ShareDataList &dataList, int mode)
         DBColValList key;
         key.append(list[0]);
         key.append(list[1]);
-        if(!updateTable(TABLE_SHARE_HISTORY, list, key)){
+        if(!updateTable(TABLE_SHARE_HISTORY, list, key, false)){
             mDB.rollback();
             return false;
         }
@@ -693,7 +714,7 @@ bool HQDBDataBase::queryShareHistory(ShareDataList &list, const QString &share_c
 
         data.mRZRQ = mSQLQuery.value(HQ_TABLE_COL_RZRQ).toDouble();
         data.mZJLX = mSQLQuery.value(HQ_TABLE_COL_ZJLX).toDouble();
-        data.mHsgtData.mVol = mSQLQuery.value(HQ_TABLE_COL_HSGT_HAVE).toDouble();
+        data.mHsgtData.mVolTotal = mSQLQuery.value(HQ_TABLE_COL_HSGT_HAVE).toDouble();
         data.mHsgtData.mVolMutablePercent = mSQLQuery.value(HQ_TABLE_COL_HSGT_HAVE_PERCENT).toDouble();
         data.mHsgtData.mPure = mSQLQuery.value(HQ_TABLE_COL_HSGT_TOP10_MONEY).toDouble();
         data.mHsgtData.mIsTop10 = mSQLQuery.value(HQ_TABLE_COL_HSGT_TOP10_FLAG).toDouble();
@@ -1205,11 +1226,11 @@ bool HQDBDataBase::delDBUpdateDate(const QString &table)
     return deleteRecord(TABLE_DB_UPDATE, list);
 }
 
-bool HQDBDataBase::updateTable(const QString& tableName, const DBColValList& values, const DBColValList& key )
+bool HQDBDataBase::updateTable(const QString& tableName, const DBColValList& values, const DBColValList& key, bool check )
 {
     //检查记录已经添加
     bool exist = false;
-    if(!isRecordExist(exist, tableName, key)) return false;
+    if( check && (!isRecordExist(exist, tableName, key))) return false;
     QMutexLocker locker(&mSQLMutex);
     if(exist){
         //更新

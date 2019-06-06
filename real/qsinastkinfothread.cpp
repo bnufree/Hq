@@ -125,7 +125,7 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
         {
             data->mProfit = DATA_SERVICE->getProfit(code);
         }
-        data->mForeignCap = data->mHsgtData.mVol * data->mCur ;
+        data->mForeignCap = data->mHsgtData.mVolTotal * data->mCur ;
         data->mForeignCapChg = data->mForeignVolChg * data->mCur ;
 //        data->mUpdateTime = QDateTime::currentMSecsSinceEpoch();
         datalist.append(*data);

@@ -120,8 +120,8 @@ typedef struct North_South_Bound_Data
     double              mTotal;
     double              mPure;
     double              mChange;
-    double              mVol;
-    double              mVolDelta;
+    qint64              mVolTotal;
+    qint64              mVolChange;
     double              mVolMutablePercent;
     bool                mIsTop10;
     ShareDateTime       mDate;
@@ -133,8 +133,8 @@ typedef struct North_South_Bound_Data
         mTotal = 0.0;
         mPure = 0.0;
         mChange = 0.0;
-        mVol = 0.0;
-        mVolDelta = 0.0;
+        mVolTotal = 0;
+        mVolChange = 0;
         mVolMutablePercent = 0.0;
     }
 
