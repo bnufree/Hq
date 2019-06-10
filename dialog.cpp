@@ -44,7 +44,7 @@ public:
 
 Dialog::Dialog(QWidget *parent) :
     QDialog(parent),mTaskMgr(0),mIndexWidget(0),
-    ui(new Ui::MainDialog)
+    ui(new Ui::MainDialog),systemIcon(0)
 {
     qDebug()<<__func__<<__LINE__;
     ui->setupUi(this);
@@ -71,11 +71,11 @@ Dialog::Dialog(QWidget *parent) :
         mIndexWidget = new QIndexWidget(this);
         ui->indexframe->layout()->addWidget(mIndexWidget);
     }
-//#ifdef Q_OS_WIN
-//    this->setWindowFlags(this->windowFlags() | Qt::WindowCloseButtonHint );
-//#elif
+#ifdef Q_OS_WIN
+    this->setWindowFlags(this->windowFlags() | Qt::WindowCloseButtonHint );
+#elif
     this->setWindowFlags(Qt::FramelessWindowHint);
-//#endif
+#endif
     this->setMouseTracking(true);
     mDisplayMode = E_DISPLAY_ALL;
     //ui->closeBtn->setIcon(style()->standardPixmap(QStyle::SP_TitleBarCloseButton));
@@ -91,7 +91,7 @@ Dialog::Dialog(QWidget *parent) :
     this->setWindowIcon(appIcon);
     systemIcon = new QSystemTrayIcon(this);
     systemIcon->setIcon(appIcon);
-    systemIcon->show();
+    systemIcon->hide();
     connect(systemIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(setDlgShow(QSystemTrayIcon::ActivationReason)));
 //    //创建快捷事件
     QShortcut *shotcut = new QShortcut(QKeySequence("Alt+X"), this);  //隐藏
@@ -211,6 +211,9 @@ void Dialog::on_closeBtn_clicked()
 
 void Dialog::closeEvent(QCloseEvent *event)
 {
+    this->setVisible(false);
+    if(systemIcon) systemIcon->setVisible(true);
+    event->ignore();
 }
 
 void Dialog::on_srchBtn_clicked()
