@@ -110,7 +110,7 @@ private slots:
 
 private:
     Ui::MainDialog *ui;
-    QSystemTrayIcon *systemIcon;
+    QSystemTrayIcon       *systemIcon;
     int                   mDisplayMode;
     int                   mSecSize;
     QSize                 mTargetSize;

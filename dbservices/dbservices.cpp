@@ -287,6 +287,8 @@ void HqInfoService::slotSendShareHistoryUpdateDate(const ShareDate &date)
         emit signalUpdateHistoryInfoFinished();
         return;
     }
+    //开始统计
+
 }
 
 

@@ -3,6 +3,7 @@
 #include <QVBoxLayout>
 #include <QDebug>
 #include "qcontainerwidget.h"
+#include <QThread>
 
 
 QIndexWidget::QIndexWidget(QWidget *parent) : QStackedWidget(parent)
@@ -25,7 +26,7 @@ QIndexWidget::~QIndexWidget()
 }
 void QIndexWidget::resizeEvent(QResizeEvent *e)
 {
-    qDebug()<<"QIndexWidget"<<__func__<<e->size();
+    qDebug()<<"QIndexWidget"<<__func__<<e->size()<<QThread::currentThread();
     QStackedWidget::resizeEvent(e);
     //检查indexMapWidget的数量,进行重新布局
     if(count() == 0) return;
@@ -45,7 +46,7 @@ void QIndexWidget::resizeEvent(QResizeEvent *e)
 
 void QIndexWidget::insertWidget(const QWidgetList &list)
 {
-    qDebug()<<"list:"<<list.count();
+    qDebug()<<"list:"<<list.count()<<QThread::currentThread();
     foreach (QWidget* w, list) {
         qDebug()<<"w:"<<w;
         insertWidget(w);
@@ -56,7 +57,7 @@ void QIndexWidget::insertWidget(QWidget *w)
 {
     QContainerWidget *target = 0;
     bool insert_new = true;
-    qDebug()<<"stacked widget count:"<<count();
+    qDebug()<<"stacked widget count:"<<count()<<QThread::currentThread();
     if(count())
     {
         target = qobject_cast<QContainerWidget*> (this->widget(count() - 1));
@@ -66,8 +67,8 @@ void QIndexWidget::insertWidget(QWidget *w)
     {
         target = new QContainerWidget();
         target->resize(this->geometry().size());
+        addWidget(target);        
         target->appendWidget(w);
-        this->addWidget(target);
     }
 
 }
@@ -117,7 +118,7 @@ void QIndexWidget::updateData(const ShareHsgtList &list)
             w->setName(data.mName);
         } else
         {
-            w = new QIndexFrame(data.mName, this);
+            w = new QIndexFrame(data.mName);
             mIndexWidgetMap[data.mCode] = w;
             insertWidget(w);
         }
@@ -128,6 +129,7 @@ void QIndexWidget::updateData(const ShareHsgtList &list)
 
 void QIndexWidget::updateData(const ShareDataList &list)
 {
+    qDebug()<<"update index:"<<QThread::currentThread();
     foreach (ShareData data, list) {
         //qDebug()<<"data:"<<data.mCode<<" "<<data.mName<<" "<<data.mChg<<" "<<data.mChgPercent;
         QIndexFrame* w = NULL;
@@ -137,7 +139,7 @@ void QIndexWidget::updateData(const ShareDataList &list)
             w->setName(data.mName);
         } else
         {
-            w = new QIndexFrame(data.mName, this);
+            w = new QIndexFrame(data.mName);
             mIndexWidgetMap[data.mCode] = w;
             insertWidget(w);
         }

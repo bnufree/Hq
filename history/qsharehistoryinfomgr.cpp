@@ -155,6 +155,7 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
     {
         start = dateList.first();
         end = dateList.last();
+        qDebug()<<"record:"<<start<<end;
         int day_count = start.daysTo(end);
         //分成10个线程处理
         int day_gap = day_count / 50;
@@ -174,7 +175,8 @@ void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& d
         qDebug()<<tr("更新外资数据耗时:")<<t.elapsed();
     } else
     {
-        end = end.addDays(-1);
+        end = end.addDays(-1);        
+        qDebug()<<"no data end:"<<end;
     }
     //update db base time
     emit DATA_SERVICE->signalSendShareHistoryUpdateDate(ShareDate(end));

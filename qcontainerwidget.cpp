@@ -88,7 +88,9 @@ QWidgetList QContainerWidget::getWidgetList()
     int count = this->layout()->count();
     for(int i=1; i<count - 1; i++)
     {
-        w = this->layout()->itemAt(i)->widget();
+        QLayoutItem *item = this->layout()->itemAt(i);
+        if(!item) continue;
+        w = item->widget();
         if(w)
         {
             w->setParent(0);
