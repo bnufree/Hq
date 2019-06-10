@@ -1,4 +1,4 @@
-﻿#include "sharedata.h"
+#include "sharedata.h"
 
 int ShareData::stk_sort_type = STK_DISPLAY_SORT_TYPE_CHGPER;
 int ShareData::stk_sort_rule = 1;
@@ -73,7 +73,7 @@ bool ShareData::ShareSort(const ShareData &d1, const ShareData &d2)
         sts = stk_sort_rule == 1? d1.mProfit > d2.mProfit : d1.mProfit < d2.mProfit;
         break;
     case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL:
-        sts = stk_sort_rule == 1? d1.mHsgtData.mVol > d2.mHsgtData.mVol : d1.mHsgtData.mVol < d2.mHsgtData.mVol;
+        sts = stk_sort_rule == 1? d1.mHsgtData.mVolTotal > d2.mHsgtData.mVolTotal : d1.mHsgtData.mVolTotal < d2.mHsgtData.mVolTotal;
         break;
     case STK_DISPLAY_SORT_TYPE_FOREIGN_CAP:
         sts = stk_sort_rule == 1? d1.mForeignCap > d2.mForeignCap : d1.mForeignCap < d2.mForeignCap;

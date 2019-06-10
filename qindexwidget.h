@@ -1,4 +1,4 @@
-﻿#ifndef QINDEXWIDGET_H
+#ifndef QINDEXWIDGET_H
 #define QINDEXWIDGET_H
 
 #include <QStackedWidget>
@@ -8,6 +8,7 @@
 #include <QTimer>
 #include <QResizeEvent>
 
+#if 0
 class QIndexWidget : public QStackedWidget
 {
     Q_OBJECT
@@ -30,5 +31,28 @@ private:
     QMap<QString, QWidget*> mIndexWidgetMap;
     QTimer*             mSwitchTimer;
 };
+#else
+class QIndexWidget : public QWidget
+{
+    Q_OBJECT
+public:
+    explicit QIndexWidget(QWidget *parent = 0);
+    ~QIndexWidget();
+
+    void resizeEvent(QResizeEvent *e);
+signals:
+
+public slots:
+    void updateData(const ShareDataList& list);
+    void updateData(const ShareHsgtList &list);
+    void insertWidget(const QString& code);
+    void switchWidget();
+
+private:
+    QMap<QString, QWidget*> mIndexWidgetMap;
+    QTimer*             mSwitchTimer;
+    int                 mMaxDisplayFrameCount;
+};
+#endif
 
 #endif // QINDEXWIDGET_H

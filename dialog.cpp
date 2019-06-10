@@ -1,4 +1,4 @@
-﻿#include "dialog.h"
+#include "dialog.h"
 #include "ui_dialog.h"
 #include <QDebug>
 #include <QMenu>
@@ -72,8 +72,8 @@ Dialog::Dialog(QWidget *parent) :
         ui->indexframe->layout()->addWidget(mIndexWidget);
     }
 #ifdef Q_OS_WIN
-    this->setWindowFlags(this->windowFlags() | Qt::WindowCloseButtonHint );
-#elif
+    this->setWindowFlags(this->windowFlags() | Qt::WindowCloseButtonHint | Qt::WindowMinMaxButtonsHint );
+#else
     this->setWindowFlags(Qt::FramelessWindowHint);
 #endif
     this->setMouseTracking(true);
@@ -182,7 +182,7 @@ void Dialog::slotSystemTrayMenuClicked()
         this->setVisible(true);
     } else
     {
-        this->close();
+        this->deleteLater();
     }
 
 }
