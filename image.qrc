@@ -8,4 +8,9 @@
         <file>image/nextpage.png</file>
         <file>image/prepage.png</file>
     </qresource>
+    <qresource prefix="/">
+        <file>image/close.png</file>
+        <file>image/maximize.png</file>
+        <file>image/minimize.png</file>
+    </qresource>
 </RCC>

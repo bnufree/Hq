@@ -108,6 +108,12 @@ private slots:
 
     void on_dataMgrBtn_clicked();
 
+    void on_min_clicked();
+
+    void on_max_clicked();
+
+    void on_close_clicked();
+
 private:
     Ui::MainDialog *ui;
     QSystemTrayIcon       *systemIcon;

@@ -40,6 +40,7 @@ public:
     ~QIndexWidget();
 
     void resizeEvent(QResizeEvent *e);
+    void appendWidget(QWidget* w) {if(w)mList.append(w);}
 signals:
 
 public slots:
@@ -50,6 +51,7 @@ public slots:
 
 private:
     QMap<QString, QWidget*> mIndexWidgetMap;
+    QWidgetList             mList;
     QTimer*             mSwitchTimer;
     int                 mMaxDisplayFrameCount;
 };

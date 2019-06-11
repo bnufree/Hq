@@ -165,7 +165,7 @@ QIndexWidget::QIndexWidget(QWidget *parent) : QWidget(parent)
     mMaxDisplayFrameCount = 1;
     mIndexWidgetMap.clear();
     mSwitchTimer = new QTimer(this);
-    mSwitchTimer->setInterval(3000);
+    mSwitchTimer->setInterval(2000);
     connect(mSwitchTimer, SIGNAL(timeout()), this, SLOT(switchWidget()));
     mSwitchTimer->start();
 
@@ -187,7 +187,7 @@ void QIndexWidget::resizeEvent(QResizeEvent *e)
     if(mIndexWidgetMap.size() == 0) return;
     //设定当前可以显示的index frame的数量
     mMaxDisplayFrameCount = e->size().width() / mIndexWidgetMap.first()->width();
-    qDebug()<<"Index widget:"<<e->size()<<mMaxDisplayFrameCount;
+//    qDebug()<<"Index widget:"<<e->size()<<mMaxDisplayFrameCount;
 
 }
 
@@ -240,7 +240,7 @@ void QIndexWidget::updateData(const ShareHsgtList &list)
         {
             w = new QIndexFrame(data.mName);
             mIndexWidgetMap[data.mCode] = w;
-            this->layout()->addWidget(w);
+            appendWidget(w);
         }
         w->updateBound(data.mPure, data.mName);
     }
@@ -249,7 +249,7 @@ void QIndexWidget::updateData(const ShareHsgtList &list)
 
 void QIndexWidget::updateData(const ShareDataList &list)
 {
-    qDebug()<<"update index:"<<QThread::currentThread();
+//    qDebug()<<"update index:"<<QThread::currentThread();
     foreach (ShareData data, list) {
         //qDebug()<<"data:"<<data.mCode<<" "<<data.mName<<" "<<data.mChg<<" "<<data.mChgPercent;
         QIndexFrame* w = NULL;
@@ -261,7 +261,7 @@ void QIndexWidget::updateData(const ShareDataList &list)
         {
             w = new QIndexFrame(data.mName);
             mIndexWidgetMap[data.mCode] = w;
-            this->layout()->addWidget(w);
+            appendWidget(w);
         }
         w->updateVal(data.mCur, data.mChg, data.mChgPercent, data.mMoney);
     }
@@ -270,15 +270,32 @@ void QIndexWidget::updateData(const ShareDataList &list)
 void QIndexWidget::switchWidget()
 {
     static int row = 0;
-    int total_row = (layout()->count() + mMaxDisplayFrameCount - 1) / mMaxDisplayFrameCount;
+    int total_row = (mList.count() + mMaxDisplayFrameCount - 1) / mMaxDisplayFrameCount;
     row++;
     if(row > total_row) row = 1;
     int start_index = (row - 1) * mMaxDisplayFrameCount;
     int end_index = row * mMaxDisplayFrameCount -1;
-    for(int i=0; i<layout()->count();i++)
+    qDebug()<<"index:"<<start_index<<end_index;
+    while (this->layout()->count()) {
+        QLayoutItem *item =  this->layout()->itemAt(0);
+        if(item)
+        {
+            QWidget* w = item->widget();
+            if(w)
+            {
+                this->layout()->removeWidget(w);
+                w->setParent(0);
+                w->setVisible(false);
+            }
+            this->layout()->removeItem(item);
+        }
+    }
+    for(int i=0; i<mList.count();i++)
     {
-        if(i<start_index || i > end_index) this->layout()->itemAt(0)->widget()->setVisible(false);
-        else this->layout()->itemAt(0)->widget()->setVisible(false);
+        if(i<start_index || i > end_index) continue;
+        this->layout()->addWidget(mList[i]);
+        mList[i]->setVisible(true);
+
     }
 }
 

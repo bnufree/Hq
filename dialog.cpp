@@ -71,16 +71,15 @@ Dialog::Dialog(QWidget *parent) :
         mIndexWidget = new QIndexWidget(this);
         ui->indexframe->layout()->addWidget(mIndexWidget);
     }
-#ifdef Q_OS_WIN
-    this->setWindowFlags(this->windowFlags() | Qt::WindowCloseButtonHint | Qt::WindowMinMaxButtonsHint );
-#else
     this->setWindowFlags(Qt::FramelessWindowHint);
+#ifdef Q_OS_WIN
+    ui->tool_frame->setVisible(true);
+    ui->min->setVisible(false);
+    ui->max->setVisible(false);
+#else
+    ui->tool_frame->setVisible(false);
 #endif
     this->setMouseTracking(true);
-    mDisplayMode = E_DISPLAY_ALL;
-    //ui->closeBtn->setIcon(style()->standardPixmap(QStyle::SP_TitleBarCloseButton));
-    //ui->minBtn->setIcon(style()->standardIcon(QStyle::SP_TitleBarMinButton));
-    //ui->srchBtn->setIcon(style()->standardIcon(QStyle::SP_BrowserReload));
 #ifdef Q_OS_WIN
     //系统托盘
     QIcon appIcon = QIcon(":/icon/image/Baidu_96px.png");
@@ -182,7 +181,7 @@ void Dialog::slotSystemTrayMenuClicked()
         this->setVisible(true);
     } else
     {
-        this->deleteLater();
+        close();
     }
 
 }
@@ -211,9 +210,9 @@ void Dialog::on_closeBtn_clicked()
 
 void Dialog::closeEvent(QCloseEvent *event)
 {
-    this->setVisible(false);
-    if(systemIcon) systemIcon->setVisible(true);
-    event->ignore();
+//    this->setVisible(false);
+////    if(systemIcon) systemIcon->setVisible(true);
+//    event->ignore();
 }
 
 void Dialog::on_srchBtn_clicked()
@@ -446,4 +445,22 @@ void Dialog::slotHqCenterBtnClicked()
         slotDisplayHqCenterPage(MKT_ZXG);
     }
 
+}
+
+void Dialog::on_min_clicked()
+{
+    hide();
+    if(systemIcon) systemIcon->setVisible(true);
+}
+
+void Dialog::on_max_clicked()
+{
+    if(isMaximized()) showNormal();
+    else showMaximized();
+}
+
+void Dialog::on_close_clicked()
+{
+    hide();
+    if(systemIcon) systemIcon->setVisible(true);
 }
