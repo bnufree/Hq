@@ -288,6 +288,42 @@ void HqInfoService::slotSendShareHistoryUpdateDate(const ShareDate &date)
         return;
     }
     //开始统计
+    //1)获取当前所有的代码数据
+    QStringList codeList = mRealShareMap.keys();
+    //2)根据每一个代码获取今年以来的成交信息
+    ShareDate year_day(QDate(QDate::currentDate().year(), 1, 1));
+    ShareDate month_date(QDate(QDate::currentDate().year(), QDate::currentDate().month(), 1));
+    int dayNum = QDate::currentDate().dayOfWeek();
+    ShareDate week_date(QDate::currentDate().addDays( -1* (dayNum-1)));
+    foreach (QString code, codeList) {
+        ShareDataList list;
+        if(!mDataBase.queryHistoryInfoFromDate(list, code, year_day)) continue;
+        if(list.size() == 0) continue;
+        ShareData* data = getShareData(code);
+        data->mHistory.mLastMoney = list.first().mMoney;
+        data->mHistory.mLastClose = list.first().mClose;
+        data->mHsgtData.mVolTotal = list.first().mHsgtData.mVolTotal;
+        data->mHsgtData.mVolMutablePercent = list.first().mHsgtData.mVolMutablePercent;
+        for(int i=0; i<list.size(); i++)
+        {
+            ShareData temp = list[i];
+            if(temp.mTime.toString() >= year_day.toString()){
+                data->mHistory.mChgPersFromYear *= (1+temp.mChgPercent * 0.01);
+            }
+            if(temp.mTime.toString() >= month_date.toString()){
+                data->mHistory.mChgPersFromMonth *= (1+temp.mChgPercent * 0.01);
+            }
+            if(temp.mTime.toString() >= week_date.toString()){
+                data->mHistory.mChgPersFromWeek *= (1+temp.mChgPercent * 0.01);
+            }
+        }
+        //获取外资持股情况变化
+        if(list.size() > 2)
+        {
+            data->mHsgtData.mVolChange = list[0].mHsgtData.mVolTotal - list[1].mHsgtData.mVolTotal;
+        }
+//        qDebug()<<data->mCode<<data->mHistory.mLastMoney<<data->mHsgtData.mVolTotal<<data->mHsgtData.mVolChange;
+    }
 
 }
 

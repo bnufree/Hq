@@ -100,7 +100,7 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
         data->mChg = detailList[4].toDouble() - detailList[3].toDouble();
         data->mChgPercent = data->mChg * 100 / detailList[3].toDouble() ;
         data->mVol = detailList[10].toInt();
-        data->mMoney = detailList[10].toDouble() / 10000;
+        data->mMoney = detailList[10].toDouble();
         data->mHsl = 0.0;
         data->mMoneyRatio = 0.0;
         if(data->mHistory.mLastMoney> 0){
@@ -126,7 +126,7 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
             data->mProfit = DATA_SERVICE->getProfit(code);
         }
         data->mForeignCap = data->mHsgtData.mVolTotal * data->mCur ;
-        data->mForeignCapChg = data->mForeignVolChg * data->mCur ;
+        data->mForeignCapChg = data->mHsgtData.mVolChange * data->mCur ;
 //        data->mUpdateTime = QDateTime::currentMSecsSinceEpoch();
         datalist.append(*data);
     }

@@ -12,6 +12,7 @@ enum DATA_MGR_TYPE{
     DATA_NONE = -1,
     DATA_LHB = 0,
     DATA_MUTUAL_MARKET,
+    DATA_NORTH_REAL,
 };
 
 class QDataMgrWidget : public QWidget

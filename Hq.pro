@@ -55,7 +55,6 @@ SOURCES += main.cpp\
     real/qeastmoneyzjlxthread.cpp \
     real/qsinastkinfothread.cpp \
     real/qsinastkresultmergethread.cpp \
-    real/qsahrerealdisplaywidget.cpp \
     qandroidbutton.cpp \
     qdatamgrwidget.cpp \
     table/qsharemutualbundwidget.cpp \
@@ -67,7 +66,9 @@ SOURCES += main.cpp\
     data_structure/hqblockdata.cpp \
     qsharecodenamelable.cpp\
     utils/networkcookie.cpp \
-    qcontainerwidget.cpp
+    qcontainerwidget.cpp \
+    real/qsinanorthrealinfothread.cpp \
+    real/qnorthflowinfodisplaywidget.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -112,7 +113,6 @@ HEADERS  += dialog.h \
     real/qeastmoneyzjlxthread.h \
     real/qsinastkinfothread.h \
     real/qsinastkresultmergethread.h \
-    real/qsahrerealdisplaywidget.h \
     qandroidbutton.h \
     qdatamgrwidget.h \
     table/qshareMutualbundwidget.h \
@@ -124,16 +124,18 @@ HEADERS  += dialog.h \
     data_structure/hqblockdata.h \
     qsharecodenamelable.h\
     utils/networkcookie.h \
-    qcontainerwidget.h
+    qcontainerwidget.h \
+    real/qsinanorthrealinfothread.h \
+    real/qnorthflowinfodisplaywidget.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \
     qindexframe.ui \
     exchange/qexchangefiledlg.ui \
     history/qsharehistorydialog.ui \
-    real/qsahrerealdisplaywidget.ui \
     qdatamgrwidget.ui \
-    qsharecodenamelable.ui
+    qsharecodenamelable.ui \
+    real/qnorthflowinfodisplaywidget.ui
 
 RESOURCES += \
     image.qrc

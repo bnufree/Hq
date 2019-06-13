@@ -18,6 +18,7 @@
 #include "qandroidlistwidget.h"
 #include "utils/comdatadefines.h"
 #include <QDir>
+#include "real/qnorthflowinfodisplaywidget.h"
 
 #define     STK_ZXG_SEC         "0520"
 #define     STK_HSJJ_SEC        "4521"
@@ -61,6 +62,7 @@ Dialog::Dialog(QWidget *parent) :
     ui->mainStackWidget->addWidget(mBlockTableWidget);
     connect(ui->DataMgrBtn, SIGNAL(clicked()), this, SLOT(on_dataMgrBtn_clicked()));
     connect(ui->HqCenterButton, SIGNAL(clicked()), this, SLOT(slotHqCenterBtnClicked()));
+    ui->mainStackWidget->addWidget(new QNorthFlowInfoDisplayWidget(this));
 
     //指数显示
     QHBoxLayout *indexLayout = new QHBoxLayout;
@@ -392,6 +394,7 @@ void Dialog::on_dataMgrBtn_clicked()
     QAndroidListWidget *list = new QAndroidListWidget(this);
     list->addItem(QStringLiteral("陆股通"), DATA_MUTUAL_MARKET);
     list->addItem(QStringLiteral("龙虎榜"), DATA_LHB);
+    list->addItem(QStringLiteral("北向实时"), DATA_NORTH_REAL);
     connect(list, SIGNAL(signalItemClicked(int)), this, SLOT(slotDisplayDataPage(int)));
     QPoint tp = ((QWidget*)ui->DataMgrBtn->parent())->mapToGlobal(ui->DataMgrBtn->geometry().topLeft());
     list->move(0, tp.y() - list->size().height());
@@ -402,9 +405,15 @@ void Dialog::slotDisplayDataPage(int val)
 {
     QAndroidListWidget* widget = qobject_cast<QAndroidListWidget*>(sender());
     if(!widget) return;
-    ui->mainStackWidget->setCurrentWidget(mDataMgrWidget);
-    mDataMgrWidget->setDataType(val);
-    mDataMgrWidget->updateData();
+    if(val == DATA_MUTUAL_MARKET)
+    {
+        ui->mainStackWidget->setCurrentWidget(mDataMgrWidget);
+        mDataMgrWidget->setDataType(val);
+        mDataMgrWidget->updateData();
+    } else if(val == DATA_NORTH_REAL)
+    {
+        ui->mainStackWidget->setCurrentIndex(ui->mainStackWidget->count()-1);
+    }
     widget->hide();
     widget->deleteLater();
 

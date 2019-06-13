@@ -46,7 +46,7 @@ void QIndexFrame::updateVal(double cur, double chg, double chgper, double money)
     ui->chg->setText(QString("").sprintf("%.2f", chg));
     ui->cur->setText(QString("").sprintf("%.2f", cur));
     ui->chgper->setText(QString("").sprintf("%.2f%", chgper));
-    ui->money->setText(QStringLiteral("%1亿").arg(QString::number(money / 10000.0, 'f', 0)));
+    ui->money->setText(QStringLiteral("%1亿").arg(QString::number(money / 100000000.0, 'f', 0)));
     int chgint = (int)(chg*100);
     QString newColor = QString("color:%1").arg(chgint == 0? "black" : chgint > 0? "red":"green");
     QString oldStyleSheet = this->styleSheet();

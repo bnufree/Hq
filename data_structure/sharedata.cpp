@@ -79,7 +79,7 @@ bool ShareData::ShareSort(const ShareData &d1, const ShareData &d2)
         sts = stk_sort_rule == 1? d1.mForeignCap > d2.mForeignCap : d1.mForeignCap < d2.mForeignCap;
         break;
     case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG:
-        sts = stk_sort_rule == 1? d1.mForeignVolChg > d2.mForeignVolChg : d1.mForeignVolChg < d2.mForeignVolChg;
+        sts = stk_sort_rule == 1? d1.mHsgtData.mVolChange > d2.mHsgtData.mVolChange : d1.mHsgtData.mVolChange < d2.mHsgtData.mVolChange;
         break;
     case STK_DISPLAY_SORT_TYPE_FOREIGN_CAP_CHG:
         sts = stk_sort_rule == 1? d1.mForeignCapChg > d2.mForeignCapChg :d1.mForeignCapChg < d2.mForeignCapChg;

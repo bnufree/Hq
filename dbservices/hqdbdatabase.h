@@ -152,6 +152,8 @@ public:
     double getMultiDaysChangePercent(const QString &code, HISTORY_CHANGEPERCENT type );
     double getLastMoney(const QString& code);
     bool   getLastForeignVol(qint64& vol, qint64& vol_chg, const QString& code);
+    //获取指定日期的成交数据
+    bool queryHistoryInfoFromDate(ShareDataList& list, const QString& code, const ShareDate& date);
 
     //股东明细信息信息
     bool updateShareHolder(const ShareHolderList& dataList);
@@ -177,6 +179,8 @@ public:
     bool updateShareHsgtTop10List(const ShareHsgtList& dataList);
     bool queryShareHsgtTop10List(ShareHsgtList& list, const QString& code, const ShareDate& date);
     bool delShareHsgtTop10(const QString& code, const ShareDate& date);
+
+
 
 
 private:

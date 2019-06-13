@@ -700,7 +700,7 @@ bool HQDBDataBase::queryShareHistory(ShareDataList &list, const QString &share_c
     {
         wherelist.append(DBColVal(HQ_TABLE_COL_DATE, end.toString(), HQ_DATA_TEXT, HQ_COMPARE_LESS));
     }
-    QString sql = QString("select * from %1 %2").arg(TABLE_SHARE_HISTORY).arg(wherelist.whereString());
+    QString sql = QString("select * from %1 %2 order by %3 desc").arg(TABLE_SHARE_HISTORY).arg(wherelist.whereString()).arg(HQ_TABLE_COL_DATE);
     QMutexLocker locker(&mSQLMutex);
     if(!mSQLQuery.exec(sql)) return false;
     while (mSQLQuery.next()) {
@@ -813,6 +813,11 @@ bool HQDBDataBase::getLastForeignVol(qint64 &vol, qint64 &vol_chg, const QString
     }
 
     return true;
+}
+
+bool HQDBDataBase::queryHistoryInfoFromDate(ShareDataList& list, const QString& code, const ShareDate& date)
+{
+    return queryShareHistory(list, code, date);
 }
 
 //shareholders

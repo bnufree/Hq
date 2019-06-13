@@ -275,7 +275,6 @@ void QIndexWidget::switchWidget()
     if(row > total_row) row = 1;
     int start_index = (row - 1) * mMaxDisplayFrameCount;
     int end_index = row * mMaxDisplayFrameCount -1;
-    qDebug()<<"index:"<<start_index<<end_index;
     while (this->layout()->count()) {
         QLayoutItem *item =  this->layout()->itemAt(0);
         if(item)
