@@ -146,6 +146,7 @@ public:
     bool delShareBlockInfo(const QString& code);
 
     //历史日线数据更新
+    bool queryShareHistroyNeedUpdateDates(QList<QDate>& list);
     bool updateShareHistory(const ShareDataList& dataList, int mode);
     bool queryShareHistory(ShareDataList& list, const QString& share_code, const ShareDate& start = ShareDate(), const ShareDate& end = ShareDate());
     bool delShareHistory(const QString& share_code, const ShareDate& start, const ShareDate& end);

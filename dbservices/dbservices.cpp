@@ -115,6 +115,7 @@ void HqInfoService::initSignalSlot()
     qRegisterMetaType<BlockDataList>("const BlockDataList&");
     qRegisterMetaType<QMap<QString, BlockDataList> >("const QMap<QString, BlockDataList>&");
     qRegisterMetaType<QMap<QString, BlockData*> >("const QMap<QString, BlockData*>&");
+    qRegisterMetaType<QList<QDate> >("const QList<QDate>&");
 
     connect(this, SIGNAL(signalInitDBTables()), this, SLOT(slotInitDBTables()));    
     connect(this, SIGNAL(signalUpdateShareBasicInfo(ShareDataList)), this, SLOT(slotUpdateShareBasicInfo(ShareDataList)));
@@ -126,8 +127,10 @@ void HqInfoService::initSignalSlot()
 
     connect(this, SIGNAL(signalRecvShareHistoryInfos(ShareDataList, int)),
             this, SLOT(slotRecvShareHistoryInfos(ShareDataList, int)));
-    connect(this, SIGNAL(signalSendShareHistoryUpdateDate(ShareDate)),
-            this, SLOT(slotSendShareHistoryUpdateDate(ShareDate)));
+    connect(this, SIGNAL(signalSendShareHistoryUpdateDate(ShareDate, bool)),
+            this, SLOT(slotSendShareHistoryUpdateDate(ShareDate, bool)));
+    connect(this, SIGNAL(signalQueryShareHistoryUpdateDateList()),
+            this, SLOT(slotQueryShareHistoryUpdateDateList()));
 //    connect(this, SIGNAL(signalSendShareHistoryCloseInfo(ShareDataList)),
 //            this, SLOT(slotSendShareHistoryCloseInfo(ShareDataList)));
 //    connect(this, SIGNAL(signalSendShareHistoryForeignVolInfo(ShareDataList)),
@@ -258,6 +261,7 @@ ShareDate HqInfoService::getLastUpdateDateOfTable(const QString& table)
 
 void HqInfoService::slotRecvShareHistoryInfos(const ShareDataList &list, int mode)
 {
+    qDebug()<<"start update history:"<<list.size();
     if(list.size() > 0)
     {
         QTime t;
@@ -279,13 +283,16 @@ void HqInfoService::slotRecvShareHistoryInfos(const ShareDataList &list, int mod
 //    }
 }
 
-void HqInfoService::slotSendShareHistoryUpdateDate(const ShareDate &date)
+void HqInfoService::slotSendShareHistoryUpdateDate(const ShareDate &date, bool update)
 {
-    if(!mDataBase.updateDBUpdateDate(date, TABLE_SHARE_HISTORY))
+    if(update)
     {
-        qDebug()<<mDataBase.errMsg();
-        emit signalUpdateHistoryInfoFinished();
-        return;
+        if(!mDataBase.updateDBUpdateDate(date, TABLE_SHARE_HISTORY))
+        {
+            qDebug()<<mDataBase.errMsg();
+            emit signalUpdateHistoryInfoFinished();
+            return;
+        }
     }
     //开始统计
     //1)获取当前所有的代码数据
@@ -325,6 +332,80 @@ void HqInfoService::slotSendShareHistoryUpdateDate(const ShareDate &date)
 //        qDebug()<<data->mCode<<data->mHistory.mLastMoney<<data->mHsgtData.mVolTotal<<data->mHsgtData.mVolChange;
     }
 
+}
+
+void HqInfoService::slotQueryShareHistoryUpdateDateList()
+{
+    //获取上一次更新的日期
+    QList<QDate> list;
+    if(!mDataBase.queryShareHistroyNeedUpdateDates(list))
+    {
+        qDebug()<<mDataBase.errMsg();
+        return;
+    }    
+    ShareDate last_update_date = getLastUpdateDateOfHistoryInfo();
+    //检查数据表的更新日期和表的最后一次的日期是否相同，如果不相同，则将数据表的记录删除知道制定的日期
+    if(list.size() > 0)
+    {
+        //清空数据记录
+        if(!mDataBase.delShareHistory("", last_update_date, ShareDate()))
+        {
+            qDebug()<<mDataBase.errMsg();
+            return;
+        }
+    } else
+    {
+        //数据表中没有记录
+        last_update_date.setDate(QDate());
+    }
+    //检查时间是否符合要求
+    ShareDate cur_date = ShareDate::currentDate();
+    ShareDate latest_act_date = ShareDate::latestActiveDay();
+    ShareDate start_check_date = cur_date;
+    if(cur_date == latest_act_date)
+    {
+        //今天是交易日，从今天的前一个交易日开始更新
+        start_check_date = cur_date.previousActiveDay();
+    } else
+    {
+        //今天不是交易日，从最近的交易日开始更新
+        start_check_date = latest_act_date;
+    }
+    //检查数据库最后更新的日期是不是开始更新的check日期，如果是不处理；不是的情况，补足中间的日期
+    QList<QDate> update_list;
+    if(last_update_date.isNull())
+    {
+        last_update_date = ShareDate(QDate::currentDate().addYears(-1));
+        if(last_update_date.isWeekend())
+        {
+            last_update_date = last_update_date.previousActiveDay();
+        }
+    }
+    //补足中间需要更新的时间
+    while(last_update_date != start_check_date)
+    {
+        update_list.append(start_check_date.date());
+        start_check_date = start_check_date.previousActiveDay();
+    }
+    //检查已经更新的时间中是否中间有断开的，吧断开的也一并添加
+    for(int i=0; i<list.size(); i++)
+    {
+        ShareDate cur(list[i]);
+        if(i+1 < list.size())
+        {
+            cur = cur.previousActiveDay();
+            ShareDate next(list[i+1]);
+            while (cur!= next)
+            {
+                update_list.append(cur.date());
+                cur = cur.previousActiveDay();
+            }
+        }
+    }
+
+    qSort(update_list);
+
+    emit signalSendShareHistoryUpdateDateList(update_list);
 }
 
 

@@ -17,13 +17,14 @@ public:
 protected:
     void paintEvent(QPaintEvent *e);
 public slots:
-    void setNorthRealInfo(const QList<NorthBoundData>& list, int mMax);
+    void setNorthRealInfo(const QList<NorthBoundData>& list, int mMax, int mMin);
 public:
     QColor mSH;
     QColor mSZ;
     QColor mTotal;
     QList<NorthBoundData> mDataList;
     int     mMax;
+    int     mMin;
 };
 
 class QNorthFlowInfoDisplayWidget : public QWidget

@@ -32,6 +32,7 @@ signals:
     void signalUpdateHistoryFinished();
 
 public slots:
+    void slotRecvShareHistoryUpdateList(const QList<QDate>& list);
     void slotStartGetHistory();
     void slotUpdateAllShareFromDate(bool deldb, const QDate& date = QDate(2017,3,17));
     void slotUpdateForignVolInfo(const ShareDataList& list);

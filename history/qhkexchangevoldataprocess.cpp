@@ -147,19 +147,21 @@ void QHKExchangeVolDataProcess::getVolofDate(ShareDataList &list, const QDate &d
 
 void QHKExchangeVolDataProcess::run()
 {
-    while(mStartDate <= mEndDate)
+    ShareDataList list;
+    QDate start = mStartDate;
+    while(start <= mEndDate)
     {
-        ShareDataList list;
-        getVolofDate(list, mStartDate);
-        mStartDate = mStartDate.addDays(1);
-        if(mParent)
-        {
-            QMetaObject::invokeMethod(mParent,\
-                                      "slotUpdateForignVolInfo",\
-                                      Qt::DirectConnection,\
-                                      Q_ARG(ShareDataList, list)\
-                                      );
-
-        }
+        getVolofDate(list, start);
+        start = start.addDays(1);
+    }
+    qDebug()<<__FUNCTION__<<mParent;
+    if(mParent)
+    {
+        qDebug()<<"date:"<<mStartDate.toString("yyyy-MM-dd")<<mEndDate.toString("yyyy-MM-dd")<<list.size();
+        QMetaObject::invokeMethod(mParent,\
+                                  "slotUpdateForignVolInfo",\
+                                  Qt::DirectConnection,\
+                                  Q_ARG(ShareDataList, list)\
+                                  );
     }
 }

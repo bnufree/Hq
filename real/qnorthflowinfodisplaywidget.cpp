@@ -1,6 +1,7 @@
 #include "qnorthflowinfodisplaywidget.h"
 #include "ui_qnorthflowinfodisplaywidget.h"
 #include <QPainter>
+#include <QDebug>
 
 
 NorthFlowCurveWidget::NorthFlowCurveWidget(QWidget *parent) :
@@ -10,7 +11,8 @@ NorthFlowCurveWidget::NorthFlowCurveWidget(QWidget *parent) :
     mSZ.setNamedColor("#4e72b8");
     mTotal.setNamedColor("#45b97c");
     mDataList.clear();
-    mMax = 10;
+    mMax = 1;
+    mMin = 0;
 }
 
 void NorthFlowCurveWidget::setLineColor(const QColor &sh, const QColor &sz, const QColor &total)
@@ -21,10 +23,11 @@ void NorthFlowCurveWidget::setLineColor(const QColor &sh, const QColor &sz, cons
     update();
 }
 
-void NorthFlowCurveWidget::setNorthRealInfo(const QList<NorthBoundData> &list, int max)
+void NorthFlowCurveWidget::setNorthRealInfo(const QList<NorthBoundData> &list, int max, int min)
 {
     mDataList = list;
     if(max > mMax) mMax = max;
+    mMin = min;
     update();
 }
 
@@ -73,13 +76,13 @@ void NorthFlowCurveWidget::paintEvent(QPaintEvent *e)
     painters.restore();
 
     //开始Y方向的刻度
-    double val_per_pitch = mMax * 2.0 / 10;
+    double val_per_pitch = (mMax - mMin) * 1.0 / 10;
     double y_pitch = curve_rect.height() * 1.0 / 10;
     for(int i=0; i<11; i++)
     {
         double left_x = curve_rect.left();
         double left_y = curve_rect.bottom() - i * y_pitch;
-        int val = (-1) * mMax + i * val_per_pitch;
+        double val = mMin + i * val_per_pitch;
         //开始画坐标刻度，上下各5个，共11个刻度
         painters.save();
         pen.setColor(Qt::lightGray);
@@ -95,8 +98,9 @@ void NorthFlowCurveWidget::paintEvent(QPaintEvent *e)
         QRect text_rect(0, 0, yTextWidth, xTextHeight);
         text_rect.moveLeft(curve_rect.left() - yTextWidth);
         text_rect.moveBottom(left_y + 0.5 * xTextHeight);
-        painters.drawText(text_rect, Qt::AlignRight | Qt::AlignVCenter, QString::number(val));
+        painters.drawText(text_rect, Qt::AlignRight | Qt::AlignVCenter, QString::number(val, 'f', 1));
         painters.restore();
+//        qDebug()<<"draw value:"<<mMax<<mMin<<val;
 
     }
 
@@ -104,7 +108,7 @@ void NorthFlowCurveWidget::paintEvent(QPaintEvent *e)
     QPolygonF sh, sz, total;
     QTime start_time(9, 30, 0);
     double x_px =  curve_rect.width() * 1.0 / (4 * 3600);
-    double y_px =  curve_rect.height() * 1.0 / (2 * mMax);
+    double y_px =  curve_rect.height() * 1.0 / (mMax-mMin);
     for(int i=0; i<mDataList.size(); i++)
     {
         NorthBoundData data = mDataList[i];
@@ -117,9 +121,9 @@ void NorthFlowCurveWidget::paintEvent(QPaintEvent *e)
         if(cur.hour() == 15 && cur.minute() > 1) continue;
         if(cur.hour() > 12) time_elapsed -= (3600 + 1800); // form 11:30 - 13;00
         double x = curve_rect.left() + time_elapsed * x_px;
-        double sh_y = curve_rect.bottom() - (data.sh_flow + mMax) * y_px;
-        double sz_y = curve_rect.bottom() - (data.sz_flow + mMax) * y_px;
-        double total_y = curve_rect.bottom() - (data.total_flow + mMax) * y_px;
+        double sh_y = curve_rect.bottom() - (data.sh_flow - mMin) * y_px;
+        double sz_y = curve_rect.bottom() - (data.sz_flow - mMin) * y_px;
+        double total_y = curve_rect.bottom() - (data.total_flow - mMin) * y_px;
         sh.append(QPointF(x, sh_y));
         sz.append(QPointF(x, sz_y));
         total.append(QPointF(x, total_y));
@@ -156,7 +160,7 @@ QNorthFlowInfoDisplayWidget::QNorthFlowInfoDisplayWidget(QWidget *parent) :
     ui->sz->setStyleSheet(QString("background-color:%1").arg(mDisplayWidget->mSZ.name()));
     ui->north->setStyleSheet(QString("background-color:%1").arg(mDisplayWidget->mTotal.name()));
     mRealInfoThread = new QSinaNorthRealInfoThread;
-    connect(mRealInfoThread, SIGNAL(signalUpdateNorthBoundList(QList<NorthBoundData>, int)), mDisplayWidget, SLOT(setNorthRealInfo(QList<NorthBoundData>,int)));
+    connect(mRealInfoThread, SIGNAL(signalUpdateNorthBoundList(QList<NorthBoundData>, int, int)), mDisplayWidget, SLOT(setNorthRealInfo(QList<NorthBoundData>,int, int)));
     mRealInfoThread->start();
 }
 

@@ -21,7 +21,7 @@ public:
     void run();
 
 signals:
-    void    signalUpdateNorthBoundList(const QList<NorthBoundData> &list, int max);
+    void    signalUpdateNorthBoundList(const QList<NorthBoundData> &list, int max, int min);
 public slots:
 };
 

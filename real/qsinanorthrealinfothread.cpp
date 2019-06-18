@@ -36,7 +36,8 @@ void QSinaNorthRealInfoThread::run()
                         {
                             //开始正式解析
                             QList<NorthBoundData> list;
-                            int max = 10;
+                            int max = 5;
+                            int min = 0;
                             QJsonArray array = data.toArray();
                             for(int i=0; i<array.size(); i++)
                             {
@@ -54,9 +55,31 @@ void QSinaNorthRealInfoThread::run()
                                 {
                                     max = (ceil(north.total_flow) / 10 + 1) *10;
                                 }
+                                if(north.sh_flow > max)
+                                {
+                                    max = (ceil(north.sh_flow) / 10 + 1) *10;
+                                }
+                                if(north.sz_flow > max)
+                                {
+                                    max = (ceil(north.sz_flow) / 10 + 1) *10;
+                                }
+
+                                if(north.total_flow < min)
+                                {
+                                    min =  (-1) * (ceil(fabs(north.total_flow)) / 10 + 1) *10;
+                                }
+                                if(north.sh_flow < min)
+                                {
+                                    min = (-1) * (ceil(fabs(north.sh_flow)) / 10 + 1) *10;
+                                }
+                                if(north.sz_flow < min)
+                                {
+                                    min = (-1) * (ceil(fabs(north.sz_flow)) / 10 + 1) *10;
+                                }
+
                                 list.append(north);
                             }
-                            emit signalUpdateNorthBoundList(list, max);
+                            emit signalUpdateNorthBoundList(list, max, min);
                         }
                     }
                 }

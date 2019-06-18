@@ -82,6 +82,25 @@ public:
     void setDate(const QDate& date) {mDate = date;}
     void    next() {mDate = mDate.addDays(1);}
     void    previous() {mDate = mDate.addDays(-1);}
+    ShareDate nextActiveDay()
+    {
+        ShareDate nextDay(this->date().addDays(1));
+        while (nextDay.isWeekend())
+        {
+            nextDay.next();
+        }
+        return nextDay;
+    }
+
+    ShareDate previousActiveDay()
+    {
+        ShareDate preDay(this->date().addDays(-1));
+        while (preDay.isWeekend())
+        {
+            preDay.previous();
+        }
+        return preDay;
+    }
 
 private:
     QDate       mDate;

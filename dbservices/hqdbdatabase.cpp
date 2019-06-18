@@ -94,6 +94,12 @@ QString DBColValList::whereString() const
                     }
                     valStrlist.append(QString("%1 in () ").arg(data.mColName).arg(resList.join(",")));
                 }
+            } else if(data.mColCompare == HQ_COMPARE_GREAT)
+            {
+                valStrlist.append(QString("%1 > %2").arg(data.mColName).arg(data.mColVal.mValue.toString()));
+            } else
+            {
+                valStrlist.append(QString("%1 < %2").arg(data.mColName).arg(data.mColVal.mValue.toString()));
             }
         } else if(data.mColVal.mType == HQ_DATA_INT)
         {
@@ -628,6 +634,17 @@ bool HQDBDataBase::createShareHistoryInfoTable(/*const QString& code*/)
     return createTable(TABLE_SHARE_HISTORY, colist);
 }
 
+bool HQDBDataBase::queryShareHistroyNeedUpdateDates(QList<QDate> &list)
+{
+    QString sql = QString("select distinct date from %1 order by date desc").arg(TABLE_SHARE_HISTORY);
+    QMutexLocker locker(&mSQLMutex);
+    if(!mSQLQuery.exec(sql)) return false;
+    while (mSQLQuery.next()) {
+        list.append(ShareDateTime::fromString(mSQLQuery.value(HQ_TABLE_COL_DATE).toString()).date());
+    }
+    return true;
+}
+
 bool HQDBDataBase::updateShareHistory(const ShareDataList &dataList, int mode)
 {
     if(dataList.size() == 0) return true;
@@ -728,7 +745,7 @@ bool HQDBDataBase::queryShareHistory(ShareDataList &list, const QString &share_c
 
 bool HQDBDataBase::delShareHistory(const QString &share_code, const ShareDate &start, const ShareDate &end)
 {
-    if(share_code.length() == 0) return false;
+    //if(share_code.length() == 0) return false;
     DBColValList wherelist;
     if(!start.isNull())
     {
@@ -1250,7 +1267,8 @@ bool HQDBDataBase::updateTable(const QString& tableName, const DBColValList& val
 bool HQDBDataBase::deleteRecord(const QString &table, const DBColValList &list)
 {
     QMutexLocker locker(&mSQLMutex);
-    if(!mSQLQuery.exec(QString("delete from %1 %2").arg(table).arg(list.whereString()))) return false;
+    QString sql = QString("delete from %1 %2").arg(table).arg(list.whereString());
+    if(!mSQLQuery.exec(sql)) return false;
     return true;
 }
 

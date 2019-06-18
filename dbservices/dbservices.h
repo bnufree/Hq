@@ -83,7 +83,9 @@ signals:
     void signalSendShareHistoryZjlxInfo(const ShareDataList &list);
 
     void signalRecvShareHistoryInfos(const ShareDataList& list, int mode);
-    void signalSendShareHistoryUpdateDate(const ShareDate& date);
+    void signalSendShareHistoryUpdateDate(const ShareDate& date, bool update);
+    void signalQueryShareHistoryUpdateDateList();
+    void signalSendShareHistoryUpdateDateList(const QList<QDate>& list);
 
     void signalQueryShareHistoryLastDate(const QString& code);
     void signalSendShareHistoryLastDate(const QString& code, const QDate& date);
@@ -136,7 +138,8 @@ public slots:
     void slotInitDBTables();
     //历史数据
     void slotRecvShareHistoryInfos(const ShareDataList& list, int mode);
-    void slotSendShareHistoryUpdateDate(const ShareDate& date);
+    void slotSendShareHistoryUpdateDate(const ShareDate& date, bool update);
+    void slotQueryShareHistoryUpdateDateList();
 //    void slotSendShareHistoryCloseInfo(const ShareDataList& list);
 //    void slotSendShareHistoryForeignVolInfo(const ShareDataList &list);
 //    void slotSendShareHistoryRzrqInfo(const ShareDataList &list);
