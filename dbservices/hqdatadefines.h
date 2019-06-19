@@ -19,6 +19,7 @@
 #define         TABLE_PROFIT                        "share_profit"
 #define         TABLE_BLOCK_SHARE                   "block_share"
 #define         TABLE_SHARE_HISTORY                 "share_history"
+#define         TABLE_CLOSE_DATE                    "close_date"
 
 //列名
 #define         HQ_TABLE_COL_ID                 "id"
@@ -50,6 +51,7 @@
 #define         HQ_TABLE_COL_HSGT_TOP10_FLAG             "hsgt"
 #define         HQ_TABLE_COL_HSGT_HAVE       "foreign_amount"
 #define         HQ_TABLE_COL_HSGT_HAVE_PERCENT  "foreign_percent"
+#define         HQ_TABLE_COL_HSGT_HAVE_CHANGE  "foreign_change"
 
 #define         HQ_TABLE_COL_HOLDER_CODE                "holder_code"
 #define         HQ_TABLE_COL_HOLDER_NAME                "holder_name"

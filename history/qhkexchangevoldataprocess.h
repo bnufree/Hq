@@ -19,6 +19,7 @@ public:
     void getMktVolInfo(QStringList& list, const QDate& date, const QString& fileName);
 private:
     void getVolofDate(ShareDataList& list, const QDate& date);
+    void getVolofDateFromEastMoney(ShareDataList& list, const QDate& date);
 private:
     QDate       mStartDate;
     QDate       mEndDate;

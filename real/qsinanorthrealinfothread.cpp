@@ -53,28 +53,28 @@ void QSinaNorthRealInfoThread::run()
                                 north.time.setTime(time);
                                 if(north.total_flow > max)
                                 {
-                                    max = (ceil(north.total_flow) / 10 + 1) *10;
+                                    max = (ceil(north.total_flow) / 2 + 1) *2;
                                 }
                                 if(north.sh_flow > max)
                                 {
-                                    max = (ceil(north.sh_flow) / 10 + 1) *10;
+                                    max = (ceil(north.sh_flow) / 2 + 1) *2;
                                 }
                                 if(north.sz_flow > max)
                                 {
-                                    max = (ceil(north.sz_flow) / 10 + 1) *10;
+                                    max = (ceil(north.sz_flow) / 2 + 1) *2;
                                 }
 
                                 if(north.total_flow < min)
                                 {
-                                    min =  (-1) * (ceil(fabs(north.total_flow)) / 10 + 1) *10;
+                                    min =  (-1) * (ceil(fabs(north.total_flow)) / 2 + 1) *2;
                                 }
                                 if(north.sh_flow < min)
                                 {
-                                    min = (-1) * (ceil(fabs(north.sh_flow)) / 10 + 1) *10;
+                                    min = (-1) * (ceil(fabs(north.sh_flow)) / 2 + 1) *2;
                                 }
                                 if(north.sz_flow < min)
                                 {
-                                    min = (-1) * (ceil(fabs(north.sz_flow)) / 10 + 1) *10;
+                                    min = (-1) * (ceil(fabs(north.sz_flow)) / 2 + 1) *2;
                                 }
 
                                 list.append(north);

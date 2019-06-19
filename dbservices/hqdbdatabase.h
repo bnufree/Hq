@@ -146,7 +146,7 @@ public:
     bool delShareBlockInfo(const QString& code);
 
     //历史日线数据更新
-    bool queryShareHistroyNeedUpdateDates(QList<QDate>& list);
+    bool queryShareHistroyUpdatedDates(QList<QDate>& list);
     bool updateShareHistory(const ShareDataList& dataList, int mode);
     bool queryShareHistory(ShareDataList& list, const QString& share_code, const ShareDate& start = ShareDate(), const ShareDate& end = ShareDate());
     bool delShareHistory(const QString& share_code, const ShareDate& start, const ShareDate& end);
@@ -181,6 +181,10 @@ public:
     bool queryShareHsgtTop10List(ShareHsgtList& list, const QString& code, const ShareDate& date);
     bool delShareHsgtTop10(const QString& code, const ShareDate& date);
 
+    //休市假期更新
+    bool updateShareCloseDates(const QList<QDate>& list);
+    bool queryShareCloseDates(QList<QDate>& list);
+
 
 
 
@@ -204,6 +208,8 @@ private:
     bool createShareBonusIbfoTable();
     //沪深港TOP10
     bool createShareHsgTop10Table();
+    //
+    bool createCloseDateTable();
     //各个表的最后更新日期
     bool createDBUpdateDateTable();
 

@@ -131,11 +131,14 @@ signals:
     void signalUpdateShareBonusInfo(const ShareBonusList& list);
     void signalQueryShareFHSP(const QString& code = QString(), const ShareDate& date = ShareDate());
 
+    void signalUpdateShareCloseDate(const QList<QDate>& list );
+
 public slots:
     void slotSearchCodesOfText(const QString &text);
     void slotSetFavCode(const QString& code);
     void slotSaveFavCode(const QString& code, bool fav);
     void slotInitDBTables();
+    void slotUpdateShareCloseDate(const QList<QDate>& list);
     //历史数据
     void slotRecvShareHistoryInfos(const ShareDataList& list, int mode);
     void slotSendShareHistoryUpdateDate(const ShareDate& date, bool update);
@@ -217,6 +220,7 @@ private:    //本类使用的变量
     QStringList                 mFavCodeList;
     QStringList                 mClosedDateList;
     int                         mHistoryInfoCount;
+    QList<QDate>                mShareCloseDateList;
 };
 
 #endif // DBSERVICE_H

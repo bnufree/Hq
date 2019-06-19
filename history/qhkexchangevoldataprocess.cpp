@@ -4,9 +4,14 @@
 #include <QRegularExpression>
 #include "utils/comdatadefines.h"
 #include <QTextCodec>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonParseError>
 
 #define     POST_VAL        "__VIEWSTATE=%2FwEPDwUJNjIxMTYzMDAwZGSFj8kdzCLeVLiJkFRvN5rjsPotqw%3D%3D&__VIEWSTATEGENERATOR=3C67932C&__EVENTVALIDATION=%2FwEdAAdbi0fj%2BZSDYaSP61MAVoEdVobCVrNyCM2j%2BbEk3ygqmn1KZjrCXCJtWs9HrcHg6Q64ro36uTSn%2FZ2SUlkm9HsG7WOv0RDD9teZWjlyl84iRMtpPncyBi1FXkZsaSW6dwqO1N1XNFmfsMXJasjxX85ju3P1WAPUeweM%2Fr0%2FuwwyYLgN1B8%3D&today=TODAY_DATE&sortBy=stockcode&sortDirection=asc&alertMsg=&txtShareholdingDate=TXTSHAREDATE&btnSearch=Search"
 #define     HK_URL      "http://www.hkexnews.hk/sdw/search/mutualmarket.aspx?t=%1"
+#define     EASTMONEY_URL "http://dcfm.eastmoney.com//em_mutisvcexpandinterface/api/js/get?type=HSGTHDSTA&token=70f12f2f4f091e459a279469fe49eca5&st=SHAREHOLDPRICE&sr=-1&p=%1&ps=100000&js={pages:(tp),data:(x)}&filter=(MARKET%20in%20(%27001%27,%27003%27))(HDDATE=^%2^)&rt=52030379"
 
 QHKExchangeVolDataProcess::QHKExchangeVolDataProcess(const QDate& start, const QDate& end, QObject* parent) : QRunnable()
 {
@@ -120,6 +125,46 @@ void QHKExchangeVolDataProcess::getMktVolInfo(QStringList& list, const QDate& da
     return ;
 }
 
+void QHKExchangeVolDataProcess::getVolofDateFromEastMoney(ShareDataList &list, const QDate &date)
+{
+    int page = 1;
+    int totalpage = 1;
+    while (page <= totalpage) {
+        QByteArray value = QHttpGet::getContentOfURL(QString(EASTMONEY_URL).arg(page).arg(date.toString("yyyy-MM-dd")));
+        value.replace("pages", "\"pages\"");
+        value.replace("data", "\"data\"");
+        page++;
+        QJsonParseError err;
+        QJsonDocument doc = QJsonDocument::fromJson(value, &err);
+        if(err.error != QJsonParseError::NoError)
+        {
+            qDebug()<<"error:"<<err.errorString();
+            continue;
+        }
+        if(!doc.isObject()) continue;
+        QJsonObject obj = doc.object();
+        totalpage = obj.value("pages").toInt();
+        QJsonArray array = obj.value("data").toArray();
+        for(int i=0; i<array.size(); i++)
+        {
+            QJsonObject sub = array[i].toObject();
+            ShareData data;
+            data.mCode = sub.value("SCODE").toString();
+            data.mName = sub.value("SNAME").toString();
+            data.mTime.setDate(QDate::fromString(sub.value("HDDATE").toString().left(10), "yyyy-MM-dd"));
+            data.mHsgtData.mVolTotal = qint64(sub.value("SHAREHOLDSUM").toDouble());
+            data.mHsgtData.mVolMutablePercent = sub.value("SHARESRATE").toDouble();
+            data.mHsgtData.mVolChange = qint64(sub.value("ShareHoldSumChg").toDouble());
+            data.mClose = sub.value("CLOSEPRICE").toDouble();
+            data.mChgPercent = sub.value("ZDF").toDouble();
+            list.append(data);
+
+        }
+
+    }
+    return ;
+}
+
 void QHKExchangeVolDataProcess::getVolofDate(ShareDataList &list, const QDate &date)
 {
     int errorNUm = 0;
@@ -151,7 +196,8 @@ void QHKExchangeVolDataProcess::run()
     QDate start = mStartDate;
     while(start <= mEndDate)
     {
-        getVolofDate(list, start);
+        //getVolofDate(list, start);
+        getVolofDateFromEastMoney(list, start);
         start = start.addDays(1);
     }
     qDebug()<<__FUNCTION__<<mParent;

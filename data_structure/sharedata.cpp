@@ -91,7 +91,10 @@ bool ShareData::ShareSort(const ShareData &d1, const ShareData &d2)
         sts = stk_sort_rule == 1? d1.mHistory.mLast10DaysChgPers > d2.mHistory.mLast10DaysChgPers : d1.mHistory.mLast10DaysChgPers < d2.mHistory.mLast10DaysChgPers;
         break;
     case STK_DISPLAY_SORT_TYPE_LAST_MONTH:
-        sts = stk_sort_rule == 1?  d1.mHistory.mLastMonthChgPers > d2.mHistory.mLastMonthChgPers : d1.mHistory.mLastMonthChgPers < d2.mHistory.mLastMonthChgPers;
+        sts = stk_sort_rule == 1?  d1.mHistory.mChgPersFromMonth > d2.mHistory.mChgPersFromMonth : d1.mHistory.mChgPersFromMonth < d2.mHistory.mChgPersFromMonth;
+        break;
+    case STK_DISPLAY_SORT_TYPE_LAST_WEEK:
+        sts = stk_sort_rule == 1?  d1.mHistory.mChgPersFromWeek > d2.mHistory.mChgPersFromWeek : d1.mHistory.mChgPersFromWeek < d2.mHistory.mChgPersFromWeek;
         break;
     case STK_DISPLAY_SORT_TYPE_LAST_YEAR:
         sts = stk_sort_rule == 1? d1.mHistory.mChgPersFromYear > d2.mHistory.mChgPersFromYear : d1.mHistory.mChgPersFromYear < d2.mHistory.mChgPersFromYear;

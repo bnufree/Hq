@@ -55,6 +55,7 @@ private:
     int                 mHistoryFileNum;
     int                 mCountCodeNum;
     QStringList         mDates;
+    QList<QDate>        mTotalDateList;
 };
 
 #endif // QSHAREHISTORYINFOMGR_H

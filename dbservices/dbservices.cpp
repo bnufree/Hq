@@ -55,6 +55,7 @@ void HqInfoService::slotInitDBTables()
     {
 //        initBlockData();
 //        initShareData();
+        mDataBase.queryShareCloseDates(mShareCloseDateList);
         emit signalDbInitFinished();
     } else
     {
@@ -117,6 +118,7 @@ void HqInfoService::initSignalSlot()
     qRegisterMetaType<QMap<QString, BlockData*> >("const QMap<QString, BlockData*>&");
     qRegisterMetaType<QList<QDate> >("const QList<QDate>&");
 
+     connect(this, SIGNAL(signalUpdateShareCloseDate(QList<QDate>)), this, SLOT(slotUpdateShareCloseDate(QList<QDate>)));
     connect(this, SIGNAL(signalInitDBTables()), this, SLOT(slotInitDBTables()));    
     connect(this, SIGNAL(signalUpdateShareBasicInfo(ShareDataList)), this, SLOT(slotUpdateShareBasicInfo(ShareDataList)));
     connect(this, SIGNAL(signalUpdateShareBonusInfo(ShareBonusList)), this, SLOT(slotUpdateShareBonusInfo(ShareBonusList)));
@@ -311,25 +313,24 @@ void HqInfoService::slotSendShareHistoryUpdateDate(const ShareDate &date, bool u
         data->mHistory.mLastClose = list.first().mClose;
         data->mHsgtData.mVolTotal = list.first().mHsgtData.mVolTotal;
         data->mHsgtData.mVolMutablePercent = list.first().mHsgtData.mVolMutablePercent;
+        data->mHsgtData.mVolChange = list.first().mHsgtData.mVolChange;
         for(int i=0; i<list.size(); i++)
         {
             ShareData temp = list[i];
             if(temp.mTime.toString() >= year_day.toString()){
-                data->mHistory.mChgPersFromYear *= (1+temp.mChgPercent * 0.01);
+                data->mHistory.mChgPersFromYear_BAK *= (1+temp.mChgPercent * 0.01);
             }
             if(temp.mTime.toString() >= month_date.toString()){
-                data->mHistory.mChgPersFromMonth *= (1+temp.mChgPercent * 0.01);
+                data->mHistory.mChgPersFromMonth_BAK *= (1+temp.mChgPercent * 0.01);
             }
             if(temp.mTime.toString() >= week_date.toString()){
-                data->mHistory.mChgPersFromWeek *= (1+temp.mChgPercent * 0.01);
+                data->mHistory.mChgPersFromWeek_BAK *= (1+temp.mChgPercent * 0.01);
             }
         }
-        //获取外资持股情况变化
-        if(list.size() > 2)
-        {
-            data->mHsgtData.mVolChange = list[0].mHsgtData.mVolTotal - list[1].mHsgtData.mVolTotal;
-        }
-//        qDebug()<<data->mCode<<data->mHistory.mLastMoney<<data->mHsgtData.mVolTotal<<data->mHsgtData.mVolChange;
+//        data->mHistory.mChgPersFromMonth -= 1.0;
+//        data->mHistory.mChgPersFromWeek -= 1.0;
+//        data->mHistory.mChgPersFromYear -= 1.0;
+//        qDebug()<<data->mCode<<data->mName<<data->mHistory.mChgPersFromWeek<<data->mHistory.mChgPersFromMonth<<data->mHistory.mChgPersFromYear;
     }
 
 }
@@ -338,7 +339,7 @@ void HqInfoService::slotQueryShareHistoryUpdateDateList()
 {
     //获取上一次更新的日期
     QList<QDate> list;
-    if(!mDataBase.queryShareHistroyNeedUpdateDates(list))
+    if(!mDataBase.queryShareHistroyUpdatedDates(list))
     {
         qDebug()<<mDataBase.errMsg();
         return;
@@ -348,10 +349,13 @@ void HqInfoService::slotQueryShareHistoryUpdateDateList()
     if(list.size() > 0)
     {
         //清空数据记录
-        if(!mDataBase.delShareHistory("", last_update_date, ShareDate()))
+        if(!last_update_date.isNull())
         {
-            qDebug()<<mDataBase.errMsg();
-            return;
+            if( !mDataBase.delShareHistory("", last_update_date, ShareDate()))
+            {
+                qDebug()<<mDataBase.errMsg();
+                return;
+            }
         }
     } else
     {
@@ -384,7 +388,8 @@ void HqInfoService::slotQueryShareHistoryUpdateDateList()
     //补足中间需要更新的时间
     while(last_update_date != start_check_date)
     {
-        update_list.append(start_check_date.date());
+        if(!mShareCloseDateList.contains(start_check_date.date()))
+            update_list.append(start_check_date.date());
         start_check_date = start_check_date.previousActiveDay();
     }
     //检查已经更新的时间中是否中间有断开的，吧断开的也一并添加
@@ -397,7 +402,10 @@ void HqInfoService::slotQueryShareHistoryUpdateDateList()
             ShareDate next(list[i+1]);
             while (cur!= next)
             {
-                update_list.append(cur.date());
+                if(!mShareCloseDateList.contains(cur.date()))
+                {
+                    update_list.append(cur.date());
+                }
                 cur = cur.previousActiveDay();
             }
         }
@@ -489,7 +497,7 @@ void HqInfoService::slotUpdateShareinfoWithHistory(const QString& code,\
     data.mHistory.mLast3DaysChgPers = last3Change;
     data.mHistory.mLast5DaysChgPers = last5Change;
     data.mHistory.mLast10DaysChgPers = last10Change;
-    data.mHistory.mLastMonthChgPers = lastMonthChange;
+    //data.mHistory.mLastMonthChgPers = lastMonthChange;
     data.mHistory.mChgPersFromYear = lastYearChange;
     data.mHsgtData.mVolTotal = vol;
     data.mHsgtData.mVolChange = vol_chnage;
@@ -607,6 +615,17 @@ void HqInfoService::slotQueryShareFinanceList(const QStringList& codes)
         }
     }
 
+}
+
+void HqInfoService::slotUpdateShareCloseDate(const QList<QDate> &list)
+{
+    if(!mDataBase.updateShareCloseDates(list))
+    {
+        qDebug()<<mDataBase.errMsg();
+        return;
+    }
+    mShareCloseDateList.clear();
+    mDataBase.queryShareCloseDates(mShareCloseDateList);
 }
 
 void HqInfoService::slotQueryShareFHSP(const QString &code, const ShareDate &date)

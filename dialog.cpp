@@ -105,9 +105,6 @@ Dialog::Dialog(QWidget *parent) :
 //    connect(shotcut3, SIGNAL(activated()), this, SLOT(slotDisplayShareMini()));
     //    setHook(this);
 #endif
-
-
-
     //
     mTaskMgr = new HQTaskMagrCenter;
     connect(mShareTableWidget, SIGNAL(signalSetFavCode(QString)), mTaskMgr, SIGNAL(signalSetFavCode(QString)));

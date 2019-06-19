@@ -102,6 +102,7 @@ void HqTableWidget::setHeaders(const TableColDataList &list)
         {
             this->setColumnHidden(i, true);
         }
+        qDebug()<<"col:"<<mColDataList[i].mColStr<<mColDataList[i].mIsDisplay<<this->isColumnHidden(i);
     }
 
     insertContextMenu(menu);
@@ -120,7 +121,7 @@ void HqTableWidget::slotSetColDisplay(bool isDisplay)
     if(!act) return;
     TableColData *data = (TableColData*)(act->data().value<void*>());
     if(!data) return;
-    this->setColumnHidden(data->mColNum, data->mIsDisplay);
+    this->setColumnHidden(data->mColNum, !(data->mIsDisplay));
     data->mIsDisplay = !(data->mIsDisplay);
 }
 

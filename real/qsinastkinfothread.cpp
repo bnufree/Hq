@@ -127,6 +127,9 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
         }
         data->mForeignCap = data->mHsgtData.mVolTotal * data->mCur ;
         data->mForeignCapChg = data->mHsgtData.mVolChange * data->mCur ;
+        data->mHistory.mChgPersFromWeek = (data->mHistory.mChgPersFromWeek_BAK * (1+data->mChgPercent * 0.01) -1) * 100;
+        data->mHistory.mChgPersFromMonth = (data->mHistory.mChgPersFromMonth_BAK  * (1+data->mChgPercent * 0.01) -1) * 100;
+        data->mHistory.mChgPersFromYear =  (data->mHistory.mChgPersFromYear_BAK * (1+data->mChgPercent * 0.01) -1) * 100;
 //        data->mUpdateTime = QDateTime::currentMSecsSinceEpoch();
         datalist.append(*data);
     }

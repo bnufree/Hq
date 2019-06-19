@@ -48,11 +48,21 @@ struct HistoryInfo{
     double                  mLast3DaysChgPers;
     double                  mLast5DaysChgPers;
     double                  mLast10DaysChgPers;
-    double                  mLastMonthChgPers;
+    //double                  mLastMonthChgPers;
     double                  mChgPersFromYear;
     double                  mChgPersFromWeek;
     double                  mChgPersFromMonth;
+    double                  mChgPersFromYear_BAK;
+    double                  mChgPersFromWeek_BAK;
+    double                  mChgPersFromMonth_BAK;
     double                  mLastClose;
+
+    HistoryInfo()
+    {
+        mChgPersFromYear_BAK = 1.0;
+        mChgPersFromWeek_BAK = 1.0;
+        mChgPersFromMonth_BAK = 1.0;
+    }
 };
 
 enum Share_Basic_Update_Mode{
