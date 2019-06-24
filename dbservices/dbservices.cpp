@@ -327,6 +327,11 @@ void HqInfoService::slotSendShareHistoryUpdateDate(const ShareDate &date, bool u
                 data->mHistory.mChgPersFromWeek_BAK *= (1+temp.mChgPercent * 0.01);
             }
         }
+        if(list.size() > 2)
+        {
+            list = list.mid(0, 2);
+            data->mHsgtData.mVolChange = list[1].mHsgtData.mVolTotal - list[0].mHsgtData.mVolTotal;
+        }
 //        data->mHistory.mChgPersFromMonth -= 1.0;
 //        data->mHistory.mChgPersFromWeek -= 1.0;
 //        data->mHistory.mChgPersFromYear -= 1.0;

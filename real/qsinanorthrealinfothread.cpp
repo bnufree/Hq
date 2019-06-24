@@ -5,6 +5,7 @@
 #include <QJsonValue>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <math.h>
 
 #define         LGT_SH_CODE         "HK_SH"
 #define         LGT_SZ_CODE         "HK_SZ"
