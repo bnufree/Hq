@@ -220,7 +220,7 @@ private:    //本类使用的变量
     QStringList                 mFavCodeList;
     QStringList                 mClosedDateList;
     int                         mHistoryInfoCount;
-    QList<QDate>                mShareCloseDateList;
+    //QList<QDate>                mShareCloseDateList;
 };
 
 #endif // DBSERVICE_H

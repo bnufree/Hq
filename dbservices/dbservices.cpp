@@ -1,4 +1,4 @@
-#include <QDebug>
+﻿#include <QDebug>
 #include <QSharedPointer>
 #include <QSqlError>
 #include <QDir>
@@ -55,7 +55,11 @@ void HqInfoService::slotInitDBTables()
     {
 //        initBlockData();
 //        initShareData();
-        mDataBase.queryShareCloseDates(mShareCloseDateList);
+        QList<QDate> list;
+        if(mDataBase.queryShareCloseDates(list))
+        {
+            ShareDate::setUnWorkingDay(list);
+        }
         emit signalDbInitFinished();
     } else
     {
@@ -624,13 +628,20 @@ void HqInfoService::slotQueryShareFinanceList(const QStringList& codes)
 
 void HqInfoService::slotUpdateShareCloseDate(const QList<QDate> &list)
 {
-    if(!mDataBase.updateShareCloseDates(list))
+    if(list.size() > 0)
     {
-        qDebug()<<mDataBase.errMsg();
-        return;
+        if(!mDataBase.updateShareCloseDates(list))
+        {
+            qDebug()<<mDataBase.errMsg();
+            return;
+        }
+
+        QList<QDate> list;
+        if(mDataBase.queryShareCloseDates(list))
+        {
+            ShareDate::setUnWorkingDay(list);
+        }
     }
-    mShareCloseDateList.clear();
-    mDataBase.queryShareCloseDates(mShareCloseDateList);
 }
 
 void HqInfoService::slotQueryShareFHSP(const QString &code, const ShareDate &date)

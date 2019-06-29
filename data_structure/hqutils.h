@@ -56,10 +56,13 @@ public:
     {
         return ShareDate(time_t);
     }
-    QString toString() const{
+
+    QString toString(const QString& format = "yyyy-MM-dd")
+    {
         if(toTime_t() == 0) return "-";
-        return mDate.toString("yyyy-MM-dd");
+        return mDate.toString(format);
     }
+
     static ShareDate fromString(const QString& str)
     {
         return ShareDate(QDate::fromString(str, "yyyy-MM-dd"));
@@ -72,7 +75,7 @@ public:
     bool    isNull() const {return mDate.isNull();}
     qint64  mSecs() const {return QDateTime(mDate).toMSecsSinceEpoch();}
     bool    isWeekend() const {return mDate.dayOfWeek() == 6 || mDate.dayOfWeek() == 7;}
-    static ShareDate latestActiveDay()
+    static ShareDate latestWorkDay()
     {
         ShareDate date = ShareDate::currentDate();
         if(!date.isWeekend()) return date;
@@ -82,29 +85,41 @@ public:
     void setDate(const QDate& date) {mDate = date;}
     void    next() {mDate = mDate.addDays(1);}
     void    previous() {mDate = mDate.addDays(-1);}
-    ShareDate nextActiveDay()
+    ShareDate nextWorkDay()
     {
         ShareDate nextDay(this->date().addDays(1));
-        while (nextDay.isWeekend())
+        while (nextDay.isWeekend() || !mWorkingDayList.contains(nextDay.date()))
         {
             nextDay.next();
+            if(nextDay.date() == QDate::currentDate())
+            {
+                return nextDay.latestWorkDay();
+            }
         }
         return nextDay;
     }
 
-    ShareDate previousActiveDay()
+    ShareDate previousWorkDay()
     {
         ShareDate preDay(this->date().addDays(-1));
-        while (preDay.isWeekend())
+        while (preDay.isWeekend() || !mWorkingDayList.contains(nextDay.date()))
         {
             preDay.previous();
         }
         return preDay;
     }
 
+    static QList<QDate> getWorkingDay() {return mWorkingDayList;}
+    static void appendWorkingDay(const QList<QDate>& list) {mWorkingDayList.append(list);}
+    static void setWorkingDay(const QList<QDate>& list) {mWorkingDayList = list;}
+
 private:
     QDate       mDate;
+    static      QList<QDate>        mWorkingDayList;
 };
+
+QList<QDate> ShareDate::mWorkingDayList;
+typedef   QList<ShareDate>      ShareDateList;
 
 
 class ShareDateTime : public QDateTime

@@ -1,4 +1,4 @@
-#include "hqdbdatabase.h"
+﻿#include "hqdbdatabase.h"
 #include <QMutexLocker>
 #include <QDebug>
 #include <QFile>
@@ -666,7 +666,7 @@ bool HQDBDataBase::updateShareCloseDates(const QList<QDate> &list)
 
 bool HQDBDataBase::queryShareCloseDates(QList<QDate> &list)
 {
-    QString sql = QString("select * from %1 ").arg(TABLE_CLOSE_DATE);
+    QString sql = QString("select * from %1 order by %2 desc").arg(TABLE_CLOSE_DATE).arg(HQ_TABLE_COL_DATE);
     QMutexLocker locker(&mSQLMutex);
     if(!mSQLQuery.exec(sql)) return false;
     while (mSQLQuery.next()) {
