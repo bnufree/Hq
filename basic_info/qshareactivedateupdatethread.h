@@ -1,4 +1,4 @@
-﻿#ifndef QSHAREACTIVEDATEUPDATETHREAD_H
+#ifndef QSHAREACTIVEDATEUPDATETHREAD_H
 #define QSHAREACTIVEDATEUPDATETHREAD_H
 
 #include <QThread>
@@ -12,6 +12,7 @@ public:
     void run();
 
 signals:
+    void signalNewWorkDateNow();
 
 public slots:
 };

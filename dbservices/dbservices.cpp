@@ -1,4 +1,4 @@
-﻿#include <QDebug>
+#include <QDebug>
 #include <QSharedPointer>
 #include <QSqlError>
 #include <QDir>
@@ -55,11 +55,6 @@ void HqInfoService::slotInitDBTables()
     {
 //        initBlockData();
 //        initShareData();
-        QList<QDate> list;
-        if(mDataBase.queryShareCloseDates(list))
-        {
-            ShareDate::setUnWorkingDay(list);
-        }
         emit signalDbInitFinished();
     } else
     {

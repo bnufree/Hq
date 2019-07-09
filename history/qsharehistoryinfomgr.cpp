@@ -58,7 +58,7 @@ void QShareHistoryInfoMgr::slotRecvShareHistoryUpdateList(const QList<QDate> &li
         {
             ShareDate temp(list[k]);
             i = k;
-            if(temp == end.nextActiveDay())
+            if(temp == end.nextWorkDay())
             {
                 end = temp;
             } else
@@ -126,7 +126,7 @@ void QShareHistoryInfoMgr::slotRecvShareHistoryUpdateList(const QList<QDate> &li
         qDebug()<<"no data end:"<<end;
     }
     ShareDate update_date = ShareDate::currentDate();
-    update_date = update_date.previousActiveDay();
+    update_date = update_date.previousWorkDay();
     //update db base time
     emit DATA_SERVICE->signalSendShareHistoryUpdateDate(update_date, update);
     //开始进行数据统计
@@ -229,7 +229,7 @@ void QShareHistoryInfoMgr::slotUpdateShareHistoryProcess(const ShareDataList& li
 void QShareHistoryInfoMgr::slotUpdateAllShareFromDate(bool deldb, const QDate& date)
 {
     QDate start = date;
-    QDate end = ShareDate::latestActiveDay().date();
+    QDate end = ShareDate::latestWorkDay().date();
     QTime t;
     t.start();
     //开始更新日线数据

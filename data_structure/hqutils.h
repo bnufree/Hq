@@ -1,4 +1,4 @@
-﻿#ifndef HQUTILS_H
+#ifndef HQUTILS_H
 #define HQUTILS_H
 
 #include <QDate>
@@ -57,7 +57,7 @@ public:
         return ShareDate(time_t);
     }
 
-    QString toString(const QString& format = "yyyy-MM-dd")
+    QString toString(const QString& format = "yyyy-MM-dd") const
     {
         if(toTime_t() == 0) return "-";
         return mDate.toString(format);
@@ -88,7 +88,7 @@ public:
     ShareDate nextWorkDay()
     {
         ShareDate nextDay(this->date().addDays(1));
-        while (nextDay.isWeekend() || !mWorkingDayList.contains(nextDay.date()))
+        while (nextDay.isWeekend() || !mHisWorkingDayList.contains(nextDay.date()))
         {
             nextDay.next();
             if(nextDay.date() == QDate::currentDate())
@@ -102,23 +102,37 @@ public:
     ShareDate previousWorkDay()
     {
         ShareDate preDay(this->date().addDays(-1));
-        while (preDay.isWeekend() || !mWorkingDayList.contains(nextDay.date()))
+        while (preDay.isWeekend() || !mHisWorkingDayList.contains(preDay.date()))
         {
             preDay.previous();
         }
         return preDay;
     }
 
-    static QList<QDate> getWorkingDay() {return mWorkingDayList;}
-    static void appendWorkingDay(const QList<QDate>& list) {mWorkingDayList.append(list);}
-    static void setWorkingDay(const QList<QDate>& list) {mWorkingDayList = list;}
+    static QList<QDate> getHisWorkingDay() {return mHisWorkingDayList;}
+    static void appendHisWorkingDay(const QList<QDate>& list) {mHisWorkingDayList.append(list);}
+    static void setHisWorkingDay(const QList<QDate>& list) {mHisWorkingDayList = list;}
+    static bool isHisWorkingDay(const QDate& date) {return mHisWorkingDayList.contains(date);}
+    static void setCurWorkDate(const QDate& date)
+    {
+        mCurWorkDay = date;
+        mLastWorkDay = ShareDate(mCurWorkDay).previousWorkDay().date();
+    }
+
+    static QDate getCurWorkDay() {return mCurWorkDay;}
+    static QDate getLastWorkDay() {return mLastWorkDay;}
 
 private:
     QDate       mDate;
-    static      QList<QDate>        mWorkingDayList;
+    static      QList<QDate>        mHisWorkingDayList;
+    static      QDate               mLastWorkDay;
+    static      QDate               mCurWorkDay;
 };
 
-QList<QDate> ShareDate::mWorkingDayList;
+QList<QDate> ShareDate::mHisWorkingDayList;
+QDate        ShareDate::mLastWorkDay;
+QDate        ShareDate::mCurWorkDay;
+
 typedef   QList<ShareDate>      ShareDateList;
 
 
