@@ -1,4 +1,4 @@
-﻿#ifndef HQDBDATABASE_H
+#ifndef HQDBDATABASE_H
 #define HQDBDATABASE_H
 
 #include <QObject>
@@ -181,12 +181,6 @@ public:
     bool queryShareHsgtTop10List(ShareHsgtList& list, const QString& code, const ShareDate& date);
     bool delShareHsgtTop10(const QString& code, const ShareDate& date);
 
-    //休市假期更新
-    bool updateShareCloseDates(const QList<QDate>& list);
-    bool queryShareCloseDates(QList<QDate>& list);
-
-
-
 
 private:
     bool initSqlDB();
@@ -199,7 +193,7 @@ private:
     bool createShareProfitTable();
     bool createShareBlockTable();
     //历史日线数据表
-    bool createShareHistoryInfoTable(/*const QString& code*/);
+    bool createShareHistoryInfoTable(const QString& code);
     //股东明细表
     bool createShareHoldersTable();
     //财务信息表
@@ -209,7 +203,7 @@ private:
     //沪深港TOP10
     bool createShareHsgTop10Table();
     //
-    bool createCloseDateTable();
+    bool createShareHistoryCounterTable();
     //各个表的最后更新日期
     bool createDBUpdateDateTable();
 

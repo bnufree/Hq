@@ -250,7 +250,10 @@ ShareDate HqInfoService::getLastUpdateDateOfFinanceInfo()
 
 ShareDate HqInfoService::getLastUpdateDateOfHistoryInfo()
 {
+#if 0
     return getLastUpdateDateOfTable(TABLE_SHARE_HISTORY);
+#endif
+    return ShareDate();
 }
 
 ShareDate HqInfoService::getLastUpdateDateOfTable(const QString& table)
@@ -286,6 +289,7 @@ void HqInfoService::slotRecvShareHistoryInfos(const ShareDataList &list, int mod
 
 void HqInfoService::slotSendShareHistoryUpdateDate(const ShareDate &date, bool update)
 {
+#if 0
     if(update)
     {
         if(!mDataBase.updateDBUpdateDate(date, TABLE_SHARE_HISTORY))
@@ -336,11 +340,12 @@ void HqInfoService::slotSendShareHistoryUpdateDate(const ShareDate &date, bool u
 //        data->mHistory.mChgPersFromYear -= 1.0;
 //        qDebug()<<data->mCode<<data->mName<<data->mHistory.mChgPersFromWeek<<data->mHistory.mChgPersFromMonth<<data->mHistory.mChgPersFromYear;
     }
-
+#endif
 }
 
 void HqInfoService::slotQueryShareHistoryUpdateDateList()
 {
+#if 0
     //获取上一次更新的日期
     QList<QDate> list;
     if(!mDataBase.queryShareHistroyUpdatedDates(list))
@@ -418,6 +423,7 @@ void HqInfoService::slotQueryShareHistoryUpdateDateList()
     qSort(update_list);
 
     emit signalSendShareHistoryUpdateDateList(update_list);
+#endif
 }
 
 
@@ -623,6 +629,7 @@ void HqInfoService::slotQueryShareFinanceList(const QStringList& codes)
 
 void HqInfoService::slotUpdateShareCloseDate(const QList<QDate> &list)
 {
+#if 0
     if(list.size() > 0)
     {
         if(!mDataBase.updateShareCloseDates(list))
@@ -637,6 +644,7 @@ void HqInfoService::slotUpdateShareCloseDate(const QList<QDate> &list)
             ShareDate::setUnWorkingDay(list);
         }
     }
+#endif
 }
 
 void HqInfoService::slotQueryShareFHSP(const QString &code, const ShareDate &date)

@@ -1,4 +1,4 @@
-﻿#ifndef PROFILE_H
+#ifndef PROFILE_H
 #define PROFILE_H
 
 #include <QObject>
@@ -22,7 +22,6 @@ public:
     QStringList getAllSections();
 private:
     explicit Profiles(QObject *parent = 0);
-    void initDefaultExpiredDate();
 private:
     static Profiles     *minstance;
     class MGarbage // 它的唯一工作就是在析构函数中删除CSingleton的实例

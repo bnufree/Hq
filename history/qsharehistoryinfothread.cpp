@@ -1,4 +1,4 @@
-﻿#include "qsharehistoryinfothread.h"
+#include "qsharehistoryinfothread.h"
 #include <QDateTime>
 #include <QDebug>
 #include "utils/qhttpget.h"
@@ -30,7 +30,7 @@ void QShareHistoryInfoThread::run()
 {
     //基金不更新
     if(mCode.left(1) == "5" || mCode.left(1) == "1") return;
-    ShareDataList list;
+    ShareForignVolFileDataList list;
     if(mStart <= mEnd)
     {
         QString wkCode;
@@ -56,33 +56,24 @@ void QShareHistoryInfoThread::run()
             QStringList cols = lines[i].split(",");
             if(cols.length() >= 15)
             {
-                //if(mCode == "000400")qDebug()<<recv.mid(20, 200);
                 QDate curDate = QDate::fromString(cols[0], "yyyy-MM-dd");
-                if(!QActiveDateTime(curDate).isDayActive()) continue;
+                if(curDate.dayOfWeek() == 6 || curDate.dayOfWeek() == 7) continue;
                 if(cols[3].toDouble() < 0.001) continue;
-                ShareData data;
-                data.mTime.setDate(curDate);
+                ShareHistoryFileData data;
+                data.mDate = QDateTime(curDate).toTime_t();
                 data.mClose = cols[3].toDouble();
-                data.mChg = cols[8].toDouble();
-                data.mChgPercent = cols[9].toDouble();
-                data.mCode = mCode;
-                data.mName = cols[2];
-                data.mHsl = cols[10].toDouble();
-                data.mVol = cols[11].toLongLong();
-                data.mFinanceData.mTotalShare = round(cols[13].toDouble() / data.mClose);
-                data.mFinanceData.mMutalShare = round(cols[14].toDouble() / data.mClose);
+                data.mCloseAdjust = data.mClose;
                 data.mMoney = cols[12].toDouble();
                 list.append(data);
             }
         }
     }
-
 FUNC_END:
     if(mParent)
     {
         QMetaObject::invokeMethod(mParent,\
                                   "slotUpdateShareHistoryProcess",\
-                                  Qt::DirectConnection, Q_ARG(ShareDataList, list ));
+                                  Qt::DirectConnection, Q_ARG(ShareForignVolFileDataList, list ));
     }
     return;
 }

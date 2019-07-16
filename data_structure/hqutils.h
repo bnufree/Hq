@@ -119,8 +119,8 @@ public:
         mLastWorkDay = ShareDate(mCurWorkDay).previousWorkDay().date();
     }
 
-    static QDate getCurWorkDay() {return mCurWorkDay;}
-    static QDate getLastWorkDay() {return mLastWorkDay;}
+    static ShareDate getCurWorkDay() {return ShareDate(mCurWorkDay);}
+    static ShareDate getLastWorkDay() {return ShareDate(mLastWorkDay);}
 
 private:
     QDate       mDate;

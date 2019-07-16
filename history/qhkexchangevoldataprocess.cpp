@@ -20,12 +20,14 @@ QHKExchangeVolDataProcess::QHKExchangeVolDataProcess(const QDate& start, const Q
     mParent = parent;
 }
 
-void QHKExchangeVolDataProcess::getMktVolInfo(ShareDataList& list, int& num, const QDate &date, int mkt)
+void QHKExchangeVolDataProcess::getVolInfoFromHKEX(ShareForignVolFileDataList& list, int& num, const QDate &date, int mkt)
 {
     QString postVal = POST_VAL;
     postVal.replace("TODAY_DATE", QDate::currentDate().toString("yyyyMMdd"));
     postVal.replace("TXTSHAREDATE", QString("").sprintf("%s", date.toString("yyyy/MM/dd").toStdString().data()));
     QByteArray value = QHttpGet::getContentOfURLWithPost(QString(HK_URL).arg(mkt == 0? "sh":"sz").arg(mkt == 0? "sh":"sz"), postVal.toUtf8());
+
+#ifdef TEST
     qDebug()<<"recv len:"<<value.length();
     qDebug()<<value;
     QFile file(QString("https_%1").arg(QDateTime::currentMSecsSinceEpoch()));
@@ -37,6 +39,7 @@ void QHKExchangeVolDataProcess::getMktVolInfo(ShareDataList& list, int& num, con
     {
         qDebug()<<__FUNCTION__<<"open file error:"<<file.fileName();
     }
+#endif
 
     QString res = QString::fromUtf8(value);
     int start_index = 0;
@@ -76,16 +79,16 @@ void QHKExchangeVolDataProcess::getMktVolInfo(ShareDataList& list, int& num, con
         start_index = volExp.indexIn(res, start_index);
         if(start_index >= 0)
         {
-            ShareData data;
-            data.mCode = tmpCode.right(6);
-            data.mHsgtData.mVolTotal = volExp.cap(1).remove(",").toLongLong();
-            data.mTime.setDate(date);
+            ShareForignVolFileData data;
+            data.mCode = tmpCode.right(6).toUInt();
+            data.mForeignVol = volExp.cap(1).remove(",").toLongLong();
+//            data.mTime.setDate(date);
             //qDebug()<<"res:"<<volExp.cap();
             start_index += volExp.cap().length();
             start_index = volPercentExp.indexIn(res, start_index);
             if(start_index >= 0)
             {
-                data.mHsgtData.mVolMutablePercent = volPercentExp.cap(1).toDouble();
+                data.mMutuablePercent = volPercentExp.cap(1).toDouble();
                 list.append(data);
                 //qDebug()<<data.mCode<<data.mHsgtData.mVolTotal<<data.mHsgtData.mVolMutablePercent;
                 start_index += volPercentExp.cap().length();
@@ -105,39 +108,26 @@ void QHKExchangeVolDataProcess::getMktVolInfo(ShareDataList& list, int& num, con
     return;
 }
 
-void QHKExchangeVolDataProcess::getMktVolInfo(QStringList& list, const QDate& date,const QString &fileName)
+bool QHKExchangeVolDataProcess::getVolInfoFromFile(ShareForignVolFileDataList& list, const QDate& date)
 {
-    if(!QFile::exists(fileName)) return;
+    if(!QFile::exists(getFileName(date))) return false;
     //读取文件
-    QFile file(fileName);
-    if(!file.open(QIODevice::ReadOnly)) return;
-    int size = file.size();
-    if(size >= sizeof(int))
-    {
-        int total_size = 0;
-        file.read((char*)(&total_size), sizeof(int));
-        int count = 0;
-        int code = 0;
-        qint64 vol = 0;
-        while (!file.atEnd() ) {
-            count++;
-            if(count == 1)
-            {
-                file.read((char*)(&code), sizeof(int));
-            } else if(count == 2)
-            {
-                file.read((char*)(&vol), sizeof(qint64));
-                list.append(QString("%1|%2").arg(code).arg(vol));
-                count = 0;
-            }
-        }
-        //qDebug()<<"total_size:"<<total_size<<" read count:"<<list.size()<<date;
+    QFile file(getFileName(date));
+    if(!file.open(QIODevice::ReadOnly)) return false;
+    int count = 0;
+    int obj_size = sizeof(ShareForignVolFileData);
+    while (!file.atEnd() ) {
+        ShareForignVolFileData data;
+        int size = file.read((char*)(&data), obj_size);
+        if(size != obj_size) break;
+        list.append(data);
+        count++;
     }
     file.close();
-    return ;
+    return list.size() > 0;
 }
 
-void QHKExchangeVolDataProcess::getVolofDateFromEastMoney(ShareDataList &list, const QDate &date)
+bool QHKExchangeVolDataProcess::getVolInfoFromEastMoney(ShareForignVolFileDataList& list, const QDate &date)
 {
     int page = 1;
     int totalpage = 1;
@@ -160,30 +150,39 @@ void QHKExchangeVolDataProcess::getVolofDateFromEastMoney(ShareDataList &list, c
         for(int i=0; i<array.size(); i++)
         {
             QJsonObject sub = array[i].toObject();
-            ShareData data;
-            data.mCode = sub.value("SCODE").toString();
-            data.mName = sub.value("SNAME").toString();
-            data.mTime.setDate(QDate::fromString(sub.value("HDDATE").toString().left(10), "yyyy-MM-dd"));
-            data.mHsgtData.mVolTotal = qint64(sub.value("SHAREHOLDSUM").toDouble());
-            data.mHsgtData.mVolMutablePercent = sub.value("SHARESRATE").toDouble();
-            data.mHsgtData.mVolChange = qint64(sub.value("ShareHoldSumChg").toDouble());
-            data.mClose = sub.value("CLOSEPRICE").toDouble();
-            data.mChgPercent = sub.value("ZDF").toDouble();
+            ShareForignVolFileData data;
+            data.mCode = sub.value("SCODE").toInt();
+//            data.mName = sub.value("SNAME").toString();
+//            data.setDate(QDate::fromString(sub.value("HDDATE").toString().left(10), "yyyy-MM-dd"));
+            data.mForeignVol = qint64(sub.value("SHAREHOLDSUM").toDouble());
+            data.mMutuablePercent = sub.value("SHARESRATE").toDouble();
+//            data.mHsgtData.mVolChange = qint64(sub.value("ShareHoldSumChg").toDouble());
+//            data.mClose = sub.value("CLOSEPRICE").toDouble();
+//            data.mChgPercent = sub.value("ZDF").toDouble();
             list.append(data);
 
         }
 
     }
-    return ;
+    if(list.size() > 0)
+    {
+        saveData(date, list);
+    }
+    return list.size() > 0;
 }
 
-void QHKExchangeVolDataProcess::getVolofDate(ShareDataList &list, const QDate &date)
+void QHKExchangeVolDataProcess::getVolofDate(ShareForignVolFileDataList &list, const QDate &date)
 {
+    //从文件获取
+    if(getVolInfoFromFile(list, date)) return;
+    //先从东方财富获取
+    if(getVolInfoFromEastMoney(list, date)) return;
+    //从港交所获取
     int errorNUm = 0;
     int sh_num = 0, sz_num = 0;
     do {
-        getMktVolInfo(list, sh_num, date, 0);
-        getMktVolInfo(list, sz_num, date, 1);
+        getVolInfoFromHKEX(list, sh_num, date, 0);
+        getVolInfoFromHKEX(list, sz_num, date, 1);
         errorNUm++;
         if(errorNUm == 3)
         {
@@ -194,17 +193,17 @@ void QHKExchangeVolDataProcess::getVolofDate(ShareDataList &list, const QDate &d
     if((sh_num == 0) ^ (sz_num == 0))
     {
         while (sh_num == 0) {
-            getMktVolInfo(list, sh_num, date, 0);
+            getVolInfoFromHKEX(list, sh_num, date, 0);
         }
         while (sz_num == 0) {
-            getMktVolInfo(list, sz_num, date, 1);
+            getVolInfoFromHKEX(list, sz_num, date, 1);
         }
     }
 }
 
 void QHKExchangeVolDataProcess::run()
 {
-    ShareDataList list;
+    ShareForignVolFileDataList list;
     QDate start = mStartDate;
     while(start <= mEndDate)
     {
@@ -219,7 +218,46 @@ void QHKExchangeVolDataProcess::run()
         QMetaObject::invokeMethod(mParent,\
                                   "slotUpdateForignVolInfo",\
                                   Qt::DirectConnection,\
-                                  Q_ARG(ShareDataList, list)\
+                                  Q_ARG(ShareForignVolFileDataList, list)\
                                   );
     }
+}
+
+QString QHKExchangeVolDataProcess::getFileName(const QDate &date)
+{
+    //设定保存的文件名
+    return QString("%1/%2.data")
+            .arg(HQ_LGTHISTORY_DIR)
+            .arg(date.toString("yyyyMMdd"));
+}
+
+bool QHKExchangeVolDataProcess::saveData(const QDate &date, const ShareForignVolFileDataList &list)
+{
+    //检查保存目录是否存在，如果不存在，则创建目录
+    QDir dir(HQ_LGTHISTORY_DIR);
+    if(!dir.exists()){
+        if(!dir.mkpath(HQ_LGTHISTORY_DIR))
+        {
+            qDebug()<<"create save file dir failed.dir:"<<dir.path();
+            return false;
+        }
+    }
+    //设定保存的文件名
+    QString fileName = getFileName(date);
+    //写文件
+    QFile file(fileName);
+    if(file.open(QIODevice::WriteOnly))
+    {
+        for(int i=0; i<list.length(); i++)
+        {
+            file.write((char*)(&(list[i])), sizeof(ShareHistoryFileData));
+        }
+        file.close();
+    } else {
+        qDebug()<<"Write file failed with date:"<<date.toString("yyyyMMdd");
+        return false;
+    }
+
+    qDebug()<<"Write file success with date:"<<date.toString("yyyyMMdd");
+    return true;
 }

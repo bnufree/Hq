@@ -1,4 +1,4 @@
-﻿#ifndef SHAREDATA_H
+#ifndef SHAREDATA_H
 #define SHAREDATA_H
 #include <QStringList>
 #include <QList>
@@ -243,6 +243,31 @@ typedef         QMap<QString, ShareData>    ShareDataMap;
 Q_DECLARE_METATYPE(ShareData)
 Q_DECLARE_METATYPE(ShareDataList)
 Q_DECLARE_METATYPE(ShareDataMap)
+
+typedef struct hqShareHistoryFileData{
+    unsigned int    mDate;
+    double          mClose;                 //最新
+    double          mCloseAdjust;           //复权
+    double          mMoney;
+    qint64          mForeignVol;
+}ShareHistoryFileData;
+
+typedef QList<hqShareHistoryFileData>       ShareHistoryFileDataList;
+
+Q_DECLARE_METATYPE(ShareHistoryFileData)
+Q_DECLARE_METATYPE(ShareHistoryFileDataList)
+
+typedef struct hqShareForeignVolFileData{
+    unsigned int    mCode;
+    qint64          mForeignVol;
+    double          mMutuablePercent;
+}ShareForignVolFileData;
+
+typedef QList<ShareForignVolFileData>       ShareForignVolFileDataList;
+
+Q_DECLARE_METATYPE(ShareForignVolFileData)
+Q_DECLARE_METATYPE(ShareForignVolFileDataList)
+
 
 #if 0
 class ShareDataList : public QList<ShareData>

@@ -51,6 +51,7 @@ void QShareActiveDateUpdateThread::run()
             if(now != cur)
             {
                 ShareDate::setCurWorkDate(now);
+                emit signalNewWorkDateNow();
                 cur = now;
             }
         }

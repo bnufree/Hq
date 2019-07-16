@@ -1,4 +1,4 @@
-﻿#ifndef HQDATADEFINES
+#ifndef HQDATADEFINES
 #define HQDATADEFINES
 
 #include <QString>
@@ -18,8 +18,7 @@
 #define         TABLE_FAVORITE                      "share_favor"
 #define         TABLE_PROFIT                        "share_profit"
 #define         TABLE_BLOCK_SHARE                   "block_share"
-#define         TABLE_SHARE_HISTORY                 "share_history"
-#define         TABLE_CLOSE_DATE                    "close_date"
+#define         TABLE_SHARE_HISTORY_COUNTER                 "share_history_counter"
 
 //列名
 #define         HQ_TABLE_COL_ID                 "id"
@@ -31,6 +30,8 @@
 #define         HQ_TABLE_COL_TOTALMNT           "total_amount"
 #define         HQ_TABLE_COL_MUTAL              "mutable_amount"
 #define         HQ_TABLE_COL_CLOSE              "close"
+#define         HQ_TABLE_COL_CLOSE_LAST             "last_close"
+#define         HQ_TABLE_COL_CLOSE_LAST_ADJUST              "last_close_adjust"
 #define         HQ_TABLE_COL_VOL                "vol"
 #define         HQ_TABLE_COL_MONEY              "money"
 #define         HQ_TABLE_COL_CHANGE_PERCENT     "change"
@@ -70,6 +71,15 @@
 #define         HQ_TABLE_COL_BONUS_SHARE        "share"
 #define         HQ_TABLE_COL_BONUS_MONEY        "money"
 #define         HQ_TABLE_COL_BONUS_DATE         "date"
+
+#define         HQ_TABLE_COL_WEEK_CHANGE                        "chgweek"
+#define         HQ_TABLE_COL_MONTH_CHANGE                       "chgmonth"
+#define         HQ_TABLE_COL_YEAR_CHANGE                        "chgyear"
+#define         HQ_TABLE_COL_FOREIGN_HOLD                       "foreign_vol"
+#define         HQ_TABLE_COL_FOREIGN_HOLD_CHANGE_DAY            "foreign_chg_day"
+#define         HQ_TABLE_COL_FOREIGN_HOLD_CHANGE_WEEK           "foreign_chg_week"
+#define         HQ_TABLE_COL_FOREIGN_HOLD_CHANGE_MONTH          "foreign_chg_month"
+#define         HQ_TABLE_COL_FOREIGN_HOLD_CHANGE_YEAR           "foreign_chg_year"
 
 //typedef         ShareData               ShareData;
 //typedef         ShareDataList           ShareDataList;

@@ -10,7 +10,7 @@
 #include <QDate>
 #include "data_structure/sharedata.h"
 
-class QEastmoneyShareHistoryInfoThread;
+
 
 class QShareHistoryInfoMgr : public QObject
 {

@@ -1,4 +1,4 @@
-﻿#ifndef QHKEXCHANGEVOLDATAPROCESS_H
+#ifndef QHKEXCHANGEVOLDATAPROCESS_H
 #define QHKEXCHANGEVOLDATAPROCESS_H
 
 #include <QRunnable>
@@ -15,11 +15,14 @@ public:
 
 public:
     void run();
-    void getMktVolInfo(ShareDataList& list,int& num, const QDate& date, int mkt = 0);
-    void getMktVolInfo(QStringList& list, const QDate& date, const QString& fileName);
+
 private:
-    void getVolofDate(ShareDataList& list, const QDate& date);
-    void getVolofDateFromEastMoney(ShareDataList& list, const QDate& date);
+    void getVolofDate(ShareForignVolFileDataList& list, const QDate& date);
+    void getVolInfoFromHKEX(ShareForignVolFileDataList& list,int& num, const QDate& date, int mkt = 0);
+    bool getVolInfoFromFile(ShareForignVolFileDataList& list, const QDate& date);
+    bool getVolInfoFromEastMoney(ShareForignVolFileDataList& list, const QDate& date);
+    bool saveData(const QDate& date, const ShareForignVolFileDataList& list);
+    QString getFileName(const QDate& date);
 private:
     QDate       mStartDate;
     QDate       mEndDate;
