@@ -1,4 +1,4 @@
-#include "hqdbdatabase.h"
+﻿#include "hqdbdatabase.h"
 #include <QMutexLocker>
 #include <QDebug>
 #include <QFile>
@@ -7,7 +7,7 @@
 #define     QDebug()                    qDebug()<<__FUNCTION__<<__LINE__
 #define     HISTORY_TABLE(code)         QString(TABLE_SHARE_HISTORY_TEMPLATE).arg(code.right(6))
 
-#define     DB_FILE                     QString("%1db.data").arg(HQ_DATA_DIR)
+#define     DB_FILE                     QString("%1/db.data").arg(HQ_DATA_DIR)
 #define     SQL_WHERE                   " where "
 
 QString DBColValList::insertString() const

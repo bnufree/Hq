@@ -130,12 +130,12 @@ typedef QList<TableColData>         TableColDataList;
 #define         HQ_APP_DIR                  QString("/sdcard/hq")
 #endif
 
-#define         HQ_CONFIG_DIR               QString("%1/etc/").arg(HQ_APP_DIR)
-#define         HQ_DATA_DIR                 QString("%1/data/").arg(HQ_APP_DIR)
-#define         HQ_CODE_DIR                 QString("%1%2/").arg(HQ_DATA_DIR).arg("code")
-#define         HQ_HSTOP10_DIR              QString("%1%2/").arg(HQ_DATA_DIR).arg("hstop10")
-#define         HQ_LGTHISTORY_DIR              QString("%1%2/").arg(HQ_DATA_DIR).arg("china_a_foreign")
-#define         HQ_SHARE_HISTORY_DIR        QString("%1%2/").arg(HQ_DATA_DIR).arg("history")
+#define         HQ_CFG_DIR                  QString("%1/etc").arg(HQ_APP_DIR)
+#define         HQ_DATA_DIR                 QString("%1/data").arg(HQ_APP_DIR)
+#define         HQ_CODE_DIR                 QString("%1/code").arg(HQ_DATA_DIR)
+#define         HQ_LGT_TOP10_DIR            QString("%1/hstop10").arg(HQ_DATA_DIR)
+#define         HQ_LGT_HISTORY_DIR          QString("%1/hs_foreign").arg(HQ_DATA_DIR)
+#define         HQ_DAY_HISTORY_DIR          QString("%1/history").arg(HQ_DATA_DIR)
 
 #endif // COMDATADEFINES_H
 

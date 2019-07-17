@@ -1,4 +1,4 @@
-#include <QDebug>
+﻿#include <QDebug>
 #include <QSharedPointer>
 #include <QSqlError>
 #include <QDir>
@@ -116,6 +116,7 @@ void HqInfoService::initSignalSlot()
     qRegisterMetaType<QMap<QString, BlockDataList> >("const QMap<QString, BlockDataList>&");
     qRegisterMetaType<QMap<QString, BlockData*> >("const QMap<QString, BlockData*>&");
     qRegisterMetaType<QList<QDate> >("const QList<QDate>&");
+    qRegisterMetaType<ShareHistoryCounter>("const ShareHistoryCounter&");
 
      connect(this, SIGNAL(signalUpdateShareCloseDate(QList<QDate>)), this, SLOT(slotUpdateShareCloseDate(QList<QDate>)));
     connect(this, SIGNAL(signalInitDBTables()), this, SLOT(slotInitDBTables()));    
@@ -143,6 +144,7 @@ void HqInfoService::initSignalSlot()
 
     connect(this, SIGNAL(signalUpdateShareinfoWithHistory(QString,double,double,double,double,double,double, qint64, qint64,ShareHistoryList)),\
             this, SLOT(slotUpdateShareinfoWithHistory(QString,double,double,double,double,double,double, qint64, qint64,ShareHistoryList)));
+    connect(this, SIGNAL(signalUpdateShareCounter(ShareHistoryCounter)), this, SLOT(slotUpdateShareCounter(ShareHistoryCounter)));
     connect(this, SIGNAL(signalQueryShareForeignVol(QString)), this, SLOT(slotQueryShareForeignVol(QString)));
     connect(this, SIGNAL(signalSetFavCode(QString)), this, SLOT(slotSetFavCode(QString)));
     connect(this, SIGNAL(signalSaveFavCode(QString,bool)), this, SLOT(slotSaveFavCode(QString,bool)));
@@ -512,6 +514,24 @@ void HqInfoService::slotUpdateShareinfoWithHistory(const QString& code,\
     data.mHsgtData.mVolTotal = vol;
     data.mHsgtData.mVolChange = vol_chnage;
     emit signalUpdateShareHistoryFinished(code);
+}
+
+//更新历史变化信息
+void HqInfoService::slotUpdateShareCounter(const ShareHistoryCounter& counter)
+{
+    QString code = counter.code.right(6);
+    ShareData *data = getShareData(code);
+    if(!data) return;
+    data->mHistory.mLastMoney = counter.lastMoney * 0.0001;
+    data->mHistory.mYearDayPrice= counter.yearP;
+    data->mHistory.mMonthDayPrice = counter.monthP;
+    data->mHistory.mWeekDayPrice = counter.weekP;
+    data->mHsgtData.mVolTotal = counter.foreign_vol;
+    data->mHsgtData.mVolMutablePercent = counter.foreign_percent;
+    data->mHsgtData.mVolMutablePercentCh1 = counter.foreign_percent_ch1;
+    data->mHsgtData.mVolMutablePercentCh5 = counter.foreign_percent_ch5;
+    data->mHsgtData.mVolMutablePercentCh10 = counter.foreign_percent_ch10;
+    //emit signalUpdateShareHistoryFinished(code);
 }
 
 void HqInfoService::slotUpdateHistoryChange(const QString &code)

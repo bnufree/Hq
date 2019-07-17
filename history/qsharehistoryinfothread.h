@@ -6,20 +6,28 @@
 #include <QRunnable>
 #include <QObject>
 #include "data_structure/sharedata.h"
+#include <QMap>
 
 class QShareHistoryInfoThread : public QRunnable
 {
 public:
     explicit QShareHistoryInfoThread(const QString& code, const ShareDate& start, const ShareDate& end, QObject* parent = 0);
+    explicit QShareHistoryInfoThread(const QString& code, QMap<QDate, ShareForignVolFileDataList>* map, QObject* parent = 0);
     ~QShareHistoryInfoThread();
     QString getCode();
 public:
     void run();
 private:
+    void                        adjustDataList(ShareHistoryFileDataList& list, double price);
+    bool                        readFile(ShareHistoryFileDataList& list);
+    QString                     getFileName();
+    void                        writeFile(const ShareHistoryFileDataList& list, const char* mode);
+private:
     QString         mCode;
     QObject         *mParent;
     ShareDate       mStart;
     ShareDate       mEnd;
+    QMap<QDate, ShareForignVolFileDataList> *mExistForeignMap;
 };
 
 #endif // QSHAREHISTORYINFOTHREAD_H

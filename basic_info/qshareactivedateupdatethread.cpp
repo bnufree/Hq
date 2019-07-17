@@ -1,4 +1,4 @@
-#include "qshareactivedateupdatethread.h"
+﻿#include "qshareactivedateupdatethread.h"
 #include "utils/qhttpget.h"
 #include "dbservices/dbservices.h"
 
@@ -20,7 +20,7 @@ void QShareActiveDateUpdateThread::run()
     QString result = QString::fromUtf8(utf8->fromUnicode(gbk->toUnicode(recv)));
 
     QStringList lines = result.split("\r\n");
-    ShareDateList list;
+    QList<QDate> list;
     for(int i=1; i<lines.length(); i++)
     {
         QStringList cols = lines[i].split(",");
@@ -29,11 +29,11 @@ void QShareActiveDateUpdateThread::run()
             //if(mCode == "000400")qDebug()<<recv.mid(20, 200);
             ShareDate curDate = ShareDate::fromString(cols[0]);
             if(curDate.isWeekend()) continue;
-            list.append(curDate);
+            list.append(curDate.date());
         }
     }
     ShareDate::setHisWorkingDay(list);
-    QDate cur;
+    QDate chk;
     //检查当前时间是不是工作日
     while(true)
     {
@@ -48,11 +48,16 @@ void QShareActiveDateUpdateThread::run()
         if(index >= 0)
         {
             QDate now = QDate::fromString(result.mid(index, 10), "yyyy-MM-dd");
-            if(now != cur)
+            if(now != chk)
             {
+                qDebug()<<"set work day:"<<now.toString("yyyy-MM-dd");
                 ShareDate::setCurWorkDate(now);
+                if(chk.isNull())
+                {
+                    emit signalUpdateHistoryWorkDays();
+                }
                 emit signalNewWorkDateNow();
-                cur = now;
+                chk = now;
             }
         }
         QThread::sleep(60);

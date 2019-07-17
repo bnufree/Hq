@@ -126,10 +126,30 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
             data->mProfit = DATA_SERVICE->getProfit(code);
         }
         data->mForeignCap = data->mHsgtData.mVolTotal * data->mCur ;
+        data->mHsgtData.mVolChange = data->mHsgtData.mVolMutablePercentCh1 * data->mFinanceData.mMutalShare;
         data->mForeignCapChg = data->mHsgtData.mVolChange * data->mCur ;
-        data->mHistory.mChgPersFromWeek = (data->mHistory.mChgPersFromWeek_BAK * (1+data->mChgPercent * 0.01) -1) * 100;
-        data->mHistory.mChgPersFromMonth = (data->mHistory.mChgPersFromMonth_BAK  * (1+data->mChgPercent * 0.01) -1) * 100;
-        data->mHistory.mChgPersFromYear =  (data->mHistory.mChgPersFromYear_BAK * (1+data->mChgPercent * 0.01) -1) * 100;
+        if(data->mHistory.mWeekDayPrice > 0)
+        {
+            data->mHistory.mChgPersFromWeek = (data->mCur - data->mHistory.mWeekDayPrice) * 100.0 / data->mHistory.mWeekDayPrice;
+        } else
+        {
+            data->mHistory.mChgPersFromWeek = 0.0;
+        }
+        if(data->mHistory.mMonthDayPrice> 0)
+        {
+            data->mHistory.mChgPersFromMonth= (data->mCur - data->mHistory.mMonthDayPrice) * 100.0 / data->mHistory.mMonthDayPrice;
+        } else
+        {
+            data->mHistory.mChgPersFromMonth= 0.0;
+        }
+
+        if(data->mHistory.mYearDayPrice > 0)
+        {
+            data->mHistory.mChgPersFromYear = (data->mCur - data->mHistory.mYearDayPrice) * 100.0 / data->mHistory.mYearDayPrice;
+        } else
+        {
+            data->mHistory.mChgPersFromYear = 0.0;
+        }
 //        data->mUpdateTime = QDateTime::currentMSecsSinceEpoch();
         datalist.append(*data);
     }

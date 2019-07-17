@@ -1,4 +1,4 @@
-#ifndef QHKEXCHANGEVOLDATAPROCESS_H
+﻿#ifndef QHKEXCHANGEVOLDATAPROCESS_H
 #define QHKEXCHANGEVOLDATAPROCESS_H
 
 #include <QRunnable>
@@ -10,7 +10,7 @@
 class QHKExchangeVolDataProcess : public QRunnable
 {
 public:
-    explicit QHKExchangeVolDataProcess(const QDate& start, const QDate& end, QObject* parent = 0);
+    explicit QHKExchangeVolDataProcess(const QDate& date, QObject* parent = 0);
     ~QHKExchangeVolDataProcess() {}
 
 public:
@@ -24,8 +24,7 @@ private:
     bool saveData(const QDate& date, const ShareForignVolFileDataList& list);
     QString getFileName(const QDate& date);
 private:
-    QDate       mStartDate;
-    QDate       mEndDate;
+    QDate       mDate;
     QObject*    mParent;
 };
 

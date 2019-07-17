@@ -107,6 +107,7 @@ signals:
                                           const ShareDataList& list);
     void signalUpdateStkProfitList(const ShareDataList& list);
     void signalInitShareRealInfos(const QStringList& codes);
+    void signalUpdateShareCounter(const ShareHistoryCounter& counter);
     //自选股
     void signalSetFavCode(const QString& code);
     void signalSaveFavCode(const QString& code, bool fav);
@@ -163,6 +164,7 @@ public slots:
                                         qint64 vol,\
                                         qint64 vol_chnage,\
                                         const ShareDataList& list);
+    void slotUpdateShareCounter(const ShareHistoryCounter& counter);
     void slotUpdateHistoryChange(const QString& code);
     void slotUpdateStkProfitList(const ShareDataList& list);
     void slotAddShareAmoutByForeigner(const ShareDataList& list);

@@ -1,4 +1,4 @@
-#include "qhkexchangevoldataprocess.h"
+﻿#include "qhkexchangevoldataprocess.h"
 #include "utils/qhttpget.h"
 #include <QDir>
 #include <QRegularExpression>
@@ -9,14 +9,13 @@
 #include <QJsonObject>
 #include <QJsonParseError>
 
-#define     POST_VAL        "__VIEWSTATE=%2FwEPDwUJNjIxMTYzMDAwZGQ79IjpLOM%2BJXdffc28A8BMMA9%2Byg%3D%3D&__VIEWSTATEGENERATOR=EC4ACD6F&__EVENTVALIDATION=%2FwEdAAdtFULLXu4cXg1Ju23kPkBZVobCVrNyCM2j%2BbEk3ygqmn1KZjrCXCJtWs9HrcHg6Q64ro36uTSn%2FZ2SUlkm9HsG7WOv0RDD9teZWjlyl84iRMtpPncyBi1FXkZsaSW6dwqO1N1XNFmfsMXJasjxX85jz8PxJxwgNJLTNVe2Bh%2Fbcg5jDf8%3D&today=TODAY_DATE&sortBy=stockcode&sortDirection=asc&alertMsg=&txtShareholdingDate=TXTSHAREDATE&btnSearch=%E6%90%9C%E5%B0%8B"
-#define     HK_URL      "https://www.hkexnews.hk/sdw/search/mutualmarket_c.aspx?t=%1&t=%2"
-#define     EASTMONEY_URL "http://dcfm.eastmoney.com//em_mutisvcexpandinterface/api/js/get?type=HSGTHDSTA&token=70f12f2f4f091e459a279469fe49eca5&st=SHAREHOLDPRICE&sr=-1&p=%1&ps=100000&js={pages:(tp),data:(x)}&filter=(MARKET%20in%20(%27001%27,%27003%27))(HDDATE=^%2^)&rt=52030379"
+#define     POST_VAL            "__VIEWSTATE=%2FwEPDwUJNjIxMTYzMDAwZGQ79IjpLOM%2BJXdffc28A8BMMA9%2Byg%3D%3D&__VIEWSTATEGENERATOR=EC4ACD6F&__EVENTVALIDATION=%2FwEdAAdtFULLXu4cXg1Ju23kPkBZVobCVrNyCM2j%2BbEk3ygqmn1KZjrCXCJtWs9HrcHg6Q64ro36uTSn%2FZ2SUlkm9HsG7WOv0RDD9teZWjlyl84iRMtpPncyBi1FXkZsaSW6dwqO1N1XNFmfsMXJasjxX85jz8PxJxwgNJLTNVe2Bh%2Fbcg5jDf8%3D&today=TODAY_DATE&sortBy=stockcode&sortDirection=asc&alertMsg=&txtShareholdingDate=TXTSHAREDATE&btnSearch=%E6%90%9C%E5%B0%8B"
+#define     HK_URL              "https://www.hkexnews.hk/sdw/search/mutualmarket_c.aspx?t=%1&t=%2"
+#define     EASTMONEY_URL       "http://dcfm.eastmoney.com//em_mutisvcexpandinterface/api/js/get?type=HSGTHDSTA&token=70f12f2f4f091e459a279469fe49eca5&st=SHAREHOLDPRICE&sr=-1&p=%1&ps=100000&js={pages:(tp),data:(x)}&filter=(MARKET%20in%20(%27001%27,%27003%27))(HDDATE=^%2^)&rt=52030379"
 
-QHKExchangeVolDataProcess::QHKExchangeVolDataProcess(const QDate& start, const QDate& end, QObject* parent) : QRunnable()
+QHKExchangeVolDataProcess::QHKExchangeVolDataProcess(const QDate& date, QObject* parent) : QRunnable()
 {
-    mStartDate = start;
-    mEndDate = end;
+    mDate = date;
     mParent = parent;
 }
 
@@ -164,10 +163,7 @@ bool QHKExchangeVolDataProcess::getVolInfoFromEastMoney(ShareForignVolFileDataLi
         }
 
     }
-    if(list.size() > 0)
-    {
-        saveData(date, list);
-    }
+
     return list.size() > 0;
 }
 
@@ -176,49 +172,63 @@ void QHKExchangeVolDataProcess::getVolofDate(ShareForignVolFileDataList &list, c
     //从文件获取
     if(getVolInfoFromFile(list, date)) return;
     //先从东方财富获取
-    if(getVolInfoFromEastMoney(list, date)) return;
-    //从港交所获取
-    int errorNUm = 0;
-    int sh_num = 0, sz_num = 0;
-    do {
-        getVolInfoFromHKEX(list, sh_num, date, 0);
-        getVolInfoFromHKEX(list, sz_num, date, 1);
-        errorNUm++;
-        if(errorNUm == 3)
-        {
-            break;
-        }
-    } while (sh_num == 0 && sz_num == 0);
-
-    if((sh_num == 0) ^ (sz_num == 0))
+    if(!getVolInfoFromEastMoney(list, date))
     {
-        while (sh_num == 0) {
+        //从港交所获取
+        int errorNUm = 0;
+        int sh_num = 0, sz_num = 0;
+        do {
             getVolInfoFromHKEX(list, sh_num, date, 0);
-        }
-        while (sz_num == 0) {
             getVolInfoFromHKEX(list, sz_num, date, 1);
+            errorNUm++;
+            if(errorNUm == 3)
+            {
+                break;
+            }
+        } while (sh_num == 0 && sz_num == 0);
+
+        if((sh_num == 0) ^ (sz_num == 0))
+        {
+            while (sh_num == 0) {
+                getVolInfoFromHKEX(list, sh_num, date, 0);
+            }
+            while (sz_num == 0) {
+                getVolInfoFromHKEX(list, sz_num, date, 1);
+            }
         }
+    }
+
+    qDebug()<<"hk:"<<date.toString("yyyyMMdd")<<list.size();
+    if(list.size() > 0)
+    {
+        saveData(date, list);
     }
 }
 
 void QHKExchangeVolDataProcess::run()
 {
     ShareForignVolFileDataList list;
+#if 0
     QDate start = mStartDate;
     while(start <= mEndDate)
     {
-        getVolofDate(list, start);
+        //检查是不是市场开市时间
+        if(ShareDate::getHisWorkingDay().contains(start))
+        {
+            getVolofDate(list, start);
+        }
         //getVolofDateFromEastMoney(list, start);
         start = start.addDays(1);
     }
-    qDebug()<<__FUNCTION__<<mParent;
+#endif
+    getVolofDate(list, mDate);
     if(mParent)
     {
-        qDebug()<<"date:"<<mStartDate.toString("yyyy-MM-dd")<<mEndDate.toString("yyyy-MM-dd")<<list.size();
         QMetaObject::invokeMethod(mParent,\
                                   "slotUpdateForignVolInfo",\
                                   Qt::DirectConnection,\
-                                  Q_ARG(ShareForignVolFileDataList, list)\
+                                  Q_ARG(ShareForignVolFileDataList, list),\
+                                  Q_ARG(QDate, mDate)\
                                   );
     }
 }
@@ -226,17 +236,17 @@ void QHKExchangeVolDataProcess::run()
 QString QHKExchangeVolDataProcess::getFileName(const QDate &date)
 {
     //设定保存的文件名
-    return QString("%1/%2.data")
-            .arg(HQ_LGTHISTORY_DIR)
+    return QString("%1/%2")
+            .arg(HQ_LGT_HISTORY_DIR)
             .arg(date.toString("yyyyMMdd"));
 }
 
 bool QHKExchangeVolDataProcess::saveData(const QDate &date, const ShareForignVolFileDataList &list)
 {
     //检查保存目录是否存在，如果不存在，则创建目录
-    QDir dir(HQ_LGTHISTORY_DIR);
+    QDir dir(HQ_LGT_HISTORY_DIR);
     if(!dir.exists()){
-        if(!dir.mkpath(HQ_LGTHISTORY_DIR))
+        if(!dir.mkpath(HQ_LGT_HISTORY_DIR))
         {
             qDebug()<<"create save file dir failed.dir:"<<dir.path();
             return false;
@@ -250,7 +260,7 @@ bool QHKExchangeVolDataProcess::saveData(const QDate &date, const ShareForignVol
     {
         for(int i=0; i<list.length(); i++)
         {
-            file.write((char*)(&(list[i])), sizeof(ShareHistoryFileData));
+            file.write((char*)(&(list[i])), sizeof(ShareForignVolFileData));
         }
         file.close();
     } else {

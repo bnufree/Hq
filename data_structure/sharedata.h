@@ -1,4 +1,4 @@
-#ifndef SHAREDATA_H
+﻿#ifndef SHAREDATA_H
 #define SHAREDATA_H
 #include <QStringList>
 #include <QList>
@@ -57,11 +57,17 @@ struct HistoryInfo{
     double                  mChgPersFromMonth_BAK;
     double                  mLastClose;
 
+    double                  mYearDayPrice;
+    double                  mMonthDayPrice;
+    double                  mWeekDayPrice;
     HistoryInfo()
     {
         mChgPersFromYear_BAK = 1.0;
         mChgPersFromWeek_BAK = 1.0;
         mChgPersFromMonth_BAK = 1.0;
+        mYearDayPrice = 0.0;
+        mMonthDayPrice = 0.0;
+        mWeekDayPrice = 0.0;
     }
 };
 
@@ -247,12 +253,14 @@ Q_DECLARE_METATYPE(ShareDataMap)
 typedef struct hqShareHistoryFileData{
     unsigned int    mDate;
     double          mClose;                 //最新
+    double          mLastClose;             //昨日最后价格
     double          mCloseAdjust;           //复权
     double          mMoney;
     qint64          mForeignVol;
+    double          mForeignMututablePercent;
 }ShareHistoryFileData;
 
-typedef QList<hqShareHistoryFileData>       ShareHistoryFileDataList;
+typedef QList<ShareHistoryFileData>       ShareHistoryFileDataList;
 
 Q_DECLARE_METATYPE(ShareHistoryFileData)
 Q_DECLARE_METATYPE(ShareHistoryFileDataList)
@@ -261,12 +269,47 @@ typedef struct hqShareForeignVolFileData{
     unsigned int    mCode;
     qint64          mForeignVol;
     double          mMutuablePercent;
+
+    hqShareForeignVolFileData()
+    {
+        mCode = 0;
+        mForeignVol = 0;
+        mMutuablePercent = 0.0;
+    }
+
+    hqShareForeignVolFileData(unsigned int code)
+    {
+        mCode = code;
+        mForeignVol = 0;
+        mMutuablePercent = 0.0;
+    }
+
+    bool operator ==(const hqShareForeignVolFileData& other)
+    {
+        return this->mCode == other.mCode;
+    }
 }ShareForignVolFileData;
 
 typedef QList<ShareForignVolFileData>       ShareForignVolFileDataList;
 
 Q_DECLARE_METATYPE(ShareForignVolFileData)
 Q_DECLARE_METATYPE(ShareForignVolFileDataList)
+
+struct ShareHistoryCounter{
+    QString     code;
+    QDate       weekDay;
+    QDate       monthDay;
+    QDate       yearDay;
+    double      weekP;
+    double      monthP;
+    double      yearP;
+    double      lastMoney;
+    qint64      foreign_vol;
+    double      foreign_percent;
+    double      foreign_percent_ch1;
+    double      foreign_percent_ch5;
+    double      foreign_percent_ch10;
+};
 
 
 #if 0

@@ -1,4 +1,4 @@
-#ifndef QSHAREHISTORYINFOMGR_H
+﻿#ifndef QSHAREHISTORYINFOMGR_H
 #define QSHAREHISTORYINFOMGR_H
 
 #include <QObject>
@@ -30,32 +30,22 @@ signals:
     void signalUpdateAllShareFromDate(bool deldb, const QDate& date);
     void signalUpdateHistoryMsg(const QString& msg);
     void signalUpdateHistoryFinished();
+    void signalStartStatic();
 
 public slots:
-    void slotRecvShareHistoryUpdateList(const QList<QDate>& list);
-    void slotStartGetHistory();
-    void slotUpdateAllShareFromDate(bool deldb, const QDate& date = QDate(2017,3,17));
-    void slotUpdateForignVolInfo(const ShareDataList& list);
-    void slotUpdateShareHistoryProcess(const ShareDataList& list);
-    void slotDbUpdateHistoryFinished();
-    void slotUpdateShareHistoryInfoFinished(const QString& code);
-    void slotUpdateReadHistoryInfo(const ShareDataList& list);
-    void slotUpdateWriteHistoryInfo(const ShareDataList& list);
+    void slotUpdateForignVolInfo(const ShareForignVolFileDataList& list, const QDate& date);
+    void slotUpdateShareHistoryProcess(const ShareHistoryFileDataList& list, const QString& code);
+    void slotStartGetHistoryWithAllCodes();
+    void slotStartStatics();
+private:
 
 private:
     QThread             mWorkThread;
     QStringList         mCodesList;
-    QMap<int, QMap<qint64, qint64> >    mShareInfoMap;  //code   date   vol
-    QMutex              mShareInfoMutex;
     QMutex              mShareHistoryMutex;
-    int                 mCurCnt;
     QThreadPool         mPool;
-    QDate               mLastUpdateDate;
-    QMap<QDate,         QMap<QString, ShareData> >  mShareInfoHistoryMap;
-    int                 mHistoryFileNum;
-    int                 mCountCodeNum;
-    QStringList         mDates;
-    QList<QDate>        mTotalDateList;
+    QMap<QString,       ShareHistoryFileDataList>  mShareInfoHistoryMap;
+    QMap<QDate, ShareForignVolFileDataList>         mShareForeignDataMap;
 };
 
 #endif // QSHAREHISTORYINFOMGR_H

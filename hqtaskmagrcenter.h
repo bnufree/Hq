@@ -9,6 +9,8 @@
 class QSinaStkResultMergeThread;
 class QEastMoneyBlockMangagerThread;
 class QShareBasicInfoWorker;
+class QShareActiveDateUpdateThread;
+class QShareHistoryInfoMgr;
 
 class HQTaskMagrCenter : public QObject
 {
@@ -34,6 +36,9 @@ signals:
 public slots:
     void        slotStart();
     void        slotDBInitFinished();
+    void        slotFinishUpdateWorkDays();
+    void        slotNewWorDayChangeNow();
+
     void        slotShareCodesListFinished(const QStringList& codes);
     void        slotBaseDataListFinished(const QStringList& codes, const ShareDataList& list);
     void        slotUpdateHistoryFinished();
@@ -55,6 +60,9 @@ private:
     QList<QObject*>             mRealWorkObjList;
     QSinaStkResultMergeThread*   mShareInfoMergeThread;
     QEastMoneyBlockMangagerThread*  mBlockMgr;
+    QShareActiveDateUpdateThread        *mWorkDayTimeMonitorThread;
+    QShareHistoryInfoMgr                *mHistoryInfoMgr;
+
 };
 
 #endif // HQTASKMAGRCENTER_H

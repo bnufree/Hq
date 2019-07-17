@@ -1,4 +1,4 @@
-#include "qsharecodeswork.h"
+﻿#include "qsharecodeswork.h"
 #include <QDebug>
 #include <QDateTime>
 #include <QRegularExpression>
@@ -27,7 +27,7 @@ void QShareCodesWork::run()
 
     ShareDataList list;
     ShareDate update_date = DATA_SERVICE->getLastUpdateDateOfBasicInfo();
-    if(update_date.date() < ShareDate::getCurWorkDay())
+    if(update_date.isNull() || update_date < ShareDate::getCurWorkDay())
     {
         QString stock_code_url = tr("http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?cb=&type=CT&token=4f1862fc3b5e77c150a2b985b12db0fd&sty=FCOIATC&js=(%7Bdata%3A%5B(x)%5D%2CrecordsFiltered%3A(tot)%7D)&cmd=C._A&st=(Code)&sr=-1&p=1&ps=20000&_=%1").arg(QDateTime::currentMSecsSinceEpoch());
         QString fund_code_url = "http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?cb=&type=CT&token=4f1862fc3b5e77c150a2b985b12db0fd&sty=FCOIATC&js=(%7Bdata%3A%5B(x)%5D%2CrecordsFiltered%3A(tot)%7D)&cmd=C.__2850013&st=(Code)&sr=-1&p=1&ps=2000&_=1555572794676";
@@ -63,7 +63,7 @@ void QShareCodesWork::parseHttp(ShareDataList& list, const QString& url, int mod
             data.mCode = code;
             data.mName = name;
             data.mShareType = ShareData::shareType(code);
-            //qDebug()<<data.mCode<<data.mName<<name.toUtf8().toHex()<<name.toUtf8().size();
+//            qDebug()<<data.mCode<<data.mName<<name.toUtf8().toHex()<<name.toUtf8().size();
             data.mPY = HqUtils::GetFirstLetter(UTF8->toUnicode(name.toUtf8()));
             qDebug()<<data.mCode<<data.mName<<data.mPY;
             list.append(data);

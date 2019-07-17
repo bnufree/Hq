@@ -1,4 +1,4 @@
-#ifndef HQUTILS_H
+﻿#ifndef HQUTILS_H
 #define HQUTILS_H
 
 #include <QDate>
@@ -120,7 +120,7 @@ public:
     }
 
     static ShareDate getCurWorkDay() {return ShareDate(mCurWorkDay);}
-    static ShareDate getLastWorkDay() {return ShareDate(mLastWorkDay);}
+    static ShareDate getLastWorkDay() {return ShareDate(mLastWorkDay);}    
 
 private:
     QDate       mDate;
@@ -129,9 +129,7 @@ private:
     static      QDate               mCurWorkDay;
 };
 
-QList<QDate> ShareDate::mHisWorkingDayList;
-QDate        ShareDate::mLastWorkDay;
-QDate        ShareDate::mCurWorkDay;
+
 
 typedef   QList<ShareDate>      ShareDateList;
 

@@ -1,4 +1,4 @@
-#include "hqtaskmagrcenter.h"
+﻿#include "hqtaskmagrcenter.h"
 #include "dbservices/dbservices.h"
 #include "basic_info/qsharebasicinfoworker.h"
 #include "history/qsharehistoryinfomgr.h"
@@ -10,12 +10,15 @@
 #include "basic_info/qsharehsgttop10work.h"
 #include "basic_info/qsharefhspwork.h"
 #include "basic_info/qsharefinancialinfowork.h"
+#include "basic_info/qshareactivedateupdatethread.h"
 
 
 HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
     QObject(parent),\
     mShareInfoMergeThread(0),\
-    mBlockMgr(0)
+    mBlockMgr(0),
+    mWorkDayTimeMonitorThread(0),
+    mHistoryInfoMgr(0)
 {
     connect(this, SIGNAL(signalStart()), this, SLOT(slotStart()));
     connect(DATA_SERVICE, SIGNAL(signalSendLastHSGTUpdateDate(ShareDate)), this, SLOT(slotStartUpdateHSGTTop10(ShareDate)));
@@ -29,6 +32,7 @@ HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
 
 HQTaskMagrCenter::~HQTaskMagrCenter()
 {
+    if(mWorkDayTimeMonitorThread) mWorkDayTimeMonitorThread->quit();
     mWorkThread.quit();
 }
 
@@ -42,12 +46,19 @@ void HQTaskMagrCenter::slotStart()
 
 void HQTaskMagrCenter::slotDBInitFinished()
 {
+    mWorkDayTimeMonitorThread = new QShareActiveDateUpdateThread;
+    connect(mWorkDayTimeMonitorThread, SIGNAL(signalUpdateHistoryWorkDays()), this, SLOT(slotFinishUpdateWorkDays()));
+    connect(mWorkDayTimeMonitorThread, SIGNAL(signalNewWorkDateNow()), this, SLOT(slotNewWorDayChangeNow()));
+    mWorkDayTimeMonitorThread->start();
+}
+
+void HQTaskMagrCenter::slotFinishUpdateWorkDays()
+{
     qDebug()<<__FUNCTION__<<__LINE__;
     //数据库初始化完成,开始获取最新的代码列表
     QShareCodesWork *codeWorker = new QShareCodesWork(this);
     connect(codeWorker, SIGNAL(finished()), codeWorker, SLOT(deleteLater()));
     codeWorker->start();
-
 
 
     //开始获取当日沪深股通数据，线程常驻，直到当日数据确定获取
@@ -56,9 +67,14 @@ void HQTaskMagrCenter::slotDBInitFinished()
     hsgtTop10->start();
 }
 
+void HQTaskMagrCenter::slotNewWorDayChangeNow()
+{
+    if(mHistoryInfoMgr) mHistoryInfoMgr->signalStartStatic();
+}
+
 void HQTaskMagrCenter::slotStartUpdateHSGTTop10(const ShareDate &date)
 {
-    if(date == ShareDate::latestActiveDay())
+    if(date == ShareDate::getCurWorkDay())
     {
         emit signalNewHsgtTop10Now();
         return;
@@ -155,10 +171,10 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     mShareInfoMergeThread->setMktType(MKT_ZXG);
     mShareInfoMergeThread->start();
     //更新日线数据
-    QShareHistoryInfoMgr* historyMgr = new QShareHistoryInfoMgr(codes);
-    connect(historyMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SIGNAL(signalUpdateHistoryMsg(QString)));
-    connect(historyMgr, SIGNAL(signalUpdateHistoryFinished()), this, SLOT(slotUpdateHistoryFinished()));
-    historyMgr->signalStartGetHistory();
+    mHistoryInfoMgr = new QShareHistoryInfoMgr(codes);
+    connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SIGNAL(signalUpdateHistoryMsg(QString)));
+    connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryFinished()), this, SLOT(slotUpdateHistoryFinished()));
+    mHistoryInfoMgr->signalStartGetHistory();
 #if 0
     return;
     //板块行情初始化
@@ -218,7 +234,7 @@ void HQTaskMagrCenter::slotBaseDataListFinished(const QStringList& codes, const 
     //更新日线数据
     QShareHistoryInfoMgr* historyMgr = new QShareHistoryInfoMgr(codes);
     connect(historyMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SIGNAL(signalUpdateHistoryMsg(QString)));
-    connect(historyMgr, SIGNAL(signalUpdateHistoryFinished()), this, SLOT(slotUpdateHistoryFinished()));
+    //connect(historyMgr, SIGNAL(signalUpdateHistoryFinished()), this, SLOT(slotUpdateHistoryFinished()));
     historyMgr->signalStartGetHistory();
 }
 

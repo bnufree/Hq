@@ -2,7 +2,7 @@
 #include "dbservices/dbservices.h"
 #include "dbservices/qactivedate.h"
 
-QShareHistoryCounterWork::QShareHistoryCounterWork(const QString& code,const ShareDataList& list, QObject* parent)
+QShareHistoryCounterWork::QShareHistoryCounterWork(const QString& code,const ShareHistoryFileDataList& list, QObject* parent)
     :mCode(code),mList(list),mParent(parent),QRunnable()
 {
 
@@ -13,100 +13,151 @@ QShareHistoryCounterWork::~QShareHistoryCounterWork()
 
 }
 
+QString QShareHistoryCounterWork::getFileName()
+{
+    //设定保存的文件名
+    return QString("%1/%2").arg(HQ_DAY_HISTORY_DIR).arg(mCode);
+}
+
+bool QShareHistoryCounterWork::readFile(ShareHistoryFileDataList& list)
+{
+    QString fileName = getFileName();
+    if(!QFile::exists(fileName))
+    {
+        qDebug()<<__FUNCTION__<<__LINE__<<fileName<<" not exist";
+        return false;
+    }
+    //读取文件
+    QFile file(fileName);
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        qDebug()<<__FUNCTION__<<__LINE__<<fileName<<" open error";
+        return false;
+    }
+    while (!file.atEnd() ) {
+        ShareHistoryFileData data;
+        file.read((char*)(&data), sizeof(ShareHistoryFileData));
+        list.append(data);
+    }
+    file.close();
+
+    return true;
+}
+
 void QShareHistoryCounterWork::run()
 {
-    if(mList.size() == 0)
-    {
-        //从文件获取
-        if(mCode.length() > 6)
-        {
-            mCode = mCode.right(6);
-        }
-        QString fileName = QString("%1%2").arg(HQ_SHARE_HISTORY_DIR).arg(mCode);
-        //读取文件信息
-        if(!QFile::exists(fileName)) return ;
-        //读取文件
-        QFile file(fileName);
-        if(!file.open(QIODevice::ReadOnly)) return ;
-        int size = file.size();
-        int totalNum = 0;
-        if(size >= sizeof(ShareData))
-        {
-            while(!file.atEnd())
-            {
-                ShareData info;
-                file.read((char*)(&info), sizeof(ShareData));
-                mList.append(info);
-            }
-        }
-        file.close();
+    if(mList.size() == 0) readFile(mList);
+    //获取当前交易日的日期
+    QDate now = ShareDate::getCurWorkDay().date();
+    //获取对应的年,月,周对应的参考基准日
+    //周参考日对应上周的星期五
+    QDate week = now.addDays(-1*(now.dayOfWeek()) - 2);
+    //月参考日对应上月的最后一个交易日
+    QDate month = QDate(now.year(), now.month(), 1).addDays(-1);
+    //年参考日
+    QDate year = QDate(now.year(), 1, 1).addDays(-1);
 
-    }
- //   qSort(mList.begin(), mList.end(), ShareData::sortByDateAsc);    
+    //开始获取参考日对应的复权价
     int size = mList.size();
-    double lastColse = 0;
-    double lastMoney = 0.0;
-    double last3Change = 0.0;
-    double last5Change = 0.0;
-    double last10Change = 0.0;
-    double lastMonthChange = 0.0;
-    double last1HYearChange = 0.0;
-    qint64 vol_change = 0;
-    qint64 vol = 0;
-#if 0
-    if(size > 0)
+    if(size == 0) return;
+    double week_p = 0.0, month_p = 0.0, year_p = 0.0;
+    bool week_found = false, month_found = false, year_found = false;
+    //从后开始往前找,找到对应日期或者最靠近日期
+    QDate real_week, real_month, real_year;
+    for(int i = size - 1; i >= 0; i--)
     {
-        lastMoney = mList[size-1].money;
-        lastColse = mList[size-1].close;
-        if(QDate::fromJulianDay(mList[size-1].date) == QActiveDateTime::latestActiveDay())
+        ShareHistoryFileData data = mList[i];
+        QDate wkDate = QDateTime::fromTime_t(data.mDate).date();
+        if((!week_found) && (wkDate <= week))
         {
-            if(size - 2 > 0)
-            {
-                lastMoney = mList[size-2].money;
-                lastColse = mList[size-2].close;
-            }
+            week_found = true;
+            week_p = data.mCloseAdjust;
+            real_week = wkDate;
         }
-        int day[] = {DAYS_3, DAYS_5, DAYS_10, DAYS_MONTH, DAYS_HALF_YEAR};
-        double *change[] = {&last3Change, &last5Change, &last10Change, &lastMonthChange, &last1HYearChange};
-        int k = 0;
-        double changper = 1.0;
-        for(int i=0; i<5; i++)
+        if((!month_found) &&(wkDate <= month))
         {
-            for(; k<size; k++)
-            {
-
-                if(k < day[i])
-                {
-                    SHARE_HISTORY_INFO curData = mList[size-1-k];
-                    changper *= (1 + curData.change /100);
-                    for(int j=i; j<5; j++)
-                    {
-                        *(change[j]) = (changper -1) * 100;
-                    }
-                } else
-                {
-                    break;
-                }
-
-            }
+            month_found = true;
+            month_p = data.mCloseAdjust;
+            real_month = wkDate;
         }
 
-        vol = mList[size-1].foreign_vol;
-        vol_change = vol;
-        if(size >=2)
+        if((!year_found) && (wkDate <= year))
         {
-            vol_change -= mList[size-2].foreign_vol;
+            year_found = true;
+            year_p = data.mCloseAdjust;
+            real_year = wkDate;
         }
+        if(week_found && month_found && year_found) break;
     }
-#endif
-    DATA_SERVICE->signalUpdateShareinfoWithHistory(mCode, lastMoney, last3Change, last5Change, last10Change, lastMonthChange, last1HYearChange, vol, vol_change, mList);
-
-//    qDebug()<<mCode<<lastMoney<<last3Change<<last5Change<<last10Change<<lastMonthChange<<last1HYearChange<<vol<<vol_change;
-
-    if(mParent)
+    //最后仍然没有找到
+    if(!week_found)
     {
-        QMetaObject::invokeMethod(mParent,\
-                                  "slotUpdateShareHistoryInfoFinished",\
-                                  Q_ARG(QString, mCode));
+        week_p = mList.first().mLastClose;
+        real_week = QDateTime::fromTime_t(mList.first().mDate).date();
+        week_found = true;
     }
+
+    if(!month_found)
+    {
+        month_p = mList.first().mLastClose;
+        real_month = QDateTime::fromTime_t(mList.first().mDate).date();
+        month_found = true;
+    }
+
+    if(!year_found)
+    {
+        year_p = mList.first().mLastClose;
+        real_year = QDateTime::fromTime_t(mList.first().mDate).date();
+        year_found = true;
+    }
+
+    double last_money = mList.last().mMoney;
+    //获取当前陆股通持股信息的变化情况 1日 5日 10日
+    double foreign_now = mList.last().mForeignVol;
+    double foreign_mutaul = mList.last().mForeignMututablePercent;
+    double foreign_chg1 = 0.0, foreign_chg5 = 0.0, foreign_chg10 = 0.0;
+    if(size >= 2)
+    {
+        foreign_chg1 = mList[size-1].mForeignMututablePercent - mList[size-2].mForeignMututablePercent;
+    } else
+    {
+        foreign_chg1 = mList[size-1].mForeignMututablePercent - mList[0].mForeignMututablePercent;
+    }
+    if(size >= 5)
+    {
+        foreign_chg5 = mList[size-1].mForeignMututablePercent - mList[size-5].mForeignMututablePercent;
+    } else
+    {
+        foreign_chg5 = mList[size-1].mForeignMututablePercent - mList[0].mForeignMututablePercent;
+    }
+
+    if(size >= 10)
+    {
+        foreign_chg10 = mList[size-1].mForeignMututablePercent - mList[size-10].mForeignMututablePercent;
+    } else
+    {
+        foreign_chg10 = mList[size-1].mForeignMututablePercent - mList[0].mForeignMututablePercent;
+    }
+
+    ShareHistoryCounter counter;
+    counter.code = mCode;
+    counter.foreign_percent = foreign_mutaul;
+    counter.foreign_percent_ch1 = foreign_chg1;
+    counter.foreign_percent_ch5 = foreign_chg5;
+    counter.foreign_percent_ch10 = foreign_chg10;
+    counter.foreign_vol = foreign_now;
+    counter.lastMoney = last_money;
+    counter.monthDay = real_month;
+    counter.monthP = month_p;
+    counter.weekDay = real_week;
+    counter.weekP = week_p;
+    counter.yearDay = real_year;
+    counter.yearP = year_p;
+    qDebug()<<mCode<<real_week.toString("yyyyMMdd")<<week_p<<real_month.toString("yyyyMMdd")<<month_p<<real_year.toString("yyyyMMdd")<<year_p;
+
+    emit DATA_SERVICE->signalUpdateShareCounter(counter);
+
+
+
+
 }
