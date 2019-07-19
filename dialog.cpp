@@ -67,7 +67,7 @@ Dialog::Dialog(QWidget *parent) :
     //指数显示
     QHBoxLayout *indexLayout = new QHBoxLayout;
     ui->indexframe->setLayout(indexLayout);
-    indexLayout->setContentsMargins(5, 5, 5, 5);
+    indexLayout->setContentsMargins(5, 0, 5, 0);
     if(!mIndexWidget)
     {
         mIndexWidget = new QIndexWidget(this);

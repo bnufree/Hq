@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>541</width>
-    <height>78</height>
+    <height>82</height>
    </rect>
   </property>
   <property name="font">
@@ -18,15 +18,12 @@
     <bold>true</bold>
    </font>
   </property>
-  <property name="windowTitle">
-   <string>Form</string>
-  </property>
   <property name="styleSheet">
    <string notr="true">QLabel{
-	font-family:微软雅黑;
+	font-family:Microsoft Yahei;
 	font-weight:bold;
 	font-size:20pt;
-	color:white;
+	color:red;
 	alignment:center;
 }
 #name,#cur{
@@ -34,6 +31,12 @@
 }</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>

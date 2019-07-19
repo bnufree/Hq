@@ -1,4 +1,4 @@
-﻿#include "qhkexchangevoldataprocess.h"
+#include "qhkexchangevoldataprocess.h"
 #include "utils/qhttpget.h"
 #include <QDir>
 #include <QRegularExpression>
@@ -150,7 +150,7 @@ bool QHKExchangeVolDataProcess::getVolInfoFromEastMoney(ShareForignVolFileDataLi
         {
             QJsonObject sub = array[i].toObject();
             ShareForignVolFileData data;
-            data.mCode = sub.value("SCODE").toInt();
+            data.mCode = sub.value("SCODE").toString().toInt();
 //            data.mName = sub.value("SNAME").toString();
 //            data.setDate(QDate::fromString(sub.value("HDDATE").toString().left(10), "yyyy-MM-dd"));
             data.mForeignVol = qint64(sub.value("SHAREHOLDSUM").toDouble());
