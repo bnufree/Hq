@@ -1,4 +1,4 @@
-﻿#include "qindexframe.h"
+#include "qindexframe.h"
 #include "ui_qindexframe.h"
 #include <QDebug>
 
@@ -22,7 +22,7 @@ QSize QIndexFrame::calSize() const
     QFont font(tr("微软雅黑"));
     font.setBold(true);
     font.setPointSize(16);
-    int height = 78;
+    int height = QFontMetrics(font).height() * 2 + 6;
     int width = 18;
     //测试frame的宽度
     width += QFontMetrics(font).width(tr("上证指数"));
@@ -76,9 +76,11 @@ void QIndexFrame::updateBound(double shVal, QString shName, double szVal, QStrin
 void QIndexFrame::updateBound(double pure, const QString &name)
 {
     ui->name->setText(name);
-    ui->chg->setText(QStringLiteral("%1亿").arg(QString::number(pure / 10000.0, 'f', 2)));
+    ui->name->setVisible(false);
+    ui->cur->setText(name);
     ui->cur->setVisible(false);
-    ui->chgper->setVisible(false);
+    ui->chg->setText(name);
+    ui->chgper->setText(QStringLiteral("%1亿").arg(QString::number(pure / 10000.0, 'f', 2)));
     ui->money->setVisible(false);
     int chgint = (int)(pure);
     QString newColor = QString("color:%1").arg(chgint == 0? "black" : chgint > 0? "red":"green");

@@ -296,6 +296,8 @@ void QIndexWidget::switchWidget()
         mList[i]->setVisible(true);
 
     }
+    if(mList.size() > 0)
+    this->setMinimumHeight(mList[0]->height());
 }
 
 #endif

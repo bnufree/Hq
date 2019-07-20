@@ -1,4 +1,4 @@
-﻿#include "qhkexchangevoldataprocess.h"
+#include "qhkexchangevoldataprocess.h"
 #include "utils/qhttpget.h"
 #include <QDir>
 #include <QRegularExpression>
