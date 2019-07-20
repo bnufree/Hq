@@ -123,9 +123,9 @@ typedef struct North_South_Bound_Data
     qint64              mVolTotal;
     qint64              mVolChange;
     double              mVolMutablePercent;
-    double              mVolMutablePercentCh1;
-    double              mVolMutablePercentCh5;
-    double              mVolMutablePercentCh10;
+    double              mVolCh1;
+    double              mVolCh5;
+    double              mVolCh10;
     bool                mIsTop10;
     ShareDateTime       mDate;
 
@@ -139,9 +139,9 @@ typedef struct North_South_Bound_Data
         mVolTotal = 0;
         mVolChange = 0;
         mVolMutablePercent = 0.0;
-        mVolMutablePercentCh1 = 0.0;
-        mVolMutablePercentCh5 = 0.0;
-        mVolMutablePercentCh10 = 0.0;
+        mVolCh1 = 0.0;
+        mVolCh5 = 0.0;
+        mVolCh10 = 0.0;
     }
 
     bool operator <(const North_South_Bound_Data& data) const

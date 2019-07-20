@@ -116,35 +116,36 @@ void QShareHistoryCounterWork::run()
     double foreign_now = mList.last().mForeignVol;
     double foreign_mutaul = mList.last().mForeignMututablePercent;
     double foreign_chg1 = 0.0, foreign_chg5 = 0.0, foreign_chg10 = 0.0;
+//    if(mList.size() > 2) qDebug()<<mList[size-1].mForeignVol<<mList[size-1].mForeignMututablePercent<<mList[size-2].mForeignVol<<mList[size-2].mForeignMututablePercent;
     if(size >= 2)
     {
-        foreign_chg1 = mList[size-1].mForeignMututablePercent - mList[size-2].mForeignMututablePercent;
+        foreign_chg1 = mList[size-1].mForeignVol - mList[size-2].mForeignVol;
     } else
     {
-        foreign_chg1 = mList[size-1].mForeignMututablePercent - mList[0].mForeignMututablePercent;
+        foreign_chg1 = mList[size-1].mForeignVol - mList[0].mForeignVol;
     }
     if(size >= 5)
     {
-        foreign_chg5 = mList[size-1].mForeignMututablePercent - mList[size-5].mForeignMututablePercent;
+        foreign_chg5 = mList[size-1].mForeignVol - mList[size-5].mForeignVol;
     } else
     {
-        foreign_chg5 = mList[size-1].mForeignMututablePercent - mList[0].mForeignMututablePercent;
+        foreign_chg5 = mList[size-1].mForeignVol - mList[0].mForeignVol;
     }
 
     if(size >= 10)
     {
-        foreign_chg10 = mList[size-1].mForeignMututablePercent - mList[size-10].mForeignMututablePercent;
+        foreign_chg10 = mList[size-1].mForeignVol - mList[size-10].mForeignVol;
     } else
     {
-        foreign_chg10 = mList[size-1].mForeignMututablePercent - mList[0].mForeignMututablePercent;
+        foreign_chg10 = mList[size-1].mForeignVol - mList[0].mForeignVol;
     }
 
     ShareHistoryCounter counter;
     counter.code = mCode;
     counter.foreign_percent = foreign_mutaul;
-    counter.foreign_percent_ch1 = foreign_chg1;
-    counter.foreign_percent_ch5 = foreign_chg5;
-    counter.foreign_percent_ch10 = foreign_chg10;
+    counter.foreign_ch1 = foreign_chg1;
+    counter.foreign_ch5 = foreign_chg5;
+    counter.foreign_ch10 = foreign_chg10;
     counter.foreign_vol = foreign_now;
     counter.lastMoney = last_money;
     counter.monthDay = real_month;
@@ -153,7 +154,7 @@ void QShareHistoryCounterWork::run()
     counter.weekP = week_p;
     counter.yearDay = real_year;
     counter.yearP = year_p;
-    qDebug()<<mCode<<real_week.toString("yyyyMMdd")<<week_p<<real_month.toString("yyyyMMdd")<<month_p<<real_year.toString("yyyyMMdd")<<year_p;
+//    qDebug()<<mCode<<real_week.toString("yyyyMMdd")<<week_p<<real_month.toString("yyyyMMdd")<<month_p<<real_year.toString("yyyyMMdd")<<year_p<<foreign_chg1<<foreign_chg5<<foreign_chg10;
 
     emit DATA_SERVICE->signalUpdateShareCounter(counter);
 

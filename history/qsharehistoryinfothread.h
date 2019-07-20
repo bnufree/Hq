@@ -18,7 +18,7 @@ public:
 public:
     void run();
 private:
-    void                        adjustDataList(ShareHistoryFileDataList& list, double price);
+    void                        adjustDataList(ShareHistoryFileDataList& list, double price, double ratio);
     bool                        readFile(ShareHistoryFileDataList& list);
     QString                     getFileName();
     void                        writeFile(const ShareHistoryFileDataList& list, const char* mode);

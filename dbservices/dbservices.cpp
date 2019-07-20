@@ -522,15 +522,15 @@ void HqInfoService::slotUpdateShareCounter(const ShareHistoryCounter& counter)
     QString code = counter.code.right(6);
     ShareData *data = getShareData(code);
     if(!data) return;
-    data->mHistory.mLastMoney = counter.lastMoney * 0.0001;
+    data->mHistory.mLastMoney = counter.lastMoney;
     data->mHistory.mYearDayPrice= counter.yearP;
     data->mHistory.mMonthDayPrice = counter.monthP;
     data->mHistory.mWeekDayPrice = counter.weekP;
     data->mHsgtData.mVolTotal = counter.foreign_vol;
     data->mHsgtData.mVolMutablePercent = counter.foreign_percent;
-    data->mHsgtData.mVolMutablePercentCh1 = counter.foreign_percent_ch1;
-    data->mHsgtData.mVolMutablePercentCh5 = counter.foreign_percent_ch5;
-    data->mHsgtData.mVolMutablePercentCh10 = counter.foreign_percent_ch10;
+    data->mHsgtData.mVolCh1 = counter.foreign_ch1;
+    data->mHsgtData.mVolCh5 = counter.foreign_ch5;
+    data->mHsgtData.mVolCh10 = counter.foreign_ch10;
     //emit signalUpdateShareHistoryFinished(code);
 }
 

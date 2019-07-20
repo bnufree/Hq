@@ -119,6 +119,7 @@ void QShareHistoryInfoThread::run()
                 data.mLastClose = cols[7].toDouble();
                 data.mCloseAdjust = data.mClose;
                 data.mMoney = cols[12].toDouble();
+                data.mTotalShareCount = qint64(floor(cols[13].toDouble() / data.mClose));
 
                 //获取当日对应的陆股通数据
                 if(mExistForeignMap && mExistForeignMap->contains(curDate))
@@ -139,7 +140,15 @@ void QShareHistoryInfoThread::run()
                     //前一笔的最后价格和当前获取的前一次的最后价格不相同,那么今天就是进行了除权处理,对前面的所有价格都进行除权
                     double adjust_price = data.mLastClose - list.last().mClose;
                     if(adjust == false) adjust = true;
-                    adjustDataList(list, adjust_price);
+                    //检查股本是否发生了变化
+                    double share_ratio = 1;
+                    if(list.last().mTotalShareCount > 0 ) share_ratio = data.mTotalShareCount * 1.0 / list.last().mTotalShareCount;
+                    adjustDataList(list, adjust_price, share_ratio);
+                }
+                if(data.mForeignVol == 0 && list.last().mForeignVol != 0)
+                {
+                    data.mForeignVol = list.last().mForeignVol;
+                    data.mForeignMututablePercent = list.last().mForeignMututablePercent;
                 }
                 list.append(data);
                 new_size++;
@@ -188,18 +197,23 @@ void QShareHistoryInfoThread::writeFile(const ShareHistoryFileDataList& list, co
     {
         foreach (ShareHistoryFileData data, list) {
             fwrite(&data, sizeof(ShareHistoryFileData), 1, fp);
+//            if(mCode == "000333")
+//            {
+//                qDebug()<<"write history:"<<QDateTime::fromTime_t(data.mDate).toString("yyyyMMdd")<<data.mForeignVol;
+//            }
         }
         fclose(fp);
     }
 }
 
-void QShareHistoryInfoThread::adjustDataList(ShareHistoryFileDataList &list, double price)
+void QShareHistoryInfoThread::adjustDataList(ShareHistoryFileDataList &list, double price, double ratio)
 {
     for(int i=0; i<list.size(); i++)
     {
         ShareHistoryFileData &data = list[i];
         data.mCloseAdjust += price;
         data.mLastClose += price;
+        data.mForeignVol = qint64(floor(data.mForeignVol * ratio));
     }
 }
 

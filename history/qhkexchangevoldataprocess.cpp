@@ -120,6 +120,10 @@ bool QHKExchangeVolDataProcess::getVolInfoFromFile(ShareForignVolFileDataList& l
         int size = file.read((char*)(&data), obj_size);
         if(size != obj_size) break;
         list.append(data);
+//        if(data.mCode == 333)
+//        {
+//            qDebug()<<"read 000333"<<date.toString("yyyyMMdd")<<data;
+//        }
         count++;
     }
     file.close();
@@ -131,7 +135,9 @@ bool QHKExchangeVolDataProcess::getVolInfoFromEastMoney(ShareForignVolFileDataLi
     int page = 1;
     int totalpage = 1;
     while (page <= totalpage) {
-        QByteArray value = QHttpGet::getContentOfURL(QString(EASTMONEY_URL).arg(page).arg(date.toString("yyyy-MM-dd")));
+        QString url = QString(EASTMONEY_URL).arg(page).arg(date.toString("yyyy-MM-dd"));
+        qDebug()<<url<<list.size();
+        QByteArray value = QHttpGet::getContentOfURL(url);
         value.replace("pages", "\"pages\"");
         value.replace("data", "\"data\"");
         page++;
@@ -150,7 +156,7 @@ bool QHKExchangeVolDataProcess::getVolInfoFromEastMoney(ShareForignVolFileDataLi
         {
             QJsonObject sub = array[i].toObject();
             ShareForignVolFileData data;
-            data.mCode = sub.value("SCODE").toInt();
+            data.mCode = sub.value("SCODE").toString().toInt();
 //            data.mName = sub.value("SNAME").toString();
 //            data.setDate(QDate::fromString(sub.value("HDDATE").toString().left(10), "yyyy-MM-dd"));
             data.mForeignVol = qint64(sub.value("SHAREHOLDSUM").toDouble());
@@ -163,6 +169,7 @@ bool QHKExchangeVolDataProcess::getVolInfoFromEastMoney(ShareForignVolFileDataLi
         }
 
     }
+
 
     return list.size() > 0;
 }
@@ -202,6 +209,7 @@ void QHKExchangeVolDataProcess::getVolofDate(ShareForignVolFileDataList &list, c
     if(list.size() > 0)
     {
         saveData(date, list);
+
     }
 }
 

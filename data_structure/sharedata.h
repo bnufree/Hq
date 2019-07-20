@@ -9,6 +9,7 @@
 #include "hqbasedata.h"
 #include "hqutils.h"
 #include "utils/comdatadefines.h"
+#include <QDebug>
 
 #define         SH_FUND_REG         "(sh){0,1}5[0-9]{5}"
 #define         SH_INDEX_REG        "sh0[0-9]{5}"
@@ -258,6 +259,7 @@ typedef struct hqShareHistoryFileData{
     double          mMoney;
     qint64          mForeignVol;
     double          mForeignMututablePercent;
+    qint64          mTotalShareCount;
 }ShareHistoryFileData;
 
 typedef QList<ShareHistoryFileData>       ShareHistoryFileDataList;
@@ -288,6 +290,13 @@ typedef struct hqShareForeignVolFileData{
     {
         return this->mCode == other.mCode;
     }
+
+    friend QDebug operator <<(QDebug debug, const hqShareForeignVolFileData& data)
+    {
+        QString info = QString("foreign vol info:Code(%1),Vol(%L2),Percent(%3)").arg(data.mCode).arg(data.mForeignVol).arg(data.mMutuablePercent, 0, 'f', 2);
+        debug<<info;
+        return debug;
+    }
 }ShareForignVolFileData;
 
 typedef QList<ShareForignVolFileData>       ShareForignVolFileDataList;
@@ -306,9 +315,9 @@ struct ShareHistoryCounter{
     double      lastMoney;
     qint64      foreign_vol;
     double      foreign_percent;
-    double      foreign_percent_ch1;
-    double      foreign_percent_ch5;
-    double      foreign_percent_ch10;
+    double      foreign_ch1;
+    double      foreign_ch5;
+    double      foreign_ch10;
 };
 
 
