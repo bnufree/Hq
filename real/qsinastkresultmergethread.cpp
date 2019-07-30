@@ -86,7 +86,7 @@ void QSinaStkResultMergeThread::run()
                         (mMktType == MKT_JJ && (data.mShareType & SHARE_FUND))||\
                         (mMktType == MKT_OTHER && mSelfCodesList.contains(data.mCode));
 
-                if(sts)
+                if(sts && data.mMoney > 0.001)
                 {
                     wklist.append(data);
                 }

@@ -1,4 +1,4 @@
-﻿#include "profiles.h"
+#include "profiles.h"
 #include <QDir>
 #include <QDebug>
 #include "comdatadefines.h"
@@ -12,7 +12,7 @@ Profiles::Profiles(QObject *parent) :
     configSettings(NULL),
     QObject(parent)
 {
-    QString fileNM = QString("%1%2").arg(HQ_CFG_DIR).arg(INI_FILE_NAME);
+    QString fileNM = QString("%1/%2").arg(HQ_CFG_DIR).arg(INI_FILE_NAME);
     bool sts = QFile::exists(fileNM);
     if(!sts)
     {
