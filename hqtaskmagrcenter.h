@@ -43,7 +43,7 @@ public slots:
     void        slotBaseDataListFinished(const QStringList& codes, const ShareDataList& list);
     void        slotUpdateHistoryFinished();
     void        slotSetFavCode(const QString& code);
-    void        slotStartUpdateHSGTTop10(const ShareDate& date);
+    void        slotStartUpdateHSGTTop10(const ShareWorkingDate& date);
 
     //
     void        setMktType(int type);

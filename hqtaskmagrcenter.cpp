@@ -21,7 +21,7 @@ HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
     mHistoryInfoMgr(0)
 {
     connect(this, SIGNAL(signalStart()), this, SLOT(slotStart()));
-    connect(DATA_SERVICE, SIGNAL(signalSendLastHSGTUpdateDate(ShareDate)), this, SLOT(slotStartUpdateHSGTTop10(ShareDate)));
+    connect(DATA_SERVICE, SIGNAL(signalSendLastHSGTUpdateDate(ShareWorkingDate)), this, SLOT(slotStartUpdateHSGTTop10(ShareWorkingDate)));
     connect(DATA_SERVICE, SIGNAL(signalDbInitFinished()), this, SLOT(slotDBInitFinished()));
     connect(DATA_SERVICE, SIGNAL(signalAllShareCodeList(QStringList)), this, SLOT(slotShareCodesListFinished(QStringList)));
     connect(this, SIGNAL(signalSearchCodesOfText(QString)), DATA_SERVICE, SIGNAL(signalSearchCodesOfText(QString)));
@@ -72,9 +72,9 @@ void HQTaskMagrCenter::slotNewWorDayChangeNow()
     if(mHistoryInfoMgr) mHistoryInfoMgr->signalStartStatic();
 }
 
-void HQTaskMagrCenter::slotStartUpdateHSGTTop10(const ShareDate &date)
+void HQTaskMagrCenter::slotStartUpdateHSGTTop10(const ShareWorkingDate &date)
 {
-    if(date == ShareDate::getCurWorkDay())
+    if(date == ShareWorkingDate::getCurWorkDay())
     {
         emit signalNewHsgtTop10Now();
         return;

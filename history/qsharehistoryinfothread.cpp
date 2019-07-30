@@ -7,7 +7,7 @@
 #include "dbservices/qactivedate.h"
 #include "utils/comdatadefines.h"
 
-QShareHistoryInfoThread::QShareHistoryInfoThread(const QString& code, const ShareDate& start, const ShareDate& end, QObject* parent) :
+QShareHistoryInfoThread::QShareHistoryInfoThread(const QString& code, const ShareWorkingDate& start, const ShareWorkingDate& end, QObject* parent) :
     mCode(code),
     mStart(start),
     mEnd(end),
@@ -25,8 +25,8 @@ QShareHistoryInfoThread::QShareHistoryInfoThread(const QString& code, const Shar
 QShareHistoryInfoThread::QShareHistoryInfoThread(const QString &code, QMap<QDate, ShareForignVolFileDataList>* map, QObject *parent)
     : mCode(code)
     , mParent(parent)
-    , mStart(ShareDate())
-    , mEnd(ShareDate())
+    , mStart(ShareWorkingDate())
+    , mEnd(ShareWorkingDate())
     , mExistForeignMap(map)
     , QRunnable()
 {
@@ -74,7 +74,7 @@ void QShareHistoryInfoThread::run()
     //基金不更新
     if(mCode.left(1) == "5" || mCode.left(1) == "1") return;
     //默认上一次更新日期是一年前的第一天
-    ShareDate last_update_date(ShareDate::getHisWorkingDay().last());
+    ShareWorkingDate last_update_date(ShareWorkingDate::getHisWorkingDay().last());
     //获取当前文件已经更新的日期
     ShareHistoryFileDataList list;
     readFile(list);
@@ -85,7 +85,7 @@ void QShareHistoryInfoThread::run()
     //开始更新日线数据到今天
     int new_size = 0;
     bool adjust = false;
-    if(last_update_date < ShareDate::currentDate())
+    if(last_update_date < ShareWorkingDate::currentDate())
     {
         QString wkCode;
         if(mCode.left(1) == "6" || mCode.left(1) == "5")
@@ -97,7 +97,7 @@ void QShareHistoryInfoThread::run()
         }
         //取得日线数据
         QString wkURL = QString("http://quotes.money.163.com/service/chddata.html?code=%1&start=%2&end=%3")
-                .arg(wkCode).arg(last_update_date.date().toString("yyyyMMdd")).arg(ShareDate::currentDate().date().toString("yyyyMMdd"));
+                .arg(wkCode).arg(last_update_date.date().toString("yyyyMMdd")).arg(ShareWorkingDate::currentDate().date().toString("yyyyMMdd"));
         QByteArray recv = QHttpGet::getContentOfURL(wkURL);
         QTextCodec* gbk = QTextCodec::codecForName("GBK");
         QTextCodec* utf8 = QTextCodec::codecForName("UTF-8");
@@ -121,6 +121,10 @@ void QShareHistoryInfoThread::run()
                 data.mMoney = cols[12].toDouble();
                 data.mTotalShareCount = qint64(floor(cols[13].toDouble() / data.mClose));
 
+//                if(curDate == QDate(2019,7,29))
+//                {
+//                    qDebug()<<__LINE__<<mCode<<QDateTime::fromTime_t(data.mDate).toString("yyyyMMdd")<<data.mForeignVol<<data.mForeignMututablePercent;
+//                }
                 //获取当日对应的陆股通数据
                 if(mExistForeignMap && mExistForeignMap->contains(curDate))
                 {
@@ -131,8 +135,18 @@ void QShareHistoryInfoThread::run()
                         ShareForignVolFileData temp = wklist[index];
                         data.mForeignVol = temp.mForeignVol;
                         data.mForeignMututablePercent = temp.mMutuablePercent;
+//                        if(curDate == QDate(2019,7,29))
+//                        {
+//                            qDebug()<<__LINE__<<mCode<<"index:"<<index<<temp;
+//                        }
+
                     }
+
                 }
+//                if(curDate == QDate(2019,7,29))
+//                {
+//                    qDebug()<<__LINE__<<mCode<<QDateTime::fromTime_t(data.mDate).toString("yyyyMMdd")<<data.mForeignVol<<data.mForeignMututablePercent;
+//                }
 
                 //检查是否有除权处理,如果有就更新前面所有的除权价格
                 if(list.size() > 0 && list.last().mClose != data.mLastClose)
@@ -145,11 +159,15 @@ void QShareHistoryInfoThread::run()
                     if(list.last().mTotalShareCount > 0 ) share_ratio = data.mTotalShareCount * 1.0 / list.last().mTotalShareCount;
                     adjustDataList(list, adjust_price, share_ratio);
                 }
-                if(data.mForeignVol == 0 && list.last().mForeignVol != 0)
+                if(list.size() > 0 && data.mForeignVol == 0 && list.last().mForeignVol != 0)
                 {
                     data.mForeignVol = list.last().mForeignVol;
                     data.mForeignMututablePercent = list.last().mForeignMututablePercent;
                 }
+//                if(curDate == QDate(2019,7,29))
+//                {
+//                    qDebug()<<__LINE__<<mCode<<QDateTime::fromTime_t(data.mDate).toString("yyyyMMdd")<<data.mForeignVol<<data.mForeignMututablePercent;
+//                }
                 list.append(data);
                 new_size++;
             }
@@ -169,6 +187,10 @@ void QShareHistoryInfoThread::run()
         }
     }
     //最后更新到管理类,便于开始统计
+//    if(list.size() > 0)
+//    {
+//        qDebug()<<__LINE__<<mCode<<QDateTime::fromTime_t(list.last().mDate).toString("yyyyMMdd")<<list.last().mForeignVol<<list.last().mForeignMututablePercent;
+//    }
 FUNC_END:
     if(mParent)
     {
@@ -197,10 +219,6 @@ void QShareHistoryInfoThread::writeFile(const ShareHistoryFileDataList& list, co
     {
         foreach (ShareHistoryFileData data, list) {
             fwrite(&data, sizeof(ShareHistoryFileData), 1, fp);
-//            if(mCode == "000333")
-//            {
-//                qDebug()<<"write history:"<<QDateTime::fromTime_t(data.mDate).toString("yyyyMMdd")<<data.mForeignVol;
-//            }
         }
         fclose(fp);
     }

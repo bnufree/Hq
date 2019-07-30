@@ -10,8 +10,8 @@ QShareActiveDateUpdateThread::QShareActiveDateUpdateThread(QObject *parent) : QT
 void QShareActiveDateUpdateThread::run()
 {
     //首先获取当前的日期列表
-    ShareDate cur = ShareDate::currentDate();
-    ShareDate start(cur.date().addYears(-1));
+    ShareWorkingDate cur = ShareWorkingDate::currentDate();
+    ShareWorkingDate start(cur.date().addYears(-1));
     QString wkURL = QString("http://quotes.money.163.com/service/chddata.html?code=0000001&start=%1&end=%2")
             .arg(start.toString("yyyyMMdd")).arg(cur.toString("yyyyMMdd"));
     QByteArray recv = QHttpGet::getContentOfURL(wkURL);
@@ -27,12 +27,12 @@ void QShareActiveDateUpdateThread::run()
         if(cols.length() >= 15)
         {
             //if(mCode == "000400")qDebug()<<recv.mid(20, 200);
-            ShareDate curDate = ShareDate::fromString(cols[0]);
+            ShareWorkingDate curDate = ShareWorkingDate::fromString(cols[0]);
             if(curDate.isWeekend()) continue;
             list.append(curDate.date());
         }
     }
-    ShareDate::setHisWorkingDay(list);
+    ShareWorkingDate::setHisWorkingDay(list);
     QDate chk;
     //检查当前时间是不是工作日
     while(true)
@@ -51,7 +51,7 @@ void QShareActiveDateUpdateThread::run()
             if(now != chk)
             {
                 qDebug()<<"set work day:"<<now.toString("yyyy-MM-dd");
-                ShareDate::setCurWorkDate(now);
+                ShareWorkingDate::setCurWorkDate(now);
                 if(chk.isNull())
                 {
                     emit signalUpdateHistoryWorkDays();

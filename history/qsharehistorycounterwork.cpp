@@ -48,7 +48,8 @@ void QShareHistoryCounterWork::run()
 {
     if(mList.size() == 0) readFile(mList);
     //获取当前交易日的日期
-    QDate now = ShareDate::getCurWorkDay().date();
+    QDate now = ShareWorkingDate::getCurWorkDay().date();
+    QDate yesterday = ShareWorkingDate::getLastWorkDay().date();
     //获取对应的年,月,周对应的参考基准日
     //周参考日对应上周的星期五
     QDate week = now.addDays(-1*(now.dayOfWeek()) - 2);
@@ -62,12 +63,14 @@ void QShareHistoryCounterWork::run()
     if(size == 0) return;
     double week_p = 0.0, month_p = 0.0, year_p = 0.0;
     bool week_found = false, month_found = false, year_found = false;
+    double last_money = mList.last().mMoney;
     //从后开始往前找,找到对应日期或者最靠近日期
     QDate real_week, real_month, real_year;
     for(int i = size - 1; i >= 0; i--)
     {
         ShareHistoryFileData data = mList[i];
         QDate wkDate = QDateTime::fromTime_t(data.mDate).date();
+        if(wkDate == yesterday) last_money = data.mMoney;
         if((!week_found) && (wkDate <= week))
         {
             week_found = true;
@@ -111,7 +114,7 @@ void QShareHistoryCounterWork::run()
         year_found = true;
     }
 
-    double last_money = mList.last().mMoney;
+
     //获取当前陆股通持股信息的变化情况 1日 5日 10日
     double foreign_now = mList.last().mForeignVol;
     double foreign_mutaul = mList.last().mForeignMututablePercent;

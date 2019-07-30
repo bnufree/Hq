@@ -69,7 +69,8 @@ SOURCES += main.cpp\
     qcontainerwidget.cpp \
     real/qsinanorthrealinfothread.cpp \
     real/qnorthflowinfodisplaywidget.cpp \
-    basic_info/qshareactivedateupdatethread.cpp
+    basic_info/qshareactivedateupdatethread.cpp \
+    data_structure/shareworkingdatetime.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -128,7 +129,8 @@ HEADERS  += dialog.h \
     qcontainerwidget.h \
     real/qsinanorthrealinfothread.h \
     real/qnorthflowinfodisplaywidget.h \
-    basic_info/qshareactivedateupdatethread.h
+    basic_info/qshareactivedateupdatethread.h \
+    data_structure/shareworkingdatetime.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

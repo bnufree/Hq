@@ -1,4 +1,4 @@
-#include "qhkexchangevoldataprocess.h"
+﻿#include "qhkexchangevoldataprocess.h"
 #include "utils/qhttpget.h"
 #include <QDir>
 #include <QRegularExpression>
@@ -9,7 +9,7 @@
 #include <QJsonObject>
 #include <QJsonParseError>
 
-#define     POST_VAL            "__VIEWSTATE=%2FwEPDwUJNjIxMTYzMDAwZGQ79IjpLOM%2BJXdffc28A8BMMA9%2Byg%3D%3D&__VIEWSTATEGENERATOR=EC4ACD6F&__EVENTVALIDATION=%2FwEdAAdtFULLXu4cXg1Ju23kPkBZVobCVrNyCM2j%2BbEk3ygqmn1KZjrCXCJtWs9HrcHg6Q64ro36uTSn%2FZ2SUlkm9HsG7WOv0RDD9teZWjlyl84iRMtpPncyBi1FXkZsaSW6dwqO1N1XNFmfsMXJasjxX85jz8PxJxwgNJLTNVe2Bh%2Fbcg5jDf8%3D&today=TODAY_DATE&sortBy=stockcode&sortDirection=asc&alertMsg=&txtShareholdingDate=TXTSHAREDATE&btnSearch=%E6%90%9C%E5%B0%8B"
+#define     POST_VAL            "__VIEWSTATE=%2FwEPDwUJNjIxMTYzMDAwZGQ79IjpLOM%2BJXdffc28A8BMMA9%2Byg%3D%3D&__VIEWSTATEGENERATOR=EC4ACD6F&__EVENTVALIDATION=%2FwEdAAdtFULLXu4cXg1Ju23kPkBZVobCVrNyCM2j%2BbEk3ygqmn1KZjrCXCJtWs9HrcHg6Q64ro36uTSn%2FZ2SUlkm9HsG7WOv0RDD9teZWjlyl84iRMtpPncyBi1FXkZsaSW6dwqO1N1XNFmfsMXJasjxX85jz8PxJxwgNJLTNVe2Bh%2Fbcg5jDf8%3D&today=TODAY_DATE&sortBy=stockcode&sortDirection=asc&alertMsg=&txtShareholdingDate=TXTShareWorkingDate&btnSearch=%E6%90%9C%E5%B0%8B"
 #define     HK_URL              "https://www.hkexnews.hk/sdw/search/mutualmarket_c.aspx?t=%1&t=%2"
 #define     EASTMONEY_URL       "http://dcfm.eastmoney.com//em_mutisvcexpandinterface/api/js/get?type=HSGTHDSTA&token=70f12f2f4f091e459a279469fe49eca5&st=SHAREHOLDPRICE&sr=-1&p=%1&ps=100000&js={pages:(tp),data:(x)}&filter=(MARKET%20in%20(%27001%27,%27003%27))(HDDATE=^%2^)&rt=52030379"
 
@@ -23,8 +23,8 @@ void QHKExchangeVolDataProcess::getVolInfoFromHKEX(ShareForignVolFileDataList& l
 {
     QString postVal = POST_VAL;
     postVal.replace("TODAY_DATE", QDate::currentDate().toString("yyyyMMdd"));
-    postVal.replace("TXTSHAREDATE", QString("").sprintf("%s", date.toString("yyyy/MM/dd").toStdString().data()));
-    QByteArray value = QHttpGet::getContentOfURLWithPost(QString(HK_URL).arg(mkt == 0? "sh":"sz").arg(mkt == 0? "sh":"sz"), postVal.toUtf8());
+    postVal.replace("TXTShareWorkingDate", QString("").sprintf("%s", date.toString("yyyy/MM/dd").toStdString().data()));
+    QByteArray value = QHttpGet::getContentOfURLWithPost(QString(HK_URL).arg(mkt == 0? "sh":"sz").arg(mkt == 0? "sh":"sz"), postVal.toUtf8(), 60);
 
 #ifdef TEST
     qDebug()<<"recv len:"<<value.length();
@@ -216,19 +216,17 @@ void QHKExchangeVolDataProcess::getVolofDate(ShareForignVolFileDataList &list, c
 void QHKExchangeVolDataProcess::run()
 {
     ShareForignVolFileDataList list;
-#if 0
-    QDate start = mStartDate;
-    while(start <= mEndDate)
+    //检查是不是市场开市时间
+    if(mDate == QDate::currentDate())
     {
-        //检查是不是市场开市时间
-        if(ShareDate::getHisWorkingDay().contains(start))
-        {
-            getVolofDate(list, start);
-        }
-        //getVolofDateFromEastMoney(list, start);
-        start = start.addDays(1);
+        //如果是今天,且是周末等就直接退出
+        if(mDate.dayOfWeek() == 6 || mDate.dayOfWeek() == 7) return;
+    } else
+    {
+        //如果是历史交易日,检查是不是在历史的交易日中
+        if(!ShareWorkingDate::getHisWorkingDay().contains(mDate)) return;
     }
-#endif
+    //开始获取对应的日期的记录
     getVolofDate(list, mDate);
     if(mParent)
     {

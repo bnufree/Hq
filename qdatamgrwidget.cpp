@@ -71,6 +71,7 @@ void QDataMgrWidget::setDataType(int type)
         ui->mCurDayText->setText(QActiveDateTime::latestActiveDay().toString(DATE_FORMAT));
         ui->mNextDayBtn->setVisible(false);
     }
+    ui->mCurDayText->setText(ShareWorkingDate::getCurWorkDay().toString(DATE_FORMAT));
     mDataType = type;
 }
 
@@ -79,7 +80,7 @@ void QDataMgrWidget::updateData()
     if(mDataType == DATA_MUTUAL_MARKET)
     {
         ui->mDataTableWidget->setDataList(ShareHsgtList());
-        emit DATA_SERVICE->signalQueryShareHsgtTop10List("", ShareDate(QDate::fromString(ui->mCurDayText->text(), DATE_FORMAT)));
+        emit DATA_SERVICE->signalQueryShareHsgtTop10List("", ShareWorkingDate(QDate::fromString(ui->mCurDayText->text(), DATE_FORMAT)));
 //        QShareHsgtTop10Work *job = new QShareHsgtTop10Work(ui->mCurDayText->text());
 //        connect(job, SIGNAL(signalChinaAShareTop10Updated(ShareDataList,QString)), this, SLOT(slotUpdateShareHsgtTop10List(ShareDataList,QString)));
 //        QThreadPool::globalInstance()->start(job);
@@ -102,5 +103,5 @@ void QDataMgrWidget::slotUpdateShareHsgtTop10List(const ShareHsgtList &list)
 void QDataMgrWidget::slotDisplayMutualBundHistory(const QString &code)
 {
     ui->mDataTableWidget->setDataList(ShareHsgtList());
-    emit DATA_SERVICE->signalQueryShareHsgtTop10List(code, ShareDate());
+    emit DATA_SERVICE->signalQueryShareHsgtTop10List(code, ShareWorkingDate());
 }

@@ -16,10 +16,10 @@ QShareFinancialInfoWork::~QShareFinancialInfoWork()
 
 void QShareFinancialInfoWork::run()
 {
-    ShareDate last_update_date = DATA_SERVICE->getLastUpdateDateOfFinanceInfo();
+    ShareWorkingDate last_update_date = DATA_SERVICE->getLastUpdateDateOfFinanceInfo();
     FinancialDataList dataList;
 
-    if(last_update_date.isNull() || last_update_date < ShareDate::getCurWorkDay())
+    if(last_update_date.isNull() || last_update_date < ShareWorkingDate::getCurWorkDay())
     {
         int pos = 0;
         int section = 200;

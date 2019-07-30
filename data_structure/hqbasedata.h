@@ -53,7 +53,7 @@ struct ShareHolder{
     QString     mName;
     double      mShareCount;
     double      mFundPercent;
-    ShareDate   mDate;
+    ShareWorkingDate   mDate;
 
     ShareHolder(){
         mShareCount = 0;
@@ -95,9 +95,9 @@ struct  ShareBonus
     QString             mCode;
     double              mSZZG; //送转股比例
     double              mXJFH;  //现金分红
-    ShareDate           mGQDJR; //股权登记日
-    ShareDate           mYAGGR; //预案公告日
-    ShareDate           mDate;  //报告日期的记录
+    ShareWorkingDate           mGQDJR; //股权登记日
+    ShareWorkingDate           mYAGGR; //预案公告日
+    ShareWorkingDate           mDate;  //报告日期的记录
     ShareBonus()
     {
         mSZZG = 0.0;
@@ -127,7 +127,7 @@ typedef struct North_South_Bound_Data
     double              mVolCh5;
     double              mVolCh10;
     bool                mIsTop10;
-    ShareDateTime       mDate;
+    ShareWorkingDateTime       mDate;
 
     North_South_Bound_Data()
     {
@@ -165,7 +165,7 @@ struct ShareZjlx
 {
     QString             mCode;
     double              mPure;
-    ShareDateTime       mDate;
+    ShareWorkingDateTime       mDate;
 
     ShareZjlx()
     {
@@ -194,7 +194,7 @@ struct ShareRzRq
 {
     QString             mCode;
     double              mRZRQ;
-    ShareDateTime       mDate;
+    ShareWorkingDateTime       mDate;
 
     ShareRzRq()
     {

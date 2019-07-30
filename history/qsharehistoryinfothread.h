@@ -11,7 +11,7 @@
 class QShareHistoryInfoThread : public QRunnable
 {
 public:
-    explicit QShareHistoryInfoThread(const QString& code, const ShareDate& start, const ShareDate& end, QObject* parent = 0);
+    explicit QShareHistoryInfoThread(const QString& code, const ShareWorkingDate& start, const ShareWorkingDate& end, QObject* parent = 0);
     explicit QShareHistoryInfoThread(const QString& code, QMap<QDate, ShareForignVolFileDataList>* map, QObject* parent = 0);
     ~QShareHistoryInfoThread();
     QString getCode();
@@ -25,8 +25,8 @@ private:
 private:
     QString         mCode;
     QObject         *mParent;
-    ShareDate       mStart;
-    ShareDate       mEnd;
+    ShareWorkingDate       mStart;
+    ShareWorkingDate       mEnd;
     QMap<QDate, ShareForignVolFileDataList> *mExistForeignMap;
 };
 

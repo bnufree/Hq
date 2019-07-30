@@ -17,7 +17,7 @@ protected:
     ~HqInfoService();
 
 public:
-    ShareDate  getLastUpdateDateOfTable(const QString& table);
+    ShareWorkingDate  getLastUpdateDateOfTable(const QString& table);
     void        setHistoryInfoCount(int count) {mHistoryInfoCount = count;}
 public:
     bool   isDBInitOk();
@@ -28,13 +28,13 @@ public:
     foreignHolder amountForeigner(const QString& code);
     QStringList  getExchangeCodeList();
     QStringList  getAllShareCodes() {return mRealShareMap.keys();}
-    ShareDate  getLastUpdateDateOfHSGT();
-    ShareDate  getLastUpdateDateOfHSGTVol();
-    ShareDate  getLastUpdateDateOfBasicInfo();
-    ShareDate  getLastUpdateDateOfBonusInfo();
-    ShareDate  getLastUpdateDateOfHsgtTop10();
-    ShareDate  getLastUpdateDateOfFinanceInfo();
-    ShareDate  getLastUpdateDateOfHistoryInfo();
+    ShareWorkingDate  getLastUpdateDateOfHSGT();
+    ShareWorkingDate  getLastUpdateDateOfHSGTVol();
+    ShareWorkingDate  getLastUpdateDateOfBasicInfo();
+    ShareWorkingDate  getLastUpdateDateOfBonusInfo();
+    ShareWorkingDate  getLastUpdateDateOfHsgtTop10();
+    ShareWorkingDate  getLastUpdateDateOfFinanceInfo();
+    ShareWorkingDate  getLastUpdateDateOfHistoryInfo();
     bool   GetHistoryInfoWithDate(const QString& table, const QDate& date, double& close, double& money, qint64& total_share, qint64& mutalble_share);
     double   GetMultiDaysChangePercent(const QString& table, int days);
     void   GetForeignVolChange(const QString& code, qint64& cur, qint64& pre);
@@ -83,7 +83,7 @@ signals:
     void signalSendShareHistoryZjlxInfo(const ShareDataList &list);
 
     void signalRecvShareHistoryInfos(const ShareDataList& list, int mode);
-    void signalSendShareHistoryUpdateDate(const ShareDate& date, bool update);
+    void signalSendShareHistoryUpdateDate(const ShareWorkingDate& date, bool update);
     void signalQueryShareHistoryUpdateDateList();
     void signalSendShareHistoryUpdateDateList(const QList<QDate>& list);
 
@@ -116,8 +116,8 @@ signals:
     void signalUpdateShareAmountByForeigner();
 
     void signalUpdateShareHsgtTop10Info(const ShareHsgtList& list);
-    void signalSendLastHSGTUpdateDate(const ShareDate& date);
-    void signalQueryShareHsgtTop10List(const QString& code, const ShareDate& date = ShareDate());
+    void signalSendLastHSGTUpdateDate(const ShareWorkingDate& date);
+    void signalQueryShareHsgtTop10List(const QString& code, const ShareWorkingDate& date = ShareWorkingDate());
     void signalSendShareHsgtTop10List(const ShareHsgtList& list);
 
     //实时数据查询信息获取
@@ -130,7 +130,7 @@ signals:
     void signalQueryShareFinanceInfo(const QStringList& list = QStringList());
     //分红数据
     void signalUpdateShareBonusInfo(const ShareBonusList& list);
-    void signalQueryShareFHSP(const QString& code = QString(), const ShareDate& date = ShareDate());
+    void signalQueryShareFHSP(const QString& code = QString(), const ShareWorkingDate& date = ShareWorkingDate());
 
     void signalUpdateShareCloseDate(const QList<QDate>& list );
 
@@ -142,7 +142,7 @@ public slots:
     void slotUpdateShareCloseDate(const QList<QDate>& list);
     //历史数据
     void slotRecvShareHistoryInfos(const ShareDataList& list, int mode);
-    void slotSendShareHistoryUpdateDate(const ShareDate& date, bool update);
+    void slotSendShareHistoryUpdateDate(const ShareWorkingDate& date, bool update);
     void slotQueryShareHistoryUpdateDateList();
 //    void slotSendShareHistoryCloseInfo(const ShareDataList& list);
 //    void slotSendShareHistoryForeignVolInfo(const ShareDataList &list);
@@ -174,9 +174,9 @@ public slots:
     void slotUpdateHsgtTop10Info(const ShareHsgtList& list);
     void slotUpdateShareFinanceInfo(const FinancialDataList& list);
     //查询
-    void slotQueryShareHsgtTop10List(const QString& code, const ShareDate& date);
+    void slotQueryShareHsgtTop10List(const QString& code, const ShareWorkingDate& date);
     void slotQueryShareFinanceList(const QStringList& list = QStringList());
-    void slotQueryShareFHSP(const QString& code, const ShareDate& date);
+    void slotQueryShareFHSP(const QString& code, const ShareWorkingDate& date);
 
 private:
     void initSignalSlot();

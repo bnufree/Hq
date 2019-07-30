@@ -11,6 +11,9 @@ public:
     explicit QShareHsgtTop10Work( QObject *parent = 0);
     ~QShareHsgtTop10Work();
     void run();
+private:
+    bool getDataFromEastMoney(ShareDataList& list, const ShareWorkingDate& date);
+    bool getDataFromHKEX(ShareDataList& list, const ShareWorkingDate& date);
 signals:
     void signalChinaAShareTop10Updated(const ShareDataList& list, const QString& date);
 
