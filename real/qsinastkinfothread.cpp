@@ -97,9 +97,18 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
         //qDebug()<<data->mCode<<data->mName<<data->mShareType;
         data->mName = detailList[1];
         data->mCur = detailList[4].toDouble();
-        data->mChg = detailList[4].toDouble() - detailList[3].toDouble();
+        data->mLastClose = detailList[3].toDouble();
+        data->mChg = detailList[4].toDouble() - data->mLastClose;
         data->mChgPercent = data->mChg * 100 / detailList[3].toDouble() ;
-        data->mVol = detailList[10].toInt();
+
+        //竞价时段的特殊处理
+        if(data->mCur == 0)
+        {
+            data->mCur = detailList[8].toDouble();
+            data->mChg = detailList[4].toDouble() - data->mLastClose;
+            data->mChgPercent = data->mChg * 100 / detailList[3].toDouble() ;
+        }
+        data->mVol = detailList[9].toInt();
         data->mMoney = detailList[10].toDouble();
         data->mHsl = 0.0;
         data->mMoneyRatio = 0.0;
@@ -109,7 +118,7 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
         //qDebug()<<data->mCode<<data->mName<<data->mMoney<<data->mLastMoney<<data->mMoneyRatio;
         if(data->mCur == 0)
         {
-            data->mCur = data->mHistory.mLastClose;
+            data->mCur = data->mLastClose;
         }
         if(data->mCur != 0)
         {

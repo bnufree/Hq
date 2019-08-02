@@ -99,6 +99,7 @@ public:
     double                  mForeignCap;
     double                  mForeignCapChg;
     double                  mCur;
+    double                  mLastClose;
     double                  mChg;
     double                  mChgPercent;
     double                  mHigh;
@@ -257,7 +258,8 @@ typedef struct hqShareHistoryFileData{
     double          mLastClose;             //昨日最后价格
     double          mCloseAdjust;           //复权
     double          mMoney;
-    qint64          mForeignVol;
+    qint64          mForeignVolOri;
+    qint64          mForeignVolAdjust;      //送转股的情况对外资持股的调整
     double          mForeignMututablePercent;
     qint64          mTotalShareCount;
 
@@ -268,7 +270,8 @@ typedef struct hqShareHistoryFileData{
         mLastClose = 0.0;
         mCloseAdjust = 0.0;
         mMoney = 0.0;
-        mForeignVol = 0;
+        mForeignVolOri = 0;
+        mForeignVolAdjust = 0;
         mForeignMututablePercent = 0.0;
         mTotalShareCount = 0;
     }

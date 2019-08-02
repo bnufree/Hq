@@ -49,7 +49,7 @@ void QShareHsgtTop10Work::run()
     }
 }
 
-bool QShareHsgtTop10Work::getDataFromEastMoney(ShareDataList &list, const ShareWorkingDate &date)
+bool QShareHsgtTop10Work::getDataFromEastMoney(ShareHsgtList &list, const ShareWorkingDate &date)
 {
     //从网络获取
     QString url = QString("http://dcfm.eastmoney.com//EM_MutiSvcExpandInterface/api/js/get?type=HSGTCJB&token=70f12f2f4f091e459a279469fe49eca5&filter=(DetailDate=^%1^)&js=(x)&sr=1&st=Rank&rt=50014200")
@@ -59,7 +59,7 @@ bool QShareHsgtTop10Work::getDataFromEastMoney(ShareDataList &list, const ShareW
     if(err.error != QJsonParseError::NoError) return false;
     if(!doc.isArray())  return false;
     //开始解析
-    ShareDataList resList;
+    ShareHsgtList resList;
     QJsonArray result = doc.array();
     for(int i=0; i<result.size(); i++)
     {
@@ -82,7 +82,7 @@ bool QShareHsgtTop10Work::getDataFromEastMoney(ShareDataList &list, const ShareW
         }
         data.mIsTop10 = true;
         data.mPure = data.mBuy - data.mSell;
-        data.mDate = ShareWorkingDateTime(last_update_date.date());
+        data.mDate = ShareWorkingDateTime(date.date());
         resList.append(data);
     }
     if(resList.size() > 0) list.append(resList);
@@ -90,7 +90,7 @@ bool QShareHsgtTop10Work::getDataFromEastMoney(ShareDataList &list, const ShareW
     return resList.size() > 0;
 }
 
-bool QShareHsgtTop10Work::getDataFromHKEX(ShareDataList &list, const QDate &date)
+bool QShareHsgtTop10Work::getDataFromHKEX(ShareHsgtList &list, const ShareWorkingDate &date)
 {
-
+    return true;
 }
