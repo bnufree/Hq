@@ -105,7 +105,7 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
         if(data->mCur == 0)
         {
             data->mCur = detailList[8].toDouble();
-            data->mChg = detailList[4].toDouble() - data->mLastClose;
+            data->mChg = detailList[8].toDouble() - data->mLastClose;
             data->mChgPercent = data->mChg * 100 / detailList[3].toDouble() ;
         }
         data->mVol = detailList[9].toInt();

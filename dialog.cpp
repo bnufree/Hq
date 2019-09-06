@@ -381,6 +381,7 @@ void Dialog::slotTodayHSGUpdated()
 
 void Dialog::slotUpdateHSGTOfCode(const QString &code)
 {
+    qDebug()<<"history code:"<<code;
     QShareHistoryDialog *dlg = new QShareHistoryDialog(code) ;
     dlg->setModal(false);
     dlg->show();

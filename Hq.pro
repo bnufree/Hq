@@ -70,7 +70,8 @@ SOURCES += main.cpp\
     real/qsinanorthrealinfothread.cpp \
     real/qnorthflowinfodisplaywidget.cpp \
     basic_info/qshareactivedateupdatethread.cpp \
-    data_structure/shareworkingdatetime.cpp
+    data_structure/shareworkingdatetime.cpp \
+    history/sharehistoryreadthread.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -130,7 +131,8 @@ HEADERS  += dialog.h \
     real/qsinanorthrealinfothread.h \
     real/qnorthflowinfodisplaywidget.h \
     basic_info/qshareactivedateupdatethread.h \
-    data_structure/shareworkingdatetime.h
+    data_structure/shareworkingdatetime.h \
+    history/sharehistoryreadthread.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \
