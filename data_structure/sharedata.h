@@ -108,7 +108,7 @@ public:
     double                  mMoney;
     double                  mRZRQ;
     qint64                  mVol;
-    ShareDateTime           mTime;
+    ShareWorkingDateTime           mTime;
     QStringList             mBlockCodeList;
     FinancialData           mFinanceData;
     ShareBonus              mBonusData;
@@ -260,6 +260,18 @@ typedef struct hqShareHistoryFileData{
     qint64          mForeignVol;
     double          mForeignMututablePercent;
     qint64          mTotalShareCount;
+
+    hqShareHistoryFileData()
+    {
+        mDate = 0;
+        mClose = 0.0;
+        mLastClose = 0.0;
+        mCloseAdjust = 0.0;
+        mMoney = 0.0;
+        mForeignVol = 0;
+        mForeignMututablePercent = 0.0;
+        mTotalShareCount = 0;
+    }
 }ShareHistoryFileData;
 
 typedef QList<ShareHistoryFileData>       ShareHistoryFileDataList;
@@ -333,14 +345,14 @@ public:
         }
     }
 
-    ShareData &valueOfDate(const ShareDate& date, const QString& code)
+    ShareData &valueOfDate(const ShareWorkingDate& date, const QString& code)
     {
         QString key = QString("%1_%2").arg(QDateTime(date.date()).toMSecsSinceEpoch()).arg(ShareData::fullCode(code));
         if(!mDataIndexMap.contains(key))
         {
             ShareData data;
             data.mCode = code.right(6);
-            data.mTime = ShareDateTime(date.date());
+            data.mTime = ShareWorkingDateTime(date.date());
             append(data);
         }
         //qDebug()<<date<<mDataIndexMap.value(date)<<this->size();

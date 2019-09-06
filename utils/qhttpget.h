@@ -18,7 +18,7 @@ public:
     //void startGet();
     void setUpdateInterval(int secs);           //刷新间隔
     QByteArray static getContentOfURL(const QString& url, const QList<QNetworkCookie>& list = QList<QNetworkCookie>());
-    QByteArray static getContentOfURLWithPost(const QString &url, const QByteArray& post);
+    QByteArray static getContentOfURLWithPost(const QString &url, const QByteArray& post, int timeout = 10);
 signals:
     void signalSendHttpConent(const QByteArray& content);
     void signalErrorOccured(QNetworkReply::NetworkError);

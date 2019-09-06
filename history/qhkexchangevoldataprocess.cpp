@@ -1,4 +1,4 @@
-#include "qhkexchangevoldataprocess.h"
+﻿#include "qhkexchangevoldataprocess.h"
 #include "utils/qhttpget.h"
 #include <QDir>
 #include <QRegularExpression>
@@ -214,19 +214,17 @@ void QHKExchangeVolDataProcess::getVolofDate(ShareForignVolFileDataList &list, c
 void QHKExchangeVolDataProcess::run()
 {
     ShareForignVolFileDataList list;
-#if 0
-    QDate start = mStartDate;
-    while(start <= mEndDate)
+    //检查是不是市场开市时间
+    if(mDate == QDate::currentDate())
     {
-        //检查是不是市场开市时间
-        if(ShareDate::getHisWorkingDay().contains(start))
-        {
-            getVolofDate(list, start);
-        }
-        //getVolofDateFromEastMoney(list, start);
-        start = start.addDays(1);
+        //如果是今天,且是周末等就直接退出
+        if(mDate.dayOfWeek() == 6 || mDate.dayOfWeek() == 7) return;
+    } else
+    {
+        //如果是历史交易日,检查是不是在历史的交易日中
+        if(!ShareWorkingDate::getHisWorkingDay().contains(mDate)) return;
     }
-#endif
+    //开始获取对应的日期的记录
     getVolofDate(list, mDate);
     if(mParent)
     {

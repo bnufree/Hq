@@ -1,4 +1,4 @@
-#include "qhttpget.h"
+﻿#include "qhttpget.h"
 #include <QDebug>
 #include <QThread>
 #include <QEventLoop>
@@ -172,7 +172,7 @@ QByteArray QHttpGet::getContentOfURL(const QString &url, const QList<QNetworkCoo
     return recv;
 }
 
-QByteArray QHttpGet::getContentOfURLWithPost(const QString &url, const QByteArray& post)
+QByteArray QHttpGet::getContentOfURLWithPost(const QString &url, const QByteArray& post, int out)
 {
     QByteArray recv;
     QNetworkAccessManager mgr;
@@ -185,7 +185,7 @@ QByteArray QHttpGet::getContentOfURLWithPost(const QString &url, const QByteArra
     QTimer timer;
     timer.setSingleShot(true);
     connect(&timer, SIGNAL(timeout()), &subloop, SLOT(quit()));
-    timer.start(10*1000);
+    timer.start(out*1000);
     subloop.exec();
     if(timer.isActive())
     {

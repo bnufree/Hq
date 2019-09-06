@@ -1,4 +1,4 @@
-#include "dialog.h"
+﻿#include "dialog.h"
 #include "ui_dialog.h"
 #include <QDebug>
 #include <QMenu>
@@ -438,6 +438,7 @@ void Dialog::slotHqCenterBtnClicked()
         list->addItem(QStringLiteral("深市"), MKT_SZ);
         list->addItem(QStringLiteral("中小板"), MKT_ZXB);
         list->addItem(QStringLiteral("创业板"), MKT_CYB);
+        list->addItem(QStringLiteral("科创板"), MKT_KCB);
         list->addItem(QStringLiteral("ETF"), MKT_JJ);
         list->addItem(QStringLiteral("陆股通TOP10"), MKT_LGT_TOP10);
         connect(list, SIGNAL(signalItemClicked(int)), this, SLOT(slotDisplayHqCenterPage(int)));

@@ -4,11 +4,7 @@
 #include "utils/profiles.h"
 #include <QDir>
 
-#define         DATE_STR_FORMAT         "yyyy-MM-dd"
 
-QList<QDate> ShareDate::mHisWorkingDayList = QList<QDate>();
-QDate        ShareDate::mLastWorkDay = QDate();
-QDate        ShareDate::mCurWorkDay = QDate();
 
 //QStringList HqUtils::mDatesList = Profiles::instance()->value("DateManage", "Expired").toStringList();
 HqUtils::HqUtils()

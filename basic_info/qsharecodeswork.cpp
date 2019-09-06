@@ -26,8 +26,8 @@ void QShareCodesWork::run()
     //http://query.sse.com.cn/security/stock/downloadStockListFile.do?csrcCode=&stockCode=&areaName=&stockType=1
 
     ShareDataList list;
-    ShareDate update_date = DATA_SERVICE->getLastUpdateDateOfBasicInfo();
-    if(update_date.isNull() || update_date < ShareDate::getCurWorkDay())
+    ShareWorkingDate update_date = DATA_SERVICE->getLastUpdateDateOfBasicInfo();
+    if(update_date.isNull() || update_date < ShareWorkingDate::getCurWorkDay())
     {
         QString stock_code_url = tr("http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?cb=&type=CT&token=4f1862fc3b5e77c150a2b985b12db0fd&sty=FCOIATC&js=(%7Bdata%3A%5B(x)%5D%2CrecordsFiltered%3A(tot)%7D)&cmd=C._A&st=(Code)&sr=-1&p=1&ps=20000&_=%1").arg(QDateTime::currentMSecsSinceEpoch());
         QString fund_code_url = "http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?cb=&type=CT&token=4f1862fc3b5e77c150a2b985b12db0fd&sty=FCOIATC&js=(%7Bdata%3A%5B(x)%5D%2CrecordsFiltered%3A(tot)%7D)&cmd=C.__2850013&st=(Code)&sr=-1&p=1&ps=2000&_=1555572794676";
@@ -47,7 +47,7 @@ void QShareCodesWork::parseHttp(ShareDataList& list, const QString& url, int mod
     QString result = QString::fromUtf8(http);
     QRegExp reg("([0-9]{6}),([0-9]{0,}[\u4e00-\u9fffA-Z\*]{1,}[0-9]{0,}[\u4e00-\u9fffA-Z\*]{1,}[0-9]{0,})");  //([\u4e00-\u9fffA-Z0-9\*]{1,})
     QString utf8_result = QString::fromUtf8(UTF8->fromUnicode(result));
-    QRegExp reg_code("60[013][0-9]{3}|300[0-9]{3}|00[012][0-9]{3}|51[0-9]{4}|159[0-9]{3}");
+    QRegExp reg_code("6[0-9]{5}|300[0-9]{3}|00[012][0-9]{3}|51[0-9]{4}|159[0-9]{3}");
     if(mode == 2)
     {
         reg_code.setPattern(QString("51[0-9]{4}|159[0-9]{3}"));

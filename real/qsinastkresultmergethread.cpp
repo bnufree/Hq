@@ -1,7 +1,8 @@
-#include "qsinastkresultmergethread.h"
+﻿#include "qsinastkresultmergethread.h"
 #include "qsinastkinfothread.h"
 #include <QDebug>
 #include "data_structure/sharedata.h"
+#include <QRegularExpression>
 
 QSinaStkResultMergeThread::QSinaStkResultMergeThread(QObject *parent) : QThread(parent)
 {
@@ -84,6 +85,7 @@ void QSinaStkResultMergeThread::run()
                         (mMktType == MKT_ZXG && data.mIsFav)||\
                         (mMktType == MKT_LGT_TOP10 && data.mHsgtData.mIsTop10) ||\
                         (mMktType == MKT_JJ && (data.mShareType & SHARE_FUND))||\
+                        (mMktType == MKT_KCB && data.mCode.contains(QRegularExpression("68[0-9]{4}"))) ||
                         (mMktType == MKT_OTHER && mSelfCodesList.contains(data.mCode));
 
                 if(sts && data.mMoney > 0.001)

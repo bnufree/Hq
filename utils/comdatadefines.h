@@ -58,6 +58,7 @@ typedef enum MktType
     MKT_HK_GGT,        //港股通（）
     MKT_ZXG,        //自选股
     MKT_LGT_TOP10,
+    MKT_KCB,        //科创板
     MKT_OTHER,      //保留
 }MKT_TYPE;
 

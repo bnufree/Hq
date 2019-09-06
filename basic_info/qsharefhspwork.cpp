@@ -27,12 +27,12 @@ void QShareFHSPWork::run()
 {
     //首先获取数据库的更新日期,获取最近10年的分红送配记录,主要是半年报或者年报
     ShareBonusList list;
-    ShareDate last_update_date = DATA_SERVICE->getLastUpdateDateOfBonusInfo();
-        ShareDate curDate = ShareDate::currentDate();
-        ShareDate start_report_date(QDate(curDate.date().addYears(-3)));
+    ShareWorkingDate last_update_date = DATA_SERVICE->getLastUpdateDateOfBonusInfo();
+        ShareWorkingDate curDate = ShareWorkingDate::currentDate();
+        ShareWorkingDate start_report_date(QDate(curDate.date().addYears(-3)));
         if(last_update_date.isNull())
         {
-            start_report_date.setDate(ShareDate::currentDate().date().addYears(-3));
+            start_report_date.setDate(ShareWorkingDate::currentDate().date().addYears(-3));
         } else
         {
             start_report_date.setDate(last_update_date.date().addYears(-1));
@@ -41,21 +41,21 @@ void QShareFHSPWork::run()
         int start_year = start_report_date.date().year();
         int end_year =  curDate.date().year();
         //计算到现在需要更新的日期,最近两个日期强制更新
-        QList<ShareDate> datelist;
+        QList<ShareWorkingDate> datelist;
         for(; start_year <= end_year; start_year++)
         {
-            ShareDate half(QDate(start_year, 6, 30));
+            ShareWorkingDate half(QDate(start_year, 6, 30));
             if(half >= start_report_date)
             {
                 datelist.append(half);
             }
-            ShareDate end(QDate(start_year, 12, 31));
+            ShareWorkingDate end(QDate(start_year, 12, 31));
             if(end >= start_report_date)
             {
                 datelist.append(end);
             }
         }
-        foreach (ShareDate date, datelist)
+        foreach (ShareWorkingDate date, datelist)
         {
             QElapsedTimer t;
             t.start();
@@ -89,9 +89,9 @@ void QShareFHSPWork::run()
                 data.mCode = subobj.value("Code").toString();
                 data.mSZZG = subobj.value("SZZBL").toString().toDouble();
                 data.mXJFH = subobj.value("XJFH").toString().toDouble()/10;
-                data.mGQDJR = ShareDate::fromString(subobj.value("GQDJR").toString().left(10));
-                data.mYAGGR = ShareDate::fromString(subobj.value("YAGGR").toString().left(10));
-                data.mDate = ShareDate::fromString(subobj.value("ReportingPeriod").toString().left(10));
+                data.mGQDJR = ShareWorkingDate::fromString(subobj.value("GQDJR").toString().left(10));
+                data.mYAGGR = ShareWorkingDate::fromString(subobj.value("YAGGR").toString().left(10));
+                data.mDate = ShareWorkingDate::fromString(subobj.value("ReportingPeriod").toString().left(10));
                 list.append(data);
 //                qDebug()<<data.mCode<<data.mSZZG<<data.mXJFH<<data.mDate.toString();
             }

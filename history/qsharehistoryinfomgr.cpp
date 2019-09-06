@@ -22,11 +22,6 @@ QShareHistoryInfoMgr::QShareHistoryInfoMgr(const QStringList& codes, QObject *pa
     mPool.setMaxThreadCount(8);
     connect(this, SIGNAL(signalStartGetHistory()), this, SLOT(slotStartGetHistoryWithAllCodes()));
     connect(this, SIGNAL(signalStartStatic()), this, SLOT(slotStartStatics()));
-    connect(this, SIGNAL(signalUpdateAllShareFromDate(bool,QDate)), this, SLOT(slotUpdateAllShareFromDate(bool,QDate)));
-    connect(DATA_SERVICE, SIGNAL(signalSendShareHistoryUpdateDateList(QList<QDate>)),
-            this, SLOT(slotRecvShareHistoryUpdateList(QList<QDate>)));
-//    connect(DATA_SERVICE, SIGNAL(signalUpdateHistoryInfoFinished()), this, SLOT(slotDbUpdateHistoryFinished()));
-    //connect(DATA_SERVICE, SIGNAL(signalUpdateShareHistoryFinished(QString)), this, SLOT(slotUpdateShareHistoryInfoFinished(QString)));
     this->moveToThread(&mWorkThread);
     mWorkThread.start();
     //查询当前需要补足的日期时间
@@ -42,10 +37,10 @@ QShareHistoryInfoMgr::~QShareHistoryInfoMgr()
 void QShareHistoryInfoMgr::slotStartGetHistoryWithAllCodes()
 {
     //首先获取从一年前到现在的陆股通数据
-    qDebug()<<"history date size:"<<ShareDate::getHisWorkingDay().size();
-    QDate start = ShareDate::getHisWorkingDay().last();
-    while (start < ShareDate::currentDate().date()) {
-        if(ShareDate::getHisWorkingDay().contains(start))
+    qDebug()<<"history date size:"<<ShareWorkingDate::getHisWorkingDay().size();
+    QDate start = ShareWorkingDate::getHisWorkingDay().last();
+    while (start < ShareWorkingDate::currentDate().date()) {
+        if(ShareWorkingDate::getHisWorkingDay().contains(start))
         {
             QHKExchangeVolDataProcess * process = new QHKExchangeVolDataProcess(start, this);
             mPool.start(process);
@@ -71,7 +66,7 @@ void QShareHistoryInfoMgr::slotStartStatics()
         if(code.size() > 6) code = code.right(6);
         if(code.left(1) == "1" || code.left(1) == "5") continue;
         if(!mShareInfoHistoryMap.contains(code)) continue;
-        ShareHistoryFileDataList list = mShareInfoHistoryMap[code];
+        ShareHistoryFileDataList list = mShareInfoHistoryMap[code];        
         QShareHistoryCounterWork* thread = new QShareHistoryCounterWork(code, list, this);
         mPool.start(thread);
     }
@@ -89,6 +84,6 @@ void QShareHistoryInfoMgr::slotUpdateForignVolInfo(const ShareForignVolFileDataL
 void QShareHistoryInfoMgr::slotUpdateShareHistoryProcess(const ShareHistoryFileDataList& list, const QString& code)
 {
     QMutexLocker locker(&mShareHistoryMutex);
-    mShareInfoHistoryMap[code] = list;
+    mShareInfoHistoryMap[code] = list;    
 }
 
