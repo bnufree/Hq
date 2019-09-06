@@ -19,9 +19,10 @@ public:
     void run();
 private:
     void                        adjustDataList(ShareHistoryFileDataList& list, double price, double ratio);
-    bool                        readFile(ShareHistoryFileDataList& list);
+    bool                        readFile(ShareHistoryFileDataList& list, bool& adjust);
     QString                     getFileName();
     void                        writeFile(const ShareHistoryFileDataList& list, const char* mode);
+    void                        getForeignVolData(qint64& vol, double& percent, const QDate& date);
 private:
     QString         mCode;
     QObject         *mParent;

@@ -99,6 +99,7 @@ public:
     double                  mForeignCap;
     double                  mForeignCapChg;
     double                  mCur;
+    double                  mLastClose;
     double                  mChg;
     double                  mChgPercent;
     double                  mHigh;
@@ -257,7 +258,8 @@ typedef struct hqShareHistoryFileData{
     double          mLastClose;             //昨日最后价格
     double          mCloseAdjust;           //复权
     double          mMoney;
-    qint64          mForeignVol;
+    qint64          mForeignVolOri;
+    qint64          mForeignVolAdjust;      //送转股的情况对外资持股的调整
     double          mForeignMututablePercent;
     qint64          mTotalShareCount;
 
@@ -268,7 +270,8 @@ typedef struct hqShareHistoryFileData{
         mLastClose = 0.0;
         mCloseAdjust = 0.0;
         mMoney = 0.0;
-        mForeignVol = 0;
+        mForeignVolOri = 0;
+        mForeignVolAdjust = 0;
         mForeignMututablePercent = 0.0;
         mTotalShareCount = 0;
     }
@@ -331,6 +334,105 @@ struct ShareHistoryCounter{
     double      foreign_ch5;
     double      foreign_ch10;
 };
+
+struct  GRAPHIC_DATA{
+    QDate           mDate;
+    double          mClose;
+    double          mRzye;
+    double          mZjlx;
+    double          mForVol;
+    double          mMoney;
+};
+class GRAPHIC_DATA_LIST : public QList<GRAPHIC_DATA>
+{
+public:
+    inline GRAPHIC_DATA_LIST()
+    {
+        mMaxClose = 0.0;
+        mMaxRzye = 0.0;
+        mMaxZjlx = 0.0;
+        mMaxForeignVol = 0.0;
+        mMaxMoney = 0.0;
+        clear();
+    }
+
+    inline GRAPHIC_DATA_LIST(const ShareDataList& list)
+    {
+        foreach (ShareData data, list) {
+            GRAPHIC_DATA graph;
+            graph.mDate = data.mTime.date();
+            graph.mClose = data.mClose;
+            graph.mForVol = data.mHsgtData.mVolTotal;
+            graph.mMoney = data.mMoney;
+            graph.mRzye = data.mRZRQ;
+            graph.mZjlx = data.mZJLX;
+            append(graph);
+        }
+        for(int i=1; i<size(); i++)
+        {
+            if(this->at(i).mForVol == 0 && this->at(i-1).mForVol != 0)
+            {
+                (*this)[i].mForVol = (*this)[i-1].mForVol;
+            }
+        }
+    }
+
+    inline GRAPHIC_DATA_LIST(const ShareHistoryFileDataList& list)
+    {
+        foreach (ShareHistoryFileData data, list) {
+            GRAPHIC_DATA graph;
+            graph.mDate = QDateTime::fromTime_t(data.mDate).date();
+            graph.mClose = data.mClose;
+            graph.mForVol = data.mForeignVolAdjust;
+            graph.mMoney = data.mMoney;
+//            graph.mRzye = data.mRZRQ;
+//            graph.mZjlx = data.mZJLX;
+            append(graph);
+        }
+        for(int i=1; i<size(); i++)
+        {
+            if(this->at(i).mForVol == 0 && this->at(i-1).mForVol != 0)
+            {
+                (*this)[i].mForVol = (*this)[i-1].mForVol;
+            }
+        }
+    }
+
+    void append(const GRAPHIC_DATA& data)
+    {
+        QList<GRAPHIC_DATA>::append(data);
+        if(data.mClose > mMaxClose)
+        {
+            mMaxClose = data.mClose;
+        }
+        if(data.mForVol > mMaxForeignVol)
+        {
+            mMaxForeignVol = data.mForVol;
+        }
+        if(data.mRzye> mMaxRzye)
+        {
+            mMaxRzye = data.mRzye;
+        }
+        if(data.mZjlx > mMaxZjlx)
+        {
+            mMaxZjlx = data.mZjlx;
+        }
+        if(data.mMoney > mMaxMoney)
+        {
+            mMaxMoney = data.mMoney;
+        }
+    }
+
+
+public:
+    double      mMaxClose;
+    double      mMaxRzye;
+    double      mMaxZjlx;
+    double      mMaxForeignVol;
+    double      mMaxMoney;
+};
+
+
 
 
 #if 0

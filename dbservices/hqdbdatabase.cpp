@@ -607,6 +607,28 @@ bool HQDBDataBase::getSimilarCodeOfText(QStringList &codes, const QString &text)
         codes.append(mSQLQuery.value(0).toString());
     }
 
+    if(codes.length() == 0)
+    {
+        if(num.exactMatch(text.toUpper()))
+        {
+            sts = mSQLQuery.exec(QString("select %1 from %2 where %3 = '%4' limit 10")\
+                                 .arg(HQ_TABLE_COL_CODE)\
+                                 .arg(TABLE_SHARE_BASIC_INFO)\
+                                 .arg(HQ_TABLE_COL_CODE)\
+                                 .arg(text));
+        } else {
+            sts = mSQLQuery.exec(QString("select %1 from %2 where %3 = '%4' limit 10")\
+                                 .arg(HQ_TABLE_COL_CODE)\
+                                 .arg(TABLE_SHARE_BASIC_INFO)\
+                                 .arg(HQ_TABLE_COL_PY_ABBR)\
+                                 .arg(text));
+        }
+        if(!sts) return false;
+        while (mSQLQuery.next()) {
+            codes.append(mSQLQuery.value(0).toString());
+        }
+    }
+
     return true;
 }
 

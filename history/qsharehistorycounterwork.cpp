@@ -94,53 +94,50 @@ void QShareHistoryCounterWork::run()
     }
     //最后仍然没有找到
     if(!week_found)
-    {
+    {        
         week_p = mList.first().mLastClose;
         real_week = QDateTime::fromTime_t(mList.first().mDate).date();
-        week_found = true;
     }
 
     if(!month_found)
     {
         month_p = mList.first().mLastClose;
         real_month = QDateTime::fromTime_t(mList.first().mDate).date();
-        month_found = true;
     }
 
     if(!year_found)
     {
         year_p = mList.first().mLastClose;
         real_year = QDateTime::fromTime_t(mList.first().mDate).date();
-        year_found = true;
     }
 
 
     //获取当前陆股通持股信息的变化情况 1日 5日 10日
-    double foreign_now = mList.last().mForeignVol;
+    double foreign_now = mList.last().mForeignVolAdjust;
     double foreign_mutaul = mList.last().mForeignMututablePercent;
     double foreign_chg1 = 0.0, foreign_chg5 = 0.0, foreign_chg10 = 0.0;
 //    if(mList.size() > 2) qDebug()<<mList[size-1].mForeignVol<<mList[size-1].mForeignMututablePercent<<mList[size-2].mForeignVol<<mList[size-2].mForeignMututablePercent;
     if(size >= 2)
     {
-        foreign_chg1 = mList[size-1].mForeignVol - mList[size-2].mForeignVol;
+        foreign_chg1 = mList[size-1].mForeignVolAdjust - mList[size-2].mForeignVolAdjust;
     } else
     {
-        foreign_chg1 = mList[size-1].mForeignVol - mList[0].mForeignVol;
+        foreign_chg1 = mList[size-1].mForeignVolAdjust - mList[0].mForeignVolAdjust;
     }
     if(size >= 5)
     {
-        foreign_chg5 = mList[size-1].mForeignVol - mList[size-5].mForeignVol;
+        foreign_chg5 = mList[size-1].mForeignVolAdjust - mList[size-5].mForeignVolAdjust;
     } else
     {
-        foreign_chg5 = mList[size-1].mForeignVol - mList[0].mForeignVol;
+        foreign_chg5 = mList[size-1].mForeignVolAdjust - mList[0].mForeignVolAdjust;
     }
 
     if(size >= 10)
     {
-        foreign_chg10 = mList[size-1].mForeignVol - mList[size-10].mForeignVol;
+        foreign_chg10 = mList[size-1].mForeignVolAdjust - mList[size-10].mForeignVolAdjust;
     } else
     {
-        foreign_chg10 = mList[size-1].mForeignVol - mList[0].mForeignVol;
+        foreign_chg10 = mList[size-1].mForeignVolAdjust - mList[0].mForeignVolAdjust;
     }
 
     ShareHistoryCounter counter;
@@ -157,7 +154,7 @@ void QShareHistoryCounterWork::run()
     counter.weekP = week_p;
     counter.yearDay = real_year;
     counter.yearP = year_p;
-//    qDebug()<<mCode<<real_week.toString("yyyyMMdd")<<week_p<<real_month.toString("yyyyMMdd")<<month_p<<real_year.toString("yyyyMMdd")<<year_p<<foreign_chg1<<foreign_chg5<<foreign_chg10;
+    qDebug()<<mCode<<real_week.toString("yyyyMMdd")<<week_p<<real_month.toString("yyyyMMdd")<<month_p<<real_year.toString("yyyyMMdd")<<year_p<<foreign_chg1<<foreign_chg5<<foreign_chg10;
 
     emit DATA_SERVICE->signalUpdateShareCounter(counter);
 
