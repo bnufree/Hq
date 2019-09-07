@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QDate>
 #include "data_structure/sharedata.h"
+#include <QPainterPath>
 
 enum ShareGraphicType
 {
@@ -25,7 +26,12 @@ public:
 public slots:
     void    setValue(const GRAPHIC_DATA_LIST& vals) {mData = vals; update();}
 private:
-    int    drawSymbol(QPainter* painters, const QString& text, const QColor& color, intx, int y);  //返回图例实际的宽度
+    int     drawSymbol(QPainter* painters, const QString& text, const QColor& color, int x, int y, int s_width, int s_height);  //返回图例实际的宽度
+    void    drawLine(QPainter* painters, const QPoint& start, const QPoint& end, int width, const QColor& color, int type);
+    void    drawRect(QPainter* painters, const QRect& rect, int pen_width, int pen_type, const QColor& pen_color, const QColor& brush);
+    void    drawText(QPainter* painters, const QPoint& pnt, const QString& text, const QColor& color, bool ref_left = true);
+    void    drawPath(QPainter* painters,  const QColor& color, const QPainterPath& path);
+    void    drawDate(QPainter* painters,  const QPoint& pnt, const QDate& text, const QColor& color, double rotate);
 protected:
     void paintEvent(QPaintEvent *e);
     void resizeEvent(QResizeEvent * e);

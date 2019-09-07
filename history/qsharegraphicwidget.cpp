@@ -1,6 +1,10 @@
 ﻿#include "qsharegraphicwidget.h"
 #include <QPainter>
 
+#define         SYMBOL_WIDTH            100
+#define         SYMBOL_HEIGHT           2
+#define         SYMBOL_GAP              20
+
 QShareGraphicWidget::QShareGraphicWidget(QWidget *parent) : QWidget(parent)
 {
 
@@ -17,11 +21,11 @@ void QShareGraphicWidget::resizeEvent(QResizeEvent *e)
 
 int QShareGraphicWidget::drawSymbol(QPainter *painters, const QString &text, const QColor &color, int x, int y, int s_width, int s_height)
 {
-    painters->drawText(x, y, text);
+    drawText(painters, QPoint(x, y), text, Qt::white, false);
     int width = painters->fontMetrics().width(text);
     int height = painters->fontMetrics().height();
     int center_x = x + width + 10 + 0.5 * s_width;
-    int center_y = y + 0.5 * height;
+    int center_y = y/* + 0.5 * height*/;
     QRect symbol(0, 0, s_width, s_height);
     symbol.moveCenter(QPoint(center_x, center_y));
     painters->save();
@@ -32,7 +36,7 @@ int QShareGraphicWidget::drawSymbol(QPainter *painters, const QString &text, con
     painters->drawRect(symbol);
     painters->restore();
 
-    return width + 10 + s_width + 10;
+    return width + 10 + s_width + SYMBOL_GAP;
 }
 
 void QShareGraphicWidget::drawLine(QPainter *painters, const QPoint &start, const QPoint &end, int width, const QColor &color, int type)
@@ -66,7 +70,7 @@ void QShareGraphicWidget::paintEvent(QPaintEvent *e)
     //设定当前的区域
     QRect draw_rect = this->rect().marginsAdded(QMargins(-5, -5, -5, -5));
     QPainter painters(this);
-    painters.setBackground(Qt::black);
+    painters.fillRect(this->rect(), Qt::black);
     double max_price = mData.mMaxClose * 1.1;
     double height_per_price = draw_rect.height() / max_price;
     double max_foreign_vol = mData.mMaxForeignVol * 1.1;
@@ -79,13 +83,16 @@ void QShareGraphicWidget::paintEvent(QPaintEvent *e)
     QColor vol_color(Qt::green);
     double symbol_height = painters.fontMetrics().height();
     //开始画图例
+    QString close_text = tr("收盘价(元)");
+    QString vol_text = tr("外资持股量(万股)");
+    int total_symbol_area_width = painters.fontMetrics().width(close_text) + painters.fontMetrics().width(vol_text) + SYMBOL_GAP + 2 * SYMBOL_WIDTH;
     int symbol_pos_y = 10;
-    int symbol_pos_x = 10;
-    symbol_pos_x += drawSymbol(&painters, tr("收盘价"), price_color, symbol_pos_x, symbol_pos_y, 100, 20);
-    symbol_pos_x += drawSymbol(&painters, tr("外资持股量"), price_color, symbol_pos_x, symbol_pos_y, 100, 20);
+    int symbol_pos_x = draw_rect.center().x() - 0.5 * total_symbol_area_width;
+    symbol_pos_x += drawSymbol(&painters, close_text, price_color, symbol_pos_x, symbol_pos_y, SYMBOL_WIDTH, SYMBOL_HEIGHT);
+    symbol_pos_x += drawSymbol(&painters, vol_text, vol_color, symbol_pos_x, symbol_pos_y, SYMBOL_WIDTH, SYMBOL_HEIGHT);
     //重新计算实际的网格区域
     draw_rect.setLeft(draw_rect.left() + price_width);
-    draw_rect.setRight(draw_rect.right() - vol_width);
+    draw_rect.setRight(draw_rect.right() - vol_width - 20);
     draw_rect.setTop(draw_rect.top() + 10 + symbol_height + 10);
     draw_rect.setBottom(draw_rect.bottom() - symbol_height - 10); //时间文本使用
 
@@ -103,25 +110,19 @@ void QShareGraphicWidget::paintEvent(QPaintEvent *e)
     double max_x = draw_rect.bottomRight().x();
     double min_y = draw_rect.topLeft().y();
     double max_y = draw_rect.bottomRight().y();
-    painters.save();
-    QPen pen = painters.pen();
-    pen.setColor(Qt::black);
-    pen.setWidthF(2);
-    painters.setPen(pen);
-    drawLine(QPointF(min_x, max_y), QPointF(min_x, min_y));
-    drawLine(QPointF(min_x, max_y), QPointF(max_x, max_y));
     //开始画价格和网格
     for(int i=0; i<5; i++)
     {
+        int pos_y = qRound(min_y + i * draw_rect.height() *1.0 / 5);
+        if(i > 0 && i<5)
+        {
+            drawLine(&painters, QPoint(min_x,  pos_y), QPoint(max_x, pos_y), 1, Qt::white, Qt::DotLine);
+        }
         QString text = QString::number(max_price * (5-i)*1.0/5, 'f', 2);
-        double width = painters.fontMetrics().width(text);
-        double height = painters.fontMetrics().height();
-        painters.drawText(QPointF(min_x+10, min_y + i * draw_rect.height() *1.0 / 5 +height), text);
-        text = QString::number(max_foreign_vol*0.0001 * (5-i)*1.0/5, 'f', 2);
-        width = painters.fontMetrics().width(text);
-        painters.drawText(QPointF(max_x-width - 5, min_y + i * draw_rect.height() *1.0 / 5 + height), text);
+        drawText(&painters, QPoint(min_x, pos_y), text, Qt::white, true);
+        text = QString::number(max_foreign_vol*0.0001 * (5-i)*1.0/5, 'f', 0);
+        drawText(&painters, QPoint(max_x, pos_y), text, Qt::white, false);
     }
-    painters.restore();
     QPainterPath price_path;
     QPainterPath vol_path;
     double start_x = min_x;
@@ -141,16 +142,51 @@ void QShareGraphicWidget::paintEvent(QPaintEvent *e)
             price_path.lineTo(QPointF(x, max_y - mData[i].mClose * height_per_price));
             vol_path.lineTo(QPointF(x, max_y - mData[i].mForVol * height_per_vol));
         }
+        if(i==size -1)
+        {
+            drawDate(&painters, QPoint(x, max_y), mData[i].mDate, Qt::white, 30);
+        }
     }
-    painters.save();
-    pen = painters.pen();
-    pen.setColor(Qt::red);
-    pen.setWidthF(1);
-    painters.setPen(pen);
-    painters.drawPath(price_path);
-    pen.setColor(Qt::green);
-    painters.setPen(pen);
-    painters.drawPath(vol_path);
-    painters.restore();
 
+    drawPath(&painters, price_color, price_path);
+    drawPath(&painters, vol_color, vol_path);
+}
+
+void QShareGraphicWidget::drawText(QPainter *painters, const QPoint &pnt, const QString &text, const QColor &color, bool ref_left)
+{
+    painters->save();
+    painters->setPen(color);
+    int width = painters->fontMetrics().width(text);
+    int height = painters->fontMetrics().height();
+    QPoint pos = pnt;
+    if(ref_left)
+    {
+        pos.setX(pos.x() - width - 2);
+    } else
+    {
+        pos.setX(pos.x() + 10);
+    }
+    pos.setY(pos.y() + 0.5 * height);
+
+    painters->drawText(pos, text);
+    painters->restore();
+}
+
+void QShareGraphicWidget::drawPath(QPainter *painters, const QColor &color, const QPainterPath &path)
+{
+    painters->save();
+    painters->setPen(QPen(color, 1));
+    painters->drawPath(path);
+    painters->restore();
+}
+
+void QShareGraphicWidget::drawDate(QPainter *painters, const QPoint &pnt, const QDate &text, const QColor &color, double rotate)
+{
+    painters->save();
+    painters->translate(-pnt.x(), -pnt.y());
+    painters->rotate(rotate);
+    painters->translate(pnt.x(), pnt.y());
+    painters->setPen(color);
+    painters->drawText(pnt, text.toString("yyyyMMdd"));
+    painters->restore();
 }
