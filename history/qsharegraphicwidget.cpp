@@ -103,23 +103,24 @@ void QShareGraphicWidget::paintEvent(QPaintEvent *e)
     double max_x = draw_rect.bottomRight().x();
     double min_y = draw_rect.topLeft().y();
     double max_y = draw_rect.bottomRight().y();
-    painters.save();
-    QPen pen = painters.pen();
-    pen.setColor(Qt::black);
-    pen.setWidthF(2);
-    painters.setPen(pen);
-    drawLine(QPointF(min_x, max_y), QPointF(min_x, min_y));
-    drawLine(QPointF(min_x, max_y), QPointF(max_x, max_y));
     //开始画价格和网格
+    painters.save();
     for(int i=0; i<5; i++)
     {
+        //网格的坐标点
+        if( i > 0 && i < 4)
+        {
+            QPointF start(min_x, min_y + i * draw_rect.height() / 5.0);
+            QPointF end(max_x, min_y + i * draw_rect.height() / 5.0);
+            this->drawLine(&painters, start.toPoint(), end.toPoint(), 1, Qt::white, Qt::DotLine);
+        }
         QString text = QString::number(max_price * (5-i)*1.0/5, 'f', 2);
         double width = painters.fontMetrics().width(text);
         double height = painters.fontMetrics().height();
-        painters.drawText(QPointF(min_x+10, min_y + i * draw_rect.height() *1.0 / 5 +height), text);
-        text = QString::number(max_foreign_vol*0.0001 * (5-i)*1.0/5, 'f', 2);
+        painters.drawText(QPointF(min_x - width, min_y + i * draw_rect.height() *1.0 / 5 -height), text);
+        text = QString::number(max_foreign_vol*0.0001 * (5-i)*1.0/5, 'f', 0);
         width = painters.fontMetrics().width(text);
-        painters.drawText(QPointF(max_x-width - 5, min_y + i * draw_rect.height() *1.0 / 5 + height), text);
+        painters.drawText(QPointF(max_x + width + 5, min_y + i * draw_rect.height() *1.0 / 5 - height), text);
     }
     painters.restore();
     QPainterPath price_path;
@@ -143,12 +144,12 @@ void QShareGraphicWidget::paintEvent(QPaintEvent *e)
         }
     }
     painters.save();
-    pen = painters.pen();
-    pen.setColor(Qt::red);
+    QPen pen = painters.pen();
+    pen.setColor(price_color);
     pen.setWidthF(1);
     painters.setPen(pen);
     painters.drawPath(price_path);
-    pen.setColor(Qt::green);
+    pen.setColor(vol_color);
     painters.setPen(pen);
     painters.drawPath(vol_path);
     painters.restore();
