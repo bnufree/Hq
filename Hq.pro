@@ -71,7 +71,9 @@ SOURCES += main.cpp\
     real/qnorthflowinfodisplaywidget.cpp \
     basic_info/qshareactivedateupdatethread.cpp \
     data_structure/shareworkingdatetime.cpp \
-    history/sharehistoryreadthread.cpp
+    history/sharehistoryreadthread.cpp \
+    history/qforignvolcheckdlg.cpp \
+    table/qshareforeignvoltablewidget.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -132,7 +134,9 @@ HEADERS  += dialog.h \
     real/qnorthflowinfodisplaywidget.h \
     basic_info/qshareactivedateupdatethread.h \
     data_structure/shareworkingdatetime.h \
-    history/sharehistoryreadthread.h
+    history/sharehistoryreadthread.h \
+    history/qforignvolcheckdlg.h \
+    table/qshareforeignvoltablewidget.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \
@@ -141,7 +145,8 @@ FORMS    += dialog.ui \
     history/qsharehistorydialog.ui \
     qdatamgrwidget.ui \
     qsharecodenamelable.ui \
-    real/qnorthflowinfodisplaywidget.ui
+    real/qnorthflowinfodisplaywidget.ui \
+    history/qforignvolcheckdlg.ui
 
 RESOURCES += \
     image.qrc

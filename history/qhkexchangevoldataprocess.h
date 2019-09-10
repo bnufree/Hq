@@ -7,14 +7,27 @@
 #include "data_structure/sharedata.h"
 #include <QMap>
 
-class QHKExchangeVolDataProcess : public QRunnable
+
+class QHKExchangeVolDataProcess : public QObject, public QRunnable
 {
+    Q_OBJECT
 public:
-    explicit QHKExchangeVolDataProcess(const QDate& date, QObject* parent = 0);
+
+    enum FetchMode{
+        Fetch_Only_File = 0x01,
+        Fetch_Only_Web = 0x02,
+        Fetch_Only_Local = Fetch_Only_File,
+        Fetch_All = Fetch_Only_Local | Fetch_Only_Web,
+    };
+
+    explicit QHKExchangeVolDataProcess(const QDate& date, FetchMode mode = Fetch_All, QObject* parent = 0);
     ~QHKExchangeVolDataProcess() {}
 
 public:
     void run();
+
+signals:
+    void signalSendDataList(const ShareForignVolFileDataList& list, const QDate& date);
 
 private:
     void getVolofDate(ShareForignVolFileDataList& list, const QDate& date);
@@ -26,6 +39,7 @@ private:
 private:
     QDate       mDate;
     QObject*    mParent;
+    FetchMode   mMode;
 };
 
 #endif // QHKEXCHANGEVOLDATAPROCESS_H

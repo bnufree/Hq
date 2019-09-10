@@ -1,4 +1,4 @@
-#include "HqTableWidget.h"
+﻿#include "HqTableWidget.h"
 #include "utils/comdatadefines.h"
 #include <QHeaderView>
 #include <QAction>
