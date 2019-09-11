@@ -16,7 +16,6 @@ QShareForeignVolTableWidget::QShareForeignVolTableWidget(QWidget *parent) : HqTa
 
 void QShareForeignVolTableWidget::slotStartInit()
 {
-
     //初始化
     //获取当前一年对应的工作日
     QList<QDate> dataList =  ShareWorkingDate::getHisWorkingDay();

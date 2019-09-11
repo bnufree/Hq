@@ -21,12 +21,15 @@ QHKExchangeVolDataProcess::QHKExchangeVolDataProcess(const QDate& date, FetchMod
     qRegisterMetaType<ShareForignVolFileDataList>("const ShareForignVolFileDataList&" );
 }
 
-void QHKExchangeVolDataProcess::getVolInfoFromHKEX(ShareForignVolFileDataList& list, int& num, const QDate &date, int mkt)
+QDate QHKExchangeVolDataProcess::getVolInfoFromHKEX(ShareForignVolFileDataList& list, int& num, const QDate &date, int mkt)
 {
+    if(QDate::currentDate() == date) return QDate();
     QString postVal = POST_VAL;
     postVal.replace("TODAY_DATE", QDate::currentDate().toString("yyyyMMdd"));
     postVal.replace("TXTShareWorkingDate", QString("").sprintf("%s", date.toString("yyyy/MM/dd").toStdString().data()));
-    QByteArray value = QHttpGet::getContentOfURLWithPost(QString(HK_URL).arg(mkt == 0? "sh":"sz").arg(mkt == 0? "sh":"sz"), postVal.toUtf8(), 60);
+    QByteArray value = QHttpGet::getContentOfURLWithPost(QString(HK_URL).arg(mkt == 0? "sh":"sz").arg(mkt == 0? "sh":"sz"), postVal.toUtf8(), 600);
+    qDebug()<<"date :"<<date.toString("yyyy-MM-dd")<<" has content length:"<<value.length();
+    if(value.length() < 10000) qDebug()<<value;
 
 #ifdef TEST
     qDebug()<<"recv len:"<<value.length();
@@ -59,7 +62,7 @@ void QHKExchangeVolDataProcess::getVolInfoFromHKEX(ShareForignVolFileDataList& l
     {
         resDate = QDate::fromString(dateExp.cap(1), "yyyy/MM/dd");
     }
-    if(resDate != date) return;
+    if(!resDate.isValid()) return resDate;
 
     QStringList resList;
     while ( (start_index = content.indexIn(res, start_index)) >= 0) {
@@ -68,8 +71,7 @@ void QHKExchangeVolDataProcess::getVolInfoFromHKEX(ShareForignVolFileDataList& l
     }
     //检查是否是3的倍数
     int size = resList.size();
-    if(size % 3 == 0) return;
-    for(int i=0; i<size && i+1<size && i+2 < size && i+3 < size; i=i+4)
+    for(int i=0; i<size && i+1<size && i+2 < size/* && i+3 < size*/; i=i+3)
     {
         QString code = resList[i];
         if(code.left(1) == "7")
@@ -86,9 +88,8 @@ void QHKExchangeVolDataProcess::getVolInfoFromHKEX(ShareForignVolFileDataList& l
             code.replace(0, 1, "60");
         }
 
-        QString name = resList[i+1];
-        QString vol = resList[i+2];
-        QString percent = resList[i+3];
+        QString vol = resList[i+1];
+        QString percent = resList[i+2];
         ShareForignVolFileData data;
         data.mCode = code.toUInt();
         data.mForeignVol = vol.remove(",").toLongLong();
@@ -144,7 +145,7 @@ void QHKExchangeVolDataProcess::getVolInfoFromHKEX(ShareForignVolFileDataList& l
     }
 #endif
     num = list.size();
-    return;
+    return date;
 }
 
 bool QHKExchangeVolDataProcess::getVolInfoFromFile(ShareForignVolFileDataList& list, const QDate& date)
@@ -229,24 +230,22 @@ void QHKExchangeVolDataProcess::getVolofDate(ShareForignVolFileDataList &list, c
             //从港交所获取
             int errorNUm = 0;
             int sh_num = 0, sz_num = 0;
-            do {
-                getVolInfoFromHKEX(list, sh_num, date, 0);
-                getVolInfoFromHKEX(list, sz_num, date, 1);
-                errorNUm++;
-                if(errorNUm == 3)
-                {
-                    break;
-                }
-            } while (sh_num == 0 && sz_num == 0);
 
-            if((sh_num == 0) ^ (sz_num == 0))
+            QDate sh_date = getVolInfoFromHKEX(list, sh_num, date, 0);
+            QDate sz_date = getVolInfoFromHKEX(list, sz_num, date, 1);
+            if(sh_date.isValid() || sz_date.isValid())
             {
+                //至少有一方获取到了实际数据
+                //获取到了指定日期的数据, 如果有数据为0, 那么继续重新获取,直到获取完毕
                 while (sh_num == 0) {
                     getVolInfoFromHKEX(list, sh_num, date, 0);
                 }
                 while (sz_num == 0) {
                     getVolInfoFromHKEX(list, sz_num, date, 1);
                 }
+            } else
+            {
+                //都没有获取到时间返回,这个时候是htttp返回错误,需要修正
             }
         }
 

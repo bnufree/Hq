@@ -31,7 +31,7 @@ signals:
 
 private:
     void getVolofDate(ShareForignVolFileDataList& list, const QDate& date);
-    void getVolInfoFromHKEX(ShareForignVolFileDataList& list,int& num, const QDate& date, int mkt = 0);
+    QDate getVolInfoFromHKEX(ShareForignVolFileDataList& list,int& num, const QDate& date, int mkt = 0);
     bool getVolInfoFromFile(ShareForignVolFileDataList& list, const QDate& date);
     bool getVolInfoFromEastMoney(ShareForignVolFileDataList& list, const QDate& date);
     bool saveData(const QDate& date, const ShareForignVolFileDataList& list);
