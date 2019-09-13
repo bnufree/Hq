@@ -42,7 +42,7 @@ void QShareHistoryInfoMgr::slotStartGetHistoryWithAllCodes()
     while (start < ShareWorkingDate::currentDate().date()) {
         if(ShareWorkingDate::getHisWorkingDay().contains(start))
         {
-            QHKExchangeVolDataProcess * process = new QHKExchangeVolDataProcess(start, this);
+            QHKExchangeVolDataProcess * process = new QHKExchangeVolDataProcess(start, QHKExchangeVolDataProcess::Fetch_All, this);
             mPool.start(process);
         }
         start = start.addDays(1);

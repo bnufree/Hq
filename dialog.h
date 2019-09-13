@@ -12,6 +12,7 @@
 
 class HQTaskMagrCenter;
 class QIndexWidget;
+class QShareForeignVolTableWidget;
 
 typedef struct strColDisplay
 {
@@ -134,6 +135,7 @@ private:
     QShareTablewidget   *mShareTableWidget;
     QBlockTableWidget   *mBlockTableWidget;
     QDataMgrWidget      *mDataMgrWidget;
+    QShareForeignVolTableWidget *mForeignVolTableWidget;
 };
 
 #endif // DIALOG_H

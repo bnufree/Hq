@@ -19,6 +19,7 @@
 #include "utils/comdatadefines.h"
 #include <QDir>
 #include "real/qnorthflowinfodisplaywidget.h"
+#include "table/qshareforeignvoltablewidget.h"
 
 #define     STK_ZXG_SEC         "0520"
 #define     STK_HSJJ_SEC        "4521"
@@ -63,6 +64,8 @@ Dialog::Dialog(QWidget *parent) :
     connect(ui->DataMgrBtn, SIGNAL(clicked()), this, SLOT(on_dataMgrBtn_clicked()));
     connect(ui->HqCenterButton, SIGNAL(clicked()), this, SLOT(slotHqCenterBtnClicked()));
     ui->mainStackWidget->addWidget(new QNorthFlowInfoDisplayWidget(this));
+    mForeignVolTableWidget = new QShareForeignVolTableWidget(this);
+    ui->mainStackWidget->addWidget(mForeignVolTableWidget);
 
     //指数显示
     QHBoxLayout *indexLayout = new QHBoxLayout;
@@ -123,7 +126,7 @@ Dialog::Dialog(QWidget *parent) :
     connect(mTaskMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SLOT(slotUpdateMsg(QString)));
     connect(mTaskMgr, SIGNAL(signalSendNotrhBoundDataList(ShareHsgtList)), mIndexWidget, SLOT(updateData(ShareHsgtList)));
     //
-
+    connect(mTaskMgr, SIGNAL(signalWorkingDayfinished()), mForeignVolTableWidget, SLOT(slotStartInit()));
     mTaskMgr->signalStart();
 
     ui->mainStackWidget->setCurrentIndex(0);
@@ -393,6 +396,7 @@ void Dialog::on_dataMgrBtn_clicked()
     list->addItem(QStringLiteral("陆股通"), DATA_MUTUAL_MARKET);
     list->addItem(QStringLiteral("龙虎榜"), DATA_LHB);
     list->addItem(QStringLiteral("北向实时"), DATA_NORTH_REAL);
+    list->addItem(QStringLiteral("外资持股数据管理"), DATA_FOREIGN_CHECK);
     connect(list, SIGNAL(signalItemClicked(int)), this, SLOT(slotDisplayDataPage(int)));
     QPoint tp = ((QWidget*)ui->DataMgrBtn->parent())->mapToGlobal(ui->DataMgrBtn->geometry().topLeft());
     list->move(0, tp.y() - list->size().height());
@@ -410,7 +414,26 @@ void Dialog::slotDisplayDataPage(int val)
         mDataMgrWidget->updateData();
     } else if(val == DATA_NORTH_REAL)
     {
-        ui->mainStackWidget->setCurrentIndex(ui->mainStackWidget->count()-1);
+        for(int i=0; i<ui->mainStackWidget->count(); i++)
+        {
+            QNorthFlowInfoDisplayWidget* w = qobject_cast<QNorthFlowInfoDisplayWidget*>(ui->mainStackWidget->widget(i));
+            if(w)
+            {
+                ui->mainStackWidget->setCurrentWidget(w);
+                break;
+            }
+        }
+    } else if(val == DATA_FOREIGN_CHECK)
+    {
+        for(int i=0; i<ui->mainStackWidget->count(); i++)
+        {
+            QShareForeignVolTableWidget* w = qobject_cast<QShareForeignVolTableWidget*>(ui->mainStackWidget->widget(i));
+            if(w)
+            {
+                ui->mainStackWidget->setCurrentWidget(w);
+                break;
+            }
+        }
     }
     widget->hide();
     widget->deleteLater();

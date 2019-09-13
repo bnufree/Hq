@@ -32,6 +32,7 @@ signals:
     void        signalSetFavCode(const QString& code);
     void        signalUpdateAllShareHistoryFromDate(bool deldb, const QDate& date);
     void        signalNewHsgtTop10Now();
+    void        signalWorkingDayfinished();
 
 public slots:
     void        slotStart();

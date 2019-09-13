@@ -9,24 +9,30 @@
 #include <QJsonObject>
 #include <QJsonParseError>
 
-#define     POST_VAL            "__VIEWSTATE=%2FwEPDwUJNjIxMTYzMDAwZGQ79IjpLOM%2BJXdffc28A8BMMA9%2Byg%3D%3D&__VIEWSTATEGENERATOR=EC4ACD6F&__EVENTVALIDATION=%2FwEdAAdtFULLXu4cXg1Ju23kPkBZVobCVrNyCM2j%2BbEk3ygqmn1KZjrCXCJtWs9HrcHg6Q64ro36uTSn%2FZ2SUlkm9HsG7WOv0RDD9teZWjlyl84iRMtpPncyBi1FXkZsaSW6dwqO1N1XNFmfsMXJasjxX85jz8PxJxwgNJLTNVe2Bh%2Fbcg5jDf8%3D&today=TODAY_DATE&sortBy=stockcode&sortDirection=asc&alertMsg=&txtShareholdingDate=TXTSHAREDATE&btnSearch=%E6%90%9C%E5%AF%BB"
-#define     HK_URL              "https://sc.hkexnews.hk/TuniS/www.hkexnews.hk/sdw/search/mutualmarket_c.aspx?t=%1"
+#define     POST_VAL            "__VIEWSTATE=%2FwEPDwUJNjIxMTYzMDAwZGQ79IjpLOM%2BJXdffc28A8BMMA9%2Byg%3D%3D&__VIEWSTATEGENERATOR=EC4ACD6F&__EVENTVALIDATION=%2FwEdAAdtFULLXu4cXg1Ju23kPkBZVobCVrNyCM2j%2BbEk3ygqmn1KZjrCXCJtWs9HrcHg6Q64ro36uTSn%2FZ2SUlkm9HsG7WOv0RDD9teZWjlyl84iRMtpPncyBi1FXkZsaSW6dwqO1N1XNFmfsMXJasjxX85jz8PxJxwgNJLTNVe2Bh%2Fbcg5jDf8%3D&today=TODAY_DATE&sortBy=stockcode&sortDirection=asc&alertMsg=&txtShareholdingDate=TXTShareWorkingDate&btnSearch=%E6%90%9C%E5%AF%BB"
+#define     HK_URL              "https://sc.hkexnews.hk/TuniS/www.hkexnews.hk/sdw/search/mutualmarket_c.aspx?t=%1&t=%2"
 #define     EASTMONEY_URL       "http://dcfm.eastmoney.com//em_mutisvcexpandinterface/api/js/get?type=HSGTHDSTA&token=70f12f2f4f091e459a279469fe49eca5&st=SHAREHOLDPRICE&sr=-1&p=%1&ps=100000&js={pages:(tp),data:(x)}&filter=(MARKET%20in%20(%27001%27,%27003%27))(HDDATE=^%2^)&rt=52030379"
 
-QHKExchangeVolDataProcess::QHKExchangeVolDataProcess(const QDate& date, QObject* parent) : QRunnable()
+QHKExchangeVolDataProcess::QHKExchangeVolDataProcess(const QDate& date, FetchMode mode, QObject* parent) : QRunnable(), QObject(0)
 {
     mDate = date;
     mParent = parent;
+    mMode = mode;
+    qRegisterMetaType<ShareForignVolFileDataList>("const ShareForignVolFileDataList&" );
 }
 
-void QHKExchangeVolDataProcess::getVolInfoFromHKEX(ShareForignVolFileDataList& list, int& num, const QDate &date, int mkt)
+QDate QHKExchangeVolDataProcess::getVolInfoFromHKEX(ShareForignVolFileDataList& list, int& num, const QDate &date, int mkt)
 {
+    if(QDate::currentDate() == date) return QDate();
     QString postVal = POST_VAL;
     postVal.replace("TODAY_DATE", QDate::currentDate().toString("yyyyMMdd"));
-    postVal.replace("TXTSHAREDATE", QString("").sprintf("%s", date.toString("yyyy/MM/dd").toStdString().data()));
-    QByteArray value = QHttpGet::getContentOfURLWithPost(QString(HK_URL).arg(mkt == 0? "sh":"sz"), postVal.toUtf8());
+    postVal.replace("TXTShareWorkingDate", QString("").sprintf("%s", date.toString("yyyy/MM/dd").toStdString().data()));
+    QString mktstr = (mkt == 0? "sh":"sz");
+    QByteArray value = QHttpGet::getContentOfURLWithPost(QString(HK_URL).arg(mktstr).arg(mktstr), postVal.toUtf8(), 600);
+    qDebug()<<"date :"<<date.toString("yyyy-MM-dd")<<" has content length:"<<value.length();
+    if(value.length() < 10000) qDebug()<<value;
 
-#if 0
+#ifdef TEST
     qDebug()<<"recv len:"<<value.length();
     qDebug()<<value;
     QFile file(QString("https_%1").arg(QDateTime::currentMSecsSinceEpoch()));
@@ -42,21 +48,57 @@ void QHKExchangeVolDataProcess::getVolInfoFromHKEX(ShareForignVolFileDataList& l
 
     QString res = QString::fromUtf8(value);
     int start_index = 0;
+#if 0
+    qDebug()<<__FUNCTION__<<start_index;
     QRegExp codeExp("7[072]{1}[0-9]{3}|9[0-9]{4}");
     //QRegExp nameExp("[\u4e00-\u9fa5A-Z]{1,}");
-    QRegExp volExp(">(([0-9]{1,3},){0,}[0-9]{1,})<");
-    QRegExp dateExp(": (\\d{4}/\\d{2}/\\d{2})");
+    QRegExp volExp(">(([0-9]{1,3},){0,}[0-9]{1,})<");    
     QRegExp volPercentExp("([0-9]{1,3}\.[0-9]{2})%");
-
+#endif
+    QRegExp content("mobile-list-body\">([0-9A-Za-z\\.,%\\u4e00-\\u9fa5\\*]{1,})<");
+    QRegExp dateExp(": (\\d{4}/\\d{2}/\\d{2})");
     start_index = dateExp.indexIn(res, start_index);
     QDate resDate;
     if(start_index >=0 )
     {
         resDate = QDate::fromString(dateExp.cap(1), "yyyy/MM/dd");
     }
-    if(resDate != date) return;
+    if(!resDate.isValid()) return resDate;
 
-    while ( (start_index = codeExp.indexIn(res, start_index)) >= 0) {
+    QStringList resList;
+    while ( (start_index = content.indexIn(res, start_index)) >= 0) {
+        resList.append(content.cap(1));
+        start_index += content.cap().length();
+    }
+    //检查是否是3的倍数
+    int size = resList.size();
+    for(int i=0; i<size && i+1<size && i+2 < size/* && i+3 < size*/; i=i+3)
+    {
+        QString code = resList[i];
+        if(code.left(1) == "7")
+        {
+            if(code.left(2)== "77")
+            {
+                code.replace(0, 2, "300");
+            } else
+            {
+                code.replace(0, 1, "00");
+            }
+        } else
+        {
+            code.replace(0, 1, "60");
+        }
+
+        QString vol = resList[i+1];
+        QString percent = resList[i+2];
+        ShareForignVolFileData data;
+        data.mCode = code.toUInt();
+        data.mForeignVol = vol.remove(",").toLongLong();
+        data.mMutuablePercent = percent.remove("%").toDouble();
+        list.append(data);
+
+    }
+#if 0
         QString tmpCode = codeExp.cap();
         if(tmpCode.left(1) == "7")
         {
@@ -102,8 +144,9 @@ void QHKExchangeVolDataProcess::getVolInfoFromHKEX(ShareForignVolFileDataList& l
         }
 //        qDebug()<<list.last();
     }
+#endif
     num = list.size();
-    return;
+    return date;
 }
 
 bool QHKExchangeVolDataProcess::getVolInfoFromFile(ShareForignVolFileDataList& list, const QDate& date)
@@ -135,6 +178,7 @@ bool QHKExchangeVolDataProcess::getVolInfoFromEastMoney(ShareForignVolFileDataLi
     int totalpage = 1;
     while (page <= totalpage) {
         QString url = QString(EASTMONEY_URL).arg(page).arg(date.toString("yyyy-MM-dd"));
+        qDebug()<<url<<list.size();
         QByteArray value = QHttpGet::getContentOfURL(url);
         value.replace("pages", "\"pages\"");
         value.replace("data", "\"data\"");
@@ -175,39 +219,43 @@ bool QHKExchangeVolDataProcess::getVolInfoFromEastMoney(ShareForignVolFileDataLi
 void QHKExchangeVolDataProcess::getVolofDate(ShareForignVolFileDataList &list, const QDate &date)
 {
     //从文件获取
-    if(getVolInfoFromFile(list, date)) return;
-    //先从东方财富获取
-    if(!getVolInfoFromEastMoney(list, date))
+    if(mMode & Fetch_Only_File)
     {
-        //从港交所获取
-        int errorNUm = 0;
-        int sh_num = 0, sz_num = 0;
-        do {
-            getVolInfoFromHKEX(list, sh_num, date, 0);
-            getVolInfoFromHKEX(list, sz_num, date, 1);
-            errorNUm++;
-            if(errorNUm == 3)
-            {
-                break;
-            }
-        } while (sh_num == 0 && sz_num == 0);
-
-        if((sh_num == 0) ^ (sz_num == 0))
+        if(getVolInfoFromFile(list, date)) return;
+    }
+    //先从东方财富获取
+    if(mMode & Fetch_Only_Web)
+    {
+        if(!getVolInfoFromEastMoney(list, date))
         {
-            while (sh_num == 0) {
-                getVolInfoFromHKEX(list, sh_num, date, 0);
-            }
-            while (sz_num == 0) {
-                getVolInfoFromHKEX(list, sz_num, date, 1);
+            //从港交所获取
+            int errorNUm = 0;
+            int sh_num = 0, sz_num = 0;
+
+            QDate sh_date = getVolInfoFromHKEX(list, sh_num, date, 0);
+            QDate sz_date = getVolInfoFromHKEX(list, sz_num, date, 1);
+            if(sh_date.isValid() || sz_date.isValid())
+            {
+                //至少有一方获取到了实际数据
+                //获取到了指定日期的数据, 如果有数据为0, 那么继续重新获取,直到获取完毕
+                while (sh_num == 0) {
+                    getVolInfoFromHKEX(list, sh_num, date, 0);
+                }
+                while (sz_num == 0) {
+                    getVolInfoFromHKEX(list, sz_num, date, 1);
+                }
+            } else
+            {
+                //都没有获取到时间返回,这个时候是htttp返回错误,需要修正
             }
         }
-    }
 
-    qDebug()<<"hk:"<<date.toString("yyyyMMdd")<<list.size();
-    if(list.size() > 0)
-    {
-        saveData(date, list);
+        qDebug()<<"hk:"<<date.toString("yyyyMMdd")<<list.size();
+        if(list.size() > 0)
+        {
+            saveData(date, list);
 
+        }
     }
 }
 
@@ -234,6 +282,9 @@ void QHKExchangeVolDataProcess::run()
                                   Q_ARG(ShareForignVolFileDataList, list),\
                                   Q_ARG(QDate, mDate)\
                                   );
+    } else
+    {
+        emit signalSendDataList(list, mDate);
     }
 }
 
