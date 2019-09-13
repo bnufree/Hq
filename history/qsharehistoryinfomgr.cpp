@@ -49,6 +49,8 @@ void QShareHistoryInfoMgr::slotStartGetHistoryWithAllCodes()
     }
     mPool.waitForDone();
     if(mCodesList.size() == 0) return;
+    QDir dir(HQ_DAY_HISTORY_DIR);
+    if(!dir.exists()) dir.mkpath(HQ_DAY_HISTORY_DIR);
     //通过传入的陆股通数据更新日线文件信息
     foreach (QString code, mCodesList) {
         if(code.size() > 6) code = code.right(6);
