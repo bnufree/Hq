@@ -14,7 +14,11 @@ int main(int argc, char *argv[])
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF8"));
     //make size as 9:16
     Dialog w;
-    w.showMaximized();
+#ifdef Q_OS_WIN
+    w.show();
+#else
+    w.showFullScreen();
+#endif
 
     return a.exec();
 }

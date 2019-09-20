@@ -1,6 +1,7 @@
-#include "qsharehistorycounterwork.h"
+﻿#include "qsharehistorycounterwork.h"
 #include "dbservices/dbservices.h"
 #include "dbservices/qactivedate.h"
+#include "data_structure/shareworkingdatetime.h"
 
 QShareHistoryCounterWork::QShareHistoryCounterWork(const QString& code,const ShareHistoryFileDataList& list, QObject* parent)
     :mCode(code),mList(list),mParent(parent),QRunnable()
@@ -154,7 +155,7 @@ void QShareHistoryCounterWork::run()
     counter.weekP = week_p;
     counter.yearDay = real_year;
     counter.yearP = year_p;
-    qDebug()<<mCode<<real_week.toString("yyyyMMdd")<<week_p<<real_month.toString("yyyyMMdd")<<month_p<<real_year.toString("yyyyMMdd")<<year_p<<foreign_chg1<<foreign_chg5<<foreign_chg10;
+//    qDebug()<<mCode<<real_week.toString("yyyyMMdd")<<week_p<<real_month.toString("yyyyMMdd")<<month_p<<real_year.toString("yyyyMMdd")<<year_p<<foreign_chg1<<foreign_chg5<<foreign_chg10<<last_day.toString("yyyy-MM-dd");
 
     emit DATA_SERVICE->signalUpdateShareCounter(counter);
 

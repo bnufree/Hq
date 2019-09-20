@@ -127,24 +127,25 @@ void QEastMoneyBlockThread::slotUpdateBlockShare()
             data->mBlockType |= mUserBlockType;
             mBlockDataList[data->mCode] = *data;
         }
+        qDebug()<<"block code:"<<data->mCode;
         index += 6;
     }
-    //开始根据板块代码，获取板块内的所有shares
-    QThreadPool pool;
-    pool.setMaxThreadCount(8);
-    pool.setExpiryTimeout(-1);
-    foreach (QString key, mBlockDataList.keys()) {
-        QEastMoneyBlockShareThread *thread = new QEastMoneyBlockShareThread(key);
-        pool.start(thread);
-    }
-    //开始更新实时板块信息
-    bool active = true;
-    while(1)
-    {
-        if(active) slotUpdateBlockInfos();
-        QThread::sleep(3);
-        active  = QActiveDateTime::isCurDateTimeActive();
-    }
+//    //开始根据板块代码，获取板块内的所有shares
+//    QThreadPool pool;
+//    pool.setMaxThreadCount(8);
+//    pool.setExpiryTimeout(-1);
+//    foreach (QString key, mBlockDataList.keys()) {
+//        QEastMoneyBlockShareThread *thread = new QEastMoneyBlockShareThread(key);
+//        pool.start(thread);
+//    }
+//    //开始更新实时板块信息
+//    bool active = true;
+//    while(1)
+//    {
+//        if(active) slotUpdateBlockInfos();
+//        QThread::sleep(3);
+//        active  = QActiveDateTime::isCurDateTimeActive();
+//    }
 }
 
 

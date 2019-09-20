@@ -20,6 +20,7 @@
 #include <QDir>
 #include "real/qnorthflowinfodisplaywidget.h"
 #include "table/qshareforeignvoltablewidget.h"
+#include <QMessageBox>
 
 #define     STK_ZXG_SEC         "0520"
 #define     STK_HSJJ_SEC        "4521"
@@ -50,22 +51,31 @@ Dialog::Dialog(QWidget *parent) :
 {
     qDebug()<<__func__<<__LINE__;
     ui->setupUi(this);
+    this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
+    this->setAttribute(Qt::WA_DeleteOnClose);
     while(ui->mainStackWidget->count())
     {
         ui->mainStackWidget->removeWidget(ui->mainStackWidget->widget(0));
     }
     qDebug()<<__func__<<__LINE__;
+    mHqWidget = new QWidget(this);
+    mHqWidget->setLayout(new QHBoxLayout);
+    mHqWidget->layout()->setSpacing(1);
+    mHqWidget->layout()->setMargin(0);
+    ui->mainStackWidget->addWidget(mHqWidget);
     mShareTableWidget = new QShareTablewidget(this);
-    ui->mainStackWidget->addWidget(mShareTableWidget);
+    mHqWidget->layout()->addWidget(mShareTableWidget);
     mDataMgrWidget = new QDataMgrWidget(this);
     ui->mainStackWidget->addWidget(mDataMgrWidget);
     mBlockTableWidget = new QBlockTableWidget(this);
+//    mHqWidget->layout()->addWidget(mBlockTableWidget);
     ui->mainStackWidget->addWidget(mBlockTableWidget);
     connect(ui->DataMgrBtn, SIGNAL(clicked()), this, SLOT(on_dataMgrBtn_clicked()));
     connect(ui->HqCenterButton, SIGNAL(clicked()), this, SLOT(slotHqCenterBtnClicked()));
     ui->mainStackWidget->addWidget(new QNorthFlowInfoDisplayWidget(this));
-    mForeignVolTableWidget = new QShareForeignVolTableWidget(this);
-    ui->mainStackWidget->addWidget(mForeignVolTableWidget);
+    mForeignVolTableWidget = NULL;
+//    mForeignVolTableWidget = new QShareForeignVolTableWidget(this);
+//    ui->mainStackWidget->addWidget(mForeignVolTableWidget);
 
     //指数显示
     QHBoxLayout *indexLayout = new QHBoxLayout;
@@ -98,8 +108,8 @@ Dialog::Dialog(QWidget *parent) :
     systemIcon->hide();
     connect(systemIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(setDlgShow(QSystemTrayIcon::ActivationReason)));
 //    //创建快捷事件
-    QShortcut *shotcut = new QShortcut(QKeySequence("Alt+X"), this);  //隐藏
-    connect(shotcut, SIGNAL(activated()), this, SLOT(slotWhetherDisplay()));
+//    QShortcut *shotcut = new QShortcut(QKeySequence("Alt+X"), this);  //隐藏
+//    connect(shotcut, SIGNAL(activated()), this, SLOT(slotWhetherDisplay()));
 //    QShortcut *shotcut1 = new QShortcut(QKeySequence("Alt+A"), this);
 //    connect(shotcut1, SIGNAL(activated()), this, SLOT(slotDisplayAll()));
 //    QShortcut *shotcut2 = new QShortcut(QKeySequence("Alt+S"), this);
@@ -115,6 +125,7 @@ Dialog::Dialog(QWidget *parent) :
     connect(mTaskMgr, SIGNAL(signalSendIndexRealDataList(ShareDataList)), mIndexWidget, SLOT(updateData(ShareDataList)));
     connect(mTaskMgr, SIGNAL(signalSendShareRealDataList(ShareDataList)), this, SLOT(updateHqTable(ShareDataList)));
     connect(mShareTableWidget, SIGNAL(signalSetDisplayHSHK(QString)), this, SLOT(slotUpdateHSGTOfCode(QString)));
+    connect(mShareTableWidget, SIGNAL(signalSetSpecialConcern(QString)), this, SLOT(slotSetSpecialConcern(QString)));
     connect(mShareTableWidget, SIGNAL(signalSetShareMarket(int)), mTaskMgr, SLOT(setMktType(int)));
     connect(mShareTableWidget, SIGNAL(signalSetSortType(int)), mTaskMgr, SLOT(setSortType(int)));
     connect(mShareTableWidget, SIGNAL(signalDisplayPage(int)), mTaskMgr, SLOT(setDisplayPage(int)));
@@ -126,12 +137,17 @@ Dialog::Dialog(QWidget *parent) :
     connect(mTaskMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SLOT(slotUpdateMsg(QString)));
     connect(mTaskMgr, SIGNAL(signalSendNotrhBoundDataList(ShareHsgtList)), mIndexWidget, SLOT(updateData(ShareHsgtList)));
     //
-    connect(mTaskMgr, SIGNAL(signalWorkingDayfinished()), mForeignVolTableWidget, SLOT(slotStartInit()));
-    mTaskMgr->signalStart();
+    if(mForeignVolTableWidget)connect(mTaskMgr, SIGNAL(signalWorkingDayfinished()), mForeignVolTableWidget, SLOT(slotStartInit()));
+//    mTaskMgr->signalStart();
 
     ui->mainStackWidget->setCurrentIndex(0);
 }
 
+
+void Dialog::slotSetSpecialConcern(const QString &code)
+{
+    if(mTaskMgr) mTaskMgr->addSpecialConcern(code);
+}
 
 void Dialog::slotRecvIndexCodesList(const QStringList &list)
 {
@@ -144,7 +160,10 @@ void Dialog::setDlgShow(QSystemTrayIcon::ActivationReason val)
 {
     switch (val) {
     case QSystemTrayIcon::DoubleClick:
-        this->setVisible(!this->isVisible());
+    {
+        if(mIsMini) showMax();
+        else showMini();
+    }
         break;
     case QSystemTrayIcon::Context:
     {
@@ -180,7 +199,7 @@ void Dialog::slotSystemTrayMenuClicked()
     if(val == 0)
     {
         //显示
-        this->setVisible(true);
+        showMax();
     } else
     {
         close();
@@ -357,6 +376,27 @@ void Dialog::mousePressEvent(QMouseEvent *event)
 
 }
 
+void Dialog::keyPressEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_Backspace)
+    {
+        static int backspace_num = 0;
+        backspace_num++;
+        if(backspace_num == 2)
+        {
+            close();
+            exit(0);
+            return;
+        }
+        QMessageBox *box = new QMessageBox(QMessageBox::Information, tr("提示"), tr("再按一次退出程序"));
+        box->setAttribute(Qt::WA_DeleteOnClose);
+        box->removeButton(box->button(QMessageBox::Cancel));
+        QTimer::singleShot(2000, box, SLOT(close()));
+        box->show();
+        event->ignore();
+    }
+}
+
 
 
 void Dialog::mouseMoveEvent(QMouseEvent *event)
@@ -453,7 +493,7 @@ void Dialog::slotDisplayHqCenterPage(int val)
 
 void Dialog::slotHqCenterBtnClicked()
 {
-    if(ui->mainStackWidget->currentWidget() == mShareTableWidget)
+    if(ui->mainStackWidget->currentWidget() == mHqWidget)
     {
         QAndroidListWidget *list = new QAndroidListWidget(this);
         list->addItem(QStringLiteral("自选"), MKT_ZXG);
@@ -492,6 +532,33 @@ void Dialog::on_max_clicked()
 
 void Dialog::on_close_clicked()
 {
-    hide();
+//    hide();
+    showMini();
     if(systemIcon) systemIcon->setVisible(true);
+}
+
+void Dialog::showMini()
+{
+    ui->indexframe->setVisible(true);
+    ui->titleFrame->setVisible(false);
+    ui->tool_frame->setVisible(false);
+    ui->mainFrame->setVisible(false);
+    this->setFixedSize(1400, 60);
+    this->move(520, 1);
+    mIsMini = true;
+    this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
+}
+
+void Dialog::showMax()
+{
+    ui->indexframe->setVisible(true);
+    ui->titleFrame->setVisible(true);
+    ui->tool_frame->setVisible(true);
+    ui->mainFrame->setVisible(true);
+    this->setFixedSize(QApplication::desktop()->availableGeometry().size());
+    this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
+    this->show();
+    this->move(0, 0);
+    mIsMini = false;
+
 }

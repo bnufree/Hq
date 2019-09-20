@@ -18,7 +18,8 @@ HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
     mShareInfoMergeThread(0),\
     mBlockMgr(0),
     mWorkDayTimeMonitorThread(0),
-    mHistoryInfoMgr(0)
+    mHistoryInfoMgr(0),
+    mIndexThread(0)
 {
     connect(this, SIGNAL(signalStart()), this, SLOT(slotStart()));
     connect(DATA_SERVICE, SIGNAL(signalSendLastHSGTUpdateDate(ShareWorkingDate)), this, SLOT(slotStartUpdateHSGTTop10(ShareWorkingDate)));
@@ -126,6 +127,11 @@ void HQTaskMagrCenter::setDisplayChinaTop10()
     if(mShareInfoMergeThread) mShareInfoMergeThread->setDisplayChinaTop10();
 }
 
+void HQTaskMagrCenter::addSpecialConcern(const QString &code)
+{
+    if(mIndexThread) mIndexThread->signalSetStkList(QStringList()<<code);
+}
+
 void HQTaskMagrCenter::reverseSortRule()
 {
     if(mBlockMgr)   mBlockMgr->reverseSortRule();
@@ -151,10 +157,10 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     //更新实时的指数
     QStringList indexlist;
     indexlist<<"sh000001"<<"sh000300"<<"sz399001"<<"sz399006"<<"sh000016"<<"sz399293";
-    QSinaStkInfoThread* indexInfoThread = new QSinaStkInfoThread;
-    mRealWorkObjList.append(indexInfoThread);
-    connect(indexInfoThread, SIGNAL(sendStkDataList(ShareDataList)), this, SIGNAL(signalSendIndexRealDataList(ShareDataList)));
-    indexInfoThread->signalSetStkList(indexlist);
+    mIndexThread = new QSinaStkInfoThread;
+    mRealWorkObjList.append(mIndexThread);
+    connect(mIndexThread, SIGNAL(sendStkDataList(ShareDataList)), this, SIGNAL(signalSendIndexRealDataList(ShareDataList)));
+    mIndexThread->signalSetStkList(indexlist);
     //更新北向的买入卖出情况
     QEastmoneyNorthBoundThread *north = new QEastmoneyNorthBoundThread();
     connect(north, SIGNAL(signalUpdateNorthBoundList(ShareHsgtList)), this, SIGNAL(signalSendNotrhBoundDataList(ShareHsgtList)));
@@ -176,16 +182,12 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SIGNAL(signalUpdateHistoryMsg(QString)));
     connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryFinished()), this, SLOT(slotUpdateHistoryFinished()));
     mHistoryInfoMgr->signalStartGetHistory();
-#if 0
+//    //板块行情初始化
+//    mBlockMgr = new QEastMoneyBlockMangagerThread();
+//    mRealWorkObjList.append(mBlockMgr);
+//    connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataVList)), this, SIGNAL(signalBlockDataListUpdated(BlockDataVList)));
+//    mBlockMgr->start();
     return;
-    //板块行情初始化
-    mBlockMgr = new QEastMoneyBlockMangagerThread();
-    mRealWorkObjList.append(mBlockMgr);
-    connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataVList)), this, SIGNAL(signalBlockDataListUpdated(BlockDataVList)));
-    mBlockMgr->start();
-    return;
-
-#endif
 }
 
 

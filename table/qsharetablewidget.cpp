@@ -138,6 +138,7 @@ void QShareTablewidget::slotCustomContextMenuRequested(const QPoint &pos)
         itemlist.append(struMenu(QStringLiteral("日线图"), INFO_K_GRAPH));
         itemlist.append(struMenu(QStringLiteral("沪深港通"), INFO_HSHK));        
         itemlist.append(struMenu(QStringLiteral("所属板块"), INFO_BLOCK_LIST));
+        itemlist.append(struMenu(QStringLiteral("特别关注"), INFO_SPECIAL_CONCER));
 
         foreach (struMenu menu_item, itemlist) {
             QAction *act = 0;
@@ -157,6 +158,9 @@ void QShareTablewidget::slotCustomContextMenuRequested(const QPoint &pos)
                 } else if(menu_item.mCmd == INFO_HSHK)
                 {
                     connect(act, &QAction::triggered, this, &QShareTablewidget::setDisplayHSHK);
+                } else if(menu_item.mCmd == INFO_SPECIAL_CONCER)
+                {
+                    connect(act, &QAction::triggered, this, &QShareTablewidget::setSpecialConcer);
                 }
 
                 insertContextMenu(act);
@@ -238,6 +242,17 @@ void QShareTablewidget::setDisplayHSHK()
     {
         struMenu menu_item = act->data().value<struMenu>();
         emit signalSetDisplayHSHK(menu_item.mKey.toString().right(6));
+    }
+}
+
+void QShareTablewidget::setSpecialConcer()
+{
+    QAction *act = qobject_cast<QAction*> (sender());
+    if(act)
+    {
+        struMenu menu_item = act->data().value<struMenu>();
+        emit signalSetSpecialConcern(menu_item.mKey.toString().right(6));
+        qDebug()<<"special concern code:"<<menu_item.mKey.toString().right(6);
     }
 }
 

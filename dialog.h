@@ -67,6 +67,7 @@ protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void closeEvent(QCloseEvent* event);
+    void keyPressEvent(QKeyEvent* event);
     //bool eventFilter(QObject *obj, QEvent *event);
     //void keyPressEvent(QKeyEvent *);
 public slots:
@@ -88,6 +89,9 @@ public slots:
     void slotHqCenterBtnClicked();
     void slotDisplayDataPage(int val);
     void slotDisplayHqCenterPage(int val);
+    void slotSetSpecialConcern(const QString& code);
+    void showMini();
+    void showMax();
 private slots:
     void on_zjlxBtn_clicked();
 
@@ -136,6 +140,8 @@ private:
     QBlockTableWidget   *mBlockTableWidget;
     QDataMgrWidget      *mDataMgrWidget;
     QShareForeignVolTableWidget *mForeignVolTableWidget;
+    bool                mIsMini;
+    QWidget*                mHqWidget;
 };
 
 #endif // DIALOG_H

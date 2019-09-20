@@ -6,11 +6,13 @@
 #include "data_structure/sharedata.h"
 #include "data_structure/hqblockdata.h"
 
+
 class QSinaStkResultMergeThread;
 class QEastMoneyBlockMangagerThread;
 class QShareBasicInfoWorker;
 class QShareActiveDateUpdateThread;
 class QShareHistoryInfoMgr;
+class QSinaStkInfoThread;
 
 class HQTaskMagrCenter : public QObject
 {
@@ -56,6 +58,7 @@ public slots:
     void        reverseSortRule();
     void        setCurBlockType(int type);
     void        setDisplayChinaTop10();
+    void        addSpecialConcern(const QString& code);
 private:
     QThread                     mWorkThread;
     QList<QObject*>             mRealWorkObjList;
@@ -63,6 +66,7 @@ private:
     QEastMoneyBlockMangagerThread*  mBlockMgr;
     QShareActiveDateUpdateThread        *mWorkDayTimeMonitorThread;
     QShareHistoryInfoMgr                *mHistoryInfoMgr;
+    QSinaStkInfoThread                  *mIndexThread;
 
 };
 

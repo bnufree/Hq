@@ -9,6 +9,7 @@ QShareHistoryDialog::QShareHistoryDialog(const QString& code, QWidget *parent) :
     ui(new Ui::QShareHistoryDialog)
 {
     ui->setupUi(this);
+    setWindowTitle(mCode);
     qRegisterMetaType<GRAPHIC_DATA>("const GRAPHIC_DATA&");
     qRegisterMetaType<GRAPHIC_DATA_LIST>("const GRAPHIC_DATA_LIST&");
     ShareHistoryReadThread *thread = new ShareHistoryReadThread(code);

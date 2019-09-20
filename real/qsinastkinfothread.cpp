@@ -56,10 +56,16 @@ void QSinaStkInfoThread::setStkList(const QStringList &list)
     if(mStkList.length() > 0)
     {
         QString wkURL = url.arg(mStkList.join(","));
-        mHttp = new QHttpGet(wkURL, true);
-        connect(mHttp, SIGNAL(signalSendHttpConent(QByteArray)), this, SLOT(slotRecvHttpContent(QByteArray)));
-        connect(mHttp, SIGNAL(signalErrorOccured(QNetworkReply::NetworkError)), this, SLOT(slotRecvError(QNetworkReply::NetworkError)));
-        mHttp->start();
+        if(!mHttp)
+        {
+            mHttp = new QHttpGet(wkURL, true);
+            connect(mHttp, SIGNAL(signalSendHttpConent(QByteArray)), this, SLOT(slotRecvHttpContent(QByteArray)));
+            connect(mHttp, SIGNAL(signalErrorOccured(QNetworkReply::NetworkError)), this, SLOT(slotRecvError(QNetworkReply::NetworkError)));
+            mHttp->start();
+        } else
+        {
+            mHttp->setUrl(wkURL);
+        }
     }
 }
 

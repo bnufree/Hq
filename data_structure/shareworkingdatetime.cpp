@@ -74,12 +74,25 @@ void ShareWorkingDate::setCurWorkDate(const QDate& date)
 {
     mCurWorkDay = date;
     int index = mHisWorkingDayList.indexOf(mCurWorkDay);
-    if(index <= 0)
+    if(index < 0)
     {
-        mLastWorkDay = QDate();
+        if(mHisWorkingDayList.size() > 0)
+        {
+            mLastWorkDay = mHisWorkingDayList.first();
+        } else
+        {
+            mLastWorkDay = QDate();
+        }
     } else
     {
-        mLastWorkDay = mHisWorkingDayList.value(index - 1);
+        if(index == 0)
+        {
+            index++;
+        } else
+        {
+            index--;
+        }
+        mLastWorkDay = mHisWorkingDayList.value(index);
     }
 }
 

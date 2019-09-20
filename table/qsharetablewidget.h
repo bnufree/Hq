@@ -20,6 +20,7 @@ signals:
     void    signalSetDisplayHSHK(const QString& code);
     void    signalSetFavCode(const QString& code);
     void    signalDisplayChinaTop10();
+    void    signalSetSpecialConcern(const QString& code);
 
 public slots:
     void    setDataList(const ShareDataList& list);
@@ -30,6 +31,7 @@ public slots:
     void    setDisplayBlockDetail();
     void    setDisplayHSHK();
     void    slotCellDoubleClicked(int row, int col);
+    void    setSpecialConcer();
 private:
     QMap<QString, double>   mShareMap;
     QList<QAction*>         mCodesActionList;
