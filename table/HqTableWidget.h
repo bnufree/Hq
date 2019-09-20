@@ -41,6 +41,7 @@ public:
     QAction* insertContextMenu(QMenu* menu);
     void insertContextMenu(QAction *act);
     void updateColumn(int col);
+    void setWorkInMini(bool sts);
 private:
 protected:
     void resizeEvent(QResizeEvent *event);
@@ -50,6 +51,7 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     bool gestureEvent(QGestureEvent* event);
+    void wheelEvent(QWheelEvent *e);
 private slots:
 
 signals:
@@ -80,6 +82,8 @@ private:
     int                     mMaxDisplayCol;
     int                     mMaxDisplayRow;
     bool                    mAutoChangePage;
+    bool                    mIsWorkInMini;
+    quint64               mLastWheelTime;
 protected:
     int                     mDisplayRowStart;
     int                     mDisplayRowEnd;

@@ -89,7 +89,7 @@ Dialog::Dialog(QWidget *parent) :
     this->setWindowFlags(Qt::FramelessWindowHint);
 #ifdef Q_OS_WIN
     ui->tool_frame->setVisible(true);
-    ui->min->setVisible(false);
+//    ui->min->setVisible(false);
     ui->max->setVisible(false);
 #else
     ui->tool_frame->setVisible(false);
@@ -138,7 +138,7 @@ Dialog::Dialog(QWidget *parent) :
     connect(mTaskMgr, SIGNAL(signalSendNotrhBoundDataList(ShareHsgtList)), mIndexWidget, SLOT(updateData(ShareHsgtList)));
     //
     if(mForeignVolTableWidget)connect(mTaskMgr, SIGNAL(signalWorkingDayfinished()), mForeignVolTableWidget, SLOT(slotStartInit()));
-//    mTaskMgr->signalStart();
+    mTaskMgr->signalStart();
 
     ui->mainStackWidget->setCurrentIndex(0);
 }
@@ -199,7 +199,7 @@ void Dialog::slotSystemTrayMenuClicked()
     if(val == 0)
     {
         //显示
-        showMax();
+        setVisible(true);
     } else
     {
         close();
@@ -512,7 +512,7 @@ void Dialog::slotHqCenterBtnClicked()
     } else
     {
         //默认显示自选
-        ui->mainStackWidget->setCurrentWidget(mShareTableWidget);
+        ui->mainStackWidget->setCurrentWidget(mHqWidget);
         slotDisplayHqCenterPage(MKT_ZXG);
     }
 
@@ -520,8 +520,9 @@ void Dialog::slotHqCenterBtnClicked()
 
 void Dialog::on_min_clicked()
 {
-    hide();
-    if(systemIcon) systemIcon->setVisible(true);
+    showMini();
+//    hide();
+//    if(systemIcon) systemIcon->setVisible(true);
 }
 
 void Dialog::on_max_clicked()
@@ -532,29 +533,21 @@ void Dialog::on_max_clicked()
 
 void Dialog::on_close_clicked()
 {
-//    hide();
-    showMini();
+    hide();
     if(systemIcon) systemIcon->setVisible(true);
 }
 
 void Dialog::showMini()
 {
-    ui->indexframe->setVisible(true);
-    ui->titleFrame->setVisible(false);
-    ui->tool_frame->setVisible(false);
-    ui->mainFrame->setVisible(false);
-    this->setFixedSize(1400, 60);
-    this->move(520, 1);
+    QSize size = QApplication::desktop()->availableGeometry().size();
+    this->setFixedSize(200, size.height());
+    this->move(size.width() - 200, 1);
     mIsMini = true;
     this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
 }
 
 void Dialog::showMax()
 {
-    ui->indexframe->setVisible(true);
-    ui->titleFrame->setVisible(true);
-    ui->tool_frame->setVisible(true);
-    ui->mainFrame->setVisible(true);
     this->setFixedSize(QApplication::desktop()->availableGeometry().size());
     this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
     this->show();

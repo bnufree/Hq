@@ -20,7 +20,10 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     mCustomContextMenu(0),
     mDisplayRowStart(0),
     mDisplayRowEnd(0),
-    mAutoChangePage(false)
+    mAutoChangePage(false),
+    mIsWorkInMini(false),
+    mLastWheelTime(0)
+
 {
     this->setItemDelegate(new RowDelegate);
     this->setRowCount(PAGE_SIZE);
@@ -78,6 +81,19 @@ bool HqTableWidget::gestureEvent(QGestureEvent *event)
     }
 
     return true;
+}
+
+void HqTableWidget::wheelEvent(QWheelEvent *e)
+{
+    if(QDateTime::currentMSecsSinceEpoch() - mLastWheelTime < 2000) return;
+    if(e->delta() > 0)
+    {
+        optMoveTable(OPT_UP);
+    } else
+    {
+        optMoveTable(OPT_DOWN);
+    }
+    mLastWheelTime = QDateTime::currentMSecsSinceEpoch();
 }
 
 void HqTableWidget::setHeaders(const TableColDataList &list)
@@ -590,6 +606,11 @@ void HqTableWidget::displayVisibleRows()
         if(i<mDisplayRowStart || i>mDisplayRowEnd) setRowHidden(i, true);
         else setRowHidden(i, false);
     }
+}
+
+void HqTableWidget::setWorkInMini(bool sts)
+{
+    mIsWorkInMini = sts;
 }
 
 

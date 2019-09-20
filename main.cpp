@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     //make size as 9:16
     Dialog w;
 #ifdef Q_OS_WIN
-    w.show();
+    w.showMax();
 #else
     w.showFullScreen();
 #endif
