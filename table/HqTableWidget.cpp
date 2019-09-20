@@ -85,15 +85,15 @@ bool HqTableWidget::gestureEvent(QGestureEvent *event)
 
 void HqTableWidget::wheelEvent(QWheelEvent *e)
 {
-    if(QDateTime::currentMSecsSinceEpoch() - mLastWheelTime < 2000) return;
+//    if(QDateTime::currentMSecsSinceEpoch() - mLastWheelTime < 2000) return;
     if(e->delta() > 0)
     {
-        optMoveTable(OPT_UP);
+        optMoveTable(OPT_DOWN);
     } else
     {
-        optMoveTable(OPT_DOWN);
+        optMoveTable(OPT_UP);
     }
-    mLastWheelTime = QDateTime::currentMSecsSinceEpoch();
+//    mLastWheelTime = QDateTime::currentMSecsSinceEpoch();
 }
 
 void HqTableWidget::setHeaders(const TableColDataList &list)
