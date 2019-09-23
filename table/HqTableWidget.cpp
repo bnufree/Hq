@@ -9,6 +9,7 @@
 #include "qsharecodenamewidget.h"
 #include <math.h>
 #include <QDesktopWidget>
+#include "data_structure/hqutils.h"
 
 #define     COL_TYPE_ROLE               Qt::UserRole + 1
 #define     COL_SORT_ROLE               Qt::UserRole + 2
@@ -54,17 +55,15 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
 //    grabGesture(Qt::PanGesture);
     grabGesture(Qt::TapAndHoldGesture);
     //根据当前屏幕的大小来设定显示的行高和列宽
+    mRowHeight = HqUtils::convertMM2Pixel(10);
     QRect rect = QApplication::desktop()->availableGeometry();
     QFont font = this->font();
     font.setBold(false);
-    font.setPointSize(20);
+    font.setPixelSize(mRowHeight * 0.8);
     this->setFont(font);
-    //默认屏幕大小为1920*1080
-    int font_height1 = this->fontMetrics().height();
-    mRowHeight = (/*1080.0 * 1.0 / rect.height() * 40*/this->fontMetrics().height()* 1.5);
-
-    qDebug()<<"height:"<<font_height1<<rect.height()<<mRowHeight;
     mColWidth = qRound(1920.0 * 1.0 / rect.width() * 140);
+    font.setPixelSize(mRowHeight * 0.5);
+    this->horizontalHeader()->setFont(font);
     //设定item的大小
     //this->setStyleSheet(QString("QTableview::item{height:%1;font-weight:bold;font-size:20pt;}").arg(mRowHeight));
 }

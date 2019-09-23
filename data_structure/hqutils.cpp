@@ -3,6 +3,9 @@
 //#include <Windows.h>
 #include "utils/profiles.h"
 #include <QDir>
+#include <QFontMetrics>
+#include <QApplication>
+#include <QDesktopWidget>
 
 
 
@@ -123,4 +126,17 @@ bool HqUtils::makePath(const QString &path)
     bool exist = dir.exists();
     qDebug()<<__func__<<__LINE__<<path<<exist;
     return exist;
+}
+
+int HqUtils::convertMM2Pixel(int mm)
+{
+    int total_height = QApplication::desktop()->geometry().height();
+    int total_mm = QApplication::desktop()->heightMM();
+
+    return int(ceil(total_height * 1.0 / total_mm * mm));
+}
+
+int  HqUtils::calFontPixelSize(int mm)
+{
+    return convertMM2Pixel(mm);
 }

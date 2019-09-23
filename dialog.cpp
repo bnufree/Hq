@@ -521,14 +521,17 @@ void Dialog::slotHqCenterBtnClicked()
 void Dialog::on_min_clicked()
 {
     showMini();
+    ui->max->setVisible(true);
+    ui->min->setVisible(false);
 //    hide();
 //    if(systemIcon) systemIcon->setVisible(true);
 }
 
 void Dialog::on_max_clicked()
 {
-    if(isMaximized()) showNormal();
-    else showMaximized();
+    showMax();
+    ui->max->setVisible(false);
+    ui->min->setVisible(true);
 }
 
 void Dialog::on_close_clicked()

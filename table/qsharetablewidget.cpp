@@ -12,7 +12,7 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
 //    datalist.append(TableColData(QStringLiteral("代码"), STK_DISPLAY_SORT_TYPE_CODE));
 //    datalist.append(TableColData(QStringLiteral("名称"), STK_DISPLAY_SORT_TYPE_NAME));
     datalist.append(TableColData(QStringLiteral(""), STK_DISPLAY_SORT_TYPE_CODE));
-    datalist.append(TableColData(QStringLiteral("现价"), STK_DISPLAY_SORT_TYPE_PRICE));
+    datalist.append(TableColData(QStringLiteral("最新"), STK_DISPLAY_SORT_TYPE_PRICE));
     datalist.append(TableColData(QStringLiteral("涨跌(%)"), STK_DISPLAY_SORT_TYPE_CHGPER));
     datalist.append(TableColData(QStringLiteral("成交(亿)"), STK_DISPLAY_SORT_TYPE_CJE));
     datalist.append(TableColData(QStringLiteral("资金比"), STK_DISPLAY_SORT_TYPE_MONEYR));
