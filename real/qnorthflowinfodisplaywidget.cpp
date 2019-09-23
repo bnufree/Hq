@@ -1,7 +1,8 @@
-#include "qnorthflowinfodisplaywidget.h"
+﻿#include "qnorthflowinfodisplaywidget.h"
 #include "ui_qnorthflowinfodisplaywidget.h"
 #include <QPainter>
 #include <QDebug>
+#include "data_structure/hqutils.h"
 
 
 NorthFlowCurveWidget::NorthFlowCurveWidget(QWidget *parent) :
@@ -151,6 +152,12 @@ QNorthFlowInfoDisplayWidget::QNorthFlowInfoDisplayWidget(QWidget *parent) :
     {
         ui->widget->setLayout(new QHBoxLayout);
     }
+    int text_height_mm = 8;
+    int pixel_size = HqUtils::convertMM2Pixel(text_height_mm);
+    QString style = this->styleSheet();
+    style.append(QString("QLabel { font-family:Microsoft Yahei; font-size:%1px;}").arg(pixel_size));
+    this->setStyleSheet(style);
+    ui->title_frame->setFixedHeight(pixel_size + 6);
     ui->widget->layout()->setMargin(0);
     ui->widget->layout()->addWidget(mDisplayWidget);
     ui->sh->setLineWidth(2);
