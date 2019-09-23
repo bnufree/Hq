@@ -6,6 +6,7 @@
 #include <QFontMetrics>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <math.h>
 
 
 

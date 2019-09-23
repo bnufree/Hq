@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 #ifdef Q_OS_WIN
     w.showMax();
 #else
-    w.showFullScreen();
+    w.showMaximized();
 #endif
 
     return a.exec();

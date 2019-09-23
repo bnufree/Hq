@@ -55,7 +55,7 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
 //    grabGesture(Qt::PanGesture);
     grabGesture(Qt::TapAndHoldGesture);
     //根据当前屏幕的大小来设定显示的行高和列宽
-    mRowHeight = HqUtils::convertMM2Pixel(10);
+    mRowHeight = HqUtils::convertMM2Pixel(5);
     QRect rect = QApplication::desktop()->availableGeometry();
     QFont font = this->font();
     font.setBold(false);
@@ -157,12 +157,13 @@ void HqTableWidget::setItemText(int row, int column, const QString &text, const 
     item->setString(text);
     item->setTextColor(color);
     QFont font = this->font();
-    if(!this->isColumnHidden(column))
+    if(font.pixelSize() > 1 && !this->isColumnHidden(column))
     {
         //字体自适应
         int text_width = QFontMetrics(font).width(text);
-        while (text_width > this->columnWidth(column) - 10 && font.pointSize() > 1) {
-            font.setPointSize(font.pointSize()-1);
+        while (text_width > this->columnWidth(column) - 10 && font.pixelSize() > 1) {
+//            qDebug()<<"text_width:"<<text_width<<" col_width:"<<this->columnWidth(column)<<"pxel size:"<<font.pixelSize();
+            font.setPixelSize(font.pixelSize()-1);
             text_width = QFontMetrics(font).width(text);
         }
     }

@@ -51,7 +51,7 @@ Dialog::Dialog(QWidget *parent) :
 {
     qDebug()<<__func__<<__LINE__;
     ui->setupUi(this);
-    this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
+//    this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
     this->setAttribute(Qt::WA_DeleteOnClose);
     while(ui->mainStackWidget->count())
     {
@@ -546,13 +546,13 @@ void Dialog::showMini()
     this->setFixedSize(200, size.height());
     this->move(size.width() - 200, 1);
     mIsMini = true;
-    this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
+//    this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
 }
 
 void Dialog::showMax()
 {
     this->setFixedSize(QApplication::desktop()->availableGeometry().size());
-    this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
+//    this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
     this->show();
     this->move(0, 0);
     mIsMini = false;

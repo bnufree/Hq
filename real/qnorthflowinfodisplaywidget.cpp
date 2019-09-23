@@ -36,7 +36,7 @@ void NorthFlowCurveWidget::paintEvent(QPaintEvent *e)
 {
     //设定当前的区域的背景色
     QPainter painters(this);
-    painters.fillRect(this->rect(), Qt::black);
+    painters.fillRect(this->rect(), Qt::transparent);
 
     //刻度值宽度高度的设定
     int yTextWidth = painters.fontMetrics().width("10000");
@@ -48,8 +48,8 @@ void NorthFlowCurveWidget::paintEvent(QPaintEvent *e)
 
     //画图区域设定，曲线区域和图例区域比例为9：1
     QRect curve_rect = draw_rect;
-    curve_rect.setWidth(curve_rect.width() - yTextWidth);
-    curve_rect.moveLeft(curve_rect.left() + yTextWidth);
+//    curve_rect.setWidth(curve_rect.width() - yTextWidth);
+//    curve_rect.moveLeft(curve_rect.left() + yTextWidth);
 //    int curve_rect_height = (int)(ceil(draw_rect.height() * 0.9));
 //    curve_rect.setHeight(curve_rect_height);
 
@@ -130,11 +130,11 @@ void NorthFlowCurveWidget::paintEvent(QPaintEvent *e)
         total.append(QPointF(x, total_y));
     }
     painters.save();
-    painters.setPen(QPen(mSH, 2));
+    painters.setPen(QPen(mSH, 8));
     painters.drawPolyline(sh);
-    painters.setPen(QPen(mSZ, 2));
+    painters.setPen(QPen(mSZ, 8));
     painters.drawPolyline(sz);
-    painters.setPen(QPen(mTotal, 2));
+    painters.setPen(QPen(mTotal, 8));
     painters.drawPolyline(total);
     painters.restore();
 }
@@ -152,20 +152,24 @@ QNorthFlowInfoDisplayWidget::QNorthFlowInfoDisplayWidget(QWidget *parent) :
     {
         ui->widget->setLayout(new QHBoxLayout);
     }
-    int text_height_mm = 8;
-    int pixel_size = HqUtils::convertMM2Pixel(text_height_mm);
+    int text_height_mm = 4;
+    int pixel_size = HqUtils::convertMM2Pixel(text_height_mm-1);
+    qDebug()<<"text height:"<<text_height_mm<<" pixel size:"<<pixel_size;
     QString style = this->styleSheet();
     style.append(QString("QLabel { font-family:Microsoft Yahei; font-size:%1px;}").arg(pixel_size));
     this->setStyleSheet(style);
-    ui->title_frame->setFixedHeight(pixel_size + 6);
+    ui->title_frame->setFixedHeight(pixel_size + 3);
     ui->widget->layout()->setMargin(0);
     ui->widget->layout()->addWidget(mDisplayWidget);
-    ui->sh->setLineWidth(2);
-    ui->sz->setLineWidth(2);
-    ui->north->setLineWidth(2);
     ui->sh->setStyleSheet(QString("background-color:%1").arg(mDisplayWidget->mSH.name()));
     ui->sz->setStyleSheet(QString("background-color:%1").arg(mDisplayWidget->mSZ.name()));
     ui->north->setStyleSheet(QString("background-color:%1").arg(mDisplayWidget->mTotal.name()));
+
+    int line_width = HqUtils::convertMM2Pixel(3);
+    qDebug()<<"symbol lne:"<<line_width;
+    ui->sh->setLineWidth(line_width);
+    ui->sz->setLineWidth(line_width);
+    ui->north->setLineWidth(line_width);
     mRealInfoThread = new QSinaNorthRealInfoThread;
     connect(mRealInfoThread, SIGNAL(signalUpdateNorthBoundList(QList<NorthBoundData>, int, int)), mDisplayWidget, SLOT(setNorthRealInfo(QList<NorthBoundData>,int, int)));
     mRealInfoThread->start();

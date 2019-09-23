@@ -25,16 +25,10 @@ QWidget:focus
 	outline:none;
 }
 
-QHeaderView
-{
-	background:transparent;
-}
-
 QHeaderView::section{
 border：0px solid gray;
 border-bottom：0px solid gray;
-background:transparent;
-height:60px;
+background-color:transparent;
 }
 
 QTableView::item
