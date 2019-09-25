@@ -1,4 +1,4 @@
-#ifndef QANDROIDBUTTON_H
+﻿#ifndef QANDROIDBUTTON_H
 #define QANDROIDBUTTON_H
 
 #include <QLabel>
@@ -14,7 +14,8 @@ signals:
     void clicked();
 protected:
     void mousePressEvent(QMouseEvent *ev);
-    void focusOutEvent(QFocusEvent *ev);
+    void enterEvent(QEvent *ev);
+    void leaveEvent(QEvent *ev);
 public slots:
 };
 

@@ -24,7 +24,7 @@ public:
     static bool makePath(const QString& path);
     //字体中的pixsize就是pix的长度  对应的就是字体的高度值,这里设定需要设定的高度毫米,返回字体的pixsize
     static int      calFontPixelSize(int target_mm);
-    static int     convertMM2Pixel(int mm);
+    static int     convertMM2Pixel(double mm);
 
 public:
     //static QStringList        mDatesList;

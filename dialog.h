@@ -13,6 +13,7 @@
 class HQTaskMagrCenter;
 class QIndexWidget;
 class QShareForeignVolTableWidget;
+class QAndroidListWidget;
 
 typedef struct strColDisplay
 {
@@ -141,7 +142,7 @@ private:
     QDataMgrWidget      *mDataMgrWidget;
     QShareForeignVolTableWidget *mForeignVolTableWidget;
     bool                mIsMini;
-    QWidget*                mHqWidget;
+    QAndroidListWidget  *mCtrlListWidget;
 };
 
 #endif // DIALOG_H

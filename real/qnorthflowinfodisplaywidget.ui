@@ -14,9 +14,7 @@
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">Line{
-	max-width:40px;
-}</string>
+   <string notr="true"/>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
    <item>
@@ -34,7 +32,7 @@
       <item>
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>沪股通:</string>
+         <string>沪股通 </string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -44,10 +42,10 @@
       <item>
        <widget class="Line" name="sh">
         <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
+         <enum>QFrame::Sunken</enum>
         </property>
         <property name="lineWidth">
-         <number>20</number>
+         <number>2</number>
         </property>
         <property name="midLineWidth">
          <number>0</number>
@@ -60,7 +58,7 @@
       <item>
        <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>深股通:</string>
+         <string>深股通 </string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -70,10 +68,10 @@
       <item>
        <widget class="Line" name="sz">
         <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
+         <enum>QFrame::Sunken</enum>
         </property>
         <property name="lineWidth">
-         <number>20</number>
+         <number>2</number>
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -82,8 +80,11 @@
       </item>
       <item>
        <widget class="QLabel" name="label_3">
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
         <property name="text">
-         <string>北向:</string>
+         <string>北向 </string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -92,11 +93,14 @@
       </item>
       <item>
        <widget class="Line" name="north">
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
         <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
+         <enum>QFrame::Sunken</enum>
         </property>
         <property name="lineWidth">
-         <number>20</number>
+         <number>2</number>
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>

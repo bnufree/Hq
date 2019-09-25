@@ -47,10 +47,13 @@ public:
 
 Dialog::Dialog(QWidget *parent) :
     QDialog(parent),mTaskMgr(0),mIndexWidget(0),
-    ui(new Ui::MainDialog),systemIcon(0)
+    ui(new Ui::MainDialog),systemIcon(0),mCtrlListWidget(0)
 {
     qDebug()<<__func__<<__LINE__;
     ui->setupUi(this);
+    ui->searchTxt->setMaximumWidth(this->fontMetrics().width(ui->searchTxt->placeholderText()) + 10);
+    ui->HqCenterButton->setMaximumWidth(this->fontMetrics().width(ui->HqCenterButton->text()) + 10);
+    ui->DataMgrBtn->setMaximumWidth(this->fontMetrics().width(ui->DataMgrBtn->text()) + 10);
 //    this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
     this->setAttribute(Qt::WA_DeleteOnClose);
     while(ui->mainStackWidget->count())
@@ -58,13 +61,8 @@ Dialog::Dialog(QWidget *parent) :
         ui->mainStackWidget->removeWidget(ui->mainStackWidget->widget(0));
     }
     qDebug()<<__func__<<__LINE__;
-    mHqWidget = new QWidget(this);
-    mHqWidget->setLayout(new QHBoxLayout);
-    mHqWidget->layout()->setSpacing(1);
-    mHqWidget->layout()->setMargin(0);
-    ui->mainStackWidget->addWidget(mHqWidget);
     mShareTableWidget = new QShareTablewidget(this);
-    mHqWidget->layout()->addWidget(mShareTableWidget);
+    ui->mainStackWidget->addWidget(mShareTableWidget);
     mDataMgrWidget = new QDataMgrWidget(this);
     ui->mainStackWidget->addWidget(mDataMgrWidget);
     mBlockTableWidget = new QBlockTableWidget(this);
@@ -432,21 +430,23 @@ void Dialog::slotUpdateHSGTOfCode(const QString &code)
 
 void Dialog::on_dataMgrBtn_clicked()
 {
-    QAndroidListWidget *list = new QAndroidListWidget(this);
-    list->addItem(QStringLiteral("陆股通"), DATA_MUTUAL_MARKET);
-    list->addItem(QStringLiteral("龙虎榜"), DATA_LHB);
-    list->addItem(QStringLiteral("北向实时"), DATA_NORTH_REAL);
-    list->addItem(QStringLiteral("外资持股数据管理"), DATA_FOREIGN_CHECK);
-    connect(list, SIGNAL(signalItemClicked(int)), this, SLOT(slotDisplayDataPage(int)));
+    if(mCtrlListWidget) delete mCtrlListWidget;
+    mCtrlListWidget = new QAndroidListWidget(this);
+    mCtrlListWidget->addItem(QStringLiteral("陆股通"), DATA_MUTUAL_MARKET);
+    mCtrlListWidget->addItem(QStringLiteral("龙虎榜"), DATA_LHB);
+    mCtrlListWidget->addItem(QStringLiteral("北向实时"), DATA_NORTH_REAL);
+    mCtrlListWidget->addItem(QStringLiteral("外资持股数据管理"), DATA_FOREIGN_CHECK);
+    connect(mCtrlListWidget, SIGNAL(signalItemClicked(int)), this, SLOT(slotDisplayDataPage(int)));
     QPoint tp = ((QWidget*)ui->DataMgrBtn->parent())->mapToGlobal(ui->DataMgrBtn->geometry().topLeft());
-    list->move(0, tp.y() - list->size().height());
-    list->show();
+    mCtrlListWidget->move(0, tp.y() - mCtrlListWidget->size().height());
+    mCtrlListWidget->show();
 }
 
 void Dialog::slotDisplayDataPage(int val)
 {
     QAndroidListWidget* widget = qobject_cast<QAndroidListWidget*>(sender());
-    if(!widget) return;
+    if(!widget || widget != mCtrlListWidget) return;
+
     if(val == DATA_MUTUAL_MARKET)
     {
         ui->mainStackWidget->setCurrentWidget(mDataMgrWidget);
@@ -475,44 +475,46 @@ void Dialog::slotDisplayDataPage(int val)
             }
         }
     }
-    widget->hide();
-    widget->deleteLater();
+    mCtrlListWidget->hide();
+    delete mCtrlListWidget;
+    mCtrlListWidget = 0;
 
 }
 
 void Dialog::slotDisplayHqCenterPage(int val)
 {
     QAndroidListWidget* widget = qobject_cast<QAndroidListWidget*>(sender());
-    if(!widget) return;
+    if(!widget || widget != mCtrlListWidget) return;
     mShareTableWidget->resetDisplayRows();
     mTaskMgr->setMktType(val);
-    widget->hide();
-    widget->deleteLater();
-
+    mCtrlListWidget->hide();
+    delete mCtrlListWidget;
+    mCtrlListWidget = 0;
 }
 
 void Dialog::slotHqCenterBtnClicked()
 {
-    if(ui->mainStackWidget->currentWidget() == mHqWidget)
+    if(ui->mainStackWidget->currentWidget() == mShareTableWidget)
     {
-        QAndroidListWidget *list = new QAndroidListWidget(this);
-        list->addItem(QStringLiteral("自选"), MKT_ZXG);
-        list->addItem(QStringLiteral("沪深"), MKT_ALL);
-        list->addItem(QStringLiteral("沪市"), MKT_SH);
-        list->addItem(QStringLiteral("深市"), MKT_SZ);
-        list->addItem(QStringLiteral("中小板"), MKT_ZXB);
-        list->addItem(QStringLiteral("创业板"), MKT_CYB);
-        list->addItem(QStringLiteral("科创板"), MKT_KCB);
-        list->addItem(QStringLiteral("ETF"), MKT_JJ);
-        list->addItem(QStringLiteral("陆股通TOP10"), MKT_LGT_TOP10);
-        connect(list, SIGNAL(signalItemClicked(int)), this, SLOT(slotDisplayHqCenterPage(int)));
+        if(mCtrlListWidget) delete mCtrlListWidget;
+        mCtrlListWidget = new QAndroidListWidget(this);
+        mCtrlListWidget->addItem(QStringLiteral("自选"), MKT_ZXG);
+        mCtrlListWidget->addItem(QStringLiteral("沪深"), MKT_ALL);
+        mCtrlListWidget->addItem(QStringLiteral("沪市"), MKT_SH);
+        mCtrlListWidget->addItem(QStringLiteral("深市"), MKT_SZ);
+        mCtrlListWidget->addItem(QStringLiteral("中小板"), MKT_ZXB);
+        mCtrlListWidget->addItem(QStringLiteral("创业板"), MKT_CYB);
+        mCtrlListWidget->addItem(QStringLiteral("科创板"), MKT_KCB);
+        mCtrlListWidget->addItem(QStringLiteral("ETF"), MKT_JJ);
+        mCtrlListWidget->addItem(QStringLiteral("陆股通TOP10"), MKT_LGT_TOP10);
+        connect(mCtrlListWidget, SIGNAL(signalItemClicked(int)), this, SLOT(slotDisplayHqCenterPage(int)));
         QPoint tp = ((QWidget*)ui->HqCenterButton->parent())->mapToGlobal(ui->DataMgrBtn->geometry().topLeft());
-        list->move(0, tp.y() - list->size().height());
-        list->show();
+        mCtrlListWidget->move(0, tp.y() - mCtrlListWidget->size().height());
+        mCtrlListWidget->show();
     } else
     {
         //默认显示自选
-        ui->mainStackWidget->setCurrentWidget(mHqWidget);
+        ui->mainStackWidget->setCurrentWidget(mShareTableWidget);
         slotDisplayHqCenterPage(MKT_ZXG);
     }
 

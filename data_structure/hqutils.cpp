@@ -129,7 +129,7 @@ bool HqUtils::makePath(const QString &path)
     return exist;
 }
 
-int HqUtils::convertMM2Pixel(int mm)
+int HqUtils::convertMM2Pixel(double mm)
 {
     int total_height = QApplication::desktop()->geometry().height();
     int total_mm = QApplication::desktop()->heightMM();

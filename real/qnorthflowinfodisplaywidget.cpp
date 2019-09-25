@@ -14,6 +14,7 @@ NorthFlowCurveWidget::NorthFlowCurveWidget(QWidget *parent) :
     mDataList.clear();
     mMax = 1;
     mMin = 0;
+    mPathWidth = 8;
 }
 
 void NorthFlowCurveWidget::setLineColor(const QColor &sh, const QColor &sz, const QColor &total)
@@ -21,6 +22,12 @@ void NorthFlowCurveWidget::setLineColor(const QColor &sh, const QColor &sz, cons
     mSH = sh;
     mSZ = sz;
     mTotal = total;
+    update();
+}
+
+void NorthFlowCurveWidget::setPathWidth(int width)
+{
+    mPathWidth = width;
     update();
 }
 
@@ -130,11 +137,11 @@ void NorthFlowCurveWidget::paintEvent(QPaintEvent *e)
         total.append(QPointF(x, total_y));
     }
     painters.save();
-    painters.setPen(QPen(mSH, 8));
+    painters.setPen(QPen(mSH, mPathWidth));
     painters.drawPolyline(sh);
-    painters.setPen(QPen(mSZ, 8));
+    painters.setPen(QPen(mSZ, mPathWidth));
     painters.drawPolyline(sz);
-    painters.setPen(QPen(mTotal, 8));
+    painters.setPen(QPen(mTotal, mPathWidth));
     painters.drawPolyline(total);
     painters.restore();
 }
@@ -161,15 +168,20 @@ QNorthFlowInfoDisplayWidget::QNorthFlowInfoDisplayWidget(QWidget *parent) :
     ui->title_frame->setFixedHeight(pixel_size + 3);
     ui->widget->layout()->setMargin(0);
     ui->widget->layout()->addWidget(mDisplayWidget);
+    int line_width = HqUtils::convertMM2Pixel(0.6);
+    ui->sh->setLineWidth(0);
+    ui->sz->setLineWidth(0);
+    ui->north->setLineWidth(0);
+    ui->sh->setFixedHeight(line_width);
+    ui->sz->setFixedHeight(line_width);
+    ui->north->setFixedHeight(line_width);
+    mDisplayWidget->setPathWidth(line_width);
+
     ui->sh->setStyleSheet(QString("background-color:%1").arg(mDisplayWidget->mSH.name()));
     ui->sz->setStyleSheet(QString("background-color:%1").arg(mDisplayWidget->mSZ.name()));
     ui->north->setStyleSheet(QString("background-color:%1").arg(mDisplayWidget->mTotal.name()));
 
-    int line_width = HqUtils::convertMM2Pixel(3);
-    qDebug()<<"symbol lne:"<<line_width;
-    ui->sh->setLineWidth(line_width);
-    ui->sz->setLineWidth(line_width);
-    ui->north->setLineWidth(line_width);
+
     mRealInfoThread = new QSinaNorthRealInfoThread;
     connect(mRealInfoThread, SIGNAL(signalUpdateNorthBoundList(QList<NorthBoundData>, int, int)), mDisplayWidget, SLOT(setNorthRealInfo(QList<NorthBoundData>,int, int)));
     mRealInfoThread->start();

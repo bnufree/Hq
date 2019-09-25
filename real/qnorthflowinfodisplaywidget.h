@@ -1,4 +1,4 @@
-#ifndef QNORTHFLOWINFODISPLAYWIDGET_H
+﻿#ifndef QNORTHFLOWINFODISPLAYWIDGET_H
 #define QNORTHFLOWINFODISPLAYWIDGET_H
 
 #include <QWidget>
@@ -14,6 +14,7 @@ class NorthFlowCurveWidget : public QWidget
 public:
     explicit NorthFlowCurveWidget(QWidget* parent = 0);
     void setLineColor(const QColor& sh, const QColor& sz, const QColor& total);
+    void setPathWidth(int width);
 protected:
     void paintEvent(QPaintEvent *e);
 public slots:
@@ -25,6 +26,7 @@ public:
     QList<NorthBoundData> mDataList;
     int     mMax;
     int     mMin;
+    int     mPathWidth;
 };
 
 class QNorthFlowInfoDisplayWidget : public QWidget

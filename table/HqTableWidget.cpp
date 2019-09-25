@@ -55,11 +55,11 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
 //    grabGesture(Qt::PanGesture);
     grabGesture(Qt::TapAndHoldGesture);
     //根据当前屏幕的大小来设定显示的行高和列宽
-    mRowHeight = HqUtils::convertMM2Pixel(5);
+    mRowHeight = HqUtils::convertMM2Pixel(8);
     QRect rect = QApplication::desktop()->availableGeometry();
     QFont font = this->font();
     font.setBold(false);
-    font.setPixelSize(mRowHeight * 0.8);
+    font.setPixelSize(mRowHeight * 0.5);
     this->setFont(font);
     mColWidth = qRound(1920.0 * 1.0 / rect.width() * 140);
     font.setPixelSize(mRowHeight * 0.5);
