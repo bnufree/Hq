@@ -345,7 +345,7 @@ void HqTableWidget::resizeEvent(QResizeEvent *event)
     QTableWidget::resizeEvent(event);
     QSize size = event->size();
     qDebug()<<__func__<<__LINE__<<size;
-    mMaxDisplayRow = size.height() / mRowHeight;
+    mMaxDisplayRow = size.height() / mRowHeight + 1;
     mMaxDisplayCol = size.width() / mColWidth;
     resetDisplayRows();
     qDebug()<<"maxrow:"<<mMaxDisplayRow<<mDisplayRowStart<<mDisplayRowEnd;

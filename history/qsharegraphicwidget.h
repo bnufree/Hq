@@ -28,6 +28,7 @@ private:
     int    drawSymbol(QPainter *painters, const QString &text, const QColor& text_color, int x, int y, int s_width, int s_height, const QColor &symbol_color, int symbol_text_gap, int symbol_gap );  //返回图例实际的宽度
     void    drawLine(QPainter *painters, const QPoint &start, const QPoint &end, int width, const QColor &color, int type);
     void    drawRect(QPainter *painters, const QRect &rect, int pen_width, int pen_type, const QColor &pen_color, const QColor &brush);
+    void    drawText(QPainter *painters, const QString &text, const QColor& text_color, int x, int y, double rotate);
 protected:
     void paintEvent(QPaintEvent *e);
     void resizeEvent(QResizeEvent * e);

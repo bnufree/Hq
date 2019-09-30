@@ -65,6 +65,22 @@ void QShareGraphicWidget::drawRect(QPainter *painters, const QRect &rect, int pe
     painters->restore();
 }
 
+void QShareGraphicWidget::drawText(QPainter *painters, const QString &text, const QColor &text_color, int x, int y, double rotate)
+{
+    painters->save();
+    QPen pen = painters->pen();
+    pen.setColor(text_color);
+    painters->setPen(pen);
+    if(rotate != 0)
+    {
+        painters->translate(x, y);
+        painters->rotate(rotate);
+        painters->translate(-x, -y);
+    }
+    painters->drawText(QPoint(x, y), text);
+    painters->restore();
+}
+
 void QShareGraphicWidget::paintEvent(QPaintEvent *e)
 {
     if(mData.size() == 0) return;
@@ -106,6 +122,7 @@ void QShareGraphicWidget::paintEvent(QPaintEvent *e)
     draw_rect.setRight(draw_rect.right() - vol_width);
     draw_rect.setTop(draw_rect.top() + 10 + symbol_height + 10);
     draw_rect.setBottom(draw_rect.bottom() - symbol_height - 10); //时间文本使用
+    int date_text_y = draw_rect.bottom() + 10;
 
     //默认100个数据，中间99间隔
     double unit_width = draw_rect.width() *1.0 / (100.0 -1);
@@ -160,6 +177,11 @@ void QShareGraphicWidget::paintEvent(QPaintEvent *e)
         {
             price_path.lineTo(QPointF(x, max_y - mData[i].mClose * height_per_price));
             vol_path.lineTo(QPointF(x, max_y - mData[i].mForVol * height_per_vol));
+        }
+
+        if(i==0 ||i==size-1)
+        {
+            drawText(&painters, mData[i].mDate.toString("yyyyMMdd"), Qt::white, x, date_text_y, 0);
         }
     }
     painters.save();
