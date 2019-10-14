@@ -274,6 +274,7 @@ void QHKExchangeVolDataProcess::run()
     }
     //开始获取对应的日期的记录
     getVolofDate(list, mDate);
+    qDebug()<<mDate.toString("yyyy-MM-dd")<<list.size();
     if(mParent)
     {
         QMetaObject::invokeMethod(mParent,\

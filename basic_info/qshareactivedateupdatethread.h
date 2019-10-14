@@ -11,6 +11,10 @@ public:
 public:
     void run();
 
+private:
+    QList<QDate> getDateListFromNetease();
+    QList<QDate> getDateListFromHexun();
+
 signals:
     void signalNewWorkDateNow();
     void signalUpdateHistoryWorkDays();

@@ -54,7 +54,7 @@ void QShareHistoryInfoMgr::slotStartGetHistoryWithAllCodes()
     //通过传入的陆股通数据更新日线文件信息
     foreach (QString code, mCodesList) {
         if(code.size() > 6) code = code.right(6);
-        if(code.left(1) == "1" || code.left(1) == "5") continue;
+//        if(code.left(1) == "1" || code.left(1) == "5") continue;
         QShareHistoryInfoThread* thread = new QShareHistoryInfoThread(code, &mShareForeignDataMap, this);
         mPool.start(thread);
     }
@@ -78,7 +78,6 @@ void QShareHistoryInfoMgr::slotStartStatics()
 
 void QShareHistoryInfoMgr::slotUpdateForignVolInfo(const ShareForignVolFileDataList& list, const QDate& date)
 {
-    qDebug()<<__FUNCTION__<<list.size();
     if(list.size() == 0) return;
     mShareForeignDataMap[date] = list;
 }

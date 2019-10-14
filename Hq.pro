@@ -73,7 +73,8 @@ SOURCES += main.cpp\
     data_structure/shareworkingdatetime.cpp \
     history/sharehistoryreadthread.cpp \
     history/qforignvolcheckdlg.cpp \
-    table/qshareforeignvoltablewidget.cpp
+    table/qshareforeignvoltablewidget.cpp \
+    utils/hqinfoparseutil.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -136,7 +137,8 @@ HEADERS  += dialog.h \
     data_structure/shareworkingdatetime.h \
     history/sharehistoryreadthread.h \
     history/qforignvolcheckdlg.h \
-    table/qshareforeignvoltablewidget.h
+    table/qshareforeignvoltablewidget.h \
+    utils/hqinfoparseutil.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

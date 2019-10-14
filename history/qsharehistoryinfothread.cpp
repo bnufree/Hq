@@ -6,6 +6,7 @@
 #include "dbservices/dbservices.h"
 #include "dbservices/qactivedate.h"
 #include "utils/comdatadefines.h"
+#include "utils/hqinfoparseutil.h"
 
 QShareHistoryInfoThread::QShareHistoryInfoThread(const QString& code, const ShareWorkingDate& start, const ShareWorkingDate& end, QObject* parent) :
     mCode(code),
@@ -107,7 +108,7 @@ void QShareHistoryInfoThread::getForeignVolData(qint64 &vol, double &percent, co
 void QShareHistoryInfoThread::run()
 {
     //基金不更新
-    if(mCode.left(1) == "5" || mCode.left(1) == "1") return;
+//    if(mCode.left(1) == "5" || mCode.left(1) == "1") return;
     //默认上一次更新日期是一年前的第一天
     ShareWorkingDate last_update_date(ShareWorkingDate::getHisWorkingDay().last());
     //获取当前文件已经更新的日期
@@ -120,9 +121,12 @@ void QShareHistoryInfoThread::run()
     }
     //开始更新日线数据到今天
     int new_size = 0;
-
+    ShareHistoryFileDataList new_list; /*= HqInfoParseUtil::getShareHistoryDataFrom163(last_update_date.date(), mCode);*/
+    if(new_list.size() == 0) new_list = HqInfoParseUtil::getShareHistoryDataFromHexun(last_update_date.date(), mCode);
+#if 0
     if(last_update_date < ShareWorkingDate::currentDate())
     {
+
         QString wkCode;
         if(mCode.left(1) == "6" || mCode.left(1) == "5")
         {
@@ -184,6 +188,35 @@ void QShareHistoryInfoThread::run()
             }
         }
     }
+#else
+    for(int i=0; i<new_list.size(); i++)
+    {
+        ShareHistoryFileData data = new_list[i];
+        data.mCloseAdjust = data.mClose;
+        //获取当日对应的陆股通数据
+        getForeignVolData(data.mForeignVolOri, data.mForeignMututablePercent, QDateTime::fromTime_t(data.mDate).date());
+        data.mForeignVolAdjust = data.mForeignVolOri;
+        //检查是否有除权处理,如果有就更新前面所有的除权价格
+        if(list.size() > 0 && list.last().mClose != data.mLastClose)
+        {
+            //前一笔的最后价格和当前获取的前一次的最后价格不相同,那么今天就是进行了除权处理,对前面的所有价格都进行除权
+            double adjust_price = data.mLastClose / list.last().mClose;
+            if(adjust == false) adjust = true;
+            //检查股本是否发生了变化
+            double share_ratio = 1;
+            if(list.last().mTotalShareCount > 0 ) share_ratio = data.mTotalShareCount * 1.0 / list.last().mTotalShareCount;
+            adjustDataList(list, adjust_price, share_ratio);
+        }
+//        if(list.size() > 0 && data.mForeignVolOri == 0 && list.last().mForeignVolOri != 0)
+//        {
+//            data.mForeignVolOri = list.last().mForeignVolOri;
+//            data.mForeignMututablePercent = list.last().mForeignMututablePercent;
+//        }
+        list.append(data);
+        new_size++;
+    }
+
+#endif
     //对新的数据更新陆股痛数据处理
     if(adjust)
     {
@@ -247,7 +280,7 @@ void QShareHistoryInfoThread::adjustDataList(ShareHistoryFileDataList &list, dou
         data.mCloseAdjust *= price;
         data.mLastClose *= price;
 #endif
-        data.mForeignVolAdjust = qint64(floor(data.mForeignVolAdjust * ratio));
+//        data.mForeignVolAdjust = qint64(floor(data.mForeignVolAdjust * ratio));
     }
 }
 

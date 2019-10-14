@@ -1,13 +1,14 @@
 ﻿#include "qshareactivedateupdatethread.h"
 #include "utils/qhttpget.h"
 #include "dbservices/dbservices.h"
+#include "utils/hqinfoparseutil.h"
 
 QShareActiveDateUpdateThread::QShareActiveDateUpdateThread(QObject *parent) : QThread(parent)
 {
 
 }
 
-void QShareActiveDateUpdateThread::run()
+QList<QDate> QShareActiveDateUpdateThread::getDateListFromNetease()
 {
     //首先获取当前的日期列表
     ShareWorkingDate cur = ShareWorkingDate::currentDate();
@@ -32,7 +33,43 @@ void QShareActiveDateUpdateThread::run()
             list.append(curDate.date());
         }
     }
+
+    return list;
+}
+
+QList<QDate> QShareActiveDateUpdateThread::getDateListFromHexun()
+{
+    //首先获取当前的日期列表
+    ShareWorkingDate cur = ShareWorkingDate::currentDate();
+    ShareWorkingDate start(cur.date().addYears(-1));
+    QString wkURL = "http://webstock.quote.hermes.hexun.com/a/kline?code=sse000001&start=20191011000000&number=-252&type=5&callback=callback";
+    QByteArray recv = QHttpGet::getContentOfURL(wkURL);
+    QTextCodec* gbk = QTextCodec::codecForName("GBK");
+    QTextCodec* utf8 = QTextCodec::codecForName("UTF-8");
+    QString result = QString::fromUtf8(utf8->fromUnicode(gbk->toUnicode(recv)));
+
+    QStringList lines = result.split("\r\n");
+    QList<QDate> list;
+    for(int i=1; i<lines.length(); i++)
+    {
+        QStringList cols = lines[i].split(",");
+        if(cols.length() >= 15)
+        {
+            //if(mCode == "000400")qDebug()<<recv.mid(20, 200);
+            ShareWorkingDate curDate = ShareWorkingDate::fromString(cols[0]);
+            if(curDate.isWeekend()) continue;
+            list.append(curDate.date());
+        }
+    }
+
+    return list;
+}
+
+void QShareActiveDateUpdateThread::run()
+{
+    QList<QDate> list = HqInfoParseUtil::getActiveDateListOfLatestYearPeriod();
     ShareWorkingDate::setHisWorkingDay(list);
+    qDebug()<<"list:"<<list;
     QDate chk;
     //检查当前时间是不是工作日
     while(true)

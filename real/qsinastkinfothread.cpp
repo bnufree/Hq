@@ -148,14 +148,14 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
             data->mHistory.mChgPersFromWeek = (data->mCur - data->mHistory.mWeekDayPrice) * 100.0 / data->mHistory.mWeekDayPrice;
         } else
         {
-            data->mHistory.mChgPersFromWeek = 0.0;
+            data->mHistory.mChgPersFromWeek = data->mChgPercent;
         }
         if(data->mHistory.mMonthDayPrice> 0)
         {
             data->mHistory.mChgPersFromMonth= (data->mCur - data->mHistory.mMonthDayPrice) * 100.0 / data->mHistory.mMonthDayPrice;
         } else
         {
-            data->mHistory.mChgPersFromMonth= 0.0;
+            data->mHistory.mChgPersFromMonth= data->mChgPercent;
         }
 
         if(data->mHistory.mYearDayPrice > 0)
@@ -163,7 +163,7 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
             data->mHistory.mChgPersFromYear = (data->mCur - data->mHistory.mYearDayPrice) * 100.0 / data->mHistory.mYearDayPrice;
         } else
         {
-            data->mHistory.mChgPersFromYear = 0.0;
+            data->mHistory.mChgPersFromYear = data->mChgPercent;
         }
 //        data->mUpdateTime = QDateTime::currentMSecsSinceEpoch();
         datalist.append(*data);
