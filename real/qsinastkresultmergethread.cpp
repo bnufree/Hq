@@ -88,7 +88,7 @@ void QSinaStkResultMergeThread::run()
                         (mMktType == MKT_KCB && data.mCode.contains(QRegularExpression("68[0-9]{4}"))) ||
                         (mMktType == MKT_OTHER && mSelfCodesList.contains(data.mCode));
 
-                if(sts && data.mMoney > 0.001)
+                if(sts && data.mCur > 0.001)
                 {
                     wklist.append(data);
                 }

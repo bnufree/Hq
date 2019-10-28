@@ -142,6 +142,7 @@ typedef struct North_South_Bound_Data
         mVolCh1 = 0.0;
         mVolCh5 = 0.0;
         mVolCh10 = 0.0;
+        mIsTop10 = false;
     }
 
     bool operator <(const North_South_Bound_Data& data) const

@@ -89,6 +89,7 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
     //先换行
     QStringList resultlist = result.split(QRegExp("[\\n;]"), QString::SkipEmptyParts);
     //再分割具体的字段
+    QStringList top10Keys = DATA_SERVICE->getHshtTop10List();
     ShareDataList datalist;
     foreach (QString detail, resultlist)
     {
@@ -106,11 +107,19 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
         data->mLastClose = detailList[3].toDouble();
         data->mChg = detailList[4].toDouble() - data->mLastClose;
         data->mChgPercent = data->mChg * 100 / detailList[3].toDouble() ;
+        double high = detailList[5].toDouble();
+        double low = detailList[6].toDouble();
+        double buy = detailList[7].toDouble();
+        double sell = detailList[8].toDouble();
+        double buy1 = detailList[12].toDouble();
+        double sell1 = detailList[22].toDouble();
 
         //竞价时段的特殊处理
         if(data->mCur == 0)
         {
-            data->mCur = detailList[8].toDouble();
+            double temp = fmax(buy, buy1);
+            if(temp == 0) temp = data->mLastClose;
+            data->mCur = temp;
             data->mChg = detailList[8].toDouble() - data->mLastClose;
             data->mChgPercent = data->mChg * 100 / detailList[3].toDouble() ;
         }
@@ -121,11 +130,7 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
         if(data->mHistory.mLastMoney> 0){
             data->mMoneyRatio = data->mMoney / data->mHistory.mLastMoney;
         }
-        //qDebug()<<data->mCode<<data->mName<<data->mMoney<<data->mLastMoney<<data->mMoneyRatio;
-        if(data->mCur == 0)
-        {
-            data->mCur = data->mLastClose;
-        }
+
         if(data->mCur != 0)
         {
             data->mGXL = data->mBonusData.mXJFH / data->mCur;
@@ -148,14 +153,14 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
             data->mHistory.mChgPersFromWeek = (data->mCur - data->mHistory.mWeekDayPrice) * 100.0 / data->mHistory.mWeekDayPrice;
         } else
         {
-            data->mHistory.mChgPersFromWeek = data->mChgPercent;
+//            data->mHistory.mChgPersFromWeek = data->mChgPercent;
         }
         if(data->mHistory.mMonthDayPrice> 0)
         {
             data->mHistory.mChgPersFromMonth= (data->mCur - data->mHistory.mMonthDayPrice) * 100.0 / data->mHistory.mMonthDayPrice;
         } else
         {
-            data->mHistory.mChgPersFromMonth= data->mChgPercent;
+//            data->mHistory.mChgPersFromMonth= data->mChgPercent;
         }
 
         if(data->mHistory.mYearDayPrice > 0)
@@ -163,9 +168,16 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
             data->mHistory.mChgPersFromYear = (data->mCur - data->mHistory.mYearDayPrice) * 100.0 / data->mHistory.mYearDayPrice;
         } else
         {
-            data->mHistory.mChgPersFromYear = data->mChgPercent;
+//            data->mHistory.mChgPersFromYear = data->mChgPercent;
         }
 //        data->mUpdateTime = QDateTime::currentMSecsSinceEpoch();
+        if(top10Keys.contains(data->mCode.right(6)))
+        {
+            data->mHsgtData.mIsTop10 = true;
+        } else
+        {
+            data->mHsgtData.mIsTop10 = false;
+        }
         datalist.append(*data);
     }
     emit sendStkDataList(datalist);

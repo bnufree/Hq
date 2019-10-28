@@ -606,6 +606,15 @@ void HqInfoService::slotUpdateHsgtTop10Info(const ShareHsgtList &list)
     }
     ShareWorkingDate last_update_date = DATA_SERVICE->getLastUpdateDateOfHsgtTop10();
     emit signalSendLastHSGTUpdateDate(last_update_date);
+    ShareHsgtList list2;
+    mHsgtTop10Kyes.clear();
+    if(!mDataBase.queryShareHsgtTop10List(list2, "", last_update_date))
+    {
+        mHsgtTop10Kyes.clear();
+        foreach (ShareHsgt data, list2) {
+            mHsgtTop10Kyes.append(data.mCode.right(6));
+        }
+    }
 }
 
 void HqInfoService::slotQueryShareHsgtTop10List(const QString &code, const ShareWorkingDate &date)
@@ -616,6 +625,7 @@ void HqInfoService::slotQueryShareHsgtTop10List(const QString &code, const Share
         qDebug()<<"update share hsgt info error:"<<mDataBase.getErrorString();
         return;
     }
+
 
     emit signalSendShareHsgtTop10List(list);
 

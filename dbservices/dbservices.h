@@ -19,6 +19,8 @@ protected:
 public:
     ShareWorkingDate  getLastUpdateDateOfTable(const QString& table);
     void        setHistoryInfoCount(int count) {mHistoryInfoCount = count;}
+
+    QStringList getHshtTop10List() const {return mHsgtTop10Kyes;}
 public:
     bool   isDBInitOk();
     friend class CGarbo;
@@ -223,6 +225,7 @@ private:    //本类使用的变量
     QStringList                 mClosedDateList;
     int                         mHistoryInfoCount;
     //QList<QDate>                mShareCloseDateList;
+    QStringList                 mHsgtTop10Kyes;
 };
 
 #endif // DBSERVICE_H
