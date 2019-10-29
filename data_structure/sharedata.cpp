@@ -102,6 +102,12 @@ bool ShareData::ShareSort(const ShareData &d1, const ShareData &d2)
     case STK_DISPLAY_SORT_TYPE_JZCSYL:
         sts = stk_sort_rule == 1? d1.mFinanceData.mROE > d2.mFinanceData.mROE : d1.mFinanceData.mROE < d2.mFinanceData.mROE;
         break;
+    case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG5:
+        sts = stk_sort_rule == 1? d1.mHsgtData.mVolCh5> d2.mHsgtData.mVolCh5 : d1.mHsgtData.mVolCh5 < d2.mHsgtData.mVolCh5;
+        break;
+    case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG10:
+        sts = stk_sort_rule == 1? d1.mHsgtData.mVolCh10 > d2.mHsgtData.mVolCh10 : d1.mHsgtData.mVolCh10 < d2.mHsgtData.mVolCh10;
+        break;
     default:
         break;
     }

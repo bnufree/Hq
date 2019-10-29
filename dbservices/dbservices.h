@@ -118,6 +118,7 @@ signals:
     void signalUpdateShareAmountByForeigner();
 
     void signalUpdateShareHsgtTop10Info(const ShareHsgtList& list);
+    void signalUpdateHsgtTop10Keys(const ShareWorkingDate& date);
     void signalSendLastHSGTUpdateDate(const ShareWorkingDate& date);
     void signalQueryShareHsgtTop10List(const QString& code, const ShareWorkingDate& date = ShareWorkingDate());
     void signalSendShareHsgtTop10List(const ShareHsgtList& list);
@@ -175,6 +176,7 @@ public slots:
     void slotUpdateShareBonusInfo(const ShareBonusList& list);
     void slotUpdateHsgtTop10Info(const ShareHsgtList& list);
     void slotUpdateShareFinanceInfo(const FinancialDataList& list);
+    void slotUpdateHsgtTop10Keys(const ShareWorkingDate& date);
     //查询
     void slotQueryShareHsgtTop10List(const QString& code, const ShareWorkingDate& date);
     void slotQueryShareFinanceList(const QStringList& list = QStringList());
@@ -226,6 +228,7 @@ private:    //本类使用的变量
     int                         mHistoryInfoCount;
     //QList<QDate>                mShareCloseDateList;
     QStringList                 mHsgtTop10Kyes;
+    QDate                       mHsgtDate;
 };
 
 #endif // DBSERVICE_H
