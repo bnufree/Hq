@@ -11,6 +11,11 @@ public:
     explicit QShareCodeNameWidget(const QString& code, const QString& name, QWidget *parent = 0);
     void setCode(const QString& str);
     void setName(const QString& str);
+    void setFavour(bool sts);
+private:
+    void updateDisplay();
+protected:
+    void resizeEvent(QResizeEvent* e);
 
 signals:
 

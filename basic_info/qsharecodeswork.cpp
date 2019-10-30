@@ -65,7 +65,7 @@ void QShareCodesWork::parseHttp(ShareDataList& list, const QString& url, int mod
             data.mShareType = ShareData::shareType(code);
 //            qDebug()<<data.mCode<<data.mName<<name.toUtf8().toHex()<<name.toUtf8().size();
             data.mPY = HqUtils::GetFirstLetter(UTF8->toUnicode(name.toUtf8()));
-            qDebug()<<data.mCode<<data.mName<<data.mPY;
+//            qDebug()<<data.mCode<<data.mName<<data.mPY;
             list.append(data);
         }
         index += reg.matchedLength();

@@ -250,7 +250,7 @@ void QHKExchangeVolDataProcess::getVolofDate(ShareForignVolFileDataList &list, c
             }
         }
 
-        qDebug()<<"hk:"<<date.toString("yyyyMMdd")<<list.size();
+//        qDebug()<<"hk:"<<date.toString("yyyyMMdd")<<list.size();
         if(list.size() > 0)
         {
             saveData(date, list);
@@ -274,7 +274,7 @@ void QHKExchangeVolDataProcess::run()
     }
     //开始获取对应的日期的记录
     getVolofDate(list, mDate);
-    qDebug()<<mDate.toString("yyyy-MM-dd")<<list.size();
+//    qDebug()<<mDate.toString("yyyy-MM-dd")<<list.size();
     if(mParent)
     {
         QMetaObject::invokeMethod(mParent,\

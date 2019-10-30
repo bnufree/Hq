@@ -7,6 +7,7 @@
 #include "qhttpget.h"
 #include <QTextCodec>
 #include "data_structure/shareworkingdatetime.h"
+#include <math.h>
 
 HqInfoParseUtil::HqInfoParseUtil()
 {

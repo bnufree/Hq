@@ -62,10 +62,11 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     font.setPixelSize(mRowHeight * 0.5);
     this->setFont(font);
     mColWidth = qRound(1920.0 * 1.0 / rect.width() * 140);
-    font.setPixelSize(mRowHeight * 0.5);
+    font.setPixelSize(mRowHeight * 0.5*0.6);
     this->horizontalHeader()->setFont(font);
     //设定item的大小
     //this->setStyleSheet(QString("QTableview::item{height:%1;font-weight:bold;font-size:20pt;}").arg(mRowHeight));
+    this->horizontalHeader()->setBackgroundRole(this->backgroundRole());
 }
 
 bool HqTableWidget::gestureEvent(QGestureEvent *event)
@@ -228,8 +229,9 @@ void HqTableWidget::updateFavShareIconOfRow(int row, bool isFav)
     if(row >= this->rowCount()) return;
     QShareCodeNameWidget * w = static_cast<QShareCodeNameWidget*>(cellWidget(row, 0));
     if(!w) return;
-    QString color = isFav ? "magenta" : "white";
-    w->setStyleSheet(QString("color:%1").arg(color));
+    w->setFavour(isFav);
+    //QString color = isFav ? "magenta" : "white";
+    //w->setStyleSheet(QString("color:%1").arg(color));
 }
 
 void HqTableWidget::prepareUpdateTable(int newRowCount)
@@ -485,7 +487,7 @@ void HqTableWidget::optMoveTable(OPT_MOVE_MODE mode)
     {
         //显示右边的列
         int col_start = 0, col_end = 0;
-        for(int i=2; i<this->columnCount(); i++)
+        for(int i=3; i<this->columnCount(); i++)
         {
             if(!this->isColumnHidden(i))
             {
@@ -521,7 +523,7 @@ void HqTableWidget::optMoveTable(OPT_MOVE_MODE mode)
     {
         //显示左边的列
         int col_start = 0, col_end = 0;
-        for(int i=this->columnCount()-1; i>=2; i--)
+        for(int i=this->columnCount()-1; i>=3; i--)
         {
             if(!this->isColumnHidden(i))
             {

@@ -3,12 +3,15 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QDebug>
+#include <QResizeEvent>
 
 QShareCodeNameWidget::QShareCodeNameWidget(const QString& code, const QString& name,QWidget *parent) :\
     QWidget(parent),\
     mCodeLbl(0),\
     mNameLbl(0)
 {
+    this->setStyleSheet("QLabel{font-family:Microsoft Yahei;font-weight:normal; color:white;}");
+//    this->setFont(font);
     QVBoxLayout *vlay = new QVBoxLayout(this);
     vlay->setContentsMargins(0, 1, 0, 1);
     vlay->setSpacing(1);
@@ -17,17 +20,61 @@ QShareCodeNameWidget::QShareCodeNameWidget(const QString& code, const QString& n
     mNameLbl = new QLabel(name, this);
     vlay->addWidget(mNameLbl, 0,  Qt::AlignCenter);
     vlay->addWidget(mCodeLbl, 0,  Qt::AlignCenter);
-    mCodeLbl->setStyleSheet("font-size:8pt;");
-    mNameLbl->setStyleSheet("font-size:12pt;");
 }
 
 void QShareCodeNameWidget::setCode(const QString &str)
 {
-    if(mCodeLbl) mCodeLbl->setText(str);
+    if(mCodeLbl)
+    {
+        mCodeLbl->setText(str);
+        updateDisplay();
+    }
 }
 
 void QShareCodeNameWidget::setName(const QString &str)
 {
-    if(mNameLbl) mNameLbl->setText(str);
+    if(mNameLbl)
+    {
+        mNameLbl->setText(str);
+        updateDisplay();
+    }
+}
+
+void QShareCodeNameWidget::setFavour(bool sts)
+{
+    QString color_style = QString("color:%1;").arg(sts ? "magenta" : "white");
+    QString style = this->styleSheet();
+    int index = style.indexOf("color:");
+    if(index < 0) return;
+    int end_index = style.indexOf(";", index+1);
+    style.replace(index, end_index - index + 1, color_style);
+
+    this->setStyleSheet(style);
+}
+
+void QShareCodeNameWidget::resizeEvent(QResizeEvent *e)
+{
+
+    QWidget::resizeEvent(e);
+    updateDisplay();
+}
+
+void QShareCodeNameWidget::updateDisplay()
+{
+    QSize size = this->size();
+    int height = size.height() - 3;
+    int code_h = qRound(height * 0.4);
+    int name_h = height - code_h;
+    QFont font1 = mCodeLbl->font();
+    font1.setPixelSize(code_h*0.8);
+    QFont font2 = mNameLbl->font();
+    font2.setPixelSize(name_h*0.8);
+    int name_width = size.width() * 0.8;
+    if(QFontMetrics(font2).width(tr("天长地久")) > name_width)
+    {
+        font2.setPixelSize(font2.pixelSize() * 0.8);
+    }
+    mCodeLbl->setFont(font1);
+    mNameLbl->setFont(font2);
 }
 

@@ -28,7 +28,7 @@ QWidget:focus
 QHeaderView::section{
 border：0px solid gray;
 border-bottom：0px solid gray;
-background-color:transparent;
+background-color:gray;
 }
 
 QTableView::item
