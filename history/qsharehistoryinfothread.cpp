@@ -121,8 +121,21 @@ void QShareHistoryInfoThread::run()
     }
     //开始更新日线数据到今天
     int new_size = 0;
-    ShareHistoryFileDataList new_list; /*= HqInfoParseUtil::getShareHistoryDataFrom163(last_update_date.date(), mCode);*/
-    if(new_list.size() == 0) new_list = HqInfoParseUtil::getShareHistoryDataFromHexun(last_update_date.date(), mCode);
+    ShareHistoryFileDataList new_list;
+    bool need_update = true;
+    if(ShareWorkingDate::getCurWorkDay().date() == QDate::currentDate())
+    {
+        if(last_update_date == QDate::currentDate()) need_update = false;
+    } else
+    {
+        if(last_update_date.date().addDays(-1) == ShareWorkingDate::getCurWorkDay().date()) need_update = false;
+    }
+//    qDebug()<<mCode<<" update:"<<need_update;
+    if(need_update)
+    {
+        new_list = HqInfoParseUtil::getShareHistoryDataFrom163(last_update_date.date(), mCode);
+//        if(new_list.size() == 0) new_list = HqInfoParseUtil::getShareHistoryDataFromHexun(last_update_date.date(), mCode);
+    }
 #if 0
     if(last_update_date < ShareWorkingDate::currentDate())
     {
@@ -230,6 +243,7 @@ void QShareHistoryInfoThread::run()
             writeFile(list.mid(list.size() - new_size , new_size), "ab+");
         }
     }
+//    qDebug()<<mCode<<" history size:"<<list.size();
     //最后更新到管理类,便于开始统计
 //    if(list.size() > 0)
 //    {

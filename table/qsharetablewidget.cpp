@@ -28,15 +28,17 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
     datalist.append(TableColData(QStringLiteral("总市值(亿)"), STK_DISPLAY_SORT_TYPE_TCAP));
     datalist.append(TableColData(QStringLiteral("流通市值(亿)"), STK_DISPLAY_SORT_TYPE_MCAP, true));
     datalist.append(TableColData(QStringLiteral("净资产收益率(%)"), STK_DISPLAY_SORT_TYPE_JZCSYL, true));
-    datalist.append(TableColData(QStringLiteral("盈亏"), STK_DISPLAY_SORT_TYPE_PROFIT));
+//    datalist.append(TableColData(QStringLiteral("盈亏"), STK_DISPLAY_SORT_TYPE_PROFIT));
     datalist.append(TableColData(QStringLiteral("外资持股(万)"), STK_DISPLAY_SORT_TYPE_FOREIGN_VOL));
-    datalist.append(TableColData(QStringLiteral("外资持股△(万)"), STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG));
+    datalist.append(TableColData(QStringLiteral("外资持股△1(万)"), STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG));
+    datalist.append(TableColData(QStringLiteral("外资持股△5(万)"), STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG5));
+    datalist.append(TableColData(QStringLiteral("外资持股△10(万)"), STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG10));
     datalist.append(TableColData(QStringLiteral("持股市值(亿)"), STK_DISPLAY_SORT_TYPE_FOREIGN_CAP));
     datalist.append(TableColData(QStringLiteral("持股市值△(亿)"), STK_DISPLAY_SORT_TYPE_FOREIGN_CAP_CHG));
     datalist.append(TableColData(QStringLiteral("换手率%"), STK_DISPLAY_SORT_TYPE_HSL));
     datalist.append(TableColData(QStringLiteral("登记日"), STK_DISPLAY_SORT_TYPE_GQDJR));
     datalist.append(TableColData(QStringLiteral("公告日"), STK_DISPLAY_SORT_TYPE_YAGGR));
-    datalist.append(TableColData(QStringLiteral("时间"), STK_DISPLAY_SORT_TYPE_NONE));
+//    datalist.append(TableColData(QStringLiteral("时间"), STK_DISPLAY_SORT_TYPE_NONE));
 
     setHeaders(datalist);
     initMenu();
@@ -70,9 +72,11 @@ void QShareTablewidget::setDataList(const ShareDataList &list)
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mTotalCap / 100000000.0 ));
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mMutalbleCap/ 100000000.0 ));
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mFinanceData.mROE));
-        this->setItemText(i, k++, QString("").sprintf("%.0f",data.mProfit));
+//        this->setItemText(i, k++, QString("").sprintf("%.0f",data.mProfit));
         this->setItemText(i, k++, QString("").sprintf("%.0f", data.mHsgtData.mVolTotal / 10000.0));
         this->setItemText(i, k++, QString("").sprintf("%.0f", data.mHsgtData.mVolChange / 10000.0));
+        this->setItemText(i, k++, QString("").sprintf("%.0f", data.mHsgtData.mVolCh5/ 10000.0));
+        this->setItemText(i, k++, QString("").sprintf("%.0f", data.mHsgtData.mVolCh10 / 10000.0));
         this->setItemText(i, k++, QString("").sprintf("%.2f", data.mForeignCap / 100000000.0));
         this->setItemText(i, k++, QString("").sprintf("%.2f", data.mForeignCapChg / 100000000.0));
         this->setItemText(i, k++, QString("").sprintf("%.2f",data.mHsl * 100));

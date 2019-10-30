@@ -22,8 +22,14 @@ QShareHsgtTop10Work::~QShareHsgtTop10Work()
 
 void QShareHsgtTop10Work::run()
 {
+    ShareWorkingDate update_date;
     ShareWorkingDate last_update_date = DATA_SERVICE->getLastUpdateDateOfHsgtTop10();
     qDebug()<<"last date:"<<last_update_date.toString()<<last_update_date.isNull();
+    if((!last_update_date.isNull()) && last_update_date != update_date)
+    {
+        update_date = last_update_date;
+        DATA_SERVICE->signalUpdateHsgtTop10Keys(update_date);
+    }
     if(last_update_date == ShareWorkingDate::currentDate()) return;
     ShareWorkingDate curDate = ShareWorkingDate::currentDate();
     if(last_update_date.isNull()) last_update_date.setDate(curDate.date().addDays(-30));
@@ -43,10 +49,7 @@ void QShareHsgtTop10Work::run()
         }
         last_update_date.next();
     }
-    if(list.size() > 0)
-    {
-        DATA_SERVICE->signalUpdateShareHsgtTop10Info(list);
-    }
+    if(list.size() > 0)DATA_SERVICE->signalUpdateShareHsgtTop10Info(list);
 }
 
 bool QShareHsgtTop10Work::getDataFromEastMoney(ShareHsgtList &list, const ShareWorkingDate &date)

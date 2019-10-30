@@ -1,13 +1,37 @@
 ﻿#include "qsharegraphicwidget.h"
 #include <QPainter>
+#include "sharehistoryreadthread.h"
+#include <QWheelEvent>
 
 QShareGraphicWidget::QShareGraphicWidget(QWidget *parent) : QWidget(parent)
 {
-
+    qRegisterMetaType<GRAPHIC_DATA>("const GRAPHIC_DATA&");
+    qRegisterMetaType<GRAPHIC_DATA_LIST>("const GRAPHIC_DATA_LIST&");
+    mDate = QDate(QDate::currentDate().year(), 1, 1);
+    qDebug()<<"init date:"<<mDate;
 }
 QShareGraphicWidget::QShareGraphicWidget(const QString &title, const QColor &, QWidget *parent)
 {
 
+}
+
+void QShareGraphicWidget::wheelEvent(QWheelEvent *e)
+{
+    qDebug()<<"wheel history:";
+    if(e->delta() > 0)
+        mDate = mDate.addDays(10);
+    else
+        mDate = mDate.addDays(-10);
+    updateGraphic();
+}
+
+void QShareGraphicWidget::updateGraphic()
+{
+    qDebug()<<"mDate:"<<mDate;
+    ShareHistoryReadThread *thread = new ShareHistoryReadThread(mCode, mDate);
+    connect(thread, SIGNAL(signalSendGraphicDataList(GRAPHIC_DATA_LIST)), this, SLOT(setValue(GRAPHIC_DATA_LIST)));
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    thread->start();
 }
 
 void QShareGraphicWidget::resizeEvent(QResizeEvent *e)
@@ -127,7 +151,7 @@ void QShareGraphicWidget::paintEvent(QPaintEvent *e)
     //默认100个数据，中间99间隔
     double unit_width = draw_rect.width() *1.0 / (100.0 -1);
     int size = mData.size();
-    if(size > 100)
+//    if(size > 100)
     {
         unit_width = draw_rect.width() * 1.0 / (size - 1);
     }
@@ -162,10 +186,10 @@ void QShareGraphicWidget::paintEvent(QPaintEvent *e)
     QPainterPath price_path;
     QPainterPath vol_path;
     double start_x = min_x;
-    if(size < 100)
-    {
-        start_x = min_x + (100-size) * unit_width;
-    }
+//    if(size < 100)
+//    {
+//        start_x = min_x + (100-size) * unit_width;
+//    }
     for(int i=0; i<size; i++)
     {
         double x = start_x + unit_width * i;

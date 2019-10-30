@@ -143,6 +143,7 @@ private:
     QShareForeignVolTableWidget *mForeignVolTableWidget;
     bool                mIsMini;
     QAndroidListWidget  *mCtrlListWidget;
+    QList<QWidget*>             mListWidget;
 };
 
 #endif // DIALOG_H

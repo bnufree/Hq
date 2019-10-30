@@ -124,6 +124,8 @@ void HqInfoService::initSignalSlot()
     connect(this, SIGNAL(signalUpdateShareBonusInfo(ShareBonusList)), this, SLOT(slotUpdateShareBonusInfo(ShareBonusList)));
     connect(this, SIGNAL(signalUpdateShareHsgtTop10Info(ShareHsgtList)),
             this, SLOT(slotUpdateHsgtTop10Info(ShareHsgtList)));
+    connect(this, SIGNAL(signalUpdateHsgtTop10Keys(ShareWorkingDate)),
+            this, SLOT(slotUpdateHsgtTop10Keys(ShareWorkingDate)));
     connect(this, SIGNAL(signalQueryShareHsgtTop10List(QString,ShareWorkingDate)),
             this, SLOT(slotQueryShareHsgtTop10List(QString,ShareWorkingDate)));
 
@@ -600,12 +602,27 @@ void HqInfoService::slotUpdateShareBonusInfo(const ShareBonusList &list)
 
 void HqInfoService::slotUpdateHsgtTop10Info(const ShareHsgtList &list)
 {
-    if(!mDataBase.updateShareHsgtTop10List(list))
+    ShareWorkingDate last_update_date;
+    if( list.size() > 0 && !mDataBase.updateShareHsgtTop10List(list))
     {
         qDebug()<<"update share hsgt info error:"<<mDataBase.getErrorString();
+        last_update_date = DATA_SERVICE->getLastUpdateDateOfHsgtTop10();
     }
-    ShareWorkingDate last_update_date = DATA_SERVICE->getLastUpdateDateOfHsgtTop10();
-    emit signalSendLastHSGTUpdateDate(last_update_date);
+
+}
+
+void HqInfoService::slotUpdateHsgtTop10Keys(const ShareWorkingDate& date)
+{
+    ShareHsgtList list2;
+    mHsgtTop10Kyes.clear();
+    if(mDataBase.queryShareHsgtTop10List(list2, "", date))
+    {
+        mHsgtTop10Kyes.clear();
+        foreach (ShareHsgt data, list2) {
+            mHsgtTop10Kyes.append(data.mCode.right(6));
+        }
+    }
+
 }
 
 void HqInfoService::slotQueryShareHsgtTop10List(const QString &code, const ShareWorkingDate &date)
@@ -616,6 +633,7 @@ void HqInfoService::slotQueryShareHsgtTop10List(const QString &code, const Share
         qDebug()<<"update share hsgt info error:"<<mDataBase.getErrorString();
         return;
     }
+
 
     emit signalSendShareHsgtTop10List(list);
 

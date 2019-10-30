@@ -378,6 +378,7 @@ void Dialog::keyPressEvent(QKeyEvent *event)
 {
     if(event->key() == Qt::Key_Backspace)
     {
+        qDebug()<<"backspace!!!:";
         static int backspace_num = 0;
         backspace_num++;
         if(backspace_num == 2)
@@ -393,6 +394,7 @@ void Dialog::keyPressEvent(QKeyEvent *event)
         box->show();
         event->ignore();
     }
+    event->ignore();
 }
 
 
@@ -423,9 +425,24 @@ void Dialog::slotTodayHSGUpdated()
 void Dialog::slotUpdateHSGTOfCode(const QString &code)
 {
     qDebug()<<"history code:"<<code;
-    QShareHistoryDialog *dlg = new QShareHistoryDialog(code) ;
-    dlg->setModal(false);
-    dlg->show();
+    bool found = false;
+    for(int i=0; i<ui->mainStackWidget->count(); i++)
+    {
+        QShareHistoryDialog* w = qobject_cast<QShareHistoryDialog*>(ui->mainStackWidget->widget(i));
+        if(w)
+        {
+            ui->mainStackWidget->setCurrentWidget(w);
+            found = true;
+            break;
+        }
+    }
+    if(!found)
+    {
+        QShareHistoryDialog *dlg = new QShareHistoryDialog(code) ;
+        dlg->setModal(false);
+        dlg->show();
+    }
+
 }
 
 void Dialog::on_dataMgrBtn_clicked()
@@ -433,9 +450,9 @@ void Dialog::on_dataMgrBtn_clicked()
     if(mCtrlListWidget) delete mCtrlListWidget;
     mCtrlListWidget = new QAndroidListWidget(this);
     mCtrlListWidget->addItem(QStringLiteral("陆股通"), DATA_MUTUAL_MARKET);
-    mCtrlListWidget->addItem(QStringLiteral("龙虎榜"), DATA_LHB);
+//    mCtrlListWidget->addItem(QStringLiteral("龙虎榜"), DATA_LHB);
     mCtrlListWidget->addItem(QStringLiteral("北向实时"), DATA_NORTH_REAL);
-    mCtrlListWidget->addItem(QStringLiteral("外资持股数据管理"), DATA_FOREIGN_CHECK);
+//    mCtrlListWidget->addItem(QStringLiteral("外资持股数据管理"), DATA_FOREIGN_CHECK);
     connect(mCtrlListWidget, SIGNAL(signalItemClicked(int)), this, SLOT(slotDisplayDataPage(int)));
     QPoint tp = ((QWidget*)ui->DataMgrBtn->parent())->mapToGlobal(ui->DataMgrBtn->geometry().topLeft());
     mCtrlListWidget->move(0, tp.y() - mCtrlListWidget->size().height());
