@@ -8,7 +8,7 @@ class ShareHistoryReadThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit ShareHistoryReadThread(const QString& code, QObject *parent = 0);
+    explicit ShareHistoryReadThread(const QString& code, const QDate& date = QDate(), QObject *parent = 0);
 protected:
     void run();
 
@@ -20,6 +20,7 @@ signals:
 public slots:
 private:
     QString mCode;
+    QDate   mDate;
 };
 
 #endif // SHAREHISTORYREADTHREAD_H

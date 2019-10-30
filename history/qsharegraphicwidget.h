@@ -13,6 +13,7 @@ enum ShareGraphicType
 };
 
 
+
 class QShareGraphicWidget : public QWidget
 {
     Q_OBJECT
@@ -22,6 +23,7 @@ public:
     void    setTitle(const QString& title) {mTitle = title; update();}
     void    setColor(const QColor& color) {mColor = color;update();}
     void    setType(int type) {mType = type;update();}
+    void    setCode(const QString& code) {mCode = code; updateGraphic();}
 public slots:
     void    setValue(const GRAPHIC_DATA_LIST& vals) {mData = vals; update();}
 private:
@@ -32,6 +34,9 @@ private:
 protected:
     void paintEvent(QPaintEvent *e);
     void resizeEvent(QResizeEvent * e);
+    void wheelEvent(QWheelEvent *e);
+private:
+    void    updateGraphic();
 
 signals:
 
@@ -41,6 +46,8 @@ private:
     QColor              mColor;
     int                 mType;
     GRAPHIC_DATA_LIST   mData;
+    QString             mCode;
+    QDate               mDate;
 };
 
 #endif // QSHAREGRAPHICWIDGET_H
