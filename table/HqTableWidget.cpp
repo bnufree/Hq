@@ -61,9 +61,9 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     font.setBold(false);
     font.setPixelSize(mRowHeight * 0.5);
     this->setFont(font);
-    mColWidth = qRound(1920.0 * 1.0 / rect.width() * 140);
-    font.setPixelSize(mRowHeight * 0.5*0.6);
-    this->horizontalHeader()->setFont(font);
+    mColWidth = /*qRound(1920.0 * 1.0 / rect.width() * 140)*/HqUtils::convertMM2Pixel(20);
+    font.setPixelSize(mRowHeight * 0.5 * 0.8);
+    this->horizontalHeader()->setFont(font);    
     //设定item的大小
     //this->setStyleSheet(QString("QTableview::item{height:%1;font-weight:bold;font-size:20pt;}").arg(mRowHeight));
     this->horizontalHeader()->setBackgroundRole(this->backgroundRole());
@@ -102,9 +102,17 @@ void HqTableWidget::setHeaders(const TableColDataList &list)
     mColDataList = list;
     this->setColumnCount(list.length());
     for(int i=0; i<mColDataList.size(); i++) {
-        this->setColumnWidth(i, 80);
+        this->setColumnWidth(i, mColWidth);
         mColDataList[i].mColNum = i;
-        this->setHorizontalHeaderItem(i, new QStkTableWidgetItem(mColDataList[i].mColStr));
+        if(this->horizontalHeader()->fontMetrics().width(mColDataList[i].mColStr) > mColWidth * 0.8)
+        {
+            QString str = mColDataList[i].mColStr;
+            str.insert(str.length() / 2, "\n");
+            this->setHorizontalHeaderItem(i, new QStkTableWidgetItem(str));
+        } else
+        {
+            this->setHorizontalHeaderItem(i, new QStkTableWidgetItem(mColDataList[i].mColStr));
+        }
         this->horizontalHeaderItem(i)->setData(COL_TYPE_ROLE, mColDataList[i].mType);
         this->horizontalHeaderItem(i)->setData(COL_SORT_ROLE, QVariant::fromValue((void*) &(mColDataList[i].mRule)));
         QAction *act = new QAction(this);
@@ -352,10 +360,19 @@ void HqTableWidget::resizeEvent(QResizeEvent *event)
     resetDisplayRows();
     qDebug()<<"maxrow:"<<mMaxDisplayRow<<mDisplayRowStart<<mDisplayRowEnd;
 
+#if 0
     for(int i=0; i<this->columnCount(); i++)
     {
-        this->setColumnWidth(i, mColWidth);
+        int col_width = this->horizontalHeader()->fontMetrics().width(this->horizontalHeaderItem(i)->text());
+        if(col_width * 0.9 <= mColWidth)
+        {
+            this->setColumnWidth(i, mColWidth);
+        } else
+        {
+            this->setColumnWidth(i, col_width / 0.9);
+        }
     }
+#endif
 
     for(int i=2; i<this->columnCount(); i++)
     {
