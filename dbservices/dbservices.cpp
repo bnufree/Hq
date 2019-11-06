@@ -576,6 +576,12 @@ ShareData* HqInfoService::getShareData(const QString &code)
     return (ShareData*)(&mRealShareMap[wkCode]);
 }
 
+ ShareDataList HqInfoService::getShareDataList()
+ {
+     QMutexLocker locker(&mShareMutex);
+     return mRealShareMap.values();
+ }
+
 void HqInfoService::slotUpdateShareBasicInfo(const ShareDataList &list)
 {
     //更新数据库

@@ -7,7 +7,9 @@
 #include "data_structure/sharedata.h"
 
 
-QSinaStkInfoThread::QSinaStkInfoThread(QObject *parent) : QObject(parent), mHttp(0)
+QSinaStkInfoThread::QSinaStkInfoThread(bool send, QObject *parent) : QObject(parent)
+  , mHttp(0)
+  , mSendResFlag(send)
 {
     mStkList.clear();
     connect(this, SIGNAL(signalSetStkList(QStringList)), this, SLOT(setStkList(QStringList)));
@@ -178,9 +180,9 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
         {
             data->mHsgtData.mIsTop10 = false;
         }
-        datalist.append(*data);
+        if(mSendResFlag) datalist.append(*data);
     }
-    emit sendStkDataList(datalist);
+    if(mSendResFlag)  emit sendStkDataList(datalist);
 }
 
 int QSinaStkInfoThread::getStkCount()

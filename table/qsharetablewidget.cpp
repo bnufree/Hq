@@ -262,12 +262,16 @@ void QShareTablewidget::setSpecialConcer()
 
 void QShareTablewidget::slotCellDoubleClicked(int row, int col)
 {
-    if(col == 0)
-    {
-        QTableWidgetItem *item = this->item(row, 0);
-        if(!item) return;
-        QString code = item->data(Qt::UserRole).toString();
-        emit signalSetFavCode(code);
-    }
-    return;
+    QTableWidgetItem *item = this->item(row, 0);
+    if(!item) return;
+    QString code = item->data(Qt::UserRole).toString();
+    emit signalDoubleClickCode(code);
+}
+
+void QShareTablewidget::slotCellClicked(int row, int col)
+{
+    QTableWidgetItem *item = this->item(row, 0);
+    if(!item) return;
+    QString code = item->data(Qt::UserRole).toString();
+    emit signalDisplayDetailOfCode(code);
 }

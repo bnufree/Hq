@@ -14,7 +14,7 @@ class QSinaStkInfoThread : public QObject
 {
     Q_OBJECT
 public:
-    explicit QSinaStkInfoThread(QObject *parent = 0);
+    explicit QSinaStkInfoThread(bool send, QObject *parent = 0);
     ~QSinaStkInfoThread();
     int  getStkCount();
 signals:
@@ -29,6 +29,7 @@ private:
     QStringList mStkList;
     QThread     mWorkThread;
     QHttpGet    *mHttp;
+    bool        mSendResFlag;
 };
 
 #endif // QSINASTKINFOTHREAD_H

@@ -43,6 +43,8 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotCustomContextMenuRequested(QPoint)));
 #endif
     connect(this, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(slotCellDoubleClicked(int,int)));
+    connect(this, SIGNAL(cellClicked(int,int)),
+            this, SLOT(slotCellClicked(int,int)));
     this->horizontalHeader()->setHighlightSections(false);
     connect(this->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(slotHeaderClicked(int)));
     //this->setAttribute(Qt::WA_AcceptTouchEvents);
@@ -61,8 +63,14 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     font.setBold(false);
     font.setPixelSize(mRowHeight * 0.5);
     this->setFont(font);
+#ifndef Q_OS_ANDROID
     mColWidth = /*qRound(1920.0 * 1.0 / rect.width() * 140)*/HqUtils::convertMM2Pixel(20);
     font.setPixelSize(mRowHeight * 0.5 * 0.8);
+#else
+    mColWidth = /*qRound(1920.0 * 1.0 / rect.width() * 140)*/HqUtils::convertMM2Pixel(14);
+    font.setPixelSize(mRowHeight * 0.5 * 0.6);
+#endif
+
     this->horizontalHeader()->setFont(font);    
     //设定item的大小
     //this->setStyleSheet(QString("QTableview::item{height:%1;font-weight:bold;font-size:20pt;}").arg(mRowHeight));

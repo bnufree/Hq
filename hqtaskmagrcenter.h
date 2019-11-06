@@ -43,7 +43,6 @@ public slots:
     void        slotNewWorDayChangeNow();
 
     void        slotShareCodesListFinished(const QStringList& codes);
-    void        slotBaseDataListFinished(const QStringList& codes, const ShareDataList& list);
     void        slotUpdateHistoryFinished();
     void        slotSetFavCode(const QString& code);
     void        slotStartUpdateHSGTTop10(const ShareWorkingDate& date);
