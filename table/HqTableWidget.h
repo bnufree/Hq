@@ -64,7 +64,7 @@ public slots:
     void slotSetColDisplay(bool isDisplay);
     virtual void slotCustomContextMenuRequested(const QPoint& pos);
     virtual void slotCellDoubleClicked(int row, int col);
-    void slotCellClicked(int row, int col);
+    virtual void slotCellClicked(int row, int col);
     void slotHeaderClicked(int col);
     void optMoveTable(OPT_MOVE_MODE mode);
 

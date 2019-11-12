@@ -3,6 +3,7 @@
 #include <QDebug>
 #include "data_structure/sharedata.h"
 #include <QRegularExpression>
+#include "dbservices/dbservices.h"
 
 QSinaStkResultMergeThread::QSinaStkResultMergeThread(QObject *parent) : QThread(parent)
 {
@@ -43,6 +44,14 @@ void QSinaStkResultMergeThread::setSortType(int type)
         ShareData::stk_sort_type = type;
         ShareData::stk_sort_rule = 1;
     }
+    //
+    if(mMktType == MKT_ZXG)
+    {
+        if(type == STK_DISPLAY_SORT_TYPE_CODE)
+        {
+            ShareData::stk_sort_rule = 0;
+        }
+    }
 }
 
 void QSinaStkResultMergeThread::run()
@@ -62,7 +71,7 @@ void QSinaStkResultMergeThread::run()
             for(int i=0; i<nthread; i++)
             {
                 QStringList wklist = mStkCodesList.mid(i*thread_code, thread_code);
-                QSinaStkInfoThread *wkthread = new QSinaStkInfoThread();
+                QSinaStkInfoThread *wkthread = new QSinaStkInfoThread(false);
                 mThreadList.append(wkthread);
                 connect(wkthread, SIGNAL(sendStkDataList(ShareDataList)), this, SLOT(slotRevResList(ShareDataList)));
                 wkthread->signalSetStkList(wklist);
@@ -70,14 +79,14 @@ void QSinaStkResultMergeThread::run()
         }
         ShareDataList wklist;
         mListMutex.lock();
+        ShareDataList total_list = DATA_SERVICE->getShareDataList();
         if(mMktType == MKT_ALL)
         {
             //全部进行排序，不过滤
-            wklist = mMidStkDataMapList.values();
+            wklist.append(total_list);
         } else
         {
-            foreach (QString key, mMidStkDataMapList.keys()) {
-                ShareData data = mMidStkDataMapList.value(key);
+            foreach (ShareData data, total_list) {
                 bool sts = (mMktType == MKT_SH && (data.mShareType & SHARE_SH))||\
                         (mMktType == MKT_SZ && (data.mShareType & SHARE_SZ)) ||\
                         (mMktType == MKT_ZXB && (data.mShareType & SHARE_SZ_ZXB))||\
@@ -100,7 +109,10 @@ void QSinaStkResultMergeThread::run()
         if(wklist.length())
         {
             //开始排序
-            qSort(wklist.begin(), wklist.end(), ShareData::ShareSort);
+            if(ShareData::stk_sort_rule != 0)
+            {
+                qSort(wklist.begin(), wklist.end(), ShareData::ShareSort);
+            }
             if(mActive)
             {
                 ShareDataList mid = wklist.mid((mCurPage - 1) * mPageSize, mPageSize);

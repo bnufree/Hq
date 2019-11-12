@@ -157,7 +157,7 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     //更新实时的指数
     QStringList indexlist;
     indexlist<<"sh000001"<<"sh000300"<<"sz399001"<<"sz399006"<<"sh000016"<<"sz399293";
-    mIndexThread = new QSinaStkInfoThread;
+    mIndexThread = new QSinaStkInfoThread(true);
     mRealWorkObjList.append(mIndexThread);
     connect(mIndexThread, SIGNAL(sendStkDataList(ShareDataList)), this, SIGNAL(signalSendIndexRealDataList(ShareDataList)));
     mIndexThread->signalSetStkList(indexlist);
@@ -188,57 +188,6 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataList)), this, SIGNAL(signalBlockDataListUpdated(BlockDataList)));
     mBlockMgr->start();
     return;
-}
-
-
-void HQTaskMagrCenter::slotBaseDataListFinished(const QStringList& codes, const ShareDataList &list)
-{
-    qDebug()<<"update code finshed:"<<list.length();
-    //更新后台数据信息
-    DATA_SERVICE->signalUpdateShareBasicInfo(list);
-    QShareBasicInfoWorker* ptr = qobject_cast<QShareBasicInfoWorker*>(sender());
-    if(ptr)
-    {
-        ptr->deleteLater();
-    }
-
-    //更新实时的指数
-    QStringList indexlist;
-    indexlist<<"s_sh000001"<<"s_sh000300"<<"s_sz399001"<<"s_sz399006"<<"s_sh000016";
-    QSinaStkInfoThread* indexInfoThread = new QSinaStkInfoThread;
-    mRealWorkObjList.append(indexInfoThread);
-    connect(indexInfoThread, SIGNAL(sendStkDataList(ShareDataList)), this, SIGNAL(signalSendIndexRealDataList(ShareDataList)));
-    indexInfoThread->signalSetStkList(indexlist);
-    //更新北向的买入卖出情况
-    QEastmoneyNorthBoundThread *north = new QEastmoneyNorthBoundThread();
-    connect(north, SIGNAL(signalUpdateNorthBoundList(QList<NS_BOUND_DATA>)), this, SIGNAL(signalSendNotrhBoundDataList(QList<NS_BOUND_DATA>)));
-    mRealWorkObjList.append(north);
-    north->start();
-    //实时全市场的行情初始化
-    mShareInfoMergeThread = new QSinaStkResultMergeThread();
-    mRealWorkObjList.append(mShareInfoMergeThread);
-    connect(mShareInfoMergeThread, SIGNAL(sendStkDataList(ShareDataList)), this, SIGNAL(signalSendShareRealDataList(ShareDataList)));
-    connect(DATA_SERVICE, SIGNAL(signalSendSearchCodesOfText(QStringList)),\
-            mShareInfoMergeThread, SLOT(setSelfCodesList(QStringList)));
-
-    mShareInfoMergeThread->setStkList(codes);
-    mShareInfoMergeThread->setActive(true);
-    mShareInfoMergeThread->setMktType(MKT_ZXG);
-    mShareInfoMergeThread->start();
-#if 0
-    return;
-    //板块行情初始化
-    mBlockMgr = new QEastMoneyBlockMangagerThread();
-    mRealWorkObjList.append(mBlockMgr);
-    connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataVList)), this, SIGNAL(signalBlockDataListUpdated(BlockDataVList)));
-    mBlockMgr->start();
-    return;
-#endif
-    //更新日线数据
-    QShareHistoryInfoMgr* historyMgr = new QShareHistoryInfoMgr(codes);
-    connect(historyMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SIGNAL(signalUpdateHistoryMsg(QString)));
-    //connect(historyMgr, SIGNAL(signalUpdateHistoryFinished()), this, SLOT(slotUpdateHistoryFinished()));
-    historyMgr->signalStartGetHistory();
 }
 
 void HQTaskMagrCenter::slotUpdateHistoryFinished()

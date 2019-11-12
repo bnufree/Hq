@@ -21,6 +21,7 @@
 #include "real/qnorthflowinfodisplaywidget.h"
 #include "table/qshareforeignvoltablewidget.h"
 #include <QMessageBox>
+#include "qsahreoptwidget.h"
 
 #define     STK_ZXG_SEC         "0520"
 #define     STK_HSJJ_SEC        "4521"
@@ -134,11 +135,22 @@ Dialog::Dialog(QWidget *parent) :
     connect(mBlockTableWidget, SIGNAL(signalSetBlockType(int)), mTaskMgr, SLOT(setCurBlockType(int)));
     connect(mTaskMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SLOT(slotUpdateMsg(QString)));
     connect(mTaskMgr, SIGNAL(signalSendNotrhBoundDataList(ShareHsgtList)), mIndexWidget, SLOT(updateData(ShareHsgtList)));
+    connect(mShareTableWidget, SIGNAL(signalDoubleClickCode(QString)),
+            this, SLOT(slotDoubClickedCode(QString)));
     //
     if(mForeignVolTableWidget)connect(mTaskMgr, SIGNAL(signalWorkingDayfinished()), mForeignVolTableWidget, SLOT(slotStartInit()));
     mTaskMgr->signalStart();
 
     ui->mainStackWidget->setCurrentIndex(0);
+}
+
+void Dialog::slotDoubClickedCode(const QString &code)
+{
+    QSahreOptWidget* widget = new QSahreOptWidget(code, this);
+    QPoint pos = QCursor::pos();
+    QPoint target = this->mapFromGlobal(pos);
+    widget->move(target.x() - widget->width() / 2, target.y());
+    widget->show();
 }
 
 
