@@ -113,11 +113,10 @@ void QShareGraphicWidget::paintEvent(QPaintEvent *e)
     QRect draw_rect = this->rect().marginsAdded(QMargins(-hor_gap, -5, -hor_gap, -5));
     QPainter painters(this);
     painters.fillRect(this->rect(), Qt::darkGray);
-    double max_price = mData.mMaxClose * 1.2;
-    double height_per_price = draw_rect.height() / max_price;
-    double max_foreign_vol = mData.mMaxForeignVol * 1.2;
-    double height_per_vol = draw_rect.height() / max_foreign_vol;
+
     //计算左边价格的宽度, 右边数量的宽度
+    double max_price = mData.mMaxClose * 1.2;
+    double max_foreign_vol = mData.mMaxForeignVol * 1.2;
     double price_width = painters.fontMetrics().width(QString::number(max_price, 'f', 2));
     double vol_width = painters.fontMetrics().width(QString::number(max_foreign_vol*0.0001, 'f', 0));
     //设定曲线图例
@@ -157,7 +156,10 @@ void QShareGraphicWidget::paintEvent(QPaintEvent *e)
     }
     //开始画坐标轴网格
     drawRect(&painters, draw_rect, 2, Qt::SolidLine, Qt::white, Qt::transparent);
-    //开始画网格
+    //开始画网格    
+    double height_per_price = draw_rect.height() / max_price;
+    double height_per_vol = draw_rect.height() / max_foreign_vol;
+
     double min_x = draw_rect.topLeft().x();
     double max_x = draw_rect.bottomRight().x();
     double min_y = draw_rect.topLeft().y();
@@ -205,6 +207,7 @@ void QShareGraphicWidget::paintEvent(QPaintEvent *e)
 
         if(i==0 ||i==size-1)
         {
+//            qDebug()<<"price:"<<mData[i].mClose;
             drawText(&painters, mData[i].mDate.toString("yyyyMMdd"), Qt::white, x, date_text_y, 0);
         }
     }

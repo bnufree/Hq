@@ -182,11 +182,11 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SIGNAL(signalUpdateHistoryMsg(QString)));
     connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryFinished()), this, SLOT(slotUpdateHistoryFinished()));
     mHistoryInfoMgr->signalStartGetHistory();
-//    //板块行情初始化
-//    mBlockMgr = new QEastMoneyBlockMangagerThread();
-//    mRealWorkObjList.append(mBlockMgr);
-//    connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataVList)), this, SIGNAL(signalBlockDataListUpdated(BlockDataVList)));
-//    mBlockMgr->start();
+    //板块行情初始化
+    mBlockMgr = new QEastMoneyBlockMangagerThread();
+    mRealWorkObjList.append(mBlockMgr);
+    connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataList)), this, SIGNAL(signalBlockDataListUpdated(BlockDataList)));
+    mBlockMgr->start();
     return;
 }
 

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>541</width>
-    <height>82</height>
+    <height>64</height>
    </rect>
   </property>
   <property name="font">
@@ -39,6 +39,9 @@
    </property>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
+     <property name="spacing">
+      <number>2</number>
+     </property>
      <item>
       <widget class="QLabel" name="name">
        <property name="text">

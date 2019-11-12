@@ -1,6 +1,7 @@
 #include "qindexframe.h"
 #include "ui_qindexframe.h"
 #include <QDebug>
+#include "data_structure/hqutils.h"
 
 QIndexFrame::QIndexFrame(const QString& name, QWidget *parent) :
     QWidget(parent),
@@ -8,6 +9,7 @@ QIndexFrame::QIndexFrame(const QString& name, QWidget *parent) :
 {
     ui->setupUi(this);
     ui->name->setText(name.trimmed());
+
     setFixedSize(calSize());
 }
 
@@ -19,20 +21,26 @@ QIndexFrame::~QIndexFrame()
 
 QSize QIndexFrame::calSize() const
 {
-    QFont font(tr("微软雅黑"));
-    font.setBold(true);
-    font.setPointSize(16);
-    int height = QFontMetrics(font).height() * 2 + 6;
+    int half_height = HqUtils::convertMM2Pixel(6);
+    QFont font = ui->name->font();
+    font.setPixelSize(half_height);
+    font.setBold(false);
+    ui->name->setFont(font);
+    ui->cur->setFont(font);
+
+    int total_height = 2* half_height + 4;
     int width = 18;
     //测试frame的宽度
     width += QFontMetrics(font).width(tr("上证指数"));
-    font.setPointSize(20);
+    font.setPixelSize(total_height);
+    ui->chg->setFont(font);
+    ui->chgper->setFont(font);
+    ui->money->setFont(font);
     width += QFontMetrics(font).width(tr("+300.00"));
     width += QFontMetrics(font).width(tr("+10.12%"));
     width += QFontMetrics(font).width(tr("10000亿"));
     width += 18;
-    qDebug()<<"frame size:"<<width<<height;
-    return QSize(width, height);
+    return QSize(width, total_height);
 }
 
 
