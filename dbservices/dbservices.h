@@ -7,6 +7,13 @@
 #include "utils/profiles.h"
 
 
+enum HqInfoSysStatus{
+    HQ_NotOpen = 0,
+    HQ_InCharge,
+    HQ_Closed,
+};
+
+
 #define DATA_SERVICE HqInfoService::instance()
 
 class HqInfoService : public QObject
@@ -21,6 +28,8 @@ public:
     void        setHistoryInfoCount(int count) {mHistoryInfoCount = count;}
 
     QStringList getHshtTop10List() const {return mHsgtTop10Kyes;}
+    int         getSystemStatus() const {return mSystemStatus;}
+    void        setSystemStatus(int sts) {mSystemStatus = sts;}
 public:
     bool   isDBInitOk();
     friend class CGarbo;
@@ -30,7 +39,7 @@ public:
     double getProfit(const QString& code);
     foreignHolder amountForeigner(const QString& code);
     QStringList  getExchangeCodeList();
-    QStringList  getAllShareCodes() {return mRealShareMap.keys();}
+    QStringList  getAllShareCodes() {return mRealShareData.keys();}
     ShareWorkingDate  getLastUpdateDateOfHSGT();
     ShareWorkingDate  getLastUpdateDateOfHSGTVol();
     ShareWorkingDate  getLastUpdateDateOfBasicInfo();
@@ -212,7 +221,7 @@ private:    //本类使用的变量
     static CGarbo s_Garbo; // 定义一个静态成员，在程序结束时，系统会调用它的析构函数
     QThread             m_threadWork;       //工作线程
     QStringList                 mNotExchangeDaysList;
-    ShareDataMap                mRealShareMap;
+    ShareDataMap                mRealShareData;
     QDate                       mLast3DaysDate;
     QDate                       mLast5DaysDate;
     QDate                       mLast10DaysDate;
@@ -230,6 +239,7 @@ private:    //本类使用的变量
     //QList<QDate>                mShareCloseDateList;
     QStringList                 mHsgtTop10Kyes;
     QDate                       mHsgtDate;
+    int                         mSystemStatus;
 };
 
 #endif // DBSERVICE_H

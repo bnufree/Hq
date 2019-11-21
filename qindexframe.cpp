@@ -23,7 +23,7 @@ QSize QIndexFrame::calSize() const
 {
     int half_height = HqUtils::convertMM2Pixel(6);
     QFont font = ui->name->font();
-    font.setPixelSize(half_height);
+    HqUtils::setFontPixelSize(&font, half_height);
     font.setBold(false);
     ui->name->setFont(font);
     ui->cur->setFont(font);
@@ -32,7 +32,7 @@ QSize QIndexFrame::calSize() const
     int width = 18;
     //测试frame的宽度
     width += QFontMetrics(font).width(tr("上证指数"));
-    font.setPixelSize(total_height);
+    HqUtils::setFontPixelSize(&font,total_height);
     ui->chg->setFont(font);
     ui->chgper->setFont(font);
     ui->money->setFont(font);

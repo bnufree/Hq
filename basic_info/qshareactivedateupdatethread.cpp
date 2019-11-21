@@ -67,10 +67,8 @@ QList<QDate> QShareActiveDateUpdateThread::getDateListFromHexun()
 
 void QShareActiveDateUpdateThread::run()
 {
-    QList<QDate> list = HqInfoParseUtil::getActiveDateListOfLatestYearPeriod();
-    ShareWorkingDate::setHisWorkingDay(list);
-    qDebug()<<"list:"<<list;
-    QDate chk;
+
+    QDate workDate;
     //检查当前时间是不是工作日
     while(true)
     {
@@ -81,22 +79,58 @@ void QShareActiveDateUpdateThread::run()
         QString result = QString::fromUtf8(utf8->fromUnicode(gbk->toUnicode(recv)));
         QRegularExpression dateExp("[0-9]{4}\\-[0-9]{2}\\-[0-9]{2}");
         int index = result.indexOf(dateExp);
-
+        bool code_change = false;
         if(index >= 0)
         {
             QDate now = QDate::fromString(result.mid(index, 10), "yyyy-MM-dd");
-            if(now != chk)
+            if(now != workDate)
             {
-                qDebug()<<"set work day:"<<now.toString("yyyy-MM-dd");
+                workDate = now;
                 ShareWorkingDate::setCurWorkDate(now);
-                if(chk.isNull())
+                //新的日期开始了,开始更新历史日期
+                QList<QDate> list = HqInfoParseUtil::getActiveDateListOfLatestYearPeriod();
+                if(list.size() > 0)
                 {
-                    emit signalUpdateHistoryWorkDays();
+                    ShareWorkingDate::setHisWorkingDay(list);
                 }
+                code_change = true;
+            }
+
+            //检查当前的时间,如果是9:00以后,需要开始重新获取代码
+            QTime   time = QDateTime::currentDateTime().time();
+            QDate   date = QDateTime::currentDateTime().date();
+            if(date > workDate)
+            {
+                //今天是节假日
+                DATA_SERVICE->setSystemStatus(HqInfoSysStatus::HQ_Closed);
+            } else
+            {
+                int hour = time.hour();
+                int minute = time.minute();
+                if(hour >= 15)
+                {
+                    DATA_SERVICE->setSystemStatus(HqInfoSysStatus::HQ_Closed);
+                } else if(hour >= 9 && minute >= 10)
+                {
+                    if(DATA_SERVICE->getSystemStatus() != HqInfoSysStatus::HQ_InCharge)
+                    {
+                        DATA_SERVICE->setSystemStatus(HqInfoSysStatus::HQ_InCharge);
+                        code_change = true;
+                    }
+                } else
+                {
+                    DATA_SERVICE->setSystemStatus(HqInfoSysStatus::HQ_NotOpen);
+                }
+
+            }
+            if(code_change)
+            {
                 emit signalNewWorkDateNow();
-                chk = now;
             }
         }
+        qDebug()<<"system status:"<<DATA_SERVICE->getSystemStatus();
+
+        //每分钟运行
         QThread::sleep(60);
     }
 

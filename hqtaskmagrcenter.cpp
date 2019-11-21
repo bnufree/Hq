@@ -49,13 +49,13 @@ void HQTaskMagrCenter::slotDBInitFinished()
 {
     mWorkDayTimeMonitorThread = new QShareActiveDateUpdateThread;
     connect(mWorkDayTimeMonitorThread, SIGNAL(signalUpdateHistoryWorkDays()), this, SLOT(slotFinishUpdateWorkDays()));
-    connect(mWorkDayTimeMonitorThread, SIGNAL(signalNewWorkDateNow()), this, SLOT(slotNewWorDayChangeNow()));
+    connect(mWorkDayTimeMonitorThread, SIGNAL(signalNewWorkDateNow()), this, SLOT(slotFinishUpdateWorkDays()));
     mWorkDayTimeMonitorThread->start();
 }
 
 void HQTaskMagrCenter::slotFinishUpdateWorkDays()
 {
-    emit signalWorkingDayfinished();
+//    emit signalWorkingDayfinished();
     qDebug()<<__FUNCTION__<<__LINE__;
     //数据库初始化完成,开始获取最新的代码列表
     QShareCodesWork *codeWorker = new QShareCodesWork(this);
@@ -129,7 +129,7 @@ void HQTaskMagrCenter::setDisplayChinaTop10()
 
 void HQTaskMagrCenter::addSpecialConcern(const QString &code)
 {
-    if(mIndexThread) mIndexThread->signalSetStkList(QStringList()<<code);
+    if(mIndexThread) mIndexThread->setStkList(QStringList()<<code);
 }
 
 void HQTaskMagrCenter::reverseSortRule()
@@ -157,23 +157,33 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     //更新实时的指数
     QStringList indexlist;
     indexlist<<"sh000001"<<"sh000300"<<"sz399001"<<"sz399006"<<"sh000016"<<"sz399293";
-    mIndexThread = new QSinaStkInfoThread(true);
+    mIndexThread = new QSinaStkInfoThread(indexlist, true);
     mRealWorkObjList.append(mIndexThread);
     connect(mIndexThread, SIGNAL(sendStkDataList(ShareDataList)), this, SIGNAL(signalSendIndexRealDataList(ShareDataList)));
-    mIndexThread->signalSetStkList(indexlist);
+    connect(mIndexThread, SIGNAL(finished()), mIndexThread, SLOT(deleteLater()));
+    mIndexThread->start();
+
     //更新北向的买入卖出情况
     QEastmoneyNorthBoundThread *north = new QEastmoneyNorthBoundThread();
     connect(north, SIGNAL(signalUpdateNorthBoundList(ShareHsgtList)), this, SIGNAL(signalSendNotrhBoundDataList(ShareHsgtList)));
     mRealWorkObjList.append(north);
     north->start();
     //实时全市场的行情初始化
+    int nthread = 6;
+    int thread_code = (codes.length() + nthread-1 ) / nthread;
+    for(int i=0; i<nthread; i++)
+    {
+        QStringList wklist = codes.mid(i*thread_code, thread_code);
+        QSinaStkInfoThread *wkthread = new QSinaStkInfoThread(wklist, false);
+        connect(wkthread, SIGNAL(finished()), wkthread, SLOT(deleteLater()));
+        wkthread->start();
+    }
     mShareInfoMergeThread = new QSinaStkResultMergeThread();
     mRealWorkObjList.append(mShareInfoMergeThread);
     connect(mShareInfoMergeThread, SIGNAL(sendStkDataList(ShareDataList)), this, SIGNAL(signalSendShareRealDataList(ShareDataList)));
     connect(DATA_SERVICE, SIGNAL(signalSendSearchCodesOfText(QStringList)),\
             mShareInfoMergeThread, SLOT(setSelfCodesList(QStringList)));
 
-    mShareInfoMergeThread->setStkList(codes);
     mShareInfoMergeThread->setActive(true);
     mShareInfoMergeThread->setMktType(MKT_ZXG);
     mShareInfoMergeThread->start();

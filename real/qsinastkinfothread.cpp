@@ -5,36 +5,48 @@
 #include "dbservices/dbservices.h"
 #include "data_structure/hqutils.h"
 #include "data_structure/sharedata.h"
+#include "utils/qhttpget.h"
 
 
-QSinaStkInfoThread::QSinaStkInfoThread(bool send, QObject *parent) : QObject(parent)
-  , mHttp(0)
+QSinaStkInfoThread::QSinaStkInfoThread(const QStringList& list, bool send, QObject *parent)
+  : QThread(parent)
   , mSendResFlag(send)
 {
     mStkList.clear();
-    connect(this, SIGNAL(signalSetStkList(QStringList)), this, SLOT(setStkList(QStringList)));
-//    mUpdateTimer = new QTimer;
-//    mUpdateTimer->setInterval(2);
-//    connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdateInfo()));
-    this->moveToThread(&mWorkThread);
-    mWorkThread.start();
-    //mActive = true;
+    setStkList(list);
 }
 
 QSinaStkInfoThread::~QSinaStkInfoThread()
 {
-//    if(mUpdateTimer)
-//    {
-//        mUpdateTimer->stop();
-//        mUpdateTimer->deleteLater();
-//    }
-    if(mHttp)
-    {
-        mHttp->deleteLater();
-    }
+    qDebug()<<"hq info thread discontructor now"<<this;
 
-    mWorkThread.quit();
-    mWorkThread.wait();
+}
+
+void QSinaStkInfoThread::run()
+{
+    bool isContinue = false;
+    do
+    {
+        //开始更新
+        QString url("http://hq.sinajs.cn/?list=%1");
+        if(mStkList.length() > 0)
+        {
+            QString wkURL = url.arg(mStkList.join(","));
+            slotRecvHttpContent(QHttpGet::getContentOfURL(wkURL));
+        }
+        //检查是否需要继续更新
+        if(DATA_SERVICE->getSystemStatus() != HqInfoSysStatus::HQ_InCharge)
+        {
+            //不是正在交易日
+            isContinue = false;
+        } else
+        {
+            isContinue = true;
+        }
+
+        sleep(2);
+
+    } while(isContinue);
 
 }
 
@@ -53,36 +65,9 @@ void QSinaStkInfoThread::setStkList(const QStringList &list)
             mStkList.append(code);
         }
     }
-    //开始更新
-    QString url("http://hq.sinajs.cn/?list=%1");
-    if(mStkList.length() > 0)
-    {
-        QString wkURL = url.arg(mStkList.join(","));
-        if(!mHttp)
-        {
-            mHttp = new QHttpGet(wkURL, true);
-            connect(mHttp, SIGNAL(signalSendHttpConent(QByteArray)), this, SLOT(slotRecvHttpContent(QByteArray)));
-            connect(mHttp, SIGNAL(signalErrorOccured(QNetworkReply::NetworkError)), this, SLOT(slotRecvError(QNetworkReply::NetworkError)));
-            mHttp->start();
-        } else
-        {
-            mHttp->setUrl(wkURL);
-        }
-    }
+
 }
 
-
-void QSinaStkInfoThread::slotUpdateInfo()
-{
-    QDateTime now = QDateTime::currentDateTime();
-    if(now.date().dayOfWeek() == 6 || now.date().dayOfWeek() == 7 ||
-            now.time().hour() < 9 || now.time().hour() >= 15)
-    {
-       return;
-    }
-
-    if(mHttp) mHttp->start();
-}
 
 void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
 {
@@ -188,11 +173,6 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
 int QSinaStkInfoThread::getStkCount()
 {
     return mStkList.count();
-}
-
-void QSinaStkInfoThread::slotRecvError(QNetworkReply::NetworkError e)
-{
-    qDebug()<<"error:"<<e;
 }
 
 

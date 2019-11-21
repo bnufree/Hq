@@ -137,6 +137,15 @@ int HqUtils::convertMM2Pixel(double mm)
     return int(ceil(total_height * 1.0 / total_mm * mm));
 }
 
+void HqUtils::setFontPixelSize(QFont *font, int size)
+{
+    if(size <= 0)
+    {
+        return;
+    }
+    font->setPixelSize(size);
+}
+
 int  HqUtils::calFontPixelSize(int mm)
 {
     return convertMM2Pixel(mm);

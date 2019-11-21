@@ -8,6 +8,7 @@
 #include <QDebug>
 #include "data_structure/hqutils.h"
 #include "data_structure/sharedata.h"
+#include "data_structure/shareworkingdatetime.h"
 #include "dbservices/dbservices.h"
 #include <QFile>
 
@@ -22,34 +23,52 @@ QShareHsgtTop10Work::~QShareHsgtTop10Work()
 
 void QShareHsgtTop10Work::run()
 {
-    ShareWorkingDate update_date;
-    ShareWorkingDate last_update_date = DATA_SERVICE->getLastUpdateDateOfHsgtTop10();
-    qDebug()<<"last date:"<<last_update_date.toString()<<last_update_date.isNull();
-    if((!last_update_date.isNull()) && last_update_date != update_date)
-    {
-        update_date = last_update_date;
-        DATA_SERVICE->signalUpdateHsgtTop10Keys(update_date);
-    }
-    if(last_update_date == ShareWorkingDate::currentDate()) return;
-    ShareWorkingDate curDate = ShareWorkingDate::currentDate();
-    if(last_update_date.isNull()) last_update_date.setDate(curDate.date().addDays(-30));
+    while (true) {
+        ShareWorkingDate last_update_date = DATA_SERVICE->getLastUpdateDateOfHsgtTop10();
+        qDebug()<<"last date:"<<last_update_date.toString()<<last_update_date.isNull();
+        //如果日期就是当前的工作日,证明更新完成,不再需要继续更新,结束线程
+        if(last_update_date == ShareWorkingDate::getCurWorkDay())
+        {
 
-    ShareHsgtList list;
-    last_update_date.next();
-    while (last_update_date <= curDate) {
-        if(last_update_date.isWeekend())
-        {
-            last_update_date.next();
-            continue;
+            DATA_SERVICE->signalUpdateHsgtTop10Keys(last_update_date);
+            return;
         }
-        //从网络获取
-        if(!getDataFromEastMoney(list, last_update_date))
-        {
-            getDataFromHKEX(list, last_update_date);
-        }
+        ShareWorkingDate curDate = ShareWorkingDate::currentDate();
+        if(last_update_date.isNull()) last_update_date.setDate(curDate.date().addDays(-30));
+
+        ShareWorkingDate final_date = last_update_date;
+        ShareHsgtList list;
         last_update_date.next();
+        qDebug()<<"start get north top10 from date:"<<last_update_date.toString();
+        while (last_update_date <= curDate) {
+            int old_size = list.size();
+            if(last_update_date.isWeekend())
+            {
+                last_update_date.next();
+                continue;
+            }
+            //从网络获取
+            if(!getDataFromEastMoney(list, last_update_date))
+            {
+                getDataFromHKEX(list, last_update_date);
+            }
+            int new_size = list.size();
+            if(new_size != old_size)
+            {
+                final_date = last_update_date;
+            }
+            last_update_date.next();
+        }
+        if(list.size() > 0)
+        {
+            DATA_SERVICE->signalUpdateShareHsgtTop10Info(list);
+        }
+
+        DATA_SERVICE->signalUpdateHsgtTop10Keys(final_date);
+        qDebug()<<"final update date"<<final_date.toString();
+
+        sleep(600);
     }
-    if(list.size() > 0)DATA_SERVICE->signalUpdateShareHsgtTop10Info(list);
 }
 
 bool QShareHsgtTop10Work::getDataFromEastMoney(ShareHsgtList &list, const ShareWorkingDate &date)

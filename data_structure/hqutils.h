@@ -25,6 +25,7 @@ public:
     //字体中的pixsize就是pix的长度  对应的就是字体的高度值,这里设定需要设定的高度毫米,返回字体的pixsize
     static int      calFontPixelSize(int target_mm);
     static int     convertMM2Pixel(double mm);
+    static void    setFontPixelSize(QFont* font, int size);
 
 public:
     //static QStringList        mDatesList;

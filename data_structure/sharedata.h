@@ -247,7 +247,7 @@ public:
 
 };
 typedef         QList<ShareData>            ShareDataList;
-typedef         QMap<QString, ShareData>    ShareDataMap;
+typedef         QMap<QString, ShareData>    ShareDataMap;   //key市场代码(sh/sz) + code  sh600036
 Q_DECLARE_METATYPE(ShareData)
 Q_DECLARE_METATYPE(ShareDataList)
 Q_DECLARE_METATYPE(ShareDataMap)

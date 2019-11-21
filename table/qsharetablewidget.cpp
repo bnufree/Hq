@@ -3,6 +3,7 @@
 #include "data_structure/hqutils.h"
 #include "data_structure/sharedata.h"
 #include "dbservices/dbservices.h"
+#include "qsahreoptwidget.h"
 
 
 QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
@@ -265,7 +266,15 @@ void QShareTablewidget::slotCellDoubleClicked(int row, int col)
     QTableWidgetItem *item = this->item(row, 0);
     if(!item) return;
     QString code = item->data(Qt::UserRole).toString();
-    emit signalDoubleClickCode(code);
+    QRect rect = this->visualItemRect(item);
+    qDebug()<<rect;
+    QSahreOptWidget* widget = new QSahreOptWidget(code, this);
+    QPoint pos = QCursor::pos();
+    QPoint target = this->mapFromGlobal(pos);
+    widget->move(target.x() - widget->width() / 2, target.y());
+    widget->show();
+
+//    emit signalDoubleClickCode(code);
 }
 
 void QShareTablewidget::slotCellClicked(int row, int col)

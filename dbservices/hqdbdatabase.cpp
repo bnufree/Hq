@@ -555,6 +555,7 @@ bool HQDBDataBase::queryShareBasicInfo(ShareDataMap& map)
     if(!mSQLQuery.exec(tr("select * from %1").arg(TABLE_SHARE_BASIC_INFO))) return false;
     while (mSQLQuery.next()) {
         QString code = mSQLQuery.value(HQ_TABLE_COL_CODE).toString();
+        if(code.length() <= 6) code = ShareData::prefixCode(code) + code;
         ShareData& info = map[code];
         if(info.mCode.length() == 0) info.mCode = code;
         info.mName = mSQLQuery.value(HQ_TABLE_COL_NAME).toString();

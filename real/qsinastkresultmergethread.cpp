@@ -7,7 +7,6 @@
 
 QSinaStkResultMergeThread::QSinaStkResultMergeThread(QObject *parent) : QThread(parent)
 {
-    mCodeChangeFlag = false;
     mStkCntPerTrd = 200;
     mTotalPage = -1;
     mPageSize = 50;
@@ -56,27 +55,7 @@ void QSinaStkResultMergeThread::setSortType(int type)
 
 void QSinaStkResultMergeThread::run()
 {
-    while (true) {
-        //检查当前的代码是否发生了变化
-        if(mStkCodesList.length() == 0)
-        {
-            sleep(1);
-            continue;
-        }
-        if(mThreadList.length() == 0)
-        {
-            //还没有初始化行情线程
-            int thread_code = 200;
-            int nthread = (mStkCodesList.length() + thread_code-1 ) / thread_code;
-            for(int i=0; i<nthread; i++)
-            {
-                QStringList wklist = mStkCodesList.mid(i*thread_code, thread_code);
-                QSinaStkInfoThread *wkthread = new QSinaStkInfoThread(false);
-                mThreadList.append(wkthread);
-                connect(wkthread, SIGNAL(sendStkDataList(ShareDataList)), this, SLOT(slotRevResList(ShareDataList)));
-                wkthread->signalSetStkList(wklist);
-            }
-        }
+    while (true) {        
         ShareDataList wklist;
         mListMutex.lock();
         ShareDataList total_list = DATA_SERVICE->getShareDataList();
@@ -124,33 +103,14 @@ void QSinaStkResultMergeThread::run()
             emit sendStkDataList(ShareDataList());
         }
 
-        sleep(1);
+        sleep(2);
     }
 
 
 }
 
-void QSinaStkResultMergeThread::slotRevResList(const ShareDataList &mid)
-{
-    mListMutex.lock();
-    foreach (ShareData data, mid) {
-        if(data.mCur < 0.1) continue;
-        //if(data.mMoney < 10000) continue;
-        mMidStkDataMapList[data.mCode] = data;
-    }
-    mListMutex.unlock();
-}
 
-void QSinaStkResultMergeThread::setStkList(const QStringList &list)
-{
-    mStkCodesList = list;
-    mCodeChangeFlag = true;
-}
 
-void QSinaStkResultMergeThread::updateStkInfoList(const QList<QStringList>& pStkSectionList)
-{
-
-}
 
 void QSinaStkResultMergeThread::setMktType(int type)
 {
@@ -161,154 +121,7 @@ void QSinaStkResultMergeThread::setMktType(int type)
     //updateStkCodes(mMktType);
 }
 
-void QSinaStkResultMergeThread::updateStkCodes(MKT_TYPE type)
-{
-    mSecCodesLock.lock();
-    mSecCodesList.clear();
-    if(type == MKT_ALL)
-    {
-        QStringList codes;
-        foreach (QString code, mStkCodesList) {
-            codes.append(code);
-            if(codes.length() == 100)
-            {
-                mSecCodesList.append(codes);
-                codes.clear();
-            }
-        }
-        if(codes.length() > 0) mSecCodesList.append(codes);
-    } else if(type == MKT_SH)
-    {
-        QStringList codes;
-        foreach (QString code, mStkCodesList) {
-            if(code.contains("sh"))
-            {
-                codes.append(code);
-            } else
-            {
-                continue;
-            }
-            if(codes.length() == 100)
-            {
-                mSecCodesList.append(codes);
-                codes.clear();
-            }
-        }
-        if(codes.length() > 0) mSecCodesList.append(codes);
-    } else if(type == MKT_SZ)
-    {
-        QStringList codes;
-        foreach (QString code, mStkCodesList) {
-            if(code.contains("sz"))
-            {
-                codes.append(code);
-            } else
-            {
-                continue;
-            }
-            if(codes.length() == 100)
-            {
-                mSecCodesList.append(codes);
-                codes.clear();
-            }
-        }
-        if(codes.length() > 0) mSecCodesList.append(codes);
-    } else if(type == MKT_ZXB)
-    {
-        QStringList codes;
-        foreach (QString code, mStkCodesList) {
-            if(code.startsWith("sz002"))
-            {
-                codes.append(code);
-            } else
-            {
-                continue;
-            }
-            if(codes.length() == 100)
-            {
-                mSecCodesList.append(codes);
-                codes.clear();
-            }
-        }
-        if(codes.length() > 0) mSecCodesList.append(codes);
-    } else if(type == MKT_CYB)
-    {
-        QStringList codes;
-        foreach (QString code, mStkCodesList) {
-            if(code.startsWith("sz30"))
-            {
-                codes.append(code);
-            } else
-            {
-                continue;
-            }
-            if(codes.length() == 100)
-            {
-                mSecCodesList.append(codes);
-                codes.clear();
-            }
-        }
-        if(codes.length() > 0)mSecCodesList.append(codes);
-    }
-    mSecCodesLock.unlock();
-//    updateStkInfoList(sec_codes_list);
-}
 
-void QSinaStkResultMergeThread::stopUpdate()
-{
-
-}
-
-void QSinaStkResultMergeThread::SortResultList(ShareDataList &result, const ShareDataList &mid)
-{
-
-//    if(wklist.length())
-//    {
-//        //开始排序
-//        if(mOptType == STK_DISPLAY_SORT_TYPE_CHGPER)
-//        {
-//            if(mSortRule == -1)
-//            {
-//                qSort(wklist.begin(), wklist.end(), ShareData::sortByPerDesc);
-//            } else
-//            {
-//                qSort(wklist.begin(), wklist.end(), ShareData::sortByPerAsc);
-//            }
-//        }
-
-//        else if(mOptType == STK_DISPLAY_SORT_TYPE_CJE)
-//        {
-//            if(mSortRule == -1)
-//            {
-//                qSort(wklist.begin(), wklist.end(), ShareData::sortByMonDesc);
-//            } else
-//            {
-//                qSort(wklist.begin(), wklist.end(), ShareData::sortByMonAsc);
-//            }
-//        }
-
-//        else if(mOptType == STK_DISPLAY_SORT_TYPE_PRICE)
-//        {
-//            if(mSortRule == -1)
-//            {
-//                qSort(wklist.begin(), wklist.end(), ShareData::sortByCurDesc);
-//            } else
-//            {
-//                qSort(wklist.begin(), wklist.end(), ShareData::sortByCurAsc);
-//            }
-//        }
-//        emit sendStkDataList(wklist);
-//    }
-
-//    reply->deleteLater();
-//    QThread::sleep(1);
-//}
-}
-
-//ShareDataList QSinaStkResultMergeThread::RealtimeInfo(const QStringList& codes)
-//{
-
-//}
 
 void QSinaStkResultMergeThread::setSelfCodesList(const QStringList &list)
 {

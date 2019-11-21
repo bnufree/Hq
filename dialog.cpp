@@ -88,7 +88,7 @@ Dialog::Dialog(QWidget *parent) :
     this->setWindowFlags(Qt::FramelessWindowHint);
 #ifdef Q_OS_WIN
     ui->tool_frame->setVisible(true);
-//    ui->min->setVisible(false);
+    ui->min->setVisible(false);
     ui->max->setVisible(false);
 #else
     ui->tool_frame->setVisible(false);

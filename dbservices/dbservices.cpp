@@ -8,6 +8,7 @@
 #include "utils/profiles.h"
 #include "qactivedate.h"
 #include "utils/comdatadefines.h"
+#include "data_structure/shareworkingdatetime.h"
 
 #define         DATE_STR_FORMAT         "yyyy-MM-dd"
 
@@ -181,9 +182,9 @@ void HqInfoService::slotSearchCodesOfText(const QString &text)
 void HqInfoService::initShareData()
 {
     QMutexLocker locker(&mShareMutex);
-    mRealShareMap.clear();
-    mDataBase.queryShareBasicInfo(mRealShareMap);
-    emit signalAllShareCodeList(mRealShareMap.keys());
+    mRealShareData.clear();
+    mDataBase.queryShareBasicInfo(mRealShareData);
+    emit signalAllShareCodeList(mRealShareData.keys());
 }
 
 void HqInfoService::saveShares()
@@ -505,8 +506,9 @@ void HqInfoService::slotUpdateShareinfoWithHistory(const QString& code,\
                                                    qint64 vol_chnage,\
                                                    const ShareDataList& list)
 {
-    ShareData& data = mRealShareMap[code];
-    data.mCode = code;
+    QString wkCode = ShareData::fullCode(code);
+    if(!mRealShareData.contains(wkCode)) return;
+    ShareData& data = mRealShareData[code];
     data.mHistory.mLastMoney = lastMoney * 0.0001;
     data.mHistory.mLast3DaysChgPers = last3Change;
     data.mHistory.mLast5DaysChgPers = last5Change;
@@ -566,20 +568,22 @@ void HqInfoService::slotSaveFavCode(const QString &code, bool fav)
 ShareData* HqInfoService::getShareData(const QString &code)
 {
     QMutexLocker locker(&mShareMutex);
-    QString wkCode = code.right(6);
-    if(!mRealShareMap.contains(wkCode))
+    SHARE_DATA_TYPE type = ShareData::shareType(code);
+    QString wkCode = ShareData::fullCode(code);
+    if(!mRealShareData.contains(wkCode))
     {
         ShareData data;
         data.mCode = wkCode;
-        mRealShareMap[wkCode] = data;
+        data.mShareType = type;
+        mRealShareData[wkCode] = data;
     }
-    return (ShareData*)(&mRealShareMap[wkCode]);
+    return (ShareData*)(&mRealShareData[wkCode]);
 }
 
  ShareDataList HqInfoService::getShareDataList()
  {
      QMutexLocker locker(&mShareMutex);
-     return mRealShareMap.values();
+     return mRealShareData.values();
  }
 
 void HqInfoService::slotUpdateShareBasicInfo(const ShareDataList &list)
@@ -628,6 +632,7 @@ void HqInfoService::slotUpdateHsgtTop10Keys(const ShareWorkingDate& date)
             mHsgtTop10Kyes.append(data.mCode.right(6));
         }
     }
+    qDebug()<<"hstop10 keys:"<<mHsgtTop10Kyes;
 
 }
 
@@ -665,7 +670,7 @@ void HqInfoService::slotQueryShareFinanceList(const QStringList& codes)
         if(share)
         {
             share->mFinanceData = data;
-            //qDebug()<<share->mFinanceData.mCode<<share->mFinanceData.mROE<<share->mFinanceData.mEPS;
+//            qDebug()<<share->mFinanceData.mCode<<share->mFinanceData.mROE<<share->mFinanceData.mEPS<<;
         }
     }
 
@@ -769,7 +774,7 @@ void HqInfoService::slotUpdateStkProfitList(const ShareDataList &list)
         emit signalDBErrorMsg(tr("update db profit error:%1").arg(mDataBase.errMsg()));
         return;
     }
-    if(!mDataBase.queryShareProfitInfo(mRealShareMap)) return;
+    if(!mDataBase.queryShareProfitInfo(mRealShareData)) return;
 }
 
 void HqInfoService::slotAddShareAmoutByForeigner(const ShareDataList &list)
@@ -864,7 +869,7 @@ void   HqInfoService::setBlockShareCodes(const QString &block, const QStringList
 void   HqInfoService::setShareBlock(const QString &code, const QString &block)
 {
     QMutexLocker locker(&mShareMutex);
-    ShareData &data = mRealShareMap[code.right(6)];
+    ShareData &data = mRealShareData[ShareData::fullCode(code)];
     if(!data.isContainsBlock(block))
     {
         data.mBlockCodeList.append(block);

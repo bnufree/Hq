@@ -4,6 +4,7 @@
 #include <QVBoxLayout>
 #include <QDebug>
 #include <QResizeEvent>
+#include "data_structure/hqutils.h"
 
 QShareCodeNameWidget::QShareCodeNameWidget(const QString& code, const QString& name,QWidget *parent) :\
     QWidget(parent),\
@@ -62,17 +63,18 @@ void QShareCodeNameWidget::resizeEvent(QResizeEvent *e)
 void QShareCodeNameWidget::updateDisplay()
 {
     QSize size = this->size();
+    if(size.height() == 0) return;
     int height = size.height() - 3;
     int code_h = qRound(height * 0.4);
     int name_h = height - code_h;
     QFont font1 = mCodeLbl->font();
-    font1.setPixelSize(code_h*0.8);
+    HqUtils::setFontPixelSize(&font1, code_h*0.8);
     QFont font2 = mNameLbl->font();
-    font2.setPixelSize(name_h*0.8);
+    HqUtils::setFontPixelSize(&font2, name_h*0.8);
     int name_width = size.width() * 0.8;
     if(QFontMetrics(font2).width(tr("天长地久")) > name_width)
     {
-        font2.setPixelSize(font2.pixelSize() * 0.8);
+        HqUtils::setFontPixelSize(&font2, font2.pixelSize() * 0.8);
     }
     mCodeLbl->setFont(font1);
     mNameLbl->setFont(font2);

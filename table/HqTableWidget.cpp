@@ -61,14 +61,14 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     QRect rect = QApplication::desktop()->availableGeometry();
     QFont font = this->font();
     font.setBold(false);
-    font.setPixelSize(mRowHeight * 0.5);
+    HqUtils::setFontPixelSize(&font, mRowHeight * 0.5);
     this->setFont(font);
 #ifndef Q_OS_ANDROID
     mColWidth = /*qRound(1920.0 * 1.0 / rect.width() * 140)*/HqUtils::convertMM2Pixel(20);
-    font.setPixelSize(mRowHeight * 0.5 * 0.8);
+    HqUtils::setFontPixelSize(&font, mRowHeight * 0.5 * 0.8);
 #else
     mColWidth = /*qRound(1920.0 * 1.0 / rect.width() * 140)*/HqUtils::convertMM2Pixel(14);
-    font.setPixelSize(mRowHeight * 0.5 * 0.6);
+    HqUtils::setFontPixelSize(&font, mRowHeight * 0.5 * 0.6);
 #endif
 
     this->horizontalHeader()->setFont(font);    
@@ -180,7 +180,7 @@ void HqTableWidget::setItemText(int row, int column, const QString &text, const 
         int text_width = QFontMetrics(font).width(text);
         while (text_width > this->columnWidth(column) - 10 && font.pixelSize() > 1) {
 //            qDebug()<<"text_width:"<<text_width<<" col_width:"<<this->columnWidth(column)<<"pxel size:"<<font.pixelSize();
-            font.setPixelSize(font.pixelSize()-1);
+            HqUtils::setFontPixelSize(&font, font.pixelSize()-1);
             text_width = QFontMetrics(font).width(text);
         }
     }
