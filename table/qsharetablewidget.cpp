@@ -48,6 +48,9 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
 
 void QShareTablewidget::setDataList(const ShareDataList &list)
 {
+    qDebug()<<"recv data list szie:"<<list.size()<<QDateTime::currentDateTimeUtc();
+    QTime t;
+    t.start();
     prepareUpdateTable(list.size());
     int i = 0;
     foreach (ShareData data, list) {
@@ -91,6 +94,7 @@ void QShareTablewidget::setDataList(const ShareDataList &list)
         i++;
 
     }
+    qDebug()<<"update table end with elapsed:"<<t.elapsed();
 }
 
 void QShareTablewidget::setShareMarket()

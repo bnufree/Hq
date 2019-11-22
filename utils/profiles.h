@@ -8,7 +8,9 @@
 
 #define         PROFILES_INS            Profiles::instance()
 //配置文件定义
-#define     FAV_CODE_SEC            "ZXG"
+#define     GLOBAL_SETTING          "Global Setting"
+#define     INDEX_KEY               "Index"
+#define     FAV_CODE                "ZXG"
 #define     FAV_CODE_KEY            "Codes"
 #define     CLOSE_DATE_SEC          "CloseDates"
 #define     CLOSE_DATE_KEY          "Dates"

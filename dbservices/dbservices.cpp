@@ -26,7 +26,7 @@ HqInfoService::HqInfoService(QObject *parent) :
     QObject(parent)
 {
     mHistoryInfoCount = 0;
-    mFavCodeList = Profiles::instance()->value(FAV_CODE_SEC, FAV_CODE_KEY, QStringList()).toStringList();
+    mFavCodeList = Profiles::instance()->value(GLOBAL_SETTING, FAV_CODE, QStringList()).toStringList();
     QActiveDateTime::mCloseDateList = PROFILES_INS->value(CLOSE_DATE_SEC, CLOSE_DATE_KEY, QStringList()).toStringList();
     qDebug()<<"close:"<<QActiveDateTime::mCloseDateList;
     initSignalSlot();

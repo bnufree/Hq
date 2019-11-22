@@ -55,7 +55,7 @@ void QSinaStkResultMergeThread::setSortType(int type)
 
 void QSinaStkResultMergeThread::run()
 {
-    while (true) {        
+    while (true) {
         ShareDataList wklist;
         mListMutex.lock();
         ShareDataList total_list = DATA_SERVICE->getShareDataList();

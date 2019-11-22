@@ -11,6 +11,7 @@
 #include "basic_info/qsharefhspwork.h"
 #include "basic_info/qsharefinancialinfowork.h"
 #include "basic_info/qshareactivedateupdatethread.h"
+#include "real/qhqindexthread.h"
 
 
 HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
@@ -22,13 +23,21 @@ HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
     mIndexThread(0)
 {
     connect(this, SIGNAL(signalStart()), this, SLOT(slotStart()));
-    connect(DATA_SERVICE, SIGNAL(signalSendLastHSGTUpdateDate(ShareWorkingDate)), this, SLOT(slotStartUpdateHSGTTop10(ShareWorkingDate)));
     connect(DATA_SERVICE, SIGNAL(signalDbInitFinished()), this, SLOT(slotDBInitFinished()));
     connect(DATA_SERVICE, SIGNAL(signalAllShareCodeList(QStringList)), this, SLOT(slotShareCodesListFinished(QStringList)));
     connect(this, SIGNAL(signalSearchCodesOfText(QString)), DATA_SERVICE, SIGNAL(signalSearchCodesOfText(QString)));
     connect(this, SIGNAL(signalSetFavCode(QString)), this, SLOT(slotSetFavCode(QString)));
+    //开始实时指数更新
+    QHqIndexThread* thread = new QHqIndexThread;
+    connect(thread, SIGNAL(signalSendIndexDataList(ShareDataList)), this, SIGNAL(signalSendIndexRealDataList(ShareDataList)));
+    //开始更新北向
+    QEastmoneyNorthBoundThread *north = new QEastmoneyNorthBoundThread();
+    connect(north, SIGNAL(signalUpdateNorthBoundList(ShareHsgtList)), this, SIGNAL(signalSendNotrhBoundDataList(ShareHsgtList)));
+
     this->moveToThread(&mWorkThread);
     mWorkThread.start();
+    thread->start();
+    north->start();
 }
 
 HQTaskMagrCenter::~HQTaskMagrCenter()
@@ -51,6 +60,7 @@ void HQTaskMagrCenter::slotDBInitFinished()
     connect(mWorkDayTimeMonitorThread, SIGNAL(signalUpdateHistoryWorkDays()), this, SLOT(slotFinishUpdateWorkDays()));
     connect(mWorkDayTimeMonitorThread, SIGNAL(signalNewWorkDateNow()), this, SLOT(slotFinishUpdateWorkDays()));
     mWorkDayTimeMonitorThread->start();
+
 }
 
 void HQTaskMagrCenter::slotFinishUpdateWorkDays()
@@ -74,17 +84,6 @@ void HQTaskMagrCenter::slotNewWorDayChangeNow()
     if(mHistoryInfoMgr) mHistoryInfoMgr->signalStartStatic();
 }
 
-void HQTaskMagrCenter::slotStartUpdateHSGTTop10(const ShareWorkingDate &date)
-{
-    if(date == ShareWorkingDate::getCurWorkDay())
-    {
-        emit signalNewHsgtTop10Now();
-        return;
-    }
-    QShareHsgtTop10Work* hsgtTop10 = new QShareHsgtTop10Work(this);
-    connect(hsgtTop10, SIGNAL(finished()), hsgtTop10, SLOT(deleteLater()));
-    hsgtTop10->start();
-}
 
 void HQTaskMagrCenter::slotSetFavCode(const QString &code)
 {
@@ -154,22 +153,9 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     connect(fhsp, SIGNAL(finished()), fhsp, SLOT(deleteLater()));
     fhsp->start();
 
-    //更新实时的指数
-    QStringList indexlist;
-    indexlist<<"sh000001"<<"sh000300"<<"sz399001"<<"sz399006"<<"sh000016"<<"sz399293";
-    mIndexThread = new QSinaStkInfoThread(indexlist, true);
-    mRealWorkObjList.append(mIndexThread);
-    connect(mIndexThread, SIGNAL(sendStkDataList(ShareDataList)), this, SIGNAL(signalSendIndexRealDataList(ShareDataList)));
-    connect(mIndexThread, SIGNAL(finished()), mIndexThread, SLOT(deleteLater()));
-    mIndexThread->start();
 
-    //更新北向的买入卖出情况
-    QEastmoneyNorthBoundThread *north = new QEastmoneyNorthBoundThread();
-    connect(north, SIGNAL(signalUpdateNorthBoundList(ShareHsgtList)), this, SIGNAL(signalSendNotrhBoundDataList(ShareHsgtList)));
-    mRealWorkObjList.append(north);
-    north->start();
     //实时全市场的行情初始化
-    int nthread = 6;
+    int nthread = 10;
     int thread_code = (codes.length() + nthread-1 ) / nthread;
     for(int i=0; i<nthread; i++)
     {
@@ -187,6 +173,7 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     mShareInfoMergeThread->setActive(true);
     mShareInfoMergeThread->setMktType(MKT_ZXG);
     mShareInfoMergeThread->start();
+    return;
     //更新日线数据
     mHistoryInfoMgr = new QShareHistoryInfoMgr(codes);
     connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SIGNAL(signalUpdateHistoryMsg(QString)));

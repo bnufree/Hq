@@ -45,8 +45,6 @@ public slots:
     void        slotShareCodesListFinished(const QStringList& codes);
     void        slotUpdateHistoryFinished();
     void        slotSetFavCode(const QString& code);
-    void        slotStartUpdateHSGTTop10(const ShareWorkingDate& date);
-
     //
     void        setMktType(int type);
     void        setSortType(int type);

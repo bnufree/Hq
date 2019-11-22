@@ -105,12 +105,11 @@ void QShareActiveDateUpdateThread::run()
                 DATA_SERVICE->setSystemStatus(HqInfoSysStatus::HQ_Closed);
             } else
             {
-                int hour = time.hour();
-                int minute = time.minute();
-                if(hour >= 15)
+                QString nowStr = time.toString("hhmmss");
+                if(nowStr >= "150000")
                 {
                     DATA_SERVICE->setSystemStatus(HqInfoSysStatus::HQ_Closed);
-                } else if(hour >= 9 && minute >= 10)
+                } else if(nowStr >= "091000")
                 {
                     if(DATA_SERVICE->getSystemStatus() != HqInfoSysStatus::HQ_InCharge)
                     {

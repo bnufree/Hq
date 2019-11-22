@@ -154,3 +154,51 @@ QDateList HqInfoParseUtil::getActiveDateListOfYear(int year)
 {
     return getActiveDateList(QDate(year, 12, 31), QDate(year, 1, 1));
 }
+
+bool HqInfoParseUtil::parseShareDataFromSinaA(ShareData& data, const QString& detail)
+{
+    QStringList detailList = detail.split(QRegExp("[\",=]"), QString::SkipEmptyParts);
+    if(detailList.length() < 23) return false;
+    data.mCode = detailList[0];
+    data.mName = detailList[1];
+    data.mCur = detailList[4].toDouble();
+    data.mLastClose = detailList[3].toDouble();
+    data.mChg = data.mCur - data.mLastClose;
+    data.mChgPercent = data.mChg* 100 / data.mLastClose ;
+    data.mHigh = detailList[5].toDouble();
+    data.mLow = detailList[6].toDouble();
+    double buy = detailList[7].toDouble();
+    double sell = detailList[8].toDouble();
+    double buy1 = detailList[12].toDouble();
+    double sell1 = detailList[22].toDouble();
+
+    //竞价时段的特殊处理
+    if(data.mCur == 0)
+    {
+        double temp = fmax(buy, buy1);
+        if(temp == 0) temp = data.mLastClose;
+        data.mCur = temp;
+        data.mChg = temp - data.mLastClose;
+        data.mChgPercent = data.mChg * 100 / data.mLastClose ;
+    }
+    data.mVol = detailList[9].toInt();
+    data.mMoney = detailList[10].toDouble();
+    return true;
+}
+
+bool HqInfoParseUtil::parseShareDataFromSinaHK(ShareData& data, const QString &detail)
+{
+    QStringList detailList = detail.split(QRegExp("[\",=]"), QString::SkipEmptyParts);
+    if(detailList.length() < 13) return false;
+    data.mCode = detailList[1];
+    data.mName = detailList[2];
+    data.mOpen = detailList[3].toDouble();
+    data.mLastClose = detailList[4].toDouble();
+    data.mHigh = detailList[5].toDouble();
+    data.mLow = detailList[6].toDouble();
+    data.mCur = detailList[7].toDouble();
+    data.mChg = detailList[8].toDouble();
+    data.mChgPercent = detailList[9].toDouble();
+    data.mMoney = detailList[12].toDouble() * 1000;
+    return true;
+}

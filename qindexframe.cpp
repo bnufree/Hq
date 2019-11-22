@@ -11,6 +11,7 @@ QIndexFrame::QIndexFrame(const QString& name, QWidget *parent) :
     ui->name->setText(name.trimmed());
 
     setFixedSize(calSize());
+    qDebug()<<"fix size:"<<this->size();
 }
 
 QIndexFrame::~QIndexFrame()
@@ -21,7 +22,7 @@ QIndexFrame::~QIndexFrame()
 
 QSize QIndexFrame::calSize() const
 {
-    int half_height = HqUtils::convertMM2Pixel(6);
+    int half_height = HqUtils::convertMM2Pixel(4);
     QFont font = ui->name->font();
     HqUtils::setFontPixelSize(&font, half_height);
     font.setBold(false);

@@ -27,6 +27,9 @@ void QSinaStkInfoThread::run()
     bool isContinue = false;
     do
     {
+//        qDebug()<<this<<"get sina hq start"<<this;
+        QTime t;
+        t.start();
         //开始更新
         QString url("http://hq.sinajs.cn/?list=%1");
         if(mStkList.length() > 0)
@@ -43,6 +46,7 @@ void QSinaStkInfoThread::run()
         {
             isContinue = true;
         }
+//        qDebug()<<this<<"get sina hq elapsed:"<<t.elapsed()<<this;
 
         sleep(2);
 

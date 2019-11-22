@@ -75,7 +75,8 @@ SOURCES += main.cpp\
     history/qforignvolcheckdlg.cpp \
     table/qshareforeignvoltablewidget.cpp \
     utils/hqinfoparseutil.cpp \
-    qsahreoptwidget.cpp
+    qsahreoptwidget.cpp \
+    real/qhqindexthread.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -140,7 +141,8 @@ HEADERS  += dialog.h \
     history/qforignvolcheckdlg.h \
     table/qshareforeignvoltablewidget.h \
     utils/hqinfoparseutil.h \
-    qsahreoptwidget.h
+    qsahreoptwidget.h \
+    real/qhqindexthread.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \
