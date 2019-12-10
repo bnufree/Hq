@@ -27,13 +27,18 @@ void QShareCodesWork::run()
 
     ShareDataList list;
     ShareWorkingDate update_date = DATA_SERVICE->getLastUpdateDateOfBasicInfo();
-    if(update_date.isNull() || update_date < ShareWorkingDate::getCurWorkDay())
-    {
+//    if(update_date.isNull() || update_date < ShareWorkingDate::getCurWorkDay())
+//    {
         QString stock_code_url = tr("http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?cb=&type=CT&token=4f1862fc3b5e77c150a2b985b12db0fd&sty=FCOIATC&js=(%7Bdata%3A%5B(x)%5D%2CrecordsFiltered%3A(tot)%7D)&cmd=C._A&st=(Code)&sr=-1&p=1&ps=20000&_=%1").arg(QDateTime::currentMSecsSinceEpoch());
         QString fund_code_url = "http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?cb=&type=CT&token=4f1862fc3b5e77c150a2b985b12db0fd&sty=FCOIATC&js=(%7Bdata%3A%5B(x)%5D%2CrecordsFiltered%3A(tot)%7D)&cmd=C.__2850013&st=(Code)&sr=-1&p=1&ps=2000&_=1555572794676";
+        QTime t;
+        t.start();
         parseHttp(list, stock_code_url, 1);
+        qDebug()<<"code:"<<t.elapsed();
+        t.start();
         parseHttp(list, fund_code_url, 2);
-    }
+        qDebug()<<"fund:"<<t.elapsed();
+//    }
     DATA_SERVICE->signalUpdateShareBasicInfo(list);
     return;
 }

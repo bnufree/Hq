@@ -37,15 +37,11 @@ QShareHistoryInfoMgr::~QShareHistoryInfoMgr()
 void QShareHistoryInfoMgr::slotStartGetHistoryWithAllCodes()
 {
     //首先获取从一年前到现在的陆股通数据
-    qDebug()<<"history date size:"<<ShareWorkingDate::getHisWorkingDay().size();
-    QDate start = ShareWorkingDate::getHisWorkingDay().last();
-    while (start < ShareWorkingDate::currentDate().date()) {
-        if(ShareWorkingDate::getHisWorkingDay().contains(start))
-        {
-            QHKExchangeVolDataProcess * process = new QHKExchangeVolDataProcess(start, QHKExchangeVolDataProcess::Fetch_All, this);
-            mPool.start(process);
-        }
-        start = start.addDays(1);
+    QList<QDate> historyDatesList = ShareWorkingDate::getHisWorkingDay();
+    foreach (QDate start, historyDatesList) {
+        if(start == QDate::currentDate()) continue;
+        QHKExchangeVolDataProcess * process = new QHKExchangeVolDataProcess(start, QHKExchangeVolDataProcess::Fetch_All, this);
+        mPool.start(process);
     }
     mPool.waitForDone();
     if(mCodesList.size() == 0) return;

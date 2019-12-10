@@ -12,6 +12,7 @@
 #include "basic_info/qsharefinancialinfowork.h"
 #include "basic_info/qshareactivedateupdatethread.h"
 #include "real/qhqindexthread.h"
+#include "real/qhqeastmoneyrealinfothread.h"
 
 
 HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
@@ -155,6 +156,7 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
 
 
     //实时全市场的行情初始化
+#if 0
     int nthread = 10;
     int thread_code = (codes.length() + nthread-1 ) / nthread;
     for(int i=0; i<nthread; i++)
@@ -164,6 +166,10 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
         connect(wkthread, SIGNAL(finished()), wkthread, SLOT(deleteLater()));
         wkthread->start();
     }
+#else
+    QHqEastMoneyRealInfoThread *realThreead = new QHqEastMoneyRealInfoThread;
+    realThreead->start();
+#endif
     mShareInfoMergeThread = new QSinaStkResultMergeThread();
     mRealWorkObjList.append(mShareInfoMergeThread);
     connect(mShareInfoMergeThread, SIGNAL(sendStkDataList(ShareDataList)), this, SIGNAL(signalSendShareRealDataList(ShareDataList)));

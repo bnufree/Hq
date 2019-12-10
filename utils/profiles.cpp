@@ -7,7 +7,7 @@
 #define     INI_FILE_NAME           "profiles.ini"
 
 Profiles* Profiles::minstance = 0;
-Profiles::MGarbage Profiles::Garbage;
+//Profiles::MGarbage Profiles::Garbage;
 Profiles::Profiles(QObject *parent) :
     configSettings(NULL),
     QObject(parent)

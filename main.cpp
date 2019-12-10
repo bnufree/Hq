@@ -9,6 +9,7 @@
 #include <QDir>
 #include <iostream>
 #include <new>
+#include <zchxmainwindow.h>
 
 void no_memory () {
   std::cout << "Failed to allocate memory!\n";
@@ -24,7 +25,7 @@ int main(int argc, char *argv[])
     //make size as 9:16
     Dialog w;
 #ifdef Q_OS_WIN
-    w.showMax();
+    w.showMaximized();
 #else
     w.showMaximized();
 #endif
