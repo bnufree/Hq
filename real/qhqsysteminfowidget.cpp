@@ -4,20 +4,11 @@
 #include "basic_info/qshareactivedateupdatethread.h"
 #include <QDateTime>
 
-QHqSystemInfoWidget::QHqSystemInfoWidget(QShareActiveDateUpdateThread* monitor, QWidget *parent) :
+QHqSystemInfoWidget::QHqSystemInfoWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::QHqSystemInfoWidget)
 {
     ui->setupUi(this);
-    if(!monitor)
-    {
-        monitor = new QShareActiveDateUpdateThread(0, this);
-    }
-    connect(monitor, SIGNAL(signalSystemStatus(qint64,int)), this, SLOT(slotUpdateSystemStatus(qint64,int)));
-    if(!monitor->isRunning())
-    {
-        monitor->start();
-    }
 }
 
 QHqSystemInfoWidget::~QHqSystemInfoWidget()

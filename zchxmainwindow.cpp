@@ -21,7 +21,7 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
     //状态栏添加实时指数
     statusBar()->addPermanentWidget(new QIndexWidget(this), QApplication::desktop()->availableGeometry().width() * 0.66);
     //状态栏添加系统时间
-    statusBar()->addPermanentWidget(new QHqSystemInfoWidget(0, this));
+    statusBar()->addPermanentWidget(new QHqSystemInfoWidget(this));
 }
 
 zchxMainWindow::~zchxMainWindow()
