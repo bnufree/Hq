@@ -139,10 +139,22 @@ void NorthFlowCurveWidget::paintEvent(QPaintEvent *e)
     painters.save();
     painters.setPen(QPen(mSH, mPathWidth));
     painters.drawPolyline(sh);
+    if(mDataList.size() > 0)
+    {
+        painters.drawText(sh.last() + QPointF(10, 0), QString::number(mDataList.last().sh_flow, 'f', 2));
+    }
     painters.setPen(QPen(mSZ, mPathWidth));
     painters.drawPolyline(sz);
+    if(mDataList.size() > 0)
+    {
+        painters.drawText(sz.last() + QPointF(10, 0), QString::number(mDataList.last().sz_flow, 'f', 2));
+    }
     painters.setPen(QPen(mTotal, mPathWidth));
     painters.drawPolyline(total);
+    if(mDataList.size() > 0)
+    {
+        painters.drawText(total.last() + QPointF(10, 0), QString::number(mDataList.last().total_flow, 'f', 2));
+    }
     painters.restore();
 }
 

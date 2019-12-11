@@ -71,7 +71,7 @@ void QIndexFrame::updateBound(double shVal, QString shName, double szVal, QStrin
     ui->money->setText(QStringLiteral("%1亿").arg(QString::number(szVal / 10000.0, 'f', 2)));
     int chgint = (int)(shVal+szVal);
     this->setStyleSheet(QString("QLabel{"
-                            "font-weight:bold;"
+                            "font-weight:normal;"
                                 "font-size:18pt;"
                             "color:%1;"
                             "alignment:center;"
@@ -106,7 +106,7 @@ void QIndexFrame::updateBound(double buy, double sell, double pure, double total
     ui->money->setText(QStringLiteral("总：%1亿").arg(QString::number(total / 10000.0, 'f', 0)));
     int chgint = (int)(pure);
     this->setStyleSheet(QString("QLabel{"
-                            "font-weight:bold;"
+                            "font-weight:normal;"
                             "color:%1;"
                             "alignment:center;"
                                 "}")

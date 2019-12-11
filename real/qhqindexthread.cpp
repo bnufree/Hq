@@ -7,7 +7,7 @@ QHqIndexThread::QHqIndexThread(QObject *parent) : QThread(parent)
 {
     //首先设定默认的值
     QStringList default_index_list;
-    default_index_list<<"sh000001"<<"sh000300"<<"sz399001"<<"sz399006"<<"sh000016"<<"sz399293"<<"rt_hkHSI";
+    default_index_list<<"sh000001"<<"sh000300"<<"sz399001"<<"sz399006"<<"sh000016"<<"sz399673"<<"rt_hkHSI";
     PROFILES_INS->setDefault(GLOBAL_SETTING, INDEX_KEY, default_index_list);
 
 }
@@ -40,6 +40,7 @@ void QHqIndexThread::run()
             }
         }
         emit signalSendIndexDataList(datalist);
+        QThread::sleep(2);
     }
 
 }

@@ -15,6 +15,9 @@ public:
     explicit zchxMainWindow(QWidget *parent = 0);
     ~zchxMainWindow();
 
+protected:
+    void resizeEvent(QResizeEvent* e);
+
 private:
     Ui::zchxMainWindow *ui;
 };

@@ -3,9 +3,9 @@
 #include "dbservices/dbservices.h"
 #include "utils/hqinfoparseutil.h"
 
-QShareActiveDateUpdateThread::QShareActiveDateUpdateThread(QObject *parent) : QThread(parent)
+QShareActiveDateUpdateThread::QShareActiveDateUpdateThread(QObject* func, QObject *parent) : QThread(parent)
 {
-
+    mDest = func;
 }
 
 QList<QDate> QShareActiveDateUpdateThread::getDateListFromNetease()
@@ -72,6 +72,8 @@ void QShareActiveDateUpdateThread::run()
     //检查当前时间是不是工作日
     while(true)
     {
+        QTime t;
+        t.start();
         QString wkURL = QString("http://hq.sinajs.cn/list=sh000001");
         QByteArray recv = QHttpGet::getContentOfURL(wkURL);
         QTextCodec* gbk = QTextCodec::codecForName("GBK");
@@ -82,8 +84,9 @@ void QShareActiveDateUpdateThread::run()
         bool code_change = false;
         if(index >= 0)
         {
-            QDate now = QDate::fromString(result.mid(index, 10), "yyyy-MM-dd");
-            if(now != workDate)
+            QDateTime nowDateTime = QDateTime::fromString(result.mid(index, 19), "yyyy-MM-dd,hh:mm:ss");
+            QDate now = nowDateTime.date();
+            if(now!= workDate)
             {
                 workDate = now;
                 ShareWorkingDate::setCurWorkDate(now);
@@ -99,38 +102,42 @@ void QShareActiveDateUpdateThread::run()
             //检查当前的时间,如果是9:00以后,需要开始重新获取代码
             QTime   time = QDateTime::currentDateTime().time();
             QDate   date = QDateTime::currentDateTime().date();
-            if(date > workDate)
-            {
-                //今天是节假日
-                DATA_SERVICE->setSystemStatus(HqInfoSysStatus::HQ_Closed);
-            } else
+            int status = HQ_Closed;
+            if(date <= workDate)
             {
                 QString nowStr = time.toString("hhmmss");
                 if(nowStr >= "150000")
                 {
-                    DATA_SERVICE->setSystemStatus(HqInfoSysStatus::HQ_Closed);
+                    status = HQ_Closed;
                 } else if(nowStr >= "091000")
                 {
-                    if(DATA_SERVICE->getSystemStatus() != HqInfoSysStatus::HQ_InCharge)
+                    if(status != HQ_InCharge)
                     {
-                        DATA_SERVICE->setSystemStatus(HqInfoSysStatus::HQ_InCharge);
+                        status = HQ_InCharge;
                         code_change = true;
                     }
                 } else
                 {
-                    DATA_SERVICE->setSystemStatus(HqInfoSysStatus::HQ_NotOpen);
+                    status = HQ_NotOpen;
                 }
 
             }
+            DATA_SERVICE->setSystemStatus(status);
+            if(status == HQ_InCharge)
+            {
+                nowDateTime = QDateTime::currentDateTime();
+            }
+            emit signalSystemStatus(nowDateTime.toMSecsSinceEpoch(), status);
             if(code_change)
             {
                 emit signalNewWorkDateNow();
             }
         }
-        qDebug()<<"system status:"<<DATA_SERVICE->getSystemStatus();
+
+
 
         //每分钟运行
-        QThread::sleep(60);
+        QThread::msleep(500);
     }
 
 

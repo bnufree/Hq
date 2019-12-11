@@ -78,7 +78,8 @@ SOURCES += main.cpp\
     qsahreoptwidget.cpp \
     real/qhqindexthread.cpp \
     zchxmainwindow.cpp \
-    real/qhqeastmoneyrealinfothread.cpp
+    real/qhqeastmoneyrealinfothread.cpp \
+    real/qhqsysteminfowidget.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -146,7 +147,8 @@ HEADERS  += dialog.h \
     qsahreoptwidget.h \
     real/qhqindexthread.h \
     zchxmainwindow.h \
-    real/qhqeastmoneyrealinfothread.h
+    real/qhqeastmoneyrealinfothread.h \
+    real/qhqsysteminfowidget.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \
@@ -158,7 +160,8 @@ FORMS    += dialog.ui \
     real/qnorthflowinfodisplaywidget.ui \
     history/qforignvolcheckdlg.ui \
     qsahreoptwidget.ui \
-    zchxmainwindow.ui
+    zchxmainwindow.ui \
+    real/qhqsysteminfowidget.ui
 
 RESOURCES += \
     image.qrc

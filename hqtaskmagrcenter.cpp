@@ -14,31 +14,33 @@
 #include "real/qhqindexthread.h"
 #include "real/qhqeastmoneyrealinfothread.h"
 
+HQTaskMagrCenter* HQTaskMagrCenter::m_pInstance = 0;
+HQTaskMagrCenter::CGarbo HQTaskMagrCenter::s_Garbo;
 
 HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
     QObject(parent),\
     mShareInfoMergeThread(0),\
     mBlockMgr(0),
     mWorkDayTimeMonitorThread(0),
-    mHistoryInfoMgr(0),
-    mIndexThread(0)
+    mHistoryInfoMgr(0)
 {
-    connect(this, SIGNAL(signalStart()), this, SLOT(slotStart()));
     connect(DATA_SERVICE, SIGNAL(signalDbInitFinished()), this, SLOT(slotDBInitFinished()));
     connect(DATA_SERVICE, SIGNAL(signalAllShareCodeList(QStringList)), this, SLOT(slotShareCodesListFinished(QStringList)));
     connect(this, SIGNAL(signalSearchCodesOfText(QString)), DATA_SERVICE, SIGNAL(signalSearchCodesOfText(QString)));
     connect(this, SIGNAL(signalSetFavCode(QString)), this, SLOT(slotSetFavCode(QString)));
-    //开始实时指数更新
-    QHqIndexThread* thread = new QHqIndexThread;
-    connect(thread, SIGNAL(signalSendIndexDataList(ShareDataList)), this, SIGNAL(signalSendIndexRealDataList(ShareDataList)));
-    //开始更新北向
-    QEastmoneyNorthBoundThread *north = new QEastmoneyNorthBoundThread();
-    connect(north, SIGNAL(signalUpdateNorthBoundList(ShareHsgtList)), this, SIGNAL(signalSendNotrhBoundDataList(ShareHsgtList)));
 
     this->moveToThread(&mWorkThread);
     mWorkThread.start();
-    thread->start();
-    north->start();
+}
+
+HQTaskMagrCenter*  HQTaskMagrCenter::instance()
+{
+    if(m_pInstance == 0)
+    {
+        m_pInstance = new HQTaskMagrCenter;
+    }
+
+    return m_pInstance;
 }
 
 HQTaskMagrCenter::~HQTaskMagrCenter()
@@ -47,17 +49,15 @@ HQTaskMagrCenter::~HQTaskMagrCenter()
     mWorkThread.quit();
 }
 
-void HQTaskMagrCenter::slotStart()
+void HQTaskMagrCenter::start()
 {
-    qDebug()<<__FUNCTION__<<__LINE__;
     //开启数据库初始化
     DATA_SERVICE->signalInitDBTables();
-    qDebug()<<__FUNCTION__<<__LINE__;
 }
 
 void HQTaskMagrCenter::slotDBInitFinished()
 {
-    mWorkDayTimeMonitorThread = new QShareActiveDateUpdateThread;
+    mWorkDayTimeMonitorThread = new QShareActiveDateUpdateThread(0, 0);
     connect(mWorkDayTimeMonitorThread, SIGNAL(signalUpdateHistoryWorkDays()), this, SLOT(slotFinishUpdateWorkDays()));
     connect(mWorkDayTimeMonitorThread, SIGNAL(signalNewWorkDateNow()), this, SLOT(slotFinishUpdateWorkDays()));
     mWorkDayTimeMonitorThread->start();
@@ -129,7 +129,6 @@ void HQTaskMagrCenter::setDisplayChinaTop10()
 
 void HQTaskMagrCenter::addSpecialConcern(const QString &code)
 {
-    if(mIndexThread) mIndexThread->setStkList(QStringList()<<code);
 }
 
 void HQTaskMagrCenter::reverseSortRule()

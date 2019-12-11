@@ -4,6 +4,7 @@
 #include "data_structure/sharedata.h"
 #include "dbservices/dbservices.h"
 #include "qsahreoptwidget.h"
+#include "real/qsinastkresultmergethread.h"
 
 
 QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
@@ -44,6 +45,8 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
     setHeaders(datalist);
     initMenu();
     setAutoChangePage(true);
+    //开始更新数据
+
 }
 
 void QShareTablewidget::setDataList(const ShareDataList &list)

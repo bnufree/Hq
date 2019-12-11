@@ -2,12 +2,11 @@
 #define QSHAREACTIVEDATEUPDATETHREAD_H
 
 #include <QThread>
-
 class QShareActiveDateUpdateThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit QShareActiveDateUpdateThread(QObject *parent = 0);
+    explicit QShareActiveDateUpdateThread(QObject* dest, QObject *parent = 0);
 public:
     void run();
 
@@ -18,6 +17,10 @@ private:
 signals:
     void signalNewWorkDateNow();
     void signalUpdateHistoryWorkDays();
+    void signalSystemStatus(qint64 time, int sts);
+
+private:
+    QObject*        mDest;
 
 public slots:
 };

@@ -47,7 +47,7 @@ public:
 };
 
 Dialog::Dialog(QWidget *parent) :
-    QDialog(parent),mTaskMgr(0),mIndexWidget(0),
+    QDialog(parent),mTaskMgr(0),mIndexWidget(0),mIsMini(false),
     ui(new Ui::MainDialog),systemIcon(0),mCtrlListWidget(0)
 {
     qDebug()<<__func__<<__LINE__;
@@ -104,7 +104,6 @@ Dialog::Dialog(QWidget *parent) :
     this->setWindowIcon(appIcon);
     systemIcon = new QSystemTrayIcon(this);
     systemIcon->setIcon(appIcon);
-    systemIcon->hide();
     connect(systemIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(setDlgShow(QSystemTrayIcon::ActivationReason)));
 //    //创建快捷事件
 //    QShortcut *shotcut = new QShortcut(QKeySequence("Alt+X"), this);  //隐藏
@@ -117,6 +116,7 @@ Dialog::Dialog(QWidget *parent) :
 //    connect(shotcut3, SIGNAL(activated()), this, SLOT(slotDisplayShareMini()));
     //    setHook(this);
 #endif
+#if 0
     //
     mTaskMgr = new HQTaskMagrCenter;
     connect(mShareTableWidget, SIGNAL(signalSetFavCode(QString)), mTaskMgr, SIGNAL(signalSetFavCode(QString)));
@@ -140,6 +140,7 @@ Dialog::Dialog(QWidget *parent) :
     //
     if(mForeignVolTableWidget)connect(mTaskMgr, SIGNAL(signalWorkingDayfinished()), mForeignVolTableWidget, SLOT(slotStartInit()));
     mTaskMgr->signalStart();
+#endif
 
     ui->mainStackWidget->setCurrentIndex(0);
 }
@@ -171,8 +172,9 @@ void Dialog::setDlgShow(QSystemTrayIcon::ActivationReason val)
     switch (val) {
     case QSystemTrayIcon::DoubleClick:
     {
-        if(mIsMini) showMax();
-        else showMini();
+//        if(mIsMini) showMax();
+//        else showMini();
+        setVisible(!isVisible());
     }
         break;
     case QSystemTrayIcon::Context:

@@ -4,6 +4,7 @@
 #include <QDebug>
 #include "qcontainerwidget.h"
 #include <QThread>
+#include "real/qhqindexthread.h"
 
 #if 0
 QIndexWidget::QIndexWidget(QWidget *parent) : QStackedWidget(parent)
@@ -168,6 +169,10 @@ QIndexWidget::QIndexWidget(QWidget *parent) : QWidget(parent)
     mSwitchTimer->setInterval(2000);
     connect(mSwitchTimer, SIGNAL(timeout()), this, SLOT(switchWidget()));
     mSwitchTimer->start();
+    //开始实时指数更新
+    QHqIndexThread* thread = new QHqIndexThread(this);
+    connect(thread, SIGNAL(signalSendIndexDataList(ShareDataList)), this, SLOT(updateData(ShareDataList)));
+    thread->start();
 
 }
 
@@ -187,7 +192,9 @@ void QIndexWidget::resizeEvent(QResizeEvent *e)
     if(mIndexWidgetMap.size() == 0) return;
     //设定当前可以显示的index frame的数量
     mMaxDisplayFrameCount = e->size().width() / mIndexWidgetMap.first()->width();
-//    qDebug()<<"Index widget:"<<e->size()<<mMaxDisplayFrameCount;
+    if(mMaxDisplayFrameCount < 1) mMaxDisplayFrameCount = 1;
+    qDebug()<<"Index widget:"<<e->size()<<mMaxDisplayFrameCount;
+
 
 }
 

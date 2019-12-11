@@ -17,12 +17,15 @@ class QSinaStkInfoThread;
 class HQTaskMagrCenter : public QObject
 {
     Q_OBJECT
-public:
+protected:
     explicit HQTaskMagrCenter(QObject *parent = 0);
+    static HQTaskMagrCenter* instance();
+    QShareActiveDateUpdateThread* activeDateThread() {return mWorkDayTimeMonitorThread;}
+public:
     ~HQTaskMagrCenter();
+    void start();
 
 signals:
-    void        signalStart();
     void        signalUpdateHistoryMsg(const QString& msg);
     void        signalUpdateHistoryFinished();
     void        signalSendIndexCodesList(const QStringList& list);
@@ -37,7 +40,6 @@ signals:
     void        signalWorkingDayfinished();
 
 public slots:
-    void        slotStart();
     void        slotDBInitFinished();
     void        slotFinishUpdateWorkDays();
     void        slotNewWorDayChangeNow();
@@ -56,6 +58,23 @@ public slots:
     void        setCurBlockType(int type);
     void        setDisplayChinaTop10();
     void        addSpecialConcern(const QString& code);
+private:    //本类使用的变量
+    static HQTaskMagrCenter *m_pInstance;
+
+    class CGarbo        // 它的唯一工作就是在析构函数中删除CSingleton的实例
+    {
+    public:
+        ~CGarbo()
+        {
+            if (HQTaskMagrCenter::m_pInstance)
+            {
+                delete HQTaskMagrCenter::m_pInstance;
+                HQTaskMagrCenter::m_pInstance = NULL;
+            }
+        }
+    };
+    static CGarbo s_Garbo; // 定义一个静态成员，在程序结束时，系统会调用它的析构函数
+
 private:
     QThread                     mWorkThread;
     QList<QObject*>             mRealWorkObjList;
@@ -63,7 +82,6 @@ private:
     QEastMoneyBlockMangagerThread*  mBlockMgr;
     QShareActiveDateUpdateThread        *mWorkDayTimeMonitorThread;
     QShareHistoryInfoMgr                *mHistoryInfoMgr;
-    QSinaStkInfoThread                  *mIndexThread;
 
 };
 
