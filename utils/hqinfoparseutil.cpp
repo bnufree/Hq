@@ -57,10 +57,11 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromHexun(const QDa
         pos += data_reg.matchedLength();
         QString src = data_reg.cap(1);
         QStringList src_list = src.split(",");
-        if(src_list.size() != 8) continue;
+        if(src_list.size() < 8) continue;
         //{"Time":"时间"},{"LastClose":"前收盘价"},{"Open":"开盘价"},{"Close":"收盘价"},{"High":"最高价"},{"Low":"最低价"},{"Volume":"成交量"},{"Amount":"成交额"}],
         QDate date = QDate::fromString(src_list[0], "yyyyMMdd000000");
         if(date < start) continue;
+        if(date == ShareWorkingDate::currentDate().date()) break;
 
         ShareHistoryFileData data;
         data.mDate = QDateTime(date).toTime_t();
@@ -110,7 +111,7 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFrom163(const QDate
                 data.mLastClose = cols[7].toDouble();
                 data.mCloseAdjust = data.mClose;
                 data.mMoney = cols[12].toDouble();
-                data.mTotalShareCount = qint64(floor(cols[13].toDouble() / data.mClose));
+//                data.mTotalShareCount = qint64(floor(cols[13].toDouble() / data.mClose));
                 list.append(data);
             }
         }

@@ -21,11 +21,21 @@ class HqTableWidget : public QTableWidget
     Q_OBJECT
 public:
     explicit HqTableWidget(QWidget *parent = 0);
-    void  resetDisplayRows() {
-        mDisplayRowEnd = mMaxDisplayRow-1;
-        mDisplayRowStart = 0;
+    void  resetDisplayRows(bool next = true)
+    {
+        if(next)
+        {
+            mDisplayRowEnd = mMaxDisplayRow-1;
+            mDisplayRowStart = 0;
+        } else
+        {
+            mDisplayRowStart = mPageSize - mMaxDisplayRow - 1;
+            mDisplayRowEnd = mPageSize - 1;
+        }
         displayVisibleRows();
     }
+    void setPageSize(int pageSize) {mPageSize = pageSize;}
+    int  pageSize() const {return mPageSize;}
     void setAutoChangePage(bool sts) {mAutoChangePage = sts;}
     void setHeaders(const TableColDataList& list);
     void appendRow();
@@ -42,6 +52,11 @@ public:
     void insertContextMenu(QAction *act);
     void updateColumn(int col);
     void setWorkInMini(bool sts);
+    virtual void setSortType(int type) {}
+    virtual void displayNextPage() {}
+    virtual void displayPreviousPage() {}
+    virtual void displayFirstPage(){}
+    virtual void displayLastPage(){}
 private:
 protected:
     void resizeEvent(QResizeEvent *event);
@@ -58,6 +73,7 @@ signals:
     void signalDisplayPage(int val);
     void signalSetSortType(int type);
     void signalSetSortRule(int rule);
+    void signalPageSizeChanged(int pagesize);
 
 public slots:
     void slotSetDisplayPage();
@@ -66,7 +82,8 @@ public slots:
     virtual void slotCellDoubleClicked(int row, int col);
     virtual void slotCellClicked(int row, int col);
     void slotHeaderClicked(int col);
-    void optMoveTable(OPT_MOVE_MODE mode);
+    void optMoveTable(OPT_MOVE_MODE mode, int step = 1);
+    int  adjusVal(int val, int step, int max, int min);
 
 private:
     TableColDataList        mColDataList;
@@ -84,6 +101,7 @@ private:
     bool                    mAutoChangePage;
     bool                    mIsWorkInMini;
     quint64               mLastWheelTime;
+    int                     mPageSize;
 protected:
     int                     mDisplayRowStart;
     int                     mDisplayRowEnd;

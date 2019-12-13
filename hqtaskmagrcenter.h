@@ -10,17 +10,17 @@
 class QSinaStkResultMergeThread;
 class QEastMoneyBlockMangagerThread;
 class QShareBasicInfoWorker;
-class QShareActiveDateUpdateThread;
 class QShareHistoryInfoMgr;
 class QSinaStkInfoThread;
+class QShareActiveDateUpdateThread;
 
 class HQTaskMagrCenter : public QObject
 {
     Q_OBJECT
 protected:
     explicit HQTaskMagrCenter(QObject *parent = 0);
+public:
     static HQTaskMagrCenter* instance();
-    QShareActiveDateUpdateThread* activeDateThread() {return mWorkDayTimeMonitorThread;}
 public:
     ~HQTaskMagrCenter();
     void start();
@@ -38,6 +38,8 @@ signals:
     void        signalUpdateAllShareHistoryFromDate(bool deldb, const QDate& date);
     void        signalNewHsgtTop10Now();
     void        signalWorkingDayfinished();
+    void        signalCurSystemInfo(qint64 time, int sts);
+    void        signalSendAllShareCodesList(const QStringList& list);
 
 public slots:
     void        slotDBInitFinished();
@@ -47,16 +49,9 @@ public slots:
     void        slotShareCodesListFinished(const QStringList& codes);
     void        slotUpdateHistoryFinished();
     void        slotSetFavCode(const QString& code);
-    //
-    void        setMktType(int type);
-    void        setSortType(int type);
-    void        setActive(bool active);
-    void        setSelfCodesList(const QStringList& list );
-    void        setDisplayPage(int val);
     void        slotUpdateHSGTOfCode(const QString& code);
     void        reverseSortRule();
     void        setCurBlockType(int type);
-    void        setDisplayChinaTop10();
     void        addSpecialConcern(const QString& code);
 private:    //本类使用的变量
     static HQTaskMagrCenter *m_pInstance;
@@ -77,11 +72,9 @@ private:    //本类使用的变量
 
 private:
     QThread                     mWorkThread;
-    QList<QObject*>             mRealWorkObjList;
-    QSinaStkResultMergeThread*   mShareInfoMergeThread;
     QEastMoneyBlockMangagerThread*  mBlockMgr;
-    QShareActiveDateUpdateThread        *mWorkDayTimeMonitorThread;
     QShareHistoryInfoMgr                *mHistoryInfoMgr;
+    QShareActiveDateUpdateThread*       mTimeMonitorThread;
 
 };
 

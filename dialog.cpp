@@ -275,7 +275,7 @@ void Dialog::resizeEvent(QResizeEvent *event)
 
 void Dialog::updateHqTable(const ShareDataList& pDataList)
 {
-    mShareTableWidget->setDataList(pDataList);
+//    mShareTableWidget->setDataList(1, 1, pDataList);
 }
 
 void Dialog::updateBlockTable(const BlockDataList& pDataList)
@@ -517,7 +517,6 @@ void Dialog::slotDisplayHqCenterPage(int val)
     QAndroidListWidget* widget = qobject_cast<QAndroidListWidget*>(sender());
     if(!widget || widget != mCtrlListWidget) return;
     mShareTableWidget->resetDisplayRows();
-    mTaskMgr->setMktType(val);
     mCtrlListWidget->hide();
     delete mCtrlListWidget;
     mCtrlListWidget = 0;

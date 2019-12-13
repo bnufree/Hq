@@ -582,7 +582,7 @@ ShareData* HqInfoService::getShareData(const QString &code)
 
  ShareDataList HqInfoService::getShareDataList()
  {
-     QMutexLocker locker(&mShareMutex);
+//     QMutexLocker locker(&mShareMutex);
      return mRealShareData.values();
  }
 

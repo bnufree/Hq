@@ -256,12 +256,10 @@ typedef struct hqShareHistoryFileData{
     unsigned int    mDate;
     double          mClose;                 //最新
     double          mLastClose;             //昨日最后价格
-    double          mCloseAdjust;           //复权
+    double          mCloseAdjust;           //复权  计算涨跌幅使用
     double          mMoney;
-    qint64          mForeignVolOri;
-    qint64          mForeignVolAdjust;      //送转股的情况对外资持股的调整
+    qint64          mForeignVol;
     double          mForeignMututablePercent;
-    qint64          mTotalShareCount;
 
     hqShareHistoryFileData()
     {
@@ -270,10 +268,9 @@ typedef struct hqShareHistoryFileData{
         mLastClose = 0.0;
         mCloseAdjust = 0.0;
         mMoney = 0.0;
-        mForeignVolOri = 0;
-        mForeignVolAdjust = 0;
+        mForeignVol = 0;
+        mForeignVol = 0;
         mForeignMututablePercent = 0.0;
-        mTotalShareCount = 0;
     }
 }ShareHistoryFileData;
 
@@ -383,7 +380,7 @@ public:
             GRAPHIC_DATA graph;
             graph.mDate = QDateTime::fromTime_t(data.mDate).date();
             graph.mClose = data.mClose;
-            graph.mForVol = data.mForeignVolAdjust;
+            graph.mForVol = data.mForeignVol;
             graph.mMoney = data.mMoney;
 //            graph.mRzye = data.mRZRQ;
 //            graph.mZjlx = data.mZJLX;

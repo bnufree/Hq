@@ -19,11 +19,16 @@ HQTaskMagrCenter::CGarbo HQTaskMagrCenter::s_Garbo;
 
 HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
     QObject(parent),\
-    mShareInfoMergeThread(0),\
     mBlockMgr(0),
-    mWorkDayTimeMonitorThread(0),
-    mHistoryInfoMgr(0)
+    mHistoryInfoMgr(0),
+    mTimeMonitorThread(0)
 {
+    //创建时间监控线程
+    mTimeMonitorThread = new QShareActiveDateUpdateThread(this);
+    connect(mTimeMonitorThread, SIGNAL(signalUpdateHistoryWorkDays()), this, SLOT(slotFinishUpdateWorkDays()));
+    connect(mTimeMonitorThread, SIGNAL(signalNewWorkDateNow()), this, SLOT(slotFinishUpdateWorkDays()));
+    connect(mTimeMonitorThread, SIGNAL(signalSystemStatus(qint64,int)), this, SIGNAL(signalCurSystemInfo(qint64,int)));
+
     connect(DATA_SERVICE, SIGNAL(signalDbInitFinished()), this, SLOT(slotDBInitFinished()));
     connect(DATA_SERVICE, SIGNAL(signalAllShareCodeList(QStringList)), this, SLOT(slotShareCodesListFinished(QStringList)));
     connect(this, SIGNAL(signalSearchCodesOfText(QString)), DATA_SERVICE, SIGNAL(signalSearchCodesOfText(QString)));
@@ -45,7 +50,7 @@ HQTaskMagrCenter*  HQTaskMagrCenter::instance()
 
 HQTaskMagrCenter::~HQTaskMagrCenter()
 {
-    if(mWorkDayTimeMonitorThread) mWorkDayTimeMonitorThread->quit();
+    if(mTimeMonitorThread) mTimeMonitorThread->quit();
     mWorkThread.quit();
 }
 
@@ -57,10 +62,7 @@ void HQTaskMagrCenter::start()
 
 void HQTaskMagrCenter::slotDBInitFinished()
 {
-    mWorkDayTimeMonitorThread = new QShareActiveDateUpdateThread(0, 0);
-    connect(mWorkDayTimeMonitorThread, SIGNAL(signalUpdateHistoryWorkDays()), this, SLOT(slotFinishUpdateWorkDays()));
-    connect(mWorkDayTimeMonitorThread, SIGNAL(signalNewWorkDateNow()), this, SLOT(slotFinishUpdateWorkDays()));
-    mWorkDayTimeMonitorThread->start();
+    if(mTimeMonitorThread) mTimeMonitorThread->start();
 
 }
 
@@ -92,40 +94,13 @@ void HQTaskMagrCenter::slotSetFavCode(const QString &code)
     emit DATA_SERVICE->signalSetFavCode(code);
 }
 
-void   HQTaskMagrCenter::setMktType(int type)
-{
-    if(mShareInfoMergeThread) mShareInfoMergeThread->setMktType(type);
-}
 
-void   HQTaskMagrCenter::setSortType(int type)
-{
-    if(mShareInfoMergeThread) mShareInfoMergeThread->setSortType(type);
-}
-
-void   HQTaskMagrCenter::setActive(bool active)
-{
-    if(mShareInfoMergeThread) mShareInfoMergeThread->setActive(active);
-}
-
-void   HQTaskMagrCenter::setSelfCodesList(const QStringList& list )
-{
-    if(mShareInfoMergeThread) mShareInfoMergeThread->setSelfCodesList(list);
-}
-
-void   HQTaskMagrCenter::setDisplayPage(int val)
-{
-    if(mShareInfoMergeThread) mShareInfoMergeThread->setDisplayPage(val);
-}
 
 void HQTaskMagrCenter::slotUpdateHSGTOfCode(const QString &code)
 {
 
 }
 
-void HQTaskMagrCenter::setDisplayChinaTop10()
-{
-    if(mShareInfoMergeThread) mShareInfoMergeThread->setDisplayChinaTop10();
-}
 
 void HQTaskMagrCenter::addSpecialConcern(const QString &code)
 {
@@ -143,7 +118,7 @@ void HQTaskMagrCenter::setCurBlockType(int type)
 
 void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
 {
-    qDebug()<<"update code finshed:"<<codes.length();
+    emit signalSendAllShareCodesList(codes);
     //获取财务信息
     QShareFinancialInfoWork* finance = new QShareFinancialInfoWork(codes, this);
     connect(finance, SIGNAL(finished()), finance, SLOT(deleteLater()));
@@ -153,40 +128,14 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     connect(fhsp, SIGNAL(finished()), fhsp, SLOT(deleteLater()));
     fhsp->start();
 
-
-    //实时全市场的行情初始化
-#if 0
-    int nthread = 10;
-    int thread_code = (codes.length() + nthread-1 ) / nthread;
-    for(int i=0; i<nthread; i++)
-    {
-        QStringList wklist = codes.mid(i*thread_code, thread_code);
-        QSinaStkInfoThread *wkthread = new QSinaStkInfoThread(wklist, false);
-        connect(wkthread, SIGNAL(finished()), wkthread, SLOT(deleteLater()));
-        wkthread->start();
-    }
-#else
-    QHqEastMoneyRealInfoThread *realThreead = new QHqEastMoneyRealInfoThread;
-    realThreead->start();
-#endif
-    mShareInfoMergeThread = new QSinaStkResultMergeThread();
-    mRealWorkObjList.append(mShareInfoMergeThread);
-    connect(mShareInfoMergeThread, SIGNAL(sendStkDataList(ShareDataList)), this, SIGNAL(signalSendShareRealDataList(ShareDataList)));
-    connect(DATA_SERVICE, SIGNAL(signalSendSearchCodesOfText(QStringList)),\
-            mShareInfoMergeThread, SLOT(setSelfCodesList(QStringList)));
-
-    mShareInfoMergeThread->setActive(true);
-    mShareInfoMergeThread->setMktType(MKT_ZXG);
-    mShareInfoMergeThread->start();
-    return;
     //更新日线数据
     mHistoryInfoMgr = new QShareHistoryInfoMgr(codes);
     connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SIGNAL(signalUpdateHistoryMsg(QString)));
     connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryFinished()), this, SLOT(slotUpdateHistoryFinished()));
-    mHistoryInfoMgr->signalStartGetHistory();
+//    mHistoryInfoMgr->signalStartGetHistory();
+    return;
     //板块行情初始化
     mBlockMgr = new QEastMoneyBlockMangagerThread();
-    mRealWorkObjList.append(mBlockMgr);
     connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataList)), this, SIGNAL(signalBlockDataListUpdated(BlockDataList)));
     mBlockMgr->start();
     return;

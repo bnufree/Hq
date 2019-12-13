@@ -3,12 +3,14 @@
 #include "dbservices/dbservices.h"
 #include "basic_info/qshareactivedateupdatethread.h"
 #include <QDateTime>
+#include "hqtaskmagrcenter.h"
 
 QHqSystemInfoWidget::QHqSystemInfoWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::QHqSystemInfoWidget)
 {
     ui->setupUi(this);
+    connect(HQTaskMagrCenter::instance(), SIGNAL(signalCurSystemInfo(qint64,int)), this, SLOT(slotUpdateSystemStatus(qint64,int)));
 }
 
 QHqSystemInfoWidget::~QHqSystemInfoWidget()
@@ -37,7 +39,7 @@ void QHqSystemInfoWidget::slotUpdateSystemStatus(qint64 time, int status)
         setStyleSheet("QLabel{color:green; font-weight:bold;}");
     } else
     {
-        setStyleSheet("QLabel{color:red;}");
+        setStyleSheet("QLabel{color:red; font-weight:bold;}");
     }
 
 //    qDebug()<<ui->time->text()<<ui->status->text();

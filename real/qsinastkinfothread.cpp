@@ -11,6 +11,7 @@
 QSinaStkInfoThread::QSinaStkInfoThread(const QStringList& list, bool send, QObject *parent)
   : QThread(parent)
   , mSendResFlag(send)
+  , mCancel(false)
 {
     mStkList.clear();
     setStkList(list);
@@ -24,10 +25,9 @@ QSinaStkInfoThread::~QSinaStkInfoThread()
 
 void QSinaStkInfoThread::run()
 {
-    bool isContinue = false;
-    do
+    while(1)
     {
-//        qDebug()<<this<<"get sina hq start"<<this;
+        if(mCancel) break;
         QTime t;
         t.start();
         //开始更新
@@ -37,20 +37,8 @@ void QSinaStkInfoThread::run()
             QString wkURL = url.arg(mStkList.join(","));
             slotRecvHttpContent(QHttpGet::getContentOfURL(wkURL));
         }
-        //检查是否需要继续更新
-        if(DATA_SERVICE->getSystemStatus() != HqInfoSysStatus::HQ_InCharge)
-        {
-            //不是正在交易日
-            isContinue = false;
-        } else
-        {
-            isContinue = true;
-        }
-//        qDebug()<<this<<"get sina hq elapsed:"<<t.elapsed()<<this;
-
-        sleep(2);
-
-    } while(isContinue);
+        int value = t.elapsed();
+    }
 
 }
 

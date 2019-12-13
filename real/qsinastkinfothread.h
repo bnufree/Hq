@@ -11,6 +11,7 @@ public:
     explicit QSinaStkInfoThread(const QStringList& list, bool send, QObject *parent = 0);
     ~QSinaStkInfoThread();
     int  getStkCount();
+    void    cancel() {mCancel = true;}
 
 protected:
     void run();
@@ -23,6 +24,7 @@ private:
 private:
     QStringList mStkList;
     bool        mSendResFlag;
+    bool        mCancel;
 };
 
 #endif // QSINASTKINFOTHREAD_H

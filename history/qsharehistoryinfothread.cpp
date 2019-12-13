@@ -67,16 +67,9 @@ bool QShareHistoryInfoThread::readFile(ShareHistoryFileDataList& list, bool& adj
         qint64 vol = 0;
         double percent = 0;
         getForeignVolData(vol, percent, QDateTime::fromTime_t(data.mDate).date());
-        if(vol > 0 && data.mForeignVolOri != vol)
+        if(vol > 0 && data.mForeignVol != vol)
         {
-            if(data.mForeignVolOri > 0 && data.mForeignVolAdjust > 0)
-            {
-                data.mForeignVolAdjust =  qint64(vol * data.mForeignVolAdjust * 1.0 / data.mForeignVolOri);
-            } else
-            {
-                data.mForeignVolAdjust = vol;
-            }
-            data.mForeignVolOri = vol;
+            data.mForeignVol = vol;
             data.mForeignMututablePercent = percent;
             adjust = true;
         }
@@ -107,6 +100,8 @@ void QShareHistoryInfoThread::getForeignVolData(qint64 &vol, double &percent, co
 
 void QShareHistoryInfoThread::run()
 {
+    QTime t;
+    t.start();
     //基金不更新
 //    if(mCode.left(1) == "5" || mCode.left(1) == "1") return;
     //默认上一次更新日期是一年前的第一天
@@ -133,8 +128,8 @@ void QShareHistoryInfoThread::run()
 //    qDebug()<<mCode<<" update:"<<need_update;
     if(need_update)
     {
-        new_list = HqInfoParseUtil::getShareHistoryDataFrom163(last_update_date.date(), mCode);
-//        if(new_list.size() == 0) new_list = HqInfoParseUtil::getShareHistoryDataFromHexun(last_update_date.date(), mCode);
+//        new_list = HqInfoParseUtil::getShareHistoryDataFrom163(last_update_date.date(), mCode);
+        if(new_list.size() == 0) new_list = HqInfoParseUtil::getShareHistoryDataFromHexun(last_update_date.date(), mCode);
     }
 #if 0
     if(last_update_date < ShareWorkingDate::currentDate())
@@ -207,8 +202,7 @@ void QShareHistoryInfoThread::run()
         ShareHistoryFileData data = new_list[i];
         data.mCloseAdjust = data.mClose;
         //获取当日对应的陆股通数据
-        getForeignVolData(data.mForeignVolOri, data.mForeignMututablePercent, QDateTime::fromTime_t(data.mDate).date());
-        data.mForeignVolAdjust = data.mForeignVolOri;
+        getForeignVolData(data.mForeignVol, data.mForeignMututablePercent, QDateTime::fromTime_t(data.mDate).date());
         //检查是否有除权处理,如果有就更新前面所有的除权价格
         if(list.size() > 0 && list.last().mClose != data.mLastClose)
         {
@@ -217,7 +211,6 @@ void QShareHistoryInfoThread::run()
             if(adjust == false) adjust = true;
             //检查股本是否发生了变化
             double share_ratio = 1;
-            if(list.last().mTotalShareCount > 0 ) share_ratio = data.mTotalShareCount * 1.0 / list.last().mTotalShareCount;
             adjustDataList(list, adjust_price, share_ratio);
         }
 //        if(list.size() > 0 && data.mForeignVolOri == 0 && list.last().mForeignVolOri != 0)
@@ -259,6 +252,7 @@ FUNC_END:
                                   Q_ARG(QString, mCode)
                                   );
     }
+//    qDebug()<<"update history "<<mCode<< t.elapsed();
     return;
 }
 

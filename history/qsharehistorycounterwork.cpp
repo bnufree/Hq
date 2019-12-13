@@ -114,31 +114,31 @@ void QShareHistoryCounterWork::run()
 
 
     //获取当前陆股通持股信息的变化情况 1日 5日 10日
-    double foreign_now = mList.last().mForeignVolAdjust;
+    double foreign_now = mList.last().mForeignVol;
     double foreign_mutaul = mList.last().mForeignMututablePercent;
     double foreign_chg1 = 0.0, foreign_chg5 = 0.0, foreign_chg10 = 0.0;
 //    if(mList.size() > 2) qDebug()<<mList[size-1].mForeignVol<<mList[size-1].mForeignMututablePercent<<mList[size-2].mForeignVol<<mList[size-2].mForeignMututablePercent;
     if(size >= 2)
     {
-        foreign_chg1 = mList[size-1].mForeignVolAdjust - mList[size-2].mForeignVolAdjust;
+        foreign_chg1 = mList[size-1].mForeignVol - mList[size-2].mForeignVol;
     } else
     {
-        foreign_chg1 = mList[size-1].mForeignVolAdjust - mList[0].mForeignVolAdjust;
+        foreign_chg1 = mList[size-1].mForeignVol - mList[0].mForeignVol;
     }
     if(size >= 5)
     {
-        foreign_chg5 = mList[size-1].mForeignVolAdjust - mList[size-5].mForeignVolAdjust;
+        foreign_chg5 = mList[size-1].mForeignVol - mList[size-5].mForeignVol;
     } else
     {
-        foreign_chg5 = mList[size-1].mForeignVolAdjust - mList[0].mForeignVolAdjust;
+        foreign_chg5 = mList[size-1].mForeignVol - mList[0].mForeignVol;
     }
 
     if(size >= 10)
     {
-        foreign_chg10 = mList[size-1].mForeignVolAdjust - mList[size-10].mForeignVolAdjust;
+        foreign_chg10 = mList[size-1].mForeignVol - mList[size-10].mForeignVol;
     } else
     {
-        foreign_chg10 = mList[size-1].mForeignVolAdjust - mList[0].mForeignVolAdjust;
+        foreign_chg10 = mList[size-1].mForeignVol - mList[0].mForeignVol;
     }
 
     ShareHistoryCounter counter;

@@ -5,6 +5,7 @@
 #include "qcontainerwidget.h"
 #include <QThread>
 #include "real/qhqindexthread.h"
+#include "utils/profiles.h"
 
 #if 0
 QIndexWidget::QIndexWidget(QWidget *parent) : QStackedWidget(parent)
@@ -186,16 +187,12 @@ QIndexWidget::~QIndexWidget()
 }
 void QIndexWidget::resizeEvent(QResizeEvent *e)
 {
-    qDebug()<<"QIndexWidget"<<__func__<<e->size()<<QThread::currentThread();
     QWidget::resizeEvent(e);
     //检查indexMapWidget的数量,进行重新布局
     if(mIndexWidgetMap.size() == 0) return;
     //设定当前可以显示的index frame的数量
     mMaxDisplayFrameCount = e->size().width() / mIndexWidgetMap.first()->width();
     if(mMaxDisplayFrameCount < 1) mMaxDisplayFrameCount = 1;
-    qDebug()<<"Index widget:"<<e->size()<<mMaxDisplayFrameCount;
-
-
 }
 
 
@@ -256,7 +253,8 @@ void QIndexWidget::updateData(const ShareHsgtList &list)
 
 void QIndexWidget::updateData(const ShareDataList &list)
 {
-//    qDebug()<<"update index:"<<QThread::currentThread();
+    QTime t;
+    t.start();
     foreach (ShareData data, list) {
         //qDebug()<<"data:"<<data.mCode<<" "<<data.mName<<" "<<data.mChg<<" "<<data.mChgPercent;
         QIndexFrame* w = NULL;
@@ -276,6 +274,8 @@ void QIndexWidget::updateData(const ShareDataList &list)
 
 void QIndexWidget::switchWidget()
 {
+    QTime t;
+    t.start();
     static int row = 0;
     int total_row = (mList.count() + mMaxDisplayFrameCount - 1) / mMaxDisplayFrameCount;
     row++;

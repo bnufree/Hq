@@ -17,7 +17,7 @@ class QSinaStkResultMergeThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit QSinaStkResultMergeThread(QObject *parent = 0);
+    explicit QSinaStkResultMergeThread(int pageSize, QObject *parent = 0);
     ~QSinaStkResultMergeThread();
 public:
     bool isActive();
@@ -27,6 +27,7 @@ public:
     void displayNext();
     void displayPrevious();
     void displayLast();
+
 signals:
 
 protected:
@@ -39,16 +40,16 @@ public slots:
     void        setSelfCodesList(const QStringList& list );
     void        setDisplayPage(int val);
     void        setDisplayChinaTop10();
+    void        setShareCodes(const QStringList& list);
+    void        setPagetSize(int size) {mPageSize = size; mParamChange = true;}
 
 signals:
-    void    sendStkDataList(const ShareDataList& list);
+    void    sendStkDataList(int page, int size, const ShareDataList& list, qint64 time);
     void    sendStkinfoUpdateProgress(int cur, int total);
 private:
     int                                                     mTotalPage;
     int                                                     mCurPage;
     int                                                     mPageSize;
-//    int                                                     mSortType;
-//    int                                                     mSortRule;
     MKT_TYPE                                                mMktType;
     QList<QStringList>                                      mSecCodesList;
     QMutex                                                  mSecCodesLock;
@@ -58,6 +59,10 @@ private:
     QStringList                                             mSelfCodesList;
     QMap<QString, double>                                   mZjlxMaplist;
     int                                                     mStkCntPerTrd;
+    bool                                                    mIsCodeChg;
+    QStringList                                             mAllShareCodesList;
+    QMutex                                                  mCodeMutex;
+    bool                                                    mParamChange;
 };
 
 #endif // QSINASTKRESULTMERGETHREAD_H

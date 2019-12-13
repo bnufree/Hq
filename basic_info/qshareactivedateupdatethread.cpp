@@ -3,9 +3,8 @@
 #include "dbservices/dbservices.h"
 #include "utils/hqinfoparseutil.h"
 
-QShareActiveDateUpdateThread::QShareActiveDateUpdateThread(QObject* func, QObject *parent) : QThread(parent)
+QShareActiveDateUpdateThread::QShareActiveDateUpdateThread(QObject *parent) : QThread(parent)
 {
-    mDest = func;
 }
 
 QList<QDate> QShareActiveDateUpdateThread::getDateListFromNetease()
@@ -102,7 +101,7 @@ void QShareActiveDateUpdateThread::run()
             //检查当前的时间,如果是9:00以后,需要开始重新获取代码
             QTime   time = QDateTime::currentDateTime().time();
             QDate   date = QDateTime::currentDateTime().date();
-            int status = HQ_Closed;
+            int status = DATA_SERVICE->getSystemStatus();
             if(date <= workDate)
             {
                 QString nowStr = time.toString("hhmmss");

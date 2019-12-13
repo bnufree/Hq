@@ -5,15 +5,16 @@
 #include "dbservices/dbservices.h"
 #include "qsahreoptwidget.h"
 #include "real/qsinastkresultmergethread.h"
+#include "hqtaskmagrcenter.h"
 
 
 QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
 {
     //设定抬头
     TableColDataList datalist;
-//    datalist.append(TableColData(QStringLiteral("代码"), STK_DISPLAY_SORT_TYPE_CODE));
-//    datalist.append(TableColData(QStringLiteral("名称"), STK_DISPLAY_SORT_TYPE_NAME));
-    datalist.append(TableColData(QStringLiteral(""), STK_DISPLAY_SORT_TYPE_CODE));
+    datalist.append(TableColData(QStringLiteral("序号"), STK_DISPLAY_SORT_TYPE_CODE));
+    datalist.append(TableColData(QStringLiteral("名称"), STK_DISPLAY_SORT_TYPE_NAME));
+//    datalist.append(TableColData(QStringLiteral(""), STK_DISPLAY_SORT_TYPE_CODE));
     datalist.append(TableColData(QStringLiteral("最新"), STK_DISPLAY_SORT_TYPE_PRICE));
     datalist.append(TableColData(QStringLiteral("涨跌(%)"), STK_DISPLAY_SORT_TYPE_CHGPER));
     datalist.append(TableColData(QStringLiteral("成交(亿)"), STK_DISPLAY_SORT_TYPE_CJE));
@@ -45,18 +46,34 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
     setHeaders(datalist);
     initMenu();
     setAutoChangePage(true);
+    mMergeThread = new QSinaStkResultMergeThread(pageSize());
+    connect(this, SIGNAL(signalPageSizeChanged(int)), mMergeThread, SLOT(setPagetSize(int)));
+    connect(mMergeThread, SIGNAL(sendStkDataList(int, int, ShareDataList, qint64)), this, SLOT(setDataList(int, int, ShareDataList, qint64)));
+    mMergeThread->setActive(true);
+    mMergeThread->setMktType(MKT_ZXG);
+    mMergeThread->start();
     //开始更新数据
+    connect(HQTaskMagrCenter::instance(), SIGNAL(signalSendAllShareCodesList(QStringList)),
+            this, SLOT(slotRecvAllShareCodes(QStringList)));
 
 }
 
-void QShareTablewidget::setDataList(const ShareDataList &list)
+
+void QShareTablewidget::slotRecvAllShareCodes(const QStringList &list)
 {
+    if(mMergeThread) mMergeThread->setShareCodes(list);
+}
+
+void QShareTablewidget::setDataList(int page, int  pagesize, const ShareDataList &list, qint64 time)
+{
+//    qDebug()<<"update:"<<page<<pagesize<<list.size()<<"datatime:"<<QDateTime::fromMSecsSinceEpoch(time).toString("hh:mm:ss")<<" current:"<<QDateTime::currentDateTime().toString("hh:mm:ss");
     QTime t;
     t.start();
     prepareUpdateTable(list.size());
     int i = 0;
     foreach (ShareData data, list) {
         int k =0;
+        this->setItemText(i, k++, QString::number((page-1)*pagesize + i+1));
         this->setCodeName(i, k++, data.mCode, data.mName);
         QColor dis_color = data.mChgPercent > 0 ? Qt::red : data.mChgPercent < 0 ? Qt::green : Qt::white;
         this->setItemText(i, k++, HqUtils::double2Str(data.mCur), dis_color);
@@ -103,7 +120,33 @@ void QShareTablewidget::setShareMarket()
     QAction *act = (QAction*)sender();
     if(act == NULL) return;
     qDebug()<<"mkt_type:"<<act->data().toInt();
-    emit signalSetShareMarket(act->data().toInt());
+    if(mMergeThread) mMergeThread->setMktType(act->data().toInt());
+}
+
+void QShareTablewidget::setSortType(int type)
+{
+    if(mMergeThread) mMergeThread->setSortType(type);
+}
+
+void QShareTablewidget::displayFirstPage()
+{
+    if(mMergeThread) mMergeThread->setDisplayPage(FIRST_PAGE);
+}
+
+void QShareTablewidget::displayNextPage()
+{
+    if(mMergeThread) mMergeThread->setDisplayPage(NEXT_PAGE);
+}
+
+
+void QShareTablewidget::displayLastPage()
+{
+    if(mMergeThread) mMergeThread->setDisplayPage(END_PAGE);
+}
+
+void QShareTablewidget::displayPreviousPage()
+{
+    if(mMergeThread) mMergeThread->setDisplayPage(PRE_PAGE);
 }
 
 void QShareTablewidget::initMenu()

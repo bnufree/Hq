@@ -23,7 +23,8 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     mDisplayRowEnd(0),
     mAutoChangePage(false),
     mIsWorkInMini(false),
-    mLastWheelTime(0)
+    mLastWheelTime(0),
+    mPageSize(50)
 
 {
     this->setItemDelegate(new RowDelegate);
@@ -93,15 +94,15 @@ bool HqTableWidget::gestureEvent(QGestureEvent *event)
 
 void HqTableWidget::wheelEvent(QWheelEvent *e)
 {
-//    if(QDateTime::currentMSecsSinceEpoch() - mLastWheelTime < 2000) return;
+    if(QDateTime::currentMSecsSinceEpoch() - mLastWheelTime < 800) return;
     if(e->delta() > 0)
     {
-        optMoveTable(OPT_DOWN);
+        optMoveTable(OPT_DOWN, 2);
     } else
     {
-        optMoveTable(OPT_UP);
+        optMoveTable(OPT_UP, 2);
     }
-//    mLastWheelTime = QDateTime::currentMSecsSinceEpoch();
+    mLastWheelTime = QDateTime::currentMSecsSinceEpoch();
 }
 
 void HqTableWidget::setHeaders(const TableColDataList &list)
@@ -142,7 +143,9 @@ void HqTableWidget::setHeaders(const TableColDataList &list)
 
 void HqTableWidget::slotHeaderClicked(int col)
 {
-    emit signalSetSortType(this->horizontalHeaderItem(col)->data(COL_TYPE_ROLE).toInt());
+    int type = this->horizontalHeaderItem(col)->data(COL_TYPE_ROLE).toInt();
+    emit signalSetSortType(type);
+    setSortType(type);
     resetDisplayRows();
 }
 
@@ -363,8 +366,10 @@ void HqTableWidget::resizeEvent(QResizeEvent *event)
     QTableWidget::resizeEvent(event);
     QSize size = event->size();
     qDebug()<<__func__<<__LINE__<<size;
-    mMaxDisplayRow = size.height() / mRowHeight + 1;
+    mMaxDisplayRow = size.height() / mRowHeight/* + 1*/;
     mMaxDisplayCol = size.width() / mColWidth;
+    mPageSize = mMaxDisplayRow;
+    emit signalPageSizeChanged(mPageSize);
     resetDisplayRows();
     qDebug()<<"maxrow:"<<mMaxDisplayRow<<mDisplayRowStart<<mDisplayRowEnd;
 
@@ -496,7 +501,7 @@ void HqTableWidget::mouseMoveEvent(QMouseEvent *event)
     }
 #endif
     mMovePnt = move_pnt;
-    //return QTableWidget::mouseMoveEvent(event);
+    QTableWidget::mouseMoveEvent(event);
 }
 
 void HqTableWidget::mouseReleaseEvent(QMouseEvent *event)
@@ -505,8 +510,16 @@ void HqTableWidget::mouseReleaseEvent(QMouseEvent *event)
 }
 #endif
 
+int  HqTableWidget::adjusVal(int val, int step, int max, int min)
+{
+    qDebug()<<"adjust:"<<val<<step<<max<<min;
+    int res = val + step;
+    if(res > max) res = max;
+    if(res < min) res = min;
+    return res;
+}
 
-void HqTableWidget::optMoveTable(OPT_MOVE_MODE mode)
+void HqTableWidget::optMoveTable(OPT_MOVE_MODE mode, int step)
 {
     if(OPT_LEFT == mode)
     {
@@ -579,7 +592,7 @@ void HqTableWidget::optMoveTable(OPT_MOVE_MODE mode)
             updateColumn(col_start-1);
         }
         //displayVisibleCols();
-
+#if 0
     } else if(mode == OPT_UP)
     {
         //向上滑动，显示下面的列
@@ -588,13 +601,14 @@ void HqTableWidget::optMoveTable(OPT_MOVE_MODE mode)
             //next page
             if(mAutoChangePage)
             {
+                displayNextPage();
                 emit signalDisplayPage(NEXT_PAGE);
                 resetDisplayRows();
             }
         } else
         {
-            mDisplayRowStart++;
-            mDisplayRowEnd++;
+            mDisplayRowStart = adjusVal(mDisplayRowStart, step, rowCount()-1, 0);
+            mDisplayRowEnd = adjusVal(mDisplayRowEnd, step, rowCount()-1, 0);
         }
         displayVisibleRows();
     } else if(mode == OPT_DOWN)
@@ -604,16 +618,35 @@ void HqTableWidget::optMoveTable(OPT_MOVE_MODE mode)
         {
             if(mAutoChangePage)
             {
+                displayPreviousPage();
                 emit signalDisplayPage(PRE_PAGE);
-                resetDisplayRows();
+                resetDisplayRows(false);
             }
         } else {
-            mDisplayRowStart--;
-            mDisplayRowEnd--;
+            mDisplayRowStart = adjusVal(mDisplayRowStart, -step, rowCount()-1, 0);
+            mDisplayRowEnd = adjusVal(mDisplayRowEnd, -step, rowCount()-1, 0);
         }
         displayVisibleRows();
 
     }
+#endif
+} else if(mode == OPT_UP)
+{
+    //向上滑动，显示下面的列
+    qDebug()<<"display next now"<<QDateTime::currentDateTime();
+    displayNextPage();
+    mDisplayRowStart = 0;
+    mDisplayRowEnd = mPageSize-1;
+    displayVisibleRows();
+} else if(mode == OPT_DOWN)
+{
+    qDebug()<<"display previous now";
+    displayPreviousPage();
+    mDisplayRowStart = 0;
+    mDisplayRowEnd = mPageSize-1;
+    displayVisibleRows();
+
+}
 }
 
 void HqTableWidget::displayVisibleCols()
@@ -627,7 +660,7 @@ void HqTableWidget::displayVisibleCols()
 
 void HqTableWidget::displayVisibleRows()
 {
-    //qDebug()<<"row display:"<<mDisplayRowStart<<mDisplayRowEnd;
+//    qDebug()<<"row display:"<<mDisplayRowStart<<mDisplayRowEnd;
     for(int i=0; i<rowCount(); i++)
     {
         if(i<mDisplayRowStart || i>mDisplayRowEnd) setRowHidden(i, true);

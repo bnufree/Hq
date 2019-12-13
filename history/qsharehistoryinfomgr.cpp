@@ -19,7 +19,7 @@ QShareHistoryInfoMgr::QShareHistoryInfoMgr(const QStringList& codes, QObject *pa
     PROFILES_INS ->setDefault(UPDATE_SEC, UPDATE_DATE, QActiveDateTime(QDate::currentDate().addDays(-365)).toString(DATE_FORMAT));
     mCodesList = codes;
     mPool.setExpiryTimeout(-1);
-    mPool.setMaxThreadCount(6);
+    mPool.setMaxThreadCount(2);
     connect(this, SIGNAL(signalStartGetHistory()), this, SLOT(slotStartGetHistoryWithAllCodes()));
     connect(this, SIGNAL(signalStartStatic()), this, SLOT(slotStartStatics()));
     this->moveToThread(&mWorkThread);
@@ -36,6 +36,8 @@ QShareHistoryInfoMgr::~QShareHistoryInfoMgr()
 
 void QShareHistoryInfoMgr::slotStartGetHistoryWithAllCodes()
 {
+    PROFILES_INS ->setDefault(UPDATE_SEC, UPDATE_DATE, QActiveDateTime(QDate::currentDate().addDays(-365)).toString(DATE_FORMAT));
+    qDebug()<<"start get hk"<<QThread::currentThread()<<((QThread*)&mWorkThread);
     //首先获取从一年前到现在的陆股通数据
     QList<QDate> historyDatesList = ShareWorkingDate::getHisWorkingDay();
     foreach (QDate start, historyDatesList) {
@@ -47,14 +49,18 @@ void QShareHistoryInfoMgr::slotStartGetHistoryWithAllCodes()
     if(mCodesList.size() == 0) return;
     QDir dir(HQ_DAY_HISTORY_DIR);
     if(!dir.exists()) dir.mkpath(HQ_DAY_HISTORY_DIR);
-    //通过传入的陆股通数据更新日线文件信息
+    QTime t;
+    t.start();
+    qDebug()<<"start get history";
+    //陆股通数据同步更新
     foreach (QString code, mCodesList) {
         if(code.size() > 6) code = code.right(6);
-        if(code.left(1) == "1" || code.left(1) == "5") continue;
         QShareHistoryInfoThread* thread = new QShareHistoryInfoThread(code, &mShareForeignDataMap, this);
         mPool.start(thread);
     }
     mPool.waitForDone();
+
+    qDebug()<<"start counter"<<t.elapsed();
     slotStartStatics();
 }
 
