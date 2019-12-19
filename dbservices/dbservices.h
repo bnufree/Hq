@@ -34,7 +34,7 @@ public:
     bool   isDBInitOk();
     friend class CGarbo;
     static HqInfoService* instance();
-    ShareData* getShareData(const QString& code);
+    ShareData& getShareData(const QString& code);
     ShareDataList getShareDataList();
     double getProfit(const QString& code);
     foreignHolder amountForeigner(const QString& code);

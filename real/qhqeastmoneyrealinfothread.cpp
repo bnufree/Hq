@@ -42,70 +42,69 @@ void QHqEastMoneyRealInfoThread::parseHttpUrl(const QString &url)
 //        0.06,       1.08,    0.31,       9.50,     1.12,   299045196470,299042644235,   4.9%,   67.68%,  -0.06,1991-04-03,2019-12-09 15:00:00,605993"
 //                    量比	  换手      市盈率    市净率	总市值		流通市值
         QString code = detailList[1];
-        ShareData * data = DATA_SERVICE->getShareData(code);
-        if(!data) continue;
-        data->mName = detailList[2];
-        data->mCur = detailList[3].toDouble();
-        data->mChg = detailList[4].toDouble();
-        data->mVol = detailList[6].toInt();
-        data->mMoney = detailList[7].toDouble();
-        data->mChgPercent = detailList[5].toDouble();
-        data->mHigh = detailList[9].toDouble();
-        data->mLow = detailList[10].toDouble();
-        data->mOpen = detailList[11].toDouble();
-        data->mLastClose = detailList[12].toDouble();
-        data->mHsl = detailList[15].toDouble();
-        data->mMoneyRatio = 0.0;
-        if(data->mHistory.mLastMoney> 0){
-            data->mMoneyRatio = data->mMoney / data->mHistory.mLastMoney;
+        ShareData &data = DATA_SERVICE->getShareData(code);
+        data.mName = detailList[2];
+        data.mCur = detailList[3].toDouble();
+        data.mChg = detailList[4].toDouble();
+        data.mVol = detailList[6].toInt();
+        data.mMoney = detailList[7].toDouble();
+        data.mChgPercent = detailList[5].toDouble();
+        data.mHigh = detailList[9].toDouble();
+        data.mLow = detailList[10].toDouble();
+        data.mOpen = detailList[11].toDouble();
+        data.mLastClose = detailList[12].toDouble();
+        data.mHsl = detailList[15].toDouble();
+        data.mMoneyRatio = 0.0;
+        if(data.mHistory.mLastMoney> 0){
+            data.mMoneyRatio = data.mMoney / data.mHistory.mLastMoney;
         }
 
-        if(data->mCur != 0)
+        if(data.mCur != 0)
         {
-            data->mGXL = data->mBonusData.mXJFH / data->mCur;
+            data.mGXL = data.mBonusData.mXJFH / data.mCur;
         }
-        data->mTotalCap = detailList[18].toDouble();
-        data->mMutalbleCap = detailList[19].toDouble();
-        if(data->mFinanceData.mMutalShare > 0)
+        data.mTotalCap = detailList[18].toDouble();
+        data.mMutalbleCap = detailList[19].toDouble();
+        if(data.mFinanceData.mMutalShare > 0)
         {
-            data->mHsl = data->mVol / (double)(data->mFinanceData.mMutalShare);
+            data.mHsl = data.mVol / (double)(data.mFinanceData.mMutalShare);
         }
-        if(data->mProfit == 0)
+        if(data.mProfit == 0)
         {
-            data->mProfit = DATA_SERVICE->getProfit(code);
+            data.mProfit = DATA_SERVICE->getProfit(code);
         }
-        data->mForeignCap = data->mHsgtData.mVolTotal * data->mCur ;
-        data->mHsgtData.mVolChange = data->mHsgtData.mVolCh1;
-        data->mForeignCapChg = data->mHsgtData.mVolChange * data->mCur ;
-        if(data->mHistory.mWeekDayPrice > 0)
+        data.mForeignCap = data.mHsgtData.mVolTotal * data.mCur ;
+        data.mHsgtData.mVolChange = data.mHsgtData.mVolCh1;
+        data.mForeignCapChg = data.mHsgtData.mVolChange * data.mCur ;
+        if(data.mHistory.mWeekDayPrice > 0)
         {
-            data->mHistory.mChgPersFromWeek = (data->mCur - data->mHistory.mWeekDayPrice) * 100.0 / data->mHistory.mWeekDayPrice;
+            data.mHistory.mChgPersFromWeek = (data.mCur - data.mHistory.mWeekDayPrice) * 100.0 / data.mHistory.mWeekDayPrice;
         } else
         {
-//            data->mHistory.mChgPersFromWeek = data->mChgPercent;
+//            data.mHistory.mChgPersFromWeek = data.mChgPercent;
         }
-        if(data->mHistory.mMonthDayPrice> 0)
+        if(data.mHistory.mMonthDayPrice> 0)
         {
-            data->mHistory.mChgPersFromMonth= (data->mCur - data->mHistory.mMonthDayPrice) * 100.0 / data->mHistory.mMonthDayPrice;
+            data.mHistory.mChgPersFromMonth= (data.mCur - data.mHistory.mMonthDayPrice) * 100.0 / data.mHistory.mMonthDayPrice;
         } else
         {
-//            data->mHistory.mChgPersFromMonth= data->mChgPercent;
+//            data.mHistory.mChgPersFromMonth= data.mChgPercent;
         }
 
-        if(data->mHistory.mYearDayPrice > 0)
+        if(data.mHistory.mYearDayPrice > 0)
         {
-            data->mHistory.mChgPersFromYear = (data->mCur - data->mHistory.mYearDayPrice) * 100.0 / data->mHistory.mYearDayPrice;
+            data.mHistory.mChgPersFromYear = (data.mCur - data.mHistory.mYearDayPrice) * 100.0 / data.mHistory.mYearDayPrice;
         } else
         {
-//            data->mHistory.mChgPersFromYear = data->mChgPercent;
+//            data.mHistory.mChgPersFromYear = data.mChgPercent;
         }
-//        data->mUpdateTime = QDateTime::currentMSecsSinceEpoch();
-        if(top10Keys.contains(data->mCode.right(6)))
+//        data.mUpdateTime = QDateTime::currentMSecsSinceEpoch();
+        if(top10Keys.contains(data.mCode.right(6)))
         {
-            data->mHsgtData.mIsTop10 = true;
+            data.mHsgtData.mIsTop10 = true;
         } else
         {
-            data->mHsgtData.mIsTop10 = false;
+            data.mHsgtData.mIsTop10 = false;
         }
     }
     qDebug()<<"total size:"<<resultlist.size();

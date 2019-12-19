@@ -1,4 +1,4 @@
-#include "qeastmoneynorthboundthread.h"
+﻿#include "qeastmoneynorthboundthread.h"
 #include "utils/qhttpget.h"
 #include "QRegExp"
 #include <QDebug>

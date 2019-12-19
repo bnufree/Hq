@@ -32,6 +32,7 @@ private:
     QTimer*             mSwitchTimer;
 };
 #else
+class QHqIndexThread;
 class QIndexWidget : public QWidget
 {
     Q_OBJECT
@@ -40,20 +41,19 @@ public:
     ~QIndexWidget();
 
     void resizeEvent(QResizeEvent *e);
-    void appendWidget(QWidget* w) {if(w)mList.append(w);}
 signals:
 
 public slots:
-    void updateData(const ShareDataList& list);
+    void updateData(const ShareDataList& list, qint64 time);
     void updateData(const ShareHsgtList &list);
     void insertWidget(const QString& code);
     void switchWidget();
 
 private:
-    QMap<QString, QWidget*> mIndexWidgetMap;
-    QWidgetList             mList;
-    QTimer*             mSwitchTimer;
-    int                 mMaxDisplayFrameCount;
+    QTimer*                 mSwitchTimer;
+    int                     mMaxDisplayFrameCount;
+    QList<IndexFrameData>       mDataList;
+    QHqIndexThread*             mIndexThread;
 };
 #endif
 

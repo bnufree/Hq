@@ -7,6 +7,8 @@
 #include "real/qhqindexthread.h"
 #include "utils/profiles.h"
 
+extern int frameWidth;
+
 #if 0
 QIndexWidget::QIndexWidget(QWidget *parent) : QStackedWidget(parent)
 {
@@ -158,22 +160,24 @@ void QIndexWidget::switchWidget()
 
 #else
 
-QIndexWidget::QIndexWidget(QWidget *parent) : QWidget(parent)
+QIndexWidget::QIndexWidget(QWidget *parent) : QWidget(parent), mSwitchTimer(0)
 {
     QHBoxLayout *layout = new QHBoxLayout(this);
     this->setLayout(layout);
     layout->setContentsMargins(10, 0, 10, 0);
     layout->setSpacing(6);
     mMaxDisplayFrameCount = 1;
-    mIndexWidgetMap.clear();
+    //开始实时指数更新
+    mIndexThread = new QHqIndexThread(this);
+//    connect(thread, SIGNAL(signalSendIndexDataList(ShareDataList, qint64)), this, SLOT(updateData(ShareDataList, qint64)));
+    mIndexThread->start();
+
+
     mSwitchTimer = new QTimer(this);
     mSwitchTimer->setInterval(2000);
     connect(mSwitchTimer, SIGNAL(timeout()), this, SLOT(switchWidget()));
     mSwitchTimer->start();
-    //开始实时指数更新
-    QHqIndexThread* thread = new QHqIndexThread(this);
-    connect(thread, SIGNAL(signalSendIndexDataList(ShareDataList)), this, SLOT(updateData(ShareDataList)));
-    thread->start();
+
 
 }
 
@@ -188,11 +192,37 @@ QIndexWidget::~QIndexWidget()
 void QIndexWidget::resizeEvent(QResizeEvent *e)
 {
     QWidget::resizeEvent(e);
-    //检查indexMapWidget的数量,进行重新布局
-    if(mIndexWidgetMap.size() == 0) return;
     //设定当前可以显示的index frame的数量
-    mMaxDisplayFrameCount = e->size().width() / mIndexWidgetMap.first()->width();
+    if(frameWidth > 0)
+    {
+        mMaxDisplayFrameCount = e->size().width() / frameWidth;
+    }
     if(mMaxDisplayFrameCount < 1) mMaxDisplayFrameCount = 1;
+
+    qDebug()<<"start delete widget:"<<frameWidth;
+    while (this->layout()->count() > 0)
+    {
+        QLayoutItem *item = this->layout()->takeAt(0);
+        qDebug()<<"remove item:"<<item;
+        if(item)
+        {
+            QWidget* w = item->widget();
+            if(w)
+            {
+                w->setParent(0);
+                delete w;
+
+            }
+            delete item;
+        }
+    }
+
+    qDebug()<<"end delete widget:";
+
+    while (this->layout()->count() < mMaxDisplayFrameCount) {
+        this->layout()->addWidget(new QIndexFrame(""));
+    }
+    qDebug()<<"add widget end";
 }
 
 
@@ -203,7 +233,7 @@ void QIndexWidget::insertWidget(const QString &code)
     ShareData data;
     data.mCode = code.right(6);
     list<<data;
-    updateData(list);
+    updateData(list, QDateTime::currentMSecsSinceEpoch());
 }
 
 void QIndexWidget::updateData(const ShareHsgtList &list)
@@ -233,78 +263,70 @@ void QIndexWidget::updateData(const ShareHsgtList &list)
         frame->updateBound(list[i].mPure, list[i].mName);
     }
  #else
-    foreach (ShareHsgt data, list) {
+    foreach (ShareHsgt temp, list) {
         //qDebug()<<"data:"<<data.mCode<<" "<<data.mName<<" "<<data.mChg<<" "<<data.mChgPercent;
-        QIndexFrame* w = NULL;
-        if(mIndexWidgetMap.contains(data.mCode))
+        IndexFrameData data;
+        data.mCode = temp.mCode;
+        data.mCur = temp.mPure;
+        data.mName = temp.mName;
+        data.mTotal = temp.mTotal;
+        data.mType = 0;
+        int index = mDataList.indexOf(data);
+        if(index < 0)
         {
-            w = (QIndexFrame*)(mIndexWidgetMap[data.mCode]);
-            w->setName(data.mName);
+            mDataList.append(data);
         } else
         {
-            w = new QIndexFrame(data.mName);
-            mIndexWidgetMap[data.mCode] = w;
-            appendWidget(w);
+            mDataList[index] = data;
         }
-        w->updateBound(data.mPure, data.mName);
     }
 #endif
 }
 
-void QIndexWidget::updateData(const ShareDataList &list)
+void QIndexWidget::updateData(const ShareDataList &list, qint64 time)
 {
+    qDebug()<<"update index:"<<QDateTime::fromMSecsSinceEpoch(time).toString("hh:mm:ss")<<QDateTime::currentDateTime().toString("hh:mm:ss");
     QTime t;
     t.start();
-    foreach (ShareData data, list) {
-        //qDebug()<<"data:"<<data.mCode<<" "<<data.mName<<" "<<data.mChg<<" "<<data.mChgPercent;
-        QIndexFrame* w = NULL;
-        if(mIndexWidgetMap.contains(data.mCode))
+    foreach (ShareData temp, list) {
+        IndexFrameData data;
+        data.mCode = temp.mCode;
+        data.mCur = temp.mCur;
+        data.mChg = temp.mChg;
+        data.mChgPer = temp.mChgPercent;
+        data.mName = temp.mName;
+        data.mTotal = temp.mMoney;
+        data.mType = 1;
+        int index = mDataList.indexOf(data);
+        if(index < 0)
         {
-            w = (QIndexFrame*)(mIndexWidgetMap[data.mCode]);
-            w->setName(data.mName);
+            mDataList.append(data);
         } else
         {
-            w = new QIndexFrame(data.mName);
-            mIndexWidgetMap[data.mCode] = w;
-            appendWidget(w);
+            mDataList[index] = data;
         }
-        w->updateVal(data.mCur, data.mChg, data.mChgPercent, data.mMoney);
     }
 }
 
 void QIndexWidget::switchWidget()
 {
+
     QTime t;
     t.start();
     static int row = 0;
-    int total_row = (mList.count() + mMaxDisplayFrameCount - 1) / mMaxDisplayFrameCount;
-    row++;
-    if(row > total_row) row = 1;
-    int start_index = (row - 1) * mMaxDisplayFrameCount;
-    int end_index = row * mMaxDisplayFrameCount -1;
-    while (this->layout()->count()) {
-        QLayoutItem *item =  this->layout()->itemAt(0);
-        if(item)
+    updateData(mIndexThread->getDataList(), QDateTime::currentMSecsSinceEpoch());
+
+    for(int i = 0; i<this->layout()->count(); i++)
+    {
+        QIndexFrame* frame = qobject_cast<QIndexFrame*>(this->layout()->itemAt(i)->widget());
+        if(frame && row < mDataList.size())
         {
-            QWidget* w = item->widget();
-            if(w)
-            {
-                this->layout()->removeWidget(w);
-                w->setParent(0);
-                w->setVisible(false);
-            }
-            this->layout()->removeItem(item);
+            IndexFrameData data = mDataList[row];
+            frame->updateData(data);
+            row++;
+            row = row % (mDataList.size());
         }
     }
-    for(int i=0; i<mList.count();i++)
-    {
-        if(i<start_index || i > end_index) continue;
-        this->layout()->addWidget(mList[i]);
-        mList[i]->setVisible(true);
-
-    }
-    if(mList.size() > 0)
-    this->setMinimumHeight(mList[0]->height());
 }
 
 #endif

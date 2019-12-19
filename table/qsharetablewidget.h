@@ -43,10 +43,12 @@ public slots:
     void    setSpecialConcer();
     void    slotCellClicked(int row, int col);
     void    slotRecvAllShareCodes(const QStringList& list);
+    void    slotUpdateTimeOut();
 private:
     QMap<QString, double>   mShareMap;
     QList<QAction*>         mCodesActionList;
     QSinaStkResultMergeThread*          mMergeThread;
+    QTimer                              *mUpdateTimer;
 };
 
 #endif // QSHARETABLEWIDGET_H

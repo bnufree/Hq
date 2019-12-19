@@ -12,6 +12,12 @@ QHqIndexThread::QHqIndexThread(QObject *parent) : QThread(parent)
 
 }
 
+ShareDataList QHqIndexThread::getDataList()
+{
+    QMutexLocker locker(&mMutex);
+    return mDataList;
+}
+
 void QHqIndexThread::run()
 {
     QStringList index_list = PROFILES_INS->value(GLOBAL_SETTING, INDEX_KEY, QStringList()).toStringList();
@@ -39,7 +45,9 @@ void QHqIndexThread::run()
                 if(HqInfoParseUtil::parseShareDataFromSinaA(data, detail)) datalist.append(data);
             }
         }
-        emit signalSendIndexDataList(datalist);
+//        emit signalSendIndexDataList(datalist, QDateTime::currentMSecsSinceEpoch());
+        QMutexLocker locker(&mMutex);
+        mDataList = datalist;
         QThread::sleep(2);
     }
 

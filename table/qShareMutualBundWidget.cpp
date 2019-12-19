@@ -1,4 +1,4 @@
-#include "qshareMutualbundwidget.h"
+﻿#include "qshareMutualbundwidget.h"
 #include <QDebug>
 #include "data_structure/hqutils.h"
 #include "data_structure/sharedata.h"

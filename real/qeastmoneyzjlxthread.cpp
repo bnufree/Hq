@@ -45,8 +45,8 @@ void QEastMoneyZjlxThread::slotRecvHttpContent(const QByteArray& bytes)
             if(InfoList.size() < 6) continue;
             QString code = InfoList.at(1);
             double zjlx = InfoList.at(5).toDouble();
-            ShareData *pdata = DATA_SERVICE->getShareData(code);
-            if(pdata)pdata->mZJLX = zjlx;
+            ShareData &pdata = DATA_SERVICE->getShareData(code);
+            pdata.mZJLX = zjlx;
         }
     }
 }

@@ -31,8 +31,10 @@ HqInfoService::HqInfoService(QObject *parent) :
     qDebug()<<"close:"<<QActiveDateTime::mCloseDateList;
     initSignalSlot();
     //3、开启异步通讯
+//    m_threadWork.setStackSize(20*1000000);
     moveToThread(&m_threadWork);
     m_threadWork.start();
+
 }
 
 
@@ -524,17 +526,16 @@ void HqInfoService::slotUpdateShareinfoWithHistory(const QString& code,\
 void HqInfoService::slotUpdateShareCounter(const ShareHistoryCounter& counter)
 {
     QString code = counter.code.right(6);
-    ShareData *data = getShareData(code);
-    if(!data) return;
-    data->mHistory.mLastMoney = counter.lastMoney;
-    data->mHistory.mYearDayPrice= counter.yearP;
-    data->mHistory.mMonthDayPrice = counter.monthP;
-    data->mHistory.mWeekDayPrice = counter.weekP;
-    data->mHsgtData.mVolTotal = counter.foreign_vol;
-    data->mHsgtData.mVolMutablePercent = counter.foreign_percent;
-    data->mHsgtData.mVolCh1 = counter.foreign_ch1;
-    data->mHsgtData.mVolCh5 = counter.foreign_ch5;
-    data->mHsgtData.mVolCh10 = counter.foreign_ch10;
+    ShareData& data = getShareData(code);
+    data.mHistory.mLastMoney = counter.lastMoney;
+    data.mHistory.mYearDayPrice= counter.yearP;
+    data.mHistory.mMonthDayPrice = counter.monthP;
+    data.mHistory.mWeekDayPrice = counter.weekP;
+    data.mHsgtData.mVolTotal = counter.foreign_vol;
+    data.mHsgtData.mVolMutablePercent = counter.foreign_percent;
+    data.mHsgtData.mVolCh1 = counter.foreign_ch1;
+    data.mHsgtData.mVolCh5 = counter.foreign_ch5;
+    data.mHsgtData.mVolCh10 = counter.foreign_ch10;
     //emit signalUpdateShareHistoryFinished(code);
 }
 
@@ -545,9 +546,9 @@ void HqInfoService::slotUpdateHistoryChange(const QString &code)
 
 void HqInfoService::slotSetFavCode(const QString &code)
 {
-    ShareData* data = getShareData(code);
-    data->mIsFav = !(data->mIsFav);
-    emit signalSaveFavCode(code, data->mIsFav);
+    ShareData& data = getShareData(code);
+    data.mIsFav = !(data.mIsFav);
+    emit signalSaveFavCode(code, data.mIsFav);
 }
 
 void HqInfoService::slotSaveFavCode(const QString &code, bool fav)
@@ -565,7 +566,7 @@ void HqInfoService::slotSaveFavCode(const QString &code, bool fav)
     return;
 }
 
-ShareData* HqInfoService::getShareData(const QString &code)
+ShareData& HqInfoService::getShareData(const QString &code)
 {
     QMutexLocker locker(&mShareMutex);
     SHARE_DATA_TYPE type = ShareData::shareType(code);
@@ -577,12 +578,12 @@ ShareData* HqInfoService::getShareData(const QString &code)
         data.mShareType = type;
         mRealShareData[wkCode] = data;
     }
-    return (ShareData*)(&mRealShareData[wkCode]);
+    return mRealShareData[wkCode];
 }
 
  ShareDataList HqInfoService::getShareDataList()
  {
-//     QMutexLocker locker(&mShareMutex);
+     QMutexLocker locker(&mShareMutex);
      return mRealShareData.values();
  }
 
@@ -666,12 +667,9 @@ void HqInfoService::slotQueryShareFinanceList(const QStringList& codes)
     FinancialDataList list;
     if(!mDataBase.queryShareFinance(list, codes)) return;
     foreach (FinancialData data, list) {
-        ShareData* share = getShareData(data.mCode.right(6));
-        if(share)
-        {
-            share->mFinanceData = data;
+        ShareData& share = getShareData(data.mCode.right(6));
+        share.mFinanceData = data;
 //            qDebug()<<share->mFinanceData.mCode<<share->mFinanceData.mROE<<share->mFinanceData.mEPS<<;
-        }
     }
 
 }
@@ -711,11 +709,8 @@ void HqInfoService::slotQueryShareFHSP(const QString &code, const ShareWorkingDa
         dateList.append(QDate(year, 12, 31).toString("yyyy-MM-dd"));
         foreach (ShareBonus data, list) {
             if(!dateList.contains(data.mDate.toString())) continue;
-            ShareData* share = getShareData(data.mCode.right(6));
-            if(share)
-            {
-                share->mBonusData  = data;
-            }
+            ShareData& share = getShareData(data.mCode.right(6));
+            share.mBonusData  = data;
         }
     }
 

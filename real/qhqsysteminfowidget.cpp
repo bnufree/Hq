@@ -1,4 +1,4 @@
-#include "qhqsysteminfowidget.h"
+﻿#include "qhqsysteminfowidget.h"
 #include "ui_qhqsysteminfowidget.h"
 #include "dbservices/dbservices.h"
 #include "basic_info/qshareactivedateupdatethread.h"

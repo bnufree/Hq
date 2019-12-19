@@ -73,14 +73,14 @@ void QShareHsgtTop10Work::run()
 
 bool QShareHsgtTop10Work::getDataFromEastMoney(ShareHsgtList &list, const ShareWorkingDate &date)
 {
-    //从网络获取
+    //从网络获取.
     QString url = QString("http://dcfm.eastmoney.com//EM_MutiSvcExpandInterface/api/js/get?type=HSGTCJB&token=70f12f2f4f091e459a279469fe49eca5&filter=(DetailDate=^%1^)&js=(x)&sr=1&st=Rank&rt=50014200")
             .arg(date.toString());
     QJsonParseError err;
     QJsonDocument doc = QJsonDocument::fromJson(QHttpGet().getContentOfURL(url), &err);
     if(err.error != QJsonParseError::NoError) return false;
     if(!doc.isArray())  return false;
-    //开始解析
+    //开始解析.
     ShareHsgtList resList;
     QJsonArray result = doc.array();
     for(int i=0; i<result.size(); i++)

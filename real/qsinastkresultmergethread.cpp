@@ -24,6 +24,33 @@ void QSinaStkResultMergeThread::setShareCodes(const QStringList &list)
     QMutexLocker locker(&mCodeMutex);
     mIsCodeChg = true;
     mAllShareCodesList = list;
+    //重新生成行情信息线程
+    //先取消所有线程
+    while (mSubThreadList.size() > 0)
+    {
+        QSinaStkInfoThread* thread = mSubThreadList.takeFirst();
+        thread->cancel();
+    }
+    //生成新的线程
+    int list_size = 6;
+    int thread_code = 100 * list_size;
+    int nthread = (mAllShareCodesList.length() + thread_code-1 ) / thread_code;
+    for(int i=0; i<nthread; i++)
+    {
+        QList<QStringList> llist;
+        int start = i*thread_code;
+        for(int k=0; k<list_size; k++)
+        {
+            int unit = thread_code / list_size;
+            QStringList wklist = mAllShareCodesList.mid(start + k*unit, unit);
+            llist.append(wklist);
+        }
+
+        QSinaStkInfoThread *wkthread = new QSinaStkInfoThread(llist, false);
+        connect(wkthread, SIGNAL(finished()), wkthread, SLOT(deleteLater()));
+        mSubThreadList.append(wkthread);
+        wkthread->start();
+    }
 }
 
 QSinaStkResultMergeThread::~QSinaStkResultMergeThread()
@@ -65,36 +92,17 @@ void QSinaStkResultMergeThread::setSortType(int type)
     mParamChange = true;
 }
 
+ShareDataList QSinaStkResultMergeThread::getDataList(int& page, int& pageSize)
+{
+    QMutexLocker locker(&mListMutex);
+    page = mCurPage;
+    pageSize = mPageSize;
+    return mResDataList;
+}
+
 void QSinaStkResultMergeThread::run()
 {
-    QList<QSinaStkInfoThread*> hqInfoThreadList;
     while (true) {
-        //检查当前的代码是否发生了变化
-        if(mIsCodeChg)
-        {
-            QMutexLocker locker(&mCodeMutex);
-            //重新生成行情信息线程
-            //先取消所有线程
-            while (hqInfoThreadList.size() > 0)
-            {
-                QSinaStkInfoThread* thread = hqInfoThreadList.takeFirst();
-                thread->cancel();
-            }
-            //生成新的线程
-            int nthread = 10;
-            int thread_code = (mAllShareCodesList.length() + nthread-1 ) / nthread;
-            for(int i=0; i<nthread; i++)
-            {
-                QStringList wklist = mAllShareCodesList.mid(i*thread_code, thread_code);
-                QSinaStkInfoThread *wkthread = new QSinaStkInfoThread(wklist, false);
-                connect(wkthread, SIGNAL(finished()), wkthread, SLOT(deleteLater()));
-                hqInfoThreadList.append(wkthread);
-                wkthread->start();
-            }
-            mIsCodeChg = false;
-        }
-
-//        qDebug()<<"start update list"<<QDateTime::currentDateTime();
         QTime t;
         t.start();
         ShareDataList wklist;
@@ -131,21 +139,14 @@ void QSinaStkResultMergeThread::run()
             {
                 qSort(wklist.begin(), wklist.end(), ShareData::ShareSort);
             }
-            if(mActive)
-            {
-                ShareDataList mid = wklist.mid((mCurPage - 1) * mPageSize, mPageSize);
-                //qDebug()<<"mid:"<<mid.length();
-                emit sendStkDataList(mCurPage, mPageSize, mid, QDateTime::currentMSecsSinceEpoch());
-            }
-        } else
-        {
-            emit sendStkDataList(mCurPage, mPageSize, ShareDataList(), QDateTime::currentMSecsSinceEpoch());
         }
-        //qDebug()<<"update list info end:"<<t.elapsed();
+
+        QMutexLocker locker(&mListMutex);
+        mResDataList = wklist.mid((mCurPage - 1) * mPageSize, mPageSize);
 
         if(!mParamChange)
         {
-            msleep(500);
+//            msleep(1000);
         } else
         {
             mParamChange = false;
@@ -225,7 +226,7 @@ void QSinaStkResultMergeThread::setCurPage(int page)
 
 void QSinaStkResultMergeThread::setDisplayPage(int val)
 {
-    qDebug()<<"set page:"<<val<<QDateTime::currentDateTime();
+    qDebug()<<"set page:"<<val<<QDateTime::currentDateTime().toString("hh:mm:ss");
     if(val == FIRST_PAGE)
     {
         displayFirst();

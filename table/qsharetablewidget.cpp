@@ -8,7 +8,7 @@
 #include "hqtaskmagrcenter.h"
 
 
-QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
+QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent), mUpdateTimer(0)
 {
     //设定抬头
     TableColDataList datalist;
@@ -56,12 +56,30 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
     connect(HQTaskMagrCenter::instance(), SIGNAL(signalSendAllShareCodesList(QStringList)),
             this, SLOT(slotRecvAllShareCodes(QStringList)));
 
+
 }
 
 
 void QShareTablewidget::slotRecvAllShareCodes(const QStringList &list)
 {
     if(mMergeThread) mMergeThread->setShareCodes(list);
+    if(mUpdateTimer)
+    {
+        mUpdateTimer->stop();
+        mUpdateTimer->deleteLater();
+    }
+    mUpdateTimer = new QTimer(this);
+    mUpdateTimer->setInterval(2000);
+    connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdateTimeOut()));
+    mUpdateTimer->start();
+}
+
+void QShareTablewidget::slotUpdateTimeOut()
+{
+    int page, pagesize;
+
+    ShareDataList list = mMergeThread->getDataList(page, pagesize);
+    setDataList(page, pagesize, list, QDateTime::currentMSecsSinceEpoch());
 }
 
 void QShareTablewidget::setDataList(int page, int  pagesize, const ShareDataList &list, qint64 time)

@@ -58,7 +58,7 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
 //    grabGesture(Qt::PanGesture);
     grabGesture(Qt::TapAndHoldGesture);
     //根据当前屏幕的大小来设定显示的行高和列宽
-    mRowHeight = HqUtils::convertMM2Pixel(8);
+    mRowHeight = HqUtils::convertMM2Pixel(12);
     QRect rect = QApplication::desktop()->availableGeometry();
     QFont font = this->font();
     font.setBold(false);
@@ -633,7 +633,7 @@ void HqTableWidget::optMoveTable(OPT_MOVE_MODE mode, int step)
 } else if(mode == OPT_UP)
 {
     //向上滑动，显示下面的列
-    qDebug()<<"display next now"<<QDateTime::currentDateTime();
+    qDebug()<<"display next now"<<QDateTime::currentDateTime().toString("hh:mm:ss");
     displayNextPage();
     mDisplayRowStart = 0;
     mDisplayRowEnd = mPageSize-1;

@@ -10,7 +10,7 @@
 #include "qeastmoneyzjlxthread.h"
 #include "qsinastkinfothread.h"
 
-class ShareData;
+struct ShareData;
 
 
 class QSinaStkResultMergeThread : public QThread
@@ -27,10 +27,11 @@ public:
     void displayNext();
     void displayPrevious();
     void displayLast();
+    ShareDataList  getDataList(int& page, int& pageSize);
 
 signals:
 
-protected:
+protected slots:
     void run();
 
 public slots:
@@ -53,7 +54,6 @@ private:
     MKT_TYPE                                                mMktType;
     QList<QStringList>                                      mSecCodesList;
     QMutex                                                  mSecCodesLock;
-    QMap<QString, ShareData>                                mMidStkDataMapList;
     bool                                                    mActive;
     QMutex                                                  mListMutex;
     QStringList                                             mSelfCodesList;
@@ -63,6 +63,8 @@ private:
     QStringList                                             mAllShareCodesList;
     QMutex                                                  mCodeMutex;
     bool                                                    mParamChange;
+    QList<QSinaStkInfoThread*>                              mSubThreadList;
+    ShareDataList                                           mResDataList;
 };
 
 #endif // QSINASTKRESULTMERGETHREAD_H

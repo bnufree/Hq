@@ -8,7 +8,7 @@ class QSinaStkInfoThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit QSinaStkInfoThread(const QStringList& list, bool send, QObject *parent = 0);
+    explicit QSinaStkInfoThread(const QList<QStringList>& list, bool send, QObject *parent = 0);
     ~QSinaStkInfoThread();
     int  getStkCount();
     void    cancel() {mCancel = true;}
@@ -18,11 +18,11 @@ protected:
 signals:
     void    sendStkDataList(const ShareDataList& list);
 public:
-    void    setStkList(const QStringList& list);
+    void    setStkList(const QList<QStringList>& list);
 private:
     void    slotRecvHttpContent(const QByteArray& bytes);
 private:
-    QStringList mStkList;
+    QList<QStringList> mStkList;
     bool        mSendResFlag;
     bool        mCancel;
 };

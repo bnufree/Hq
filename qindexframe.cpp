@@ -1,17 +1,21 @@
-#include "qindexframe.h"
+﻿#include "qindexframe.h"
 #include "ui_qindexframe.h"
 #include <QDebug>
 #include "data_structure/hqutils.h"
 
+int         frameWidth = 0;
 QIndexFrame::QIndexFrame(const QString& name, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::QIndexFrame)
 {
     ui->setupUi(this);
-    ui->name->setText(name.trimmed());
-
     setFixedSize(calSize());
     qDebug()<<"fix size:"<<this->size();
+    ui->name->setText(name.trimmed());
+    ui->cur->clear();
+    ui->chg->clear();
+    ui->chgper->clear();
+    ui->money->clear();
 }
 
 QIndexFrame::~QIndexFrame()
@@ -41,6 +45,7 @@ QSize QIndexFrame::calSize() const
     width += QFontMetrics(font).width(tr("+10.12%"));
     width += QFontMetrics(font).width(tr("10000亿"));
     width += 18;
+    frameWidth = width;
     return QSize(width, total_height);
 }
 
@@ -49,6 +54,21 @@ void QIndexFrame::setName(const QString &name)
 {
     ui->name->setText(name);
 }
+
+void QIndexFrame::updateData(const IndexFrameData& data)
+{
+    if(data.mType == 1)
+    {
+        ui->name->setVisible(true);
+        ui->cur->setVisible(true);
+        ui->name->setText(data.mName);
+        updateVal(data.mCur, data.mChg, data.mChgPer, data.mTotal);
+    } else
+    {
+        updateBound(data.mCur, data.mName);
+    }
+}
+
 
 void QIndexFrame::updateVal(double cur, double chg, double chgper, double money)
 {

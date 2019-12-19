@@ -1,4 +1,4 @@
-#include "zchxmainwindow.h"
+﻿#include "zchxmainwindow.h"
 #include "ui_zchxmainwindow.h"
 #include "real/qnorthflowinfodisplaywidget.h"
 #include "real/qhqsysteminfowidget.h"
@@ -15,15 +15,16 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
     ui(new Ui::zchxMainWindow)
 {
     ui->setupUi(this);
-//    this->setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
-    //添加实时数据到左侧
-    ui->left_frame->layout()->addWidget(new QShareTablewidget(this));
+    this->setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
+
     //添加实时北向曲线
     ui->right_frame->layout()->addWidget(new QNorthFlowInfoDisplayWidget);
-//    //状态栏添加实时指数
+    //状态栏添加实时指数
     statusBar()->addPermanentWidget(new QIndexWidget(this), QApplication::desktop()->availableGeometry().width() * 0.66);
     //状态栏添加系统时间
     statusBar()->addPermanentWidget(new QHqSystemInfoWidget(this));
+    //添加实时数据到左侧
+    ui->left_frame->layout()->addWidget(new QShareTablewidget(this));
     //添加图标
     QIcon appIcon = QIcon(":/icon/image/Baidu_96px.png");
     this->setWindowIcon(appIcon);
