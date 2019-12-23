@@ -46,8 +46,10 @@ void QHqIndexThread::run()
             }
         }
 //        emit signalSendIndexDataList(datalist, QDateTime::currentMSecsSinceEpoch());
-        QMutexLocker locker(&mMutex);
-        mDataList = datalist;
+        {
+            QMutexLocker locker(&mMutex);
+            mDataList = datalist;
+        }
         QThread::sleep(2);
     }
 

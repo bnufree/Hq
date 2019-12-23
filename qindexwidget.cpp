@@ -285,7 +285,7 @@ void QIndexWidget::updateData(const ShareHsgtList &list)
 
 void QIndexWidget::updateData(const ShareDataList &list, qint64 time)
 {
-    qDebug()<<"update index:"<<QDateTime::fromMSecsSinceEpoch(time).toString("hh:mm:ss")<<QDateTime::currentDateTime().toString("hh:mm:ss");
+//    qDebug()<<"update index:"<<QDateTime::fromMSecsSinceEpoch(time).toString("hh:mm:ss")<<QDateTime::currentDateTime().toString("hh:mm:ss");
     QTime t;
     t.start();
     foreach (ShareData temp, list) {

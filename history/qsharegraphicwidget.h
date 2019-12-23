@@ -19,10 +19,11 @@ class QShareGraphicWidget : public QWidget
     Q_OBJECT
 public:
     explicit QShareGraphicWidget(QWidget *parent = 0);
-    explicit QShareGraphicWidget(const QString& title = QString(), const QColor& = Qt::red, QWidget* parent = 0);
+    explicit QShareGraphicWidget(const QString& title , const QColor& = Qt::red, QWidget* parent = 0);
     void    setTitle(const QString& title) {mTitle = title; update();}
     void    setColor(const QColor& color) {mColor = color;update();}
     void    setType(int type) {mType = type;update();}
+public slots:
     void    setCode(const QString& code) {mCode = code; updateGraphic();}
 public slots:
     void    setValue(const GRAPHIC_DATA_LIST& vals) {mData = vals; update();}

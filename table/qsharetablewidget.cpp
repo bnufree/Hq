@@ -348,5 +348,5 @@ void QShareTablewidget::slotCellClicked(int row, int col)
     QTableWidgetItem *item = this->item(row, 0);
     if(!item) return;
     QString code = item->data(Qt::UserRole).toString();
-    emit signalDisplayDetailOfCode(code);
+    emit signalDisplayDetailOfCode(code.right(6));
 }

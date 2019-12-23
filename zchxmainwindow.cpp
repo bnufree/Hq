@@ -9,22 +9,33 @@
 #include "table/qsharetablewidget.h"
 #include "hqtaskmagrcenter.h"
 #include <QSystemTrayIcon>
+#include "history/qsharegraphicwidget.h"
+#include <QSplitter>
 
 zchxMainWindow::zchxMainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::zchxMainWindow)
 {
     ui->setupUi(this);
-    this->setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
+//    this->setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
+    QSplitter *main = new QSplitter(Qt::Horizontal, this);
+    ui->centralwidget->layout()->addWidget(main);
+    //添加实时数据到左侧
+    main->addWidget(mHqList = new QShareTablewidget(ui->centralwidget));
+
+    QFrame *right = new QFrame(main);
+    right->setLayout(new QVBoxLayout);
+    main->setStretchFactor(0, 1);
+    main->setStretchFactor(1, 1);
 
     //添加实时北向曲线
-    ui->right_frame->layout()->addWidget(new QNorthFlowInfoDisplayWidget);
+    right->layout()->addWidget(new QNorthFlowInfoDisplayWidget);
+    right->layout()->addWidget(mShareGraphicWidget = new QShareGraphicWidget(ui->centralwidget));
     //状态栏添加实时指数
     statusBar()->addPermanentWidget(new QIndexWidget(this), QApplication::desktop()->availableGeometry().width() * 0.66);
     //状态栏添加系统时间
-    statusBar()->addPermanentWidget(new QHqSystemInfoWidget(this));
-    //添加实时数据到左侧
-    ui->left_frame->layout()->addWidget(new QShareTablewidget(this));
+//    statusBar()->addPermanentWidget(new QHqSystemInfoWidget(this));
+
     //添加图标
     QIcon appIcon = QIcon(":/icon/image/Baidu_96px.png");
     this->setWindowIcon(appIcon);
@@ -35,6 +46,8 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
 
     //启动系统巡演
     HQTaskMagrCenter::instance()->start();
+    connect(mHqList, SIGNAL(signalSetDisplayHSHK(QString)), mShareGraphicWidget, SLOT(setCode(QString)));
+    connect(mHqList, SIGNAL(signalDisplayDetailOfCode(QString)), mShareGraphicWidget, SLOT(setCode(QString)));
 }
 
 zchxMainWindow::~zchxMainWindow()
@@ -45,7 +58,6 @@ zchxMainWindow::~zchxMainWindow()
 void zchxMainWindow::resizeEvent(QResizeEvent *e)
 {
     QMainWindow::resizeEvent(e);
-    ui->right_frame->setFixedWidth(e->size().width()* 0.25);
 }
 
 void zchxMainWindow::closeEvent(QCloseEvent *e)

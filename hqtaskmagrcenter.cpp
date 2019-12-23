@@ -132,7 +132,7 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     mHistoryInfoMgr = new QShareHistoryInfoMgr(codes);
     connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SIGNAL(signalUpdateHistoryMsg(QString)));
     connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryFinished()), this, SLOT(slotUpdateHistoryFinished()));
-//    mHistoryInfoMgr->signalStartGetHistory();
+    mHistoryInfoMgr->signalStartGetHistory();
     return;
     //板块行情初始化
     mBlockMgr = new QEastMoneyBlockMangagerThread();

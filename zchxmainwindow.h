@@ -8,6 +8,8 @@ namespace Ui {
 class zchxMainWindow;
 }
 
+class QShareTablewidget;
+class QShareGraphicWidget;
 class zchxMainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -25,6 +27,8 @@ protected:
 
 private:
     Ui::zchxMainWindow *ui;
+    QShareTablewidget       *mHqList;
+    QShareGraphicWidget     *mShareGraphicWidget;
 };
 
 #endif // ZCHXMAINWINDOW_H

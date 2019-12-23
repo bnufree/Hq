@@ -130,7 +130,11 @@ void QSinaStkResultMergeThread::run()
                 }
             }
         }
-        mTotalPage = (wklist.length() + mPageSize -1) / mPageSize;
+        mTotalPage = 0;
+        if(mPageSize > 0)
+        {
+            mTotalPage = (wklist.length() + mPageSize -1) / mPageSize;
+        }
 
         if(wklist.length())
         {
@@ -140,9 +144,11 @@ void QSinaStkResultMergeThread::run()
                 qSort(wklist.begin(), wklist.end(), ShareData::ShareSort);
             }
         }
+        {
 
-        QMutexLocker locker(&mListMutex);
-        mResDataList = wklist.mid((mCurPage - 1) * mPageSize, mPageSize);
+            QMutexLocker locker(&mListMutex);
+            mResDataList = wklist.mid((mCurPage - 1) * mPageSize, mPageSize);
+        }
 
         if(!mParamChange)
         {

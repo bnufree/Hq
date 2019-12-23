@@ -203,6 +203,18 @@ void QShareGraphicWidget::paintEvent(QPaintEvent *e)
         {
             price_path.lineTo(QPointF(x, max_y - mData[i].mClose * height_per_price));
             vol_path.lineTo(QPointF(x, max_y - mData[i].mForVol * height_per_vol));
+            //开始画柱状图形
+            double  subVol = mData[i].mForVol - mData[i-1].mForVol;
+            QRectF rect(0, 0, unit_width, fabs(subVol * height_per_vol) * 4 );
+            rect.moveBottomRight(QPointF(x+ 0.5*unit_width, max_y));
+            {
+                painters.save();
+                Qt::GlobalColor color = (subVol >= 0? Qt::red : Qt::green);
+                painters.setPen(color);
+                painters.setBrush(color);
+                painters.drawRect(rect);
+                painters.restore();
+            }
         }
 
         if(i==0 ||i==size-1)
