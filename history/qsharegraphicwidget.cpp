@@ -7,7 +7,7 @@ QShareGraphicWidget::QShareGraphicWidget(QWidget *parent) : QWidget(parent)
 {
     qRegisterMetaType<GRAPHIC_DATA>("const GRAPHIC_DATA&");
     qRegisterMetaType<GRAPHIC_DATA_LIST>("const GRAPHIC_DATA_LIST&");
-    mDate = QDate(QDate::currentDate().year(), 1, 1);
+    mDate = QDate::currentDate().addMonths(-1);
     qDebug()<<"init date:"<<mDate;
 }
 QShareGraphicWidget::QShareGraphicWidget(const QString &title, const QColor &, QWidget *parent)
@@ -152,7 +152,7 @@ void QShareGraphicWidget::paintEvent(QPaintEvent *e)
     int size = mData.size();
 //    if(size > 100)
     {
-        unit_width = draw_rect.width() * 1.0 / (size - 1);
+        unit_width = draw_rect.width() * 1.0 / size;
     }
     //开始画坐标轴网格
     drawRect(&painters, draw_rect, 2, Qt::SolidLine, Qt::white, Qt::transparent);
@@ -205,7 +205,7 @@ void QShareGraphicWidget::paintEvent(QPaintEvent *e)
             vol_path.lineTo(QPointF(x, max_y - mData[i].mForVol * height_per_vol));
             //开始画柱状图形
             double  subVol = mData[i].mForVol - mData[i-1].mForVol;
-            QRectF rect(0, 0, unit_width, fabs(subVol * height_per_vol) * 4 );
+            QRectF rect(0, 0, unit_width, fabs(subVol * height_per_vol * 3) );
             rect.moveBottomRight(QPointF(x+ 0.5*unit_width, max_y));
             {
                 painters.save();
