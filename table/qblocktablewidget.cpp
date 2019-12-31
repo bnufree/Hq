@@ -1,5 +1,6 @@
 ﻿#include "qblocktablewidget.h"
 #include <QDebug>
+#include "block/qeastmoneyblockmangagerthread.h"
 
 QBlockTableWidget::QBlockTableWidget(QWidget *parent) : HqTableWidget(parent)
 {
@@ -9,6 +10,17 @@ QBlockTableWidget::QBlockTableWidget(QWidget *parent) : HqTableWidget(parent)
     datalist.append(TableColData(QStringLiteral("涨跌"), STK_DISPLAY_SORT_TYPE_CHGPER));
     setHeaders(datalist);
     initMenu();
+    //板块行情初始化
+    mBlockMgr = new QEastMoneyBlockMangagerThread();
+    connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataList)), this, SLOT(setDataList(BlockDataList)));
+    mBlockMgr->start();
+
+    return;
+}
+
+void QBlockTableWidget::setSortType(int type)
+{
+    if(mBlockMgr) mBlockMgr->reverseSortRule();
 }
 
 void QBlockTableWidget::setDataList(const BlockDataList &list)
@@ -17,7 +29,7 @@ void QBlockTableWidget::setDataList(const BlockDataList &list)
     int i = 0;
     foreach (BlockData data, list) {
         int k =0;
-        this->setRowHeight(i, 20);
+//        this->setRowHeight(i, 20);
         this->setItemText(i, k++, data.mName);
         this->setItemText(i, k++, QString("%1%").arg(data.mChangePercent, 0, 'f', 2 ));
         this->updateFavShareIconOfRow(i, data.mIsFav);
@@ -27,7 +39,7 @@ void QBlockTableWidget::setDataList(const BlockDataList &list)
     }
 }
 
-void QBlockTableWidget::slotCellDoubleClicked(int row, int col)
+void QBlockTableWidget::slotCellClicked(int row, int col)
 {
     QTableWidgetItem *item = this->item(row, col);
     if(!item) return;
@@ -38,8 +50,12 @@ void QBlockTableWidget::slotCellDoubleClicked(int row, int col)
     }
 
     QStringList codes = item->data(Qt::UserRole).toStringList();
-    qDebug()<<"block codes:"<<codes;
     emit signalDisplayBlockDetailCodesList(codes);
+}
+
+void QBlockTableWidget::slotCellDoubleClicked(int row, int col)
+{
+
 
 }
 
@@ -74,5 +90,6 @@ void QBlockTableWidget::setBlockType()
     if(!act) return;
     int type = act->data().toInt();
     emit signalSetBlockType(type);
+    mBlockMgr->setCurBlockType(type);
 
 }

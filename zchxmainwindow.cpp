@@ -7,6 +7,7 @@
 #include <QDesktopWidget>
 #include <QApplication>
 #include "table/qsharetablewidget.h"
+#include "table/qblocktablewidget.h"
 #include "hqtaskmagrcenter.h"
 #include <QSystemTrayIcon>
 #include "history/qsharegraphicwidget.h"
@@ -18,15 +19,18 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 //    this->setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
-    QSplitter *main = new QSplitter(Qt::Horizontal, this);
-    ui->centralwidget->layout()->addWidget(main);
-    //添加实时数据到左侧
-    main->addWidget(mHqList = new QShareTablewidget(ui->centralwidget));
-
-    QFrame *right = new QFrame(main);
+    ui->centralwidget->layout()->addWidget(mBlockTableWidget = new QBlockTableWidget(ui->centralwidget));
+    ui->centralwidget->layout()->addWidget(mHqList = new QShareTablewidget(ui->centralwidget));
+    QFrame *right = new QFrame(ui->centralwidget);
     right->setLayout(new QVBoxLayout);
-    main->setStretchFactor(0, 1);
-    main->setStretchFactor(1, 1);
+    ui->centralwidget->layout()->addWidget(right);
+    QHBoxLayout* hlayout = qobject_cast<QHBoxLayout*>(ui->centralwidget->layout());
+    if(hlayout)
+    {
+        hlayout->setStretch(0, 1);
+        hlayout->setStretch(1, 8);
+        hlayout->setStretch(2, 3);
+    }
 
     //添加实时北向曲线
     right->layout()->addWidget(new QNorthFlowInfoDisplayWidget);
@@ -36,6 +40,14 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
     //状态栏添加系统时间
 //    statusBar()->addPermanentWidget(new QHqSystemInfoWidget(this));
 
+
+
+    connect(mHqList, SIGNAL(signalSetDisplayHSHK(QString)), mShareGraphicWidget, SLOT(setCode(QString)));
+    connect(mHqList, SIGNAL(signalDisplayDetailOfCode(QString)), mShareGraphicWidget, SLOT(setCode(QString)));
+    connect(mBlockTableWidget, SIGNAL(signalDisplayBlockDetailCodesList(QStringList)),
+            mHqList, SLOT(setSelfShareCodesList(QStringList)));
+    //启动系统巡演
+    HQTaskMagrCenter::instance()->start();
     //添加图标
     QIcon appIcon = QIcon(":/icon/image/Baidu_96px.png");
     this->setWindowIcon(appIcon);
@@ -44,10 +56,6 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
     systemIcon->setVisible(true);
     connect(systemIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(slotSystemTrayOperation(QSystemTrayIcon::ActivationReason)));
 
-    //启动系统巡演
-    HQTaskMagrCenter::instance()->start();
-    connect(mHqList, SIGNAL(signalSetDisplayHSHK(QString)), mShareGraphicWidget, SLOT(setCode(QString)));
-    connect(mHqList, SIGNAL(signalDisplayDetailOfCode(QString)), mShareGraphicWidget, SLOT(setCode(QString)));
 }
 
 zchxMainWindow::~zchxMainWindow()

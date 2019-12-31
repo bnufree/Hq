@@ -112,7 +112,7 @@ void QShareGraphicWidget::paintEvent(QPaintEvent *e)
     int hor_gap = HqUtils::convertMM2Pixel(5);
     QRect draw_rect = this->rect().marginsAdded(QMargins(-hor_gap, -5, -hor_gap, -5));
     QPainter painters(this);
-    painters.fillRect(this->rect(), Qt::darkGray);
+    painters.fillRect(this->rect(), Qt::transparent);
 
     //计算左边价格的宽度, 右边数量的宽度
     double max_price = mData.mMaxClose * 1.2;
@@ -152,7 +152,8 @@ void QShareGraphicWidget::paintEvent(QPaintEvent *e)
     int size = mData.size();
 //    if(size > 100)
     {
-        unit_width = draw_rect.width() * 1.0 / size;
+        unit_width = draw_rect.width() * 1.0 /
+                size;
     }
     //开始画坐标轴网格
     drawRect(&painters, draw_rect, 2, Qt::SolidLine, Qt::white, Qt::transparent);

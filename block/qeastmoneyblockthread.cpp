@@ -77,19 +77,13 @@ void QEastMoneyBlockThread::slotUpdateBlockInfos()
     {
         //qDebug()<<"rx:"<<rx.cap();
         QString code = rx.cap(1).replace("BK0", replaceStr);
-        BlockData &data = mBlockDataList[code];
-        if(data.mType == HqBaseData::UNDEFINED)
-        {
-            data.mCode = code;
-            data.mType = HqBaseData::BLOCK;
+        BlockData* data = DATA_SERVICE->getBlockDataOfCode(code);
+        if(data){
+            data->mName = rx.cap(2);
+            data->mChangePercent = rx.cap(3).toDouble();
         }
-            data.mName = rx.cap(2);
-            data.mChangePercent = rx.cap(3).toDouble();
-            list.append(data);
         index += (rx.matchedLength()+2);
     }
-    //qDebug()<<__FUNCTION__<<__LINE__<<mBlockDataList.values().length();
-    //emit sendBlockDataList(list);
     return;
 }
 
@@ -130,22 +124,23 @@ void QEastMoneyBlockThread::slotUpdateBlockShare()
         qDebug()<<"block code:"<<data->mCode;
         index += 6;
     }
-//    //开始根据板块代码，获取板块内的所有shares
-//    QThreadPool pool;
-//    pool.setMaxThreadCount(8);
-//    pool.setExpiryTimeout(-1);
-//    foreach (QString key, mBlockDataList.keys()) {
-//        QEastMoneyBlockShareThread *thread = new QEastMoneyBlockShareThread(key);
-//        pool.start(thread);
-//    }
-//    //开始更新实时板块信息
-//    bool active = true;
-//    while(1)
-//    {
-//        if(active) slotUpdateBlockInfos();
-//        QThread::sleep(3);
-//        active  = QActiveDateTime::isCurDateTimeActive();
-//    }
+    //开始根据板块代码，获取板块内的所有shares
+    QThreadPool pool;
+    pool.setMaxThreadCount(8);
+    pool.setExpiryTimeout(-1);
+    foreach (QString key, mBlockDataList.keys()) {
+        QEastMoneyBlockShareThread *thread = new QEastMoneyBlockShareThread(key);
+        pool.start(thread);
+    }
+    qDebug()<<"block share update finished.start update block realtime info";
+    //开始更新实时板块信息
+    bool active = true;
+    while(1)
+    {
+        if(active) slotUpdateBlockInfos();
+        QThread::sleep(3);
+        active  = QActiveDateTime::isCurDateTimeActive();
+    }
 }
 
 

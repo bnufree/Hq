@@ -12,7 +12,7 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent), m
 {
     //设定抬头
     TableColDataList datalist;
-    datalist.append(TableColData(QStringLiteral("序号"), STK_DISPLAY_SORT_TYPE_CODE));
+//    datalist.append(TableColData(QStringLiteral("序号"), STK_DISPLAY_SORT_TYPE_CODE));
     datalist.append(TableColData(QStringLiteral("名称"), STK_DISPLAY_SORT_TYPE_NAME));
 //    datalist.append(TableColData(QStringLiteral(""), STK_DISPLAY_SORT_TYPE_CODE));
     datalist.append(TableColData(QStringLiteral("最新"), STK_DISPLAY_SORT_TYPE_PRICE));
@@ -91,7 +91,7 @@ void QShareTablewidget::setDataList(int page, int  pagesize, const ShareDataList
     int i = 0;
     foreach (ShareData data, list) {
         int k =0;
-        this->setItemText(i, k++, QString::number((page-1)*pagesize + i+1));
+//        this->setItemText(i, k++, QString::number((page-1)*pagesize + i+1));
         this->setCodeName(i, k++, data.mCode, data.mName);
         QColor dis_color = data.mChgPercent > 0 ? Qt::red : data.mChgPercent < 0 ? Qt::green : Qt::white;
         this->setItemText(i, k++, HqUtils::double2Str(data.mCur), dis_color);
@@ -139,6 +139,11 @@ void QShareTablewidget::setShareMarket()
     if(act == NULL) return;
     qDebug()<<"mkt_type:"<<act->data().toInt();
     if(mMergeThread) mMergeThread->setMktType(act->data().toInt());
+}
+
+void QShareTablewidget::setSelfShareCodesList(const QStringList &list)
+{
+    if(mMergeThread) mMergeThread->setSelfCodesList(list);
 }
 
 void QShareTablewidget::setSortType(int type)
@@ -302,7 +307,9 @@ void QShareTablewidget::setDisplayBlockDetail()
     QAction *act = qobject_cast<QAction*> (sender());
     if(act)
     {
-        emit signalSetDisplayBlockDetail(act->data().toStringList());
+        QStringList list = act->data().toStringList();
+        emit signalSetDisplayBlockDetail(list);
+        if(mMergeThread) mMergeThread->setSelfCodesList(list);
     }
 }
 

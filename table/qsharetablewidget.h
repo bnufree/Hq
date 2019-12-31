@@ -16,6 +16,8 @@ public:
     virtual void displayPreviousPage();
     virtual void displayFirstPage();
     virtual void displayLastPage();
+public slots:
+    void    setSelfShareCodesList(const QStringList& list);
 private:
     void    initMenu();
 

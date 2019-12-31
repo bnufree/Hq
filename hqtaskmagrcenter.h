@@ -72,7 +72,6 @@ private:    //本类使用的变量
 
 private:
     QThread                     mWorkThread;
-    QEastMoneyBlockMangagerThread*  mBlockMgr;
     QShareHistoryInfoMgr                *mHistoryInfoMgr;
     QShareActiveDateUpdateThread*       mTimeMonitorThread;
 

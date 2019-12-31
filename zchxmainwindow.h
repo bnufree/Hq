@@ -10,6 +10,8 @@ class zchxMainWindow;
 
 class QShareTablewidget;
 class QShareGraphicWidget;
+class QBlockTableWidget;
+
 class zchxMainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -29,6 +31,7 @@ private:
     Ui::zchxMainWindow *ui;
     QShareTablewidget       *mHqList;
     QShareGraphicWidget     *mShareGraphicWidget;
+    QBlockTableWidget       *mBlockTableWidget;
 };
 
 #endif // ZCHXMAINWINDOW_H

@@ -19,7 +19,6 @@ HQTaskMagrCenter::CGarbo HQTaskMagrCenter::s_Garbo;
 
 HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
     QObject(parent),\
-    mBlockMgr(0),
     mHistoryInfoMgr(0),
     mTimeMonitorThread(0)
 {
@@ -108,12 +107,12 @@ void HQTaskMagrCenter::addSpecialConcern(const QString &code)
 
 void HQTaskMagrCenter::reverseSortRule()
 {
-    if(mBlockMgr)   mBlockMgr->reverseSortRule();
+//    if(mBlockMgr)   mBlockMgr->reverseSortRule();
 }
 
 void HQTaskMagrCenter::setCurBlockType(int type)
 {
-    if(mBlockMgr)   mBlockMgr->setCurBlockType(type);
+//    if(mBlockMgr)   mBlockMgr->setCurBlockType(type);
 }
 
 void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
@@ -133,11 +132,6 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SIGNAL(signalUpdateHistoryMsg(QString)));
     connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryFinished()), this, SLOT(slotUpdateHistoryFinished()));
     mHistoryInfoMgr->signalStartGetHistory();
-    return;
-    //板块行情初始化
-    mBlockMgr = new QEastMoneyBlockMangagerThread();
-    connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataList)), this, SIGNAL(signalBlockDataListUpdated(BlockDataList)));
-    mBlockMgr->start();
     return;
 }
 

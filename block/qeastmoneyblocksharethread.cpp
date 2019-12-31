@@ -34,6 +34,7 @@ void QEastMoneyBlockShareThread::run()
         sharecodeslist.append(ShareData::fullCode(code));
         DATA_SERVICE->setShareBlock(code, mBlockCode);
     }
+
     if(sharecodeslist.length() > 0)
     {
         DATA_SERVICE->setBlockShareCodes(mBlockCode, sharecodeslist);

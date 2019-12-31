@@ -61,11 +61,11 @@ void QEastMoneyBlockMangagerThread::reverseSortRule()
 
 void QEastMoneyBlockMangagerThread::slotRecvBlockDataList(const BlockDataList &list)
 {
+
     foreach (BlockData data, list) {
         if(mBlockDataList.contains(data)) continue;
         mBlockDataList.append(data);
     }
-
 }
 
 void QEastMoneyBlockMangagerThread::slotUpdateBlockInfo()

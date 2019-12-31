@@ -24,7 +24,8 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     mAutoChangePage(false),
     mIsWorkInMini(false),
     mLastWheelTime(0),
-    mPageSize(50)
+    mPageSize(50),
+    mColWidthArray(0)
 
 {
     this->setItemDelegate(new RowDelegate);
@@ -110,9 +111,11 @@ void HqTableWidget::setHeaders(const TableColDataList &list)
     QMenu *menu = new QMenu(QStringLiteral("列表标题"), this);
     mColDataList = list;
     this->setColumnCount(list.length());
+    mColWidthArray = new int[list.length()];
     for(int i=0; i<mColDataList.size(); i++) {
         this->setColumnWidth(i, mColWidth);
         mColDataList[i].mColNum = i;
+#if 0
         if(this->horizontalHeader()->fontMetrics().width(mColDataList[i].mColStr) > mColWidth * 0.8)
         {
             QString str = mColDataList[i].mColStr;
@@ -122,6 +125,14 @@ void HqTableWidget::setHeaders(const TableColDataList &list)
         {
             this->setHorizontalHeaderItem(i, new QStkTableWidgetItem(mColDataList[i].mColStr));
         }
+#else
+        int destWidth = this->horizontalHeader()->fontMetrics().width(mColDataList[i].mColStr) / 0.8;
+        if( destWidth > mColWidth)
+        {
+           this->setColumnWidth(i, destWidth);
+        }
+        this->setHorizontalHeaderItem(i, new QStkTableWidgetItem(mColDataList[i].mColStr));
+#endif
         this->horizontalHeaderItem(i)->setData(COL_TYPE_ROLE, mColDataList[i].mType);
         this->horizontalHeaderItem(i)->setData(COL_SORT_ROLE, QVariant::fromValue((void*) &(mColDataList[i].mRule)));
         QAction *act = new QAction(this);
@@ -135,7 +146,8 @@ void HqTableWidget::setHeaders(const TableColDataList &list)
         {
             this->setColumnHidden(i, true);
         }
-        qDebug()<<"col:"<<mColDataList[i].mColStr<<mColDataList[i].mIsDisplay<<this->isColumnHidden(i);
+        qDebug()<<"col:"<<mColDataList[i].mColStr<<mColDataList[i].mIsDisplay<<this->isColumnHidden(i);        
+        mColWidthArray[i] = this->columnWidth(i);
     }
 
     insertContextMenu(menu);

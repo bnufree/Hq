@@ -102,6 +102,7 @@ private:
     bool                    mIsWorkInMini;
     quint64               mLastWheelTime;
     int                     mPageSize;
+    int*                    mColWidthArray;
 protected:
     int                     mDisplayRowStart;
     int                     mDisplayRowEnd;
