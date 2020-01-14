@@ -12,3 +12,8 @@ QKuaixunListWidget::~QKuaixunListWidget()
 {
     delete ui;
 }
+
+void QKuaixunListWidget::appendData(const KuaiXunList &list)
+{
+
+}
