@@ -11,6 +11,35 @@
 
 
 
+
+struct KuaixunData{
+    enum Source{
+        Source_EastMoney = 0,
+        Source_Ths,
+    };
+
+    QString strid;
+    QString time;
+    QString title;
+    QString url;
+    QString digest;
+    int     source;
+    bool operator <(const KuaixunData &other) const
+    {
+        return time < other.time;
+    }
+
+    bool operator >(const KuaixunData &other) const
+    {
+        return time > other.time;
+    }
+};
+
+typedef QList<KuaixunData> KuaiXunList;
+
+Q_DECLARE_METATYPE(KuaixunData)
+Q_DECLARE_METATYPE(KuaiXunList)
+
 class HqUtils
 {
 

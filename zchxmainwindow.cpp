@@ -12,12 +12,26 @@
 #include <QSystemTrayIcon>
 #include "history/qsharegraphicwidget.h"
 #include <QSplitter>
+#include <QToolButton>
+#include "qandroidbutton.h"
+#include "real/hqkuaixun.h"
 
 zchxMainWindow::zchxMainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::zchxMainWindow)
 {
     ui->setupUi(this);
+    //添加TAB按钮
+    this->statusBar()->addPermanentWidget(new QAndroidButton(QStringLiteral("资讯")));
+    this->statusBar()->addPermanentWidget(new QAndroidButton(QStringLiteral("行情")));
+    this->statusBar()->addPermanentWidget(new QAndroidButton(QStringLiteral("港资")));
+    this->statusBar()->addPermanentWidget(new QAndroidButton(QStringLiteral("龙虎榜")));
+    this->statusBar()->addPermanentWidget(new QAndroidButton(QStringLiteral("新股申购")));
+    HqKuaixun *infoThread = new HqKuaixun(this);
+    connect(infoThread, SIGNAL(signalSendKuaiXun(KuaiXunList)), this, SLOT(slotRecvKuaiXunList(KuaiXunList)));
+    infoThread->start();
+
+#if 0
 //    this->setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
     ui->centralwidget->layout()->addWidget(mBlockTableWidget = new QBlockTableWidget(ui->centralwidget));
     ui->centralwidget->layout()->addWidget(mHqList = new QShareTablewidget(ui->centralwidget));
@@ -55,6 +69,7 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
     systemIcon->setIcon(appIcon);
     systemIcon->setVisible(true);
     connect(systemIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(slotSystemTrayOperation(QSystemTrayIcon::ActivationReason)));
+#endif
 
 }
 
@@ -123,5 +138,15 @@ void zchxMainWindow::slotSystemTrayMenuClicked()
         exit(0);
     }
 
+}
+
+void zchxMainWindow::slotRecvKuaiXunList(const KuaiXunList& list)
+{
+    if(list.size() > 0)
+    {
+        this->statusBar()->showMessage(QString("%1(%2)   %3").arg(list.first().time)
+                                       .arg(list.first().source == KuaixunData::Source_EastMoney ? QStringLiteral("东方财富") : QStringLiteral("同花顺"))
+                                       .arg(list.first().title));
+    }
 }
 

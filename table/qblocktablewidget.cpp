@@ -10,6 +10,7 @@ QBlockTableWidget::QBlockTableWidget(QWidget *parent) : HqTableWidget(parent)
     datalist.append(TableColData(QStringLiteral("涨跌"), STK_DISPLAY_SORT_TYPE_CHGPER));
     setHeaders(datalist);
     initMenu();
+    setPageSize(3000);
     //板块行情初始化
     mBlockMgr = new QEastMoneyBlockMangagerThread();
     connect(mBlockMgr, SIGNAL(signalBlockDataListUpdated(BlockDataList)), this, SLOT(setDataList(BlockDataList)));

@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QSystemTrayIcon>
+#include "data_structure/hqutils.h"
 
 namespace Ui {
 class zchxMainWindow;
@@ -23,6 +24,7 @@ public:
 private slots:
     void slotSystemTrayOperation(QSystemTrayIcon::ActivationReason val);
     void slotSystemTrayMenuClicked();
+    void slotRecvKuaiXunList(const KuaiXunList& list);
 protected:
     void resizeEvent(QResizeEvent* e);
     void closeEvent(QCloseEvent * e);
