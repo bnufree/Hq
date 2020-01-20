@@ -15,12 +15,23 @@
 #include <QToolButton>
 #include "qandroidbutton.h"
 #include "real/hqkuaixun.h"
+#include "qkuaixunlistwidget.h"
 
 zchxMainWindow::zchxMainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::zchxMainWindow)
+    ui(new Ui::zchxMainWindow),
+    mInfoListWidget(0)
 {
     ui->setupUi(this);
+    mWidgetMgr = new QStackedWidget(this);
+    ui->centralwidget->layout()->addWidget(mWidgetMgr);
+    //启动系统巡演
+    HQTaskMagrCenter::instance()->start();
+
+    //快讯信息显示
+    mInfoListWidget = new QKuaixunListWidget(this);
+    mWidgetMgr->addWidget(mInfoListWidget);
+    mWidgetMgr->setCurrentWidget(mInfoListWidget);
     //添加TAB按钮
     this->statusBar()->addPermanentWidget(new QAndroidButton(QStringLiteral("资讯")));
     this->statusBar()->addPermanentWidget(new QAndroidButton(QStringLiteral("行情")));
@@ -29,6 +40,7 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
     this->statusBar()->addPermanentWidget(new QAndroidButton(QStringLiteral("新股申购")));
     HqKuaixun *infoThread = new HqKuaixun(this);
     connect(infoThread, SIGNAL(signalSendKuaiXun(KuaiXunList)), this, SLOT(slotRecvKuaiXunList(KuaiXunList)));
+    connect(infoThread, SIGNAL(signalSendKuaiXun(KuaiXunList)), mInfoListWidget, SLOT(appendData(KuaiXunList)));
     infoThread->start();
 
 #if 0
@@ -50,7 +62,7 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
     right->layout()->addWidget(new QNorthFlowInfoDisplayWidget);
     right->layout()->addWidget(mShareGraphicWidget = new QShareGraphicWidget(ui->centralwidget));
     //状态栏添加实时指数
-    statusBar()->addPermanentWidget(new QIndexWidget(this), QApplication::desktop()->availableGeometry().width() * 0.66);
+    statusBar()->addWidget(new QIndexWidget(this), QApplication::desktop()->availableGeometry().width() * 0.66);
     //状态栏添加系统时间
 //    statusBar()->addPermanentWidget(new QHqSystemInfoWidget(this));
 
@@ -60,8 +72,9 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
     connect(mHqList, SIGNAL(signalDisplayDetailOfCode(QString)), mShareGraphicWidget, SLOT(setCode(QString)));
     connect(mBlockTableWidget, SIGNAL(signalDisplayBlockDetailCodesList(QStringList)),
             mHqList, SLOT(setSelfShareCodesList(QStringList)));
-    //启动系统巡演
-    HQTaskMagrCenter::instance()->start();
+
+#endif
+#ifdef Q_OS_WIN
     //添加图标
     QIcon appIcon = QIcon(":/icon/image/Baidu_96px.png");
     this->setWindowIcon(appIcon);
@@ -142,6 +155,7 @@ void zchxMainWindow::slotSystemTrayMenuClicked()
 
 void zchxMainWindow::slotRecvKuaiXunList(const KuaiXunList& list)
 {
+    return;
     if(list.size() > 0)
     {
         this->statusBar()->showMessage(QString("%1(%2)   %3").arg(list.first().time)

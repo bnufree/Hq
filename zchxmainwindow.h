@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QSystemTrayIcon>
 #include "data_structure/hqutils.h"
+#include <QStackedWidget>
 
 namespace Ui {
 class zchxMainWindow;
@@ -12,6 +13,7 @@ class zchxMainWindow;
 class QShareTablewidget;
 class QShareGraphicWidget;
 class QBlockTableWidget;
+class QKuaixunListWidget;
 
 class zchxMainWindow : public QMainWindow
 {
@@ -34,6 +36,8 @@ private:
     QShareTablewidget       *mHqList;
     QShareGraphicWidget     *mShareGraphicWidget;
     QBlockTableWidget       *mBlockTableWidget;
+    QKuaixunListWidget      *mInfoListWidget;
+    QStackedWidget          *mWidgetMgr;
 };
 
 #endif // ZCHXMAINWINDOW_H

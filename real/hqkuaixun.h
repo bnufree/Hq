@@ -13,6 +13,7 @@ public:
 private:
     void parseEastMoney(KuaiXunList& list);
     void parseThs(KuaiXunList& list);
+    QList<LinkData> getLinkeDataList(const QString& digest);
 signals:
     void signalSendKuaiXun(const KuaiXunList& list);
 public slots:

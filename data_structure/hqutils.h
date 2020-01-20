@@ -11,6 +11,10 @@
 
 
 
+struct LinkData{
+    QString mCode;
+    QString mName;
+};
 
 struct KuaixunData{
     enum Source{
@@ -24,6 +28,7 @@ struct KuaixunData{
     QString url;
     QString digest;
     int     source;
+    QList<LinkData> mLinkDataList;
     bool operator <(const KuaixunData &other) const
     {
         return time < other.time;
@@ -32,6 +37,11 @@ struct KuaixunData{
     bool operator >(const KuaixunData &other) const
     {
         return time > other.time;
+    }
+    QString sourceString() const
+    {
+        if(source == 0) return QStringLiteral("东方财富");
+        return QStringLiteral("同花顺");
     }
 };
 

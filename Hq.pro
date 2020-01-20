@@ -81,7 +81,8 @@ SOURCES += main.cpp\
     real/qhqeastmoneyrealinfothread.cpp \
     real/qhqsysteminfowidget.cpp \
     real/hqkuaixun.cpp \
-    qkuaixunlistwidget.cpp
+    qkuaixunlistwidget.cpp \
+    qhqdisplaywidget.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -152,7 +153,8 @@ HEADERS  += dialog.h \
     real/qhqeastmoneyrealinfothread.h \
     real/qhqsysteminfowidget.h \
     real/hqkuaixun.h \
-    qkuaixunlistwidget.h
+    qkuaixunlistwidget.h \
+    qhqdisplaywidget.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

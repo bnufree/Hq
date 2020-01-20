@@ -23,6 +23,11 @@ void HqKuaixun::run()
         if(list.size() > 0)
         {
             std::stable_sort(list.begin(), list.end(), std::greater<KuaixunData>());
+            {
+                foreach (KuaixunData data, list) {
+                    qDebug()<<data.time<<data.title<<data.sourceString();
+                }
+            }
             emit signalSendKuaiXun(list);
         }
     }
@@ -96,4 +101,12 @@ void HqKuaixun::parseThs(KuaiXunList &resList)
         if(first_id == -1) first_id = new_id;
     }
     if(first_id > 0) last_ths_id = first_id;
+}
+
+QList<LinkData> HqKuaixun::getLinkeDataList(const QString& digest)
+{
+    QList<LinkData> list;
+
+
+    return list;
 }
