@@ -4,6 +4,8 @@
 #include <QDebug>
 #include <QResizeEvent>
 #include <QTextBrowser>
+#include <QScroller>
+#include <QScrollBar>
 
 ConfortableLabel::ConfortableLabel(const QString &text, QWidget *parent) : QLabel(text, parent)
 {
@@ -27,7 +29,7 @@ QInfoWidget::QInfoWidget(const KuaixunData &data, QWidget *parent) : QWidget(par
     sizePolicy.setHeightForWidth(this->sizePolicy().hasHeightForWidth());
     this->setSizePolicy(sizePolicy);
     this->setLayout(new QVBoxLayout);
-    mTitle = new ConfortableLabel(QString("%1 %2").arg(data.time).arg(data.sourceString()), this);
+    mTitle = new ConfortableLabel(QString("%1 %2").arg(data.src_time).arg(data.sourceString()), this);
     mContent = new QTextBrowser(this);
     mContent->insertPlainText(data.digest);
     mContent->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
@@ -44,6 +46,7 @@ void QInfoWidget::setReferWidth(int width)
     setFixedWidth(width);
 //    mContent->updateWidth(width);
     mContent->adjustSize();
+    setWindowFlags(Qt::SubWindow);
 
 }
 
@@ -52,8 +55,16 @@ QKuaixunListWidget::QKuaixunListWidget(QWidget *parent) :
     ui(new Ui::QKuaixunListWidget)
 {
     ui->setupUi(this);
-    ui->mTextBrowser->setDocumentTitle(QStringLiteral("7*24快讯"));
+//    ui->mTextBrowser->setDocumentTitle(QStringLiteral("7*24快讯"));
+#ifndef Q_OS_WIN
+    QScroller::grabGesture(ui->listWidget);
+#endif
     this->setStyleSheet("font-size:12pt;");
+    ui->listWidget->setWrapping(false);
+    ui->listWidget->setWordWrap(true);
+    ui->listWidget->verticalScrollBar()->setVisible(false);
+    ui->listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    ui->listWidget->setSpacing(10);
 }
 
 QKuaixunListWidget::~QKuaixunListWidget()
@@ -68,13 +79,18 @@ void QKuaixunListWidget::appendData(const KuaiXunList &list)
     for(int i=list.size()-1; i>=0; i--)
     {
         KuaixunData data = list.at(i);
-        if(data.strid == mLastDataID){
-            break;
-        }
-        ui->mTextBrowser->append(data.time + "  " + data.sourceString());
-        ui->mTextBrowser->append(data.digest);
-        ui->mTextBrowser->append("\n");
-        mLastDataID = data.strid;
+//        if(data.strid == mLastDataID){
+//            break;
+//        }
+        QStringList content;
+        content.append(data.src_time + "  " + data.sourceString());
+        content.first().append("\n");
+        content.first().append(data.digest);
+//        content.append("\n");
+        ui->listWidget->insertItems(0, content);
+//        ui->mTextBrowser->append(data.digest);
+//        ui->mTextBrowser->append("\n");
+//        mLastDataID = data.strid;
 //        ui->tableWidget->insertRow(0);
 //        QInfoWidget *text = new QInfoWidget(data, this);
 //        ui->tableWidget->setCellWidget(0, 0, text);

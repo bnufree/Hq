@@ -1,10 +1,27 @@
 ﻿#include "qandroidbutton.h"
 #include <QDebug>
+#include <QStyle>
 
 QAndroidButton::QAndroidButton(const QString& label, QWidget *parent) :\
     QLabel(label,parent)
 {
+    mIsSelected = false;
+    mRelatedWidget = 0;
     setMouseTracking(true);
+    setAlignment(Qt::AlignCenter);
+    this->setStyleSheet("\
+                        QLabel[selected=\"true\"]\
+                        {\
+                            color:red;\
+                            font-weight:bold;\
+                        }\
+                        QLabel[selec"
+                        "ted=\"false\"]\
+                        {\
+                            color:white;\
+                            font-weight:normal;\
+                        }\
+                        ");
 }
 
 void QAndroidButton::mousePressEvent(QMouseEvent *ev)
@@ -25,5 +42,17 @@ void QAndroidButton::enterEvent(QEvent *ev)
 {
 //    qDebug()<<__func__<<"$$$$$$$$$$$$$$$$$$$$$$$$$$";
 //    this->setStyleSheet("background-color:red;font-weight:bold;");
+}
+
+bool QAndroidButton::selected() const
+{
+    return mIsSelected;
+}
+
+void QAndroidButton::setSelected(bool sts)
+{
+    mIsSelected = sts;
+    style()->polish(this);
+
 }
 

@@ -27,6 +27,8 @@ private slots:
     void slotSystemTrayOperation(QSystemTrayIcon::ActivationReason val);
     void slotSystemTrayMenuClicked();
     void slotRecvKuaiXunList(const KuaiXunList& list);
+    void slotCtrlBtnClicked();
+    void slotCtrlBtnClicked(QWidget* btn);
 protected:
     void resizeEvent(QResizeEvent* e);
     void closeEvent(QCloseEvent * e);
@@ -38,6 +40,7 @@ private:
     QBlockTableWidget       *mBlockTableWidget;
     QKuaixunListWidget      *mInfoListWidget;
     QStackedWidget          *mWidgetMgr;
+    QWidget                 *mCtrlWidget;
 };
 
 #endif // ZCHXMAINWINDOW_H

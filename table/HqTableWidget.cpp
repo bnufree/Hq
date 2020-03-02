@@ -10,6 +10,7 @@
 #include <math.h>
 #include <QDesktopWidget>
 #include "data_structure/hqutils.h"
+#include <QScroller>
 
 #define     COL_TYPE_ROLE               Qt::UserRole + 1
 #define     COL_SORT_ROLE               Qt::UserRole + 2
@@ -57,9 +58,13 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
 //    grabGesture(Qt::TapGesture);
 //    grabGesture(Qt::SwipeGesture);
 //    grabGesture(Qt::PanGesture);
-    grabGesture(Qt::TapAndHoldGesture);
+//    grabGesture(Qt::TapAndHoldGesture);
     //根据当前屏幕的大小来设定显示的行高和列宽
+    mRowHeight = HqUtils::convertMM2Pixel(8);
+#ifdef Q_OS_WIN
     mRowHeight = HqUtils::convertMM2Pixel(12);
+#endif
+
     QRect rect = QApplication::desktop()->availableGeometry();
     QFont font = this->font();
     font.setBold(false);
@@ -77,6 +82,13 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
     //设定item的大小
     //this->setStyleSheet(QString("QTableview::item{height:%1;font-weight:bold;font-size:20pt;}").arg(mRowHeight));
     this->horizontalHeader()->setBackgroundRole(this->backgroundRole());
+//    QScroller::grabGesture(this, QScroller::LeftMouseButtonGesture);
+#ifdef Q_OS_ANDROID
+    QScroller::grabGesture(this, QScroller::TouchGesture);
+#endif
+    this->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    this->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+
 }
 
 bool HqTableWidget::gestureEvent(QGestureEvent *event)
@@ -260,7 +272,7 @@ void HqTableWidget::updateFavShareIconOfRow(int row, bool isFav)
     if(row >= this->rowCount()) return;
     QShareCodeNameWidget * w = static_cast<QShareCodeNameWidget*>(cellWidget(row, 0));
     if(!w) return;
-    w->setFavour(isFav);
+    w->setFavourite(isFav);
     //QString color = isFav ? "magenta" : "white";
     //w->setStyleSheet(QString("color:%1").arg(color));
 }
@@ -376,14 +388,14 @@ void HqTableWidget::slotCellClicked(int row, int col)
 void HqTableWidget::resizeEvent(QResizeEvent *event)
 {
     QTableWidget::resizeEvent(event);
-    QSize size = event->size();
-    qDebug()<<__func__<<__LINE__<<size;
-    mMaxDisplayRow = size.height() / mRowHeight/* + 1*/;
-    mMaxDisplayCol = size.width() / mColWidth;
-    mPageSize = mMaxDisplayRow;
-    emit signalPageSizeChanged(mPageSize);
-    resetDisplayRows();
-    qDebug()<<"maxrow:"<<mMaxDisplayRow<<mDisplayRowStart<<mDisplayRowEnd;
+//    QSize size = event->size();
+//    qDebug()<<__func__<<__LINE__<<size;
+//    mMaxDisplayRow = size.height() / mRowHeight/* + 1*/;
+//    mMaxDisplayCol = size.width() / mColWidth;
+//    mPageSize = mMaxDisplayRow;
+//    emit signalPageSizeChanged(mPageSize);
+//    resetDisplayRows();
+//    qDebug()<<"maxrow:"<<mMaxDisplayRow<<mDisplayRowStart<<mDisplayRowEnd;
 
 #if 0
     for(int i=0; i<this->columnCount(); i++)
@@ -399,16 +411,16 @@ void HqTableWidget::resizeEvent(QResizeEvent *event)
     }
 #endif
 
-    for(int i=2; i<this->columnCount(); i++)
-    {
-        if(i <mMaxDisplayCol)
-        {
-            this->setColumnHidden(i, false);
-        } else
-        {
-            this->setColumnHidden(i, true);
-        }
-    }
+//    for(int i=2; i<this->columnCount(); i++)
+//    {
+//        if(i <mMaxDisplayCol)
+//        {
+//            this->setColumnHidden(i, false);
+//        } else
+//        {
+//            this->setColumnHidden(i, true);
+//        }
+//    }
 
 }
 
@@ -460,6 +472,7 @@ bool HqTableWidget::event(QEvent *event)
 
 void HqTableWidget::mousePressEvent(QMouseEvent *event)
 {
+    return;
     //qDebug()<<__func__<<event;
     mPressPnt = QCursor::pos();
     mMovePnt = mPressPnt;
@@ -469,6 +482,7 @@ void HqTableWidget::mousePressEvent(QMouseEvent *event)
 
 void HqTableWidget::mouseMoveEvent(QMouseEvent *event)
 {
+    return;
 //    qDebug()<<__func__<<event;
 
     //窗口跟着鼠标移动

@@ -2,7 +2,19 @@
 #define QSHARECODENAMEWIDGET_H
 
 #include <QWidget>
-class QLabel;
+#include <QLabel>;
+
+class QFavLabel : public QLabel
+{
+    Q_OBJECT
+    Q_PROPERTY(bool favourite READ favourite WRITE setFavourite)
+public:
+    explicit QFavLabel(const QString& label, QWidget *parent = 0);
+    void setFavourite(bool sts);
+    bool favourite() const {return mIsFav;}
+private:
+    bool         mIsFav;
+};
 
 class QShareCodeNameWidget : public QWidget
 {
@@ -11,7 +23,7 @@ public:
     explicit QShareCodeNameWidget(const QString& code, const QString& name, QWidget *parent = 0);
     void setCode(const QString& str);
     void setName(const QString& str);
-    void setFavour(bool sts);
+    void setFavourite(bool sts);
 private:
     void updateDisplay();
 protected:
@@ -22,7 +34,7 @@ signals:
 public slots:
 
 private:
-    QLabel      *mCodeLbl, *mNameLbl;
+    QFavLabel      *mCodeLbl, *mNameLbl;
 };
 
 #endif // QSHARECODENAMEWIDGET_H

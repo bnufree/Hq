@@ -46,6 +46,7 @@ public:
     ~QKuaixunListWidget();
 public slots:
     void appendData(const KuaiXunList& list);
+protected:
 
 private:
     Ui::QKuaixunListWidget *ui;

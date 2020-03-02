@@ -206,7 +206,7 @@ void QShareGraphicWidget::paintEvent(QPaintEvent *e)
             vol_path.lineTo(QPointF(x, max_y - mData[i].mForVol * height_per_vol));
             //开始画柱状图形
             double  subVol = mData[i].mForVol - mData[i-1].mForVol;
-            QRectF rect(0, 0, unit_width, fabs(subVol * height_per_vol) );
+            QRectF rect(0, 0, unit_width, qAbs(subVol * height_per_vol) );
             rect.moveBottomRight(QPointF(x+ 0.5*unit_width, max_y));
             {
                 painters.save();

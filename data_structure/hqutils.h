@@ -23,7 +23,8 @@ struct KuaixunData{
     };
 
     QString strid;
-    QString time;
+    QString src_time;
+    QString local_time;
     QString title;
     QString url;
     QString digest;
@@ -31,12 +32,16 @@ struct KuaixunData{
     QList<LinkData> mLinkDataList;
     bool operator <(const KuaixunData &other) const
     {
-        return time < other.time;
+        if(local_time < other.local_time) return true;
+        if(local_time == other.local_time) return src_time < other.src_time;
+        return false;
     }
 
     bool operator >(const KuaixunData &other) const
     {
-        return time > other.time;
+        if(local_time > other.local_time) return true;
+        if(local_time == other.local_time) return src_time > other.src_time;
+        return false;
     }
     QString sourceString() const
     {

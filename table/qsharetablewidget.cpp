@@ -133,6 +133,11 @@ void QShareTablewidget::setDataList(int page, int  pagesize, const ShareDataList
     }
 }
 
+void QShareTablewidget::setShareMarketType(int type)
+{
+    if(mMergeThread) mMergeThread->setMktType(type);
+}
+
 void QShareTablewidget::setShareMarket()
 {
     QAction *act = (QAction*)sender();

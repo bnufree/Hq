@@ -7,6 +7,8 @@
 #include(./QtXlsx/QtXlsx.pri)
 QT       += core gui network sql concurrent
 
+CONFIG += c++11
+
 #DEFINES *= Q_QDOC
 #DEFINES *= HQ_RUNNABLE
 
@@ -82,7 +84,9 @@ SOURCES += main.cpp\
     real/qhqsysteminfowidget.cpp \
     real/hqkuaixun.cpp \
     qkuaixunlistwidget.cpp \
-    qhqdisplaywidget.cpp
+    qhqdisplaywidget.cpp \
+    table/zchxhqdisplaywidget.cpp \
+    qpopwindow.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -154,7 +158,9 @@ HEADERS  += dialog.h \
     real/qhqsysteminfowidget.h \
     real/hqkuaixun.h \
     qkuaixunlistwidget.h \
-    qhqdisplaywidget.h
+    qhqdisplaywidget.h \
+    table/zchxhqdisplaywidget.h \
+    qpopwindow.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \
@@ -168,7 +174,9 @@ FORMS    += dialog.ui \
     qsahreoptwidget.ui \
     zchxmainwindow.ui \
     real/qhqsysteminfowidget.ui \
-    qkuaixunlistwidget.ui
+    qkuaixunlistwidget.ui \
+    table/zchxhqdisplaywidget.ui \
+    qpopwindow.ui
 
 RESOURCES += \
     image.qrc

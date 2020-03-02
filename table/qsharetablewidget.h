@@ -37,6 +37,7 @@ public slots:
     void    setDataList(int page, int pagesize, const ShareDataList& list, qint64 time);
     void    slotCustomContextMenuRequested(const QPoint &pos);
     void    setShareMarket();
+    void    setShareMarketType(int type);
     void    setDisplayMinuteGraph();
     void    setDisplayDayGraph();
     void    setDisplayBlockDetail();
