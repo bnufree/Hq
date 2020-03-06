@@ -14,6 +14,7 @@ class QShareTablewidget;
 class QShareGraphicWidget;
 class QBlockTableWidget;
 class QKuaixunListWidget;
+class QSystemTrayIcon;
 
 class zchxMainWindow : public QMainWindow
 {
@@ -41,6 +42,7 @@ private:
     QKuaixunListWidget      *mInfoListWidget;
     QStackedWidget          *mWidgetMgr;
     QWidget                 *mCtrlWidget;
+    QSystemTrayIcon         *mSysTrayIcon;
 };
 
 #endif // ZCHXMAINWINDOW_H

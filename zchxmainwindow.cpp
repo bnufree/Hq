@@ -22,6 +22,7 @@
 #include <QDesktopWidget>
 #include "qpopwindow.h"
 #include <QKeyEvent>
+#include <QTextBrowser>
 
 enum zchxBtnIndex{
     Btn_Info = 0,
@@ -36,7 +37,8 @@ enum zchxBtnIndex{
 zchxMainWindow::zchxMainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::zchxMainWindow),
-    mInfoListWidget(0)
+    mInfoListWidget(0),
+    mSysTrayIcon(0)
 {
     ui->setupUi(this);
     mWidgetMgr = new QStackedWidget(this);
@@ -144,10 +146,10 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
     //添加图标
     QIcon appIcon = QIcon(":/icon/image/Baidu_96px.png");
     this->setWindowIcon(appIcon);
-    QSystemTrayIcon* systemIcon = new QSystemTrayIcon(this);
-    systemIcon->setIcon(appIcon);
-    systemIcon->setVisible(true);
-    connect(systemIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(slotSystemTrayOperation(QSystemTrayIcon::ActivationReason)));
+    mSysTrayIcon = new QSystemTrayIcon(this);
+    mSysTrayIcon->setIcon(appIcon);
+    mSysTrayIcon->setVisible(true);
+    connect(mSysTrayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(slotSystemTrayOperation(QSystemTrayIcon::ActivationReason)));
 #endif
 
 //    slotCtrlBtnClicked(mCtrlWidget->layout()->itemAt(0)->widget());
@@ -254,14 +256,23 @@ void zchxMainWindow::slotRecvKuaiXunList(const KuaiXunList& list)
     if(!isHidden())return;
     if(list.size() == 0) return;
     qDebug()<<"recv list pop:"<<list.size();
-    QKuaixunListWidget *widget = new QKuaixunListWidget;
-    widget->appendData(list);
-    widget->setFixedWidth(80);
-    QRect rect = QApplication::desktop()->screenGeometry();
-    widget->move(rect.width() - 100, rect.height() - 40);
-    widget->show();
+    KuaixunData data = list.first();
+    QTextBrowser *browser = new QTextBrowser;
+    browser->setWindowFlags(Qt::SubWindow | Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
+    browser->setWordWrapMode(QTextOption::WordWrap);
+    browser->verticalScrollBar()->setVisible(false);
+    browser->horizontalScrollBar()->setVisible(false);
+    browser->setStyleSheet("background:black;color:white;font-family:Microsoft Yahei;font-size: 12pt; font-weight:bold;");
 
-    QTimer::singleShot(5000, this, [=](){widget->hide(); widget->deleteLater();});
+    browser->append(data.src_time + "  " + data.sourceString());
+    browser->append(data.digest);
+    QRect rect = QApplication::desktop()->availableGeometry();
+    browser->setFixedWidth(rect.width() * 0.2);
+    browser->adjustSize();
+    browser->move(rect.width() - browser->width() - 20, rect.height() - browser->height() - 60);
+    QTimer::singleShot(10*1000, this, [=](){browser->deleteLater();});
+    browser->show();
+
 #endif
 
 }
