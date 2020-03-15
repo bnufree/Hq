@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>541</width>
+    <width>500</width>
     <height>64</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="font">
    <font>
@@ -19,11 +25,27 @@
    </font>
   </property>
   <property name="styleSheet">
-   <string notr="true">QLabel{
+   <string notr="true">QFrame[status=&quot;0&quot;]
+{
+	color:white;
+}
+
+QFrame[status=&quot;1&quot;]
+{
+	color:red;
+}
+
+QFrame[status=&quot;-1&quot;]
+{
+	color:green;
+}
+
+
+
+QLabel{
 	font-family:Microsoft Yahei;
 	font-weight:bold;
 	font-size:20pt;
-	color:red;
 	alignment:center;
 }
 #name,#cur{

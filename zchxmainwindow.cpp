@@ -33,7 +33,6 @@ enum zchxBtnIndex{
     Btn_End,
 };
 
-
 zchxMainWindow::zchxMainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::zchxMainWindow),
@@ -42,18 +41,23 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     mWidgetMgr = new QStackedWidget(this);
+    ui->centralwidget->layout()->addWidget(mWidgetMgr);
+    //添加TAB按钮
+    mCtrlWidget = new QWidget(this);
+    mCtrlWidget->setLayout(new QHBoxLayout);
+    ui->centralwidget->layout()->addWidget(mCtrlWidget);
+    ui->statusbar->setVisible(false);
     //快讯信息显示
     mInfoListWidget = new QKuaixunListWidget(this);
-#ifdef Q_OS_WIN
-    int width = QApplication::desktop()->availableGeometry().width();
-    mInfoListWidget->setFixedWidth(width * 0.25);
-    ui->centralwidget->layout()->addWidget(mInfoListWidget);
-#else
-    mWidgetMgr->addWidget(mInfoListWidget);
-#endif
-    ui->centralwidget->layout()->addWidget(mWidgetMgr);
-    //启动系统巡演
-//    HQTaskMagrCenter::instance()->start();
+    HQTaskMagrCenter::instance()->registerInfoDisplaywidget(mInfoListWidget);
+    createCtrlObject(QStringLiteral("资讯"), mInfoListWidget);
+    createCtrlObject(QStringLiteral("行情中心"), new QShareTablewidget(this));
+    createCtrlObject(QStringLiteral("港资"), new QWidget);
+    createCtrlObject(QStringLiteral("龙虎榜"), new QWidget);
+    createCtrlObject(QStringLiteral("新股申购"), new QWidget);
+
+
+
 
 
 
@@ -82,10 +86,7 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
         mWidgetMgr->addWidget(w);
     }
 
-    //添加TAB按钮
-    mCtrlWidget = new QWidget(this);
-    mCtrlWidget->setLayout(new QHBoxLayout);
-    this->statusBar()->addWidget(mCtrlWidget);
+
     //按钮名称
     QStringList btnTitles;
     btnTitles.append(QStringLiteral("资讯"));
@@ -153,10 +154,10 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
 #endif
 
 //    slotCtrlBtnClicked(mCtrlWidget->layout()->itemAt(0)->widget());
-    HqKuaixun *infoThread = new HqKuaixun(this);
-    connect(infoThread, SIGNAL(signalSendKuaiXun(KuaiXunList)), this, SLOT(slotRecvKuaiXunList(KuaiXunList)));
-    connect(infoThread, SIGNAL(signalSendKuaiXun(KuaiXunList)), mInfoListWidget, SLOT(appendData(KuaiXunList)));
-    infoThread->start();
+    connect(mInfoListWidget, SIGNAL(sendRecvInfoList(KuaiXunList)), this, SLOT(slotRecvKuaiXunList(KuaiXunList)));
+
+
+    HQTaskMagrCenter::instance()->start();
 
 }
 
@@ -167,8 +168,9 @@ zchxMainWindow::~zchxMainWindow()
 
 void zchxMainWindow::resizeEvent(QResizeEvent *e)
 {
+//    if(mCtrlWidget) mCtrlWidget->setFixedWidth(e->size().width()-10);
     QMainWindow::resizeEvent(e);
-//    if(mCtrlWidget) mCtrlWidget->setMinimumWidth(e->size().width()-10);
+
 }
 
 void zchxMainWindow::closeEvent(QCloseEvent *e)
@@ -188,11 +190,14 @@ void zchxMainWindow::closeEvent(QCloseEvent *e)
     }
     last_close_time = current;
 //    statusBar()->showMessage(QStringLiteral("再按一次退出"), 5000);
-    QLabel *label = new QLabel(QStringLiteral("再按一次退出"), ui->centralwidget);
-    label->setWindowFlags(Qt::WindowStaysOnTopHint);
+    QLabel *label = new QLabel(QStringLiteral("再按一次退出"));
+    label->setWindowFlags(Qt::WindowStaysOnTopHint|Qt::SubWindow);
+    label->adjustSize();
+    QRect rect1 = QApplication::desktop()->availableGeometry();
     QRect rect = label->rect();
-    rect.moveCenter(ui->centralwidget->rect().center());
+    rect.moveCenter(rect1.center());
     label->setGeometry(rect);
+    label->show();
     QTimer::singleShot(5000, label, SLOT(deleteLater()));
 
     e->ignore();
@@ -253,7 +258,7 @@ void zchxMainWindow::slotSystemTrayMenuClicked()
 void zchxMainWindow::slotRecvKuaiXunList(const KuaiXunList& list)
 {
 #ifdef Q_OS_WIN
-    if(!isHidden())return;
+//    if(!isHidden())return;
     if(list.size() == 0) return;
     qDebug()<<"recv list pop:"<<list.size();
     KuaixunData data = list.first();
@@ -303,5 +308,18 @@ void zchxMainWindow::slotCtrlBtnClicked(QWidget* w)
         }
 
     }
+}
+
+void zchxMainWindow::createCtrlObject(const QString &title, QWidget *widget)
+{
+    zchxCtrolObject obj;
+    obj.mDisplayWidget = widget;
+    obj.mTitle = title;
+    obj.mBtn = new QAndroidButton(title);
+    obj.mBtn->setRelatedWidget(widget);
+    connect(obj.mBtn, SIGNAL(clicked()), this, SLOT(slotCtrlBtnClicked()));
+    mCtrlWidget->layout()->addWidget(obj.mBtn);
+    mCtrlObjectList.append(obj);
+    mWidgetMgr->addWidget(widget);
 }
 

@@ -1,7 +1,7 @@
 ﻿#ifndef QINDEXFRAME_H
 #define QINDEXFRAME_H
 
-#include <QWidget>
+#include <QFrame>
 
 namespace Ui {
 class QIndexFrame;
@@ -9,11 +9,11 @@ class QIndexFrame;
 
 struct IndexFrameData
 {
-    int mType; //0:沪深港通; 1:指数
-    QString  mCode;
-    QString  mName;
-    double   mCur;
-    double   mChg;
+    int         mType; //0:沪深港通; 1:指数
+    QString     mCode;
+    QString     mName;
+    double      mCur;
+    double      mChg;
     double      mChgPer;
     double      mTotal;
 
@@ -24,13 +24,16 @@ struct IndexFrameData
 
 };
 
-class QIndexFrame : public QWidget
+class QIndexFrame : public QFrame
 {
     Q_OBJECT
-
+    Q_PROPERTY(int status READ status WRITE setStatus)
 public:
     explicit QIndexFrame(const QString& name, QWidget *parent = 0);
-    ~QIndexFrame();\
+    ~QIndexFrame();
+    QString getName() const {return mName;}
+    int status()const;
+    void setStatus(int sts);
     void updateData(const IndexFrameData& data);
     void updateVal(double cur, double chg, double chgper, double money);
     void updateBound(double buy, double sell, double pure, double total);
@@ -42,6 +45,8 @@ protected:
 
 private:
     Ui::QIndexFrame *ui;
+    int             mStatus;
+    QString         mName;
 };
 
 #endif // QINDEXFRAME_H

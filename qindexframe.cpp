@@ -2,20 +2,23 @@
 #include "ui_qindexframe.h"
 #include <QDebug>
 #include "data_structure/hqutils.h"
+#include <QStyle>
 
-int         frameWidth = 0;
+int         frame_Width = 0;
 QIndexFrame::QIndexFrame(const QString& name, QWidget *parent) :
-    QWidget(parent),
+    QFrame(parent),
     ui(new Ui::QIndexFrame)
 {
+    mName = name;
     ui->setupUi(this);
-    setFixedSize(calSize());
-    qDebug()<<"fix size:"<<this->size();
     ui->name->setText(name.trimmed());
     ui->cur->clear();
     ui->chg->clear();
     ui->chgper->clear();
     ui->money->clear();
+    this->setFrameShape(QFrame::NoFrame);
+    setStatus(0);
+    frame_Width = width();
 }
 
 QIndexFrame::~QIndexFrame()
@@ -45,18 +48,20 @@ QSize QIndexFrame::calSize() const
     width += QFontMetrics(font).width(tr("+10.12%"));
     width += QFontMetrics(font).width(tr("10000亿"));
     width += 18;
-    frameWidth = width;
+    frame_Width = width;
     return QSize(width, total_height);
 }
 
 
 void QIndexFrame::setName(const QString &name)
 {
+    mName = name;
     ui->name->setText(name);
 }
 
 void QIndexFrame::updateData(const IndexFrameData& data)
 {
+//    qDebug()<<data.mName<<data.mCur<<data.mChg;
     if(data.mType == 1)
     {
         ui->name->setVisible(true);
@@ -77,10 +82,8 @@ void QIndexFrame::updateVal(double cur, double chg, double chgper, double money)
     ui->chgper->setText(QString("").sprintf("%.2f%", chgper));
     ui->money->setText(QStringLiteral("%1亿").arg(QString::number(money / 100000000.0, 'f', 0)));
     int chgint = (int)(chg*100);
-    QString newColor = QString("color:%1").arg(chgint == 0? "black" : chgint > 0? "red":"green");
-    QString oldStyleSheet = this->styleSheet();
-    oldStyleSheet.replace(QRegularExpression("color:[a-z0-9\\(\\),]{1,}"), newColor);
-    this->setStyleSheet(oldStyleSheet);
+    int sts = (chgint == 0? 0 : chgint > 0? 1: -1);
+    setStatus(sts);
 }
 
 void QIndexFrame::updateBound(double shVal, QString shName, double szVal, QString szName)
@@ -90,16 +93,8 @@ void QIndexFrame::updateBound(double shVal, QString shName, double szVal, QStrin
     ui->chgper->setText(szName);
     ui->money->setText(QStringLiteral("%1亿").arg(QString::number(szVal / 10000.0, 'f', 2)));
     int chgint = (int)(shVal+szVal);
-    this->setStyleSheet(QString("QLabel{"
-                            "font-weight:normal;"
-                                "font-size:18pt;"
-                            "color:%1;"
-                            "alignment:center;"
-                                "}"
-                                "#name,#cur{"
-                                "font-size:10pt;"
-                                "}")
-                        .arg(chgint == 0? "black" : chgint > 0? "red":"green"));
+    int sts = (chgint == 0? 0 : chgint > 0? 1: -1);
+    setStatus(sts);
 }
 
 void QIndexFrame::updateBound(double pure, const QString &name)
@@ -112,10 +107,8 @@ void QIndexFrame::updateBound(double pure, const QString &name)
     ui->chgper->setText(QStringLiteral("%1亿").arg(QString::number(pure / 10000.0, 'f', 2)));
     ui->money->setVisible(false);
     int chgint = (int)(pure);
-    QString newColor = QString("color:%1").arg(chgint == 0? "black" : chgint > 0? "red":"green");
-    QString oldStyleSheet = this->styleSheet();
-    oldStyleSheet.replace(QRegularExpression("color:[a-z0-9\\(\\),]{1,}"), newColor);
-    this->setStyleSheet(oldStyleSheet);
+    int sts = (chgint == 0? 0 : chgint > 0? 1: -1);
+    setStatus(sts);
 }
 
 void QIndexFrame::updateBound(double buy, double sell, double pure, double total)
@@ -125,10 +118,19 @@ void QIndexFrame::updateBound(double buy, double sell, double pure, double total
     ui->chgper->setText(QStringLiteral("净：%1亿").arg(QString::number(pure / 10000.0, 'f', 1)));
     ui->money->setText(QStringLiteral("总：%1亿").arg(QString::number(total / 10000.0, 'f', 0)));
     int chgint = (int)(pure);
-    this->setStyleSheet(QString("QLabel{"
-                            "font-weight:normal;"
-                            "color:%1;"
-                            "alignment:center;"
-                                "}")
-                        .arg(chgint == 0? "black" : chgint > 0? "red":"green"));
+    int sts = (chgint == 0? 0 : chgint > 0? 1: -1);
+    setStatus(sts);
+}
+
+int QIndexFrame::status() const
+{
+    return mStatus;
+}
+
+void QIndexFrame::setStatus(int sts)
+{
+    mStatus = sts;
+//    qDebug()<<ui->name<<ui->chg<<mStatus;
+    style()->polish(this);
+
 }

@@ -48,12 +48,16 @@ public slots:
     void updateData(const ShareHsgtList &list);
     void insertWidget(const QString& code);
     void switchWidget();
+    void updateIndexDataList(const QList<IndexFrameData>& list);
+private:
+    QIndexFrame* frameOfData(const IndexFrameData& data);
 
 private:
-    QTimer*                 mSwitchTimer;
-    int                     mMaxDisplayFrameCount;
-    QList<IndexFrameData>       mDataList;
+    QTimer*                     mSwitchTimer;
+    int                         mMaxDisplayFrameCount;
+    QList<QIndexFrame*>         mWidgetList;
     QHqIndexThread*             mIndexThread;
+
 };
 #endif
 

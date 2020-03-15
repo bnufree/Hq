@@ -7,6 +7,10 @@
 #include(./QtXlsx/QtXlsx.pri)
 QT       += core gui network sql concurrent
 
+win32{
+ QT += webkitwidgets
+}
+
 CONFIG += c++11
 
 #DEFINES *= Q_QDOC

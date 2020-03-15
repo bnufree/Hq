@@ -516,7 +516,7 @@ void Dialog::slotDisplayHqCenterPage(int val)
 {
     QAndroidListWidget* widget = qobject_cast<QAndroidListWidget*>(sender());
     if(!widget || widget != mCtrlListWidget) return;
-    mShareTableWidget->resetDisplayRows();
+//    mShareTableWidget->resetDisplayRows();
     mCtrlListWidget->hide();
     delete mCtrlListWidget;
     mCtrlListWidget = 0;

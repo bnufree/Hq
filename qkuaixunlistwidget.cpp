@@ -6,6 +6,10 @@
 #include <QTextBrowser>
 #include <QScroller>
 #include <QScrollBar>
+#include <QDesktopWidget>
+#ifdef Q_OS_WIN
+#include <QtWebKitWidgets/QWebView>
+#endif
 
 ConfortableLabel::ConfortableLabel(const QString &text, QWidget *parent) : QLabel(text, parent)
 {
@@ -57,14 +61,38 @@ QKuaixunListWidget::QKuaixunListWidget(QWidget *parent) :
     ui->setupUi(this);
 //    ui->mTextBrowser->setDocumentTitle(QStringLiteral("7*24快讯"));
 #ifndef Q_OS_WIN
-    QScroller::grabGesture(ui->listWidget);
+    Qt::GestureType type = QScroller::grabGesture(ui->listWidget);
+    qDebug()<<"gesture type:"<<type;
 #endif
-    this->setStyleSheet("font-size:12pt;");
+    this->setStyleSheet("font-size:16pt;");
     ui->listWidget->setWrapping(false);
     ui->listWidget->setWordWrap(true);
     ui->listWidget->verticalScrollBar()->setVisible(false);
     ui->listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    ui->listWidget->setSpacing(10);
+    ui->listWidget->setResizeMode(QListWidget::Adjust);
+    ui->listWidget->setSpacing(12);
+    connect(ui->listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+            this, SLOT(itemDoubleClicked(QListWidgetItem*)));
+}
+
+void QKuaixunListWidget::itemDoubleClicked(QListWidgetItem *item)
+{
+#ifdef Q_OS_WIN
+    if(!item) return;
+    KuaixunData data = item->data(Qt::UserRole).value<KuaixunData>();
+    QWebView *view = new QWebView;
+    view->setUrl(QUrl(data.url));
+    view->setWindowFlags(Qt::WindowStaysOnTopHint);
+    view->setWindowTitle(data.title);
+    view->setAttribute(Qt::WA_DeleteOnClose);
+    QRect rect = QApplication::desktop()->availableGeometry();
+    QPoint center = rect.center();
+    rect.setWidth(rect.width() * 0.5);
+    rect.setHeight(rect.height() * 0.5);
+    rect.moveCenter(center);
+    view->setGeometry(rect);
+    view->show();
+#endif
 }
 
 QKuaixunListWidget::~QKuaixunListWidget()
@@ -79,33 +107,26 @@ void QKuaixunListWidget::appendData(const KuaiXunList &list)
     for(int i=list.size()-1; i>=0; i--)
     {
         KuaixunData data = list.at(i);
-//        if(data.strid == mLastDataID){
-//            break;
-//        }
         QStringList content;
         content.append(data.src_time + "  " + data.sourceString());
         content.first().append("\n");
         content.first().append(data.digest);
-//        content.append("\n");
         ui->listWidget->insertItems(0, content);
-//        ui->mTextBrowser->append(data.digest);
-//        ui->mTextBrowser->append("\n");
-//        mLastDataID = data.strid;
-//        ui->tableWidget->insertRow(0);
-//        QInfoWidget *text = new QInfoWidget(data, this);
-//        ui->tableWidget->setCellWidget(0, 0, text);
-//        text->setReferWidth(ui->tableWidget->columnWidth(0)-10);
-////        qDebug()<<"width:"<<text->width();
-//        ui->tableWidget->setRowHeight(0, text->height() + 20);
-//        mLastDataID = data.strid;
-//        if(ui->tableWidget->rowCount() == 100)
-//        {
-//            ui->tableWidget->removeRow(99);
-//        }
+        QListWidgetItem *item = ui->listWidget->item(0);
+        item->setData(Qt::UserRole, QVariant::fromValue(data));
     }
-//    int rowCount = ui->tableWidget->rowCount();
-//    if(rowCount)
-//    {
-//        ui->tableWidget->scrollToTop();
-//    }
+    int rowCount = ui->listWidget->count();
+    if(rowCount)
+    {
+        ui->listWidget->scrollToTop();
+    }
+    int sub_row = rowCount - 100;
+    while (sub_row > 0) {
+        ui->listWidget->takeItem(100);
+        sub_row--;
+    }
+    if(!isVisible())
+    {
+        emit sendRecvInfoList(list);
+    }
 }

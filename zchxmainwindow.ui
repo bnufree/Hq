@@ -31,6 +31,10 @@ border-bottom：0px solid gray;
 background-color:gray;
 }
 
+QHeaderView::item{
+	height:40px;
+}
+
 QTableView::item
 {
 /*	height:40px;
@@ -137,20 +141,7 @@ QScrollBar:vertical {
 </string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
-    <property name="leftMargin">
-     <number>0</number>
-    </property>
-    <property name="topMargin">
-     <number>0</number>
-    </property>
-    <property name="rightMargin">
-     <number>0</number>
-    </property>
-    <property name="bottomMargin">
-     <number>0</number>
-    </property>
-   </layout>
+   <layout class="QVBoxLayout" name="verticalLayout"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

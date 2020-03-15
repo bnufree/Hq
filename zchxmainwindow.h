@@ -15,6 +15,13 @@ class QShareGraphicWidget;
 class QBlockTableWidget;
 class QKuaixunListWidget;
 class QSystemTrayIcon;
+class QAndroidButton;
+
+struct zchxCtrolObject{
+    QWidget*            mDisplayWidget;
+    QString             mTitle;
+    QAndroidButton*     mBtn;
+};
 
 class zchxMainWindow : public QMainWindow
 {
@@ -25,6 +32,7 @@ public:
     ~zchxMainWindow();
 
 private slots:
+    void createCtrlObject(const QString& title, QWidget* widget);
     void slotSystemTrayOperation(QSystemTrayIcon::ActivationReason val);
     void slotSystemTrayMenuClicked();
     void slotRecvKuaiXunList(const KuaiXunList& list);
@@ -43,6 +51,7 @@ private:
     QStackedWidget          *mWidgetMgr;
     QWidget                 *mCtrlWidget;
     QSystemTrayIcon         *mSysTrayIcon;
+    QList<zchxCtrolObject>   mCtrlObjectList;
 };
 
 #endif // ZCHXMAINWINDOW_H

@@ -6,6 +6,7 @@
 #include "utils/comdatadefines.h"
 #include <QResizeEvent>
 #include <QGestureEvent>
+#include <QDebug>
 
 enum OPT_MOVE_MODE{
     OPT_LEFT = 0,
@@ -21,21 +22,48 @@ class HqTableWidget : public QTableWidget
     Q_OBJECT
 public:
     explicit HqTableWidget(QWidget *parent = 0);
-    void  resetDisplayRows(bool next = true)
+    bool isColVisible(int i) const {return !isColumnHidden(i);}
+    bool isRowVisible(int i) const {return !isRowHidden(i);}
+    void resetPageDisplay()
     {
-        if(next)
-        {
-            mDisplayRowEnd = mMaxDisplayRow-1;
-            mDisplayRowStart = 0;
-        } else
-        {
-            mDisplayRowStart = mPageSize - mMaxDisplayRow - 1;
-            mDisplayRowEnd = mPageSize - 1;
-        }
+        mDisRowEnd = mMaxDisRow-1;
+        mDisRowStart = 0;
         displayVisibleRows();
     }
-    void setPageSize(int pageSize) {mPageSize = pageSize;}
-    int  pageSize() const {return mPageSize;}
+
+    void  resetDisplayRows(OPT_MOVE_MODE dir)
+    {
+        bool page_change = false;
+        if(dir == OPT_DOWN)
+        {
+            mDisRowStart++;
+            mDisRowEnd++;
+        } else if(dir == OPT_UP)
+        {
+            mDisRowStart--;
+            mDisRowEnd--;
+        } else
+        {
+            return;
+        }
+        if(mDisRowEnd == rowCount())
+        {
+            page_change = true;
+            displayNextPage();
+        } else if(mDisRowStart == -1)
+        {
+            page_change = true;
+            displayPreviousPage();
+        }
+        if(page_change)
+        {
+            mDisRowEnd = mMaxDisRow-1;
+            mDisRowStart = 0;
+
+        }
+        qDebug()<<"row start:"<<mDisRowStart<<" end:"<<mDisRowEnd<<" page:"<<page_change;
+        displayVisibleRows();
+    }
     void setAutoChangePage(bool sts) {mAutoChangePage = sts;}
     void setHeaders(const TableColDataList& list);
     void appendRow();
@@ -67,6 +95,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event);
     bool gestureEvent(QGestureEvent* event);
     void wheelEvent(QWheelEvent *e);
+    void keyPressEvent(QKeyEvent *event);
 private slots:
 
 signals:
@@ -96,16 +125,17 @@ private:
     QPoint                  mPressPnt;
     QPoint                  mMovePnt;
     int                     mMoveDir;
-    int                     mMaxDisplayCol;
-    int                     mMaxDisplayRow;
+    int                     mMaxDisCol;
+    int                     mMaxDisRow;
     bool                    mAutoChangePage;
     bool                    mIsWorkInMini;
     quint64               mLastWheelTime;
-    int                     mPageSize;
-    int*                    mColWidthArray;
 protected:
-    int                     mDisplayRowStart;
-    int                     mDisplayRowEnd;
+    int                     mDisRowStart;
+    int                     mDisRowEnd;
+    int                     mCurPage;
+    int                     mTotalPage;
+    int                     mPageSize;
 
 };
 
