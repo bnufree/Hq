@@ -189,11 +189,12 @@ void zchxMainWindow::closeEvent(QCloseEvent *e)
     last_close_time = current;
 //    statusBar()->showMessage(QStringLiteral("再按一次退出"), 5000);
     QLabel *label = new QLabel(QStringLiteral("再按一次退出"), ui->centralwidget);
-    label->setWindowFlags(Qt::WindowStaysOnTopHint);
+    label->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::SubWindow);
     QRect rect = label->rect();
     rect.moveCenter(ui->centralwidget->rect().center());
     label->setGeometry(rect);
     QTimer::singleShot(5000, label, SLOT(deleteLater()));
+    label->show();
 
     e->ignore();
     return;
