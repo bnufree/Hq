@@ -16,7 +16,6 @@ QIndexFrame::QIndexFrame(const QString& name, QWidget *parent) :
     ui->chg->clear();
     ui->chgper->clear();
     ui->money->clear();
-    this->setFrameShape(QFrame::NoFrame);
     setStatus(0);
     frame_Width = width();
 }
@@ -129,8 +128,31 @@ int QIndexFrame::status() const
 
 void QIndexFrame::setStatus(int sts)
 {
+//    mStatus = sts;
+//    style()->polish(this);
     mStatus = sts;
-//    qDebug()<<ui->name<<ui->chg<<mStatus;
-    style()->polish(this);
+    QLayout* pLayout = layout();
+    if(!pLayout) return;
+    setLayoutLabel(pLayout, sts);
+}
 
+void QIndexFrame::setLayoutLabel(QLayout *pLayout, int sts)
+{
+    if(!pLayout) return;
+    int itemCount = pLayout->count();
+    for(int i=0; i<itemCount; i++)
+    {
+        QLayoutItem* item = pLayout->itemAt(i);
+        if(!item) continue;
+        QLayout *layout = item->layout();
+        if(layout)
+        {
+            setLayoutLabel(layout, sts);
+            continue;
+        }
+        QWidget* widget = item->widget();
+        if(!widget) continue;
+        ColorTextLabel* label = qobject_cast<ColorTextLabel*>(widget);
+        if(label)label->setTextColor(sts);
+    }
 }

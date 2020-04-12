@@ -7,9 +7,9 @@
 #include(./QtXlsx/QtXlsx.pri)
 QT       += core gui network sql concurrent
 
-win32{
- QT += webkitwidgets
-}
+#win32{
+# QT += webkitwidgets
+#}
 
 CONFIG += c++11
 
@@ -90,7 +90,8 @@ SOURCES += main.cpp\
     qkuaixunlistwidget.cpp \
     qhqdisplaywidget.cpp \
     table/zchxhqdisplaywidget.cpp \
-    qpopwindow.cpp
+    qpopwindow.cpp \
+    colortextlabel.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -164,7 +165,8 @@ HEADERS  += dialog.h \
     qkuaixunlistwidget.h \
     qhqdisplaywidget.h \
     table/zchxhqdisplaywidget.h \
-    qpopwindow.h
+    qpopwindow.h \
+    colortextlabel.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

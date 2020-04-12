@@ -86,8 +86,13 @@ HqTableWidget::HqTableWidget(QWidget *parent) : QTableWidget(parent),\
 #if 0
     QScroller::grabGesture(this, QScroller::TouchGesture);
 #endif
+#ifdef Q_QS_ANDROID
     this->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     this->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+#else
+    this->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
+    this->setHorizontalScrollMode(QAbstractItemView::ScrollPerItem);
+#endif
 
 }
 

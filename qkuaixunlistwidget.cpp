@@ -8,7 +8,7 @@
 #include <QScrollBar>
 #include <QDesktopWidget>
 #ifdef Q_OS_WIN
-#include <QtWebKitWidgets/QWebView>
+//#include <QtWebKitWidgets/QWebView>
 #endif
 
 ConfortableLabel::ConfortableLabel(const QString &text, QWidget *parent) : QLabel(text, parent)
@@ -77,22 +77,22 @@ QKuaixunListWidget::QKuaixunListWidget(QWidget *parent) :
 
 void QKuaixunListWidget::itemDoubleClicked(QListWidgetItem *item)
 {
-#ifdef Q_OS_WIN
-    if(!item) return;
-    KuaixunData data = item->data(Qt::UserRole).value<KuaixunData>();
-    QWebView *view = new QWebView;
-    view->setUrl(QUrl(data.url));
-    view->setWindowFlags(Qt::WindowStaysOnTopHint);
-    view->setWindowTitle(data.title);
-    view->setAttribute(Qt::WA_DeleteOnClose);
-    QRect rect = QApplication::desktop()->availableGeometry();
-    QPoint center = rect.center();
-    rect.setWidth(rect.width() * 0.5);
-    rect.setHeight(rect.height() * 0.5);
-    rect.moveCenter(center);
-    view->setGeometry(rect);
-    view->show();
-#endif
+//#ifdef Q_OS_WIN
+//    if(!item) return;
+//    KuaixunData data = item->data(Qt::UserRole).value<KuaixunData>();
+//    QWebView *view = new QWebView;
+//    view->setUrl(QUrl(data.url));
+//    view->setWindowFlags(Qt::WindowStaysOnTopHint);
+//    view->setWindowTitle(data.title);
+//    view->setAttribute(Qt::WA_DeleteOnClose);
+//    QRect rect = QApplication::desktop()->availableGeometry();
+//    QPoint center = rect.center();
+//    rect.setWidth(rect.width() * 0.5);
+//    rect.setHeight(rect.height() * 0.5);
+//    rect.moveCenter(center);
+//    view->setGeometry(rect);
+//    view->show();
+//#endif
 }
 
 QKuaixunListWidget::~QKuaixunListWidget()
