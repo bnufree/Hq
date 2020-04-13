@@ -30,7 +30,9 @@ void QShareCodesWork::run()
     if(update_date.isNull() || update_date < ShareWorkingDate::getCurWorkDay())
     {
         QString stock_code_url = tr("http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?cb=&type=CT&token=4f1862fc3b5e77c150a2b985b12db0fd&sty=FCOIATC&js=(%7Bdata%3A%5B(x)%5D%2CrecordsFiltered%3A(tot)%7D)&cmd=C._A&st=(Code)&sr=-1&p=1&ps=20000&_=%1").arg(QDateTime::currentMSecsSinceEpoch());
-        QString fund_code_url = "http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?cb=&type=CT&token=4f1862fc3b5e77c150a2b985b12db0fd&sty=FCOIATC&js=(%7Bdata%3A%5B(x)%5D%2CrecordsFiltered%3A(tot)%7D)&cmd=C.__2850013&st=(Code)&sr=-1&p=1&ps=2000&_=1555572794676";
+//        QString fund_code_url = "http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?cb=&type=CT&token=4f1862fc3b5e77c150a2b985b12db0fd&sty=FCOIATC&js=(%7Bdata%3A%5B(x)%5D%2CrecordsFiltered%3A(tot)%7D)&cmd=C.__2850013&st=(Code)&sr=-1&p=1&ps=2000&_=";
+        QString fund_code_url = "http://18.push2.eastmoney.com/api/qt/clist/get?cb=&pn=1&pz=10000&po=0&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f12&fs=b:MK0021,b:MK0022,b:MK0023,b:MK0024&fields=f12,f14&_=";
+        fund_code_url.append(QString::number(QDateTime::currentMSecsSinceEpoch()));
         QTime t;
         t.start();
         parseHttp(list, stock_code_url, 1);
@@ -56,6 +58,7 @@ void QShareCodesWork::parseHttp(ShareDataList& list, const QString& url, int mod
     if(mode == 2)
     {
         reg_code.setPattern(QString("51[0-9]{4}|159[0-9]{3}"));
+        reg.setPattern(QString("\"f12\":\"([0-9]{6})\",\"f14\":\"([\u4e00-\u9fffA-Z\*]{1,})\""));
     }
     int index = 0;
     while((index = reg.indexIn(utf8_result, index)) >= 0)
@@ -70,7 +73,7 @@ void QShareCodesWork::parseHttp(ShareDataList& list, const QString& url, int mod
             data.mShareType = ShareData::shareType(code);
 //            qDebug()<<data.mCode<<data.mName<<name.toUtf8().toHex()<<name.toUtf8().size();
             data.mPY = HqUtils::GetFirstLetter(UTF8->toUnicode(name.toUtf8()));
-//            qDebug()<<data.mCode<<data.mName<<data.mPY;
+            qDebug()<<data.mCode<<data.mName<<data.mPY;
             list.append(data);
         }
         index += reg.matchedLength();

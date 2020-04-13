@@ -13,6 +13,7 @@ class QShareBasicInfoWorker;
 class QShareHistoryInfoMgr;
 class QSinaStkInfoThread;
 class QShareActiveDateUpdateThread;
+class HqKuaixun;
 
 class HQTaskMagrCenter : public QObject
 {
@@ -21,10 +22,11 @@ protected:
     explicit HQTaskMagrCenter(QObject *parent = 0);
 public:
     static HQTaskMagrCenter* instance();
+
 public:
     ~HQTaskMagrCenter();
     void start();
-
+    void  registerInfoDisplaywidget(QWidget* w);
 signals:
     void        signalUpdateHistoryMsg(const QString& msg);
     void        signalUpdateHistoryFinished();
@@ -74,6 +76,7 @@ private:
     QThread                     mWorkThread;
     QShareHistoryInfoMgr                *mHistoryInfoMgr;
     QShareActiveDateUpdateThread*       mTimeMonitorThread;
+    HqKuaixun*  mInfoThread724;
 
 };
 

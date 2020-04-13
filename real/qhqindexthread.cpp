@@ -45,7 +45,7 @@ void QHqIndexThread::run()
                 if(HqInfoParseUtil::parseShareDataFromSinaA(data, detail)) datalist.append(data);
             }
         }
-//        emit signalSendIndexDataList(datalist, QDateTime::currentMSecsSinceEpoch());
+        emit signalSendIndexDataList(datalist, QDateTime::currentMSecsSinceEpoch());
         {
             QMutexLocker locker(&mMutex);
             mDataList = datalist;

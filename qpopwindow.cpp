@@ -18,7 +18,7 @@ QPopWindow::QPopWindow(QWidget *parent) :
     connect(timer, &QTimer::timeout, this, [=](){
         QStringList list;
         list.append(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
-        list.append(QStringLiteral("迪士尼为本片在中国进行了内部试映，尤其包括迪士尼的中国高管参加了试映。在早期版本里，木兰和陈洪辉有一场桥上的吻别戏，导演Niki Caro表示尽管这场戏非常美，但中国这边给出的意见是“不能这么拍，对于中国观众来说不合适。”所以就删掉了。"));
+//        list.append(QStringLiteral("迪士尼为本片在中国进行了内部试映，尤其包括迪士尼的中国高管参加了试映。在早期版本里，木兰和陈洪辉有一场桥上的吻别戏，导演Niki Caro表示尽管这场戏非常美，但中国这边给出的意见是\"不能这么拍，对于中国观众来说不合适。\"所以就删掉了。"));
         appendText(list);
     });
 

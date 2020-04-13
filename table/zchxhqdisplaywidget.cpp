@@ -1,15 +1,15 @@
 #include "zchxhqdisplaywidget.h"
 #include "ui_zchxhqdisplaywidget.h"
 #include <QStackedWidget>
+#include <qindexwidget.h>
 
 zchxHqDisplayWidget::zchxHqDisplayWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::zchxHqDisplayWidget)
 {
     ui->setupUi(this);
+#ifdef Q_OS_ANDROID
     ui->comboBox->setMinimumHeight(40);
-    ui->verticalLayout->addWidget(mShareWidget = new QShareTablewidget(this));
-
     QList<struMenu> itemlist;
     itemlist.append(struMenu(QStringLiteral("自选"), MKT_ZXG));
     itemlist.append(struMenu(QStringLiteral("沪深"), MKT_ALL));
@@ -30,6 +30,11 @@ zchxHqDisplayWidget::zchxHqDisplayWidget(QWidget *parent) :
     connect(ui->comboBox,SIGNAL(currentIndexChanged(int)),
             this, SLOT(slotMarketTypeChanged(int)));
     ui->comboBox->setCurrentIndex(0);
+#else
+    ui->comboBox->setVisible(false);
+#endif
+//    ui->horizontalLayout->addWidget(new QIndexWidget(this));
+    ui->verticalLayout->addWidget(mShareWidget = new QShareTablewidget(this));
 
 }
 

@@ -8,7 +8,7 @@
 #include "hqtaskmagrcenter.h"
 
 
-QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent), mUpdateTimer(0)
+QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent), mUpdateTimer(0), mMergeThread(0)
 {
     //设定抬头
     TableColDataList datalist;
@@ -46,7 +46,7 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent), m
     setHeaders(datalist);
     initMenu();
     setAutoChangePage(true);
-    mMergeThread = new QSinaStkResultMergeThread(pageSize());
+    mMergeThread = new QSinaStkResultMergeThread(mPageSize);
     connect(this, SIGNAL(signalPageSizeChanged(int)), mMergeThread, SLOT(setPagetSize(int)));
     connect(mMergeThread, SIGNAL(sendStkDataList(int, int, ShareDataList, qint64)), this, SLOT(setDataList(int, int, ShareDataList, qint64)));
     mMergeThread->setActive(true);
@@ -76,6 +76,7 @@ void QShareTablewidget::slotRecvAllShareCodes(const QStringList &list)
 
 void QShareTablewidget::slotUpdateTimeOut()
 {
+    if(!mMergeThread) return;
     int page, pagesize;
 
     ShareDataList list = mMergeThread->getDataList(page, pagesize);
@@ -143,6 +144,7 @@ void QShareTablewidget::setShareMarket()
     QAction *act = (QAction*)sender();
     if(act == NULL) return;
     qDebug()<<"mkt_type:"<<act->data().toInt();
+    resetPageDisplay();
     if(mMergeThread) mMergeThread->setMktType(act->data().toInt());
 }
 

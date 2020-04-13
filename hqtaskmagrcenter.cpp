@@ -13,6 +13,7 @@
 #include "basic_info/qshareactivedateupdatethread.h"
 #include "real/qhqindexthread.h"
 #include "real/qhqeastmoneyrealinfothread.h"
+#include "real/hqkuaixun.h"
 
 HQTaskMagrCenter* HQTaskMagrCenter::m_pInstance = 0;
 HQTaskMagrCenter::CGarbo HQTaskMagrCenter::s_Garbo;
@@ -20,8 +21,11 @@ HQTaskMagrCenter::CGarbo HQTaskMagrCenter::s_Garbo;
 HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
     QObject(parent),\
     mHistoryInfoMgr(0),
-    mTimeMonitorThread(0)
+    mTimeMonitorThread(0),
+    mInfoThread724(0)
 {
+    //
+    mInfoThread724 = new HqKuaixun(this);
     //创建时间监控线程
     mTimeMonitorThread = new QShareActiveDateUpdateThread(this);
     connect(mTimeMonitorThread, SIGNAL(signalUpdateHistoryWorkDays()), this, SLOT(slotFinishUpdateWorkDays()));
@@ -57,6 +61,18 @@ void HQTaskMagrCenter::start()
 {
     //开启数据库初始化
     DATA_SERVICE->signalInitDBTables();
+    if(mInfoThread724 && !mInfoThread724->isRunning())
+    {
+        mInfoThread724->start();
+    }
+}
+
+void HQTaskMagrCenter::registerInfoDisplaywidget(QWidget *w)
+{
+    if(mInfoThread724)
+    {
+        mInfoThread724->setDisplayWidget(w);
+    }
 }
 
 void HQTaskMagrCenter::slotDBInitFinished()

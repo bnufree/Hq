@@ -37,6 +37,7 @@ private:
     QTextBrowser *mContent;
 };
 
+class QListWidgetItem;
 class QKuaixunListWidget : public QWidget
 {
     Q_OBJECT
@@ -46,6 +47,9 @@ public:
     ~QKuaixunListWidget();
 public slots:
     void appendData(const KuaiXunList& list);
+    void itemDoubleClicked(QListWidgetItem* item);
+signals:
+    void sendRecvInfoList(const KuaiXunList& list);
 protected:
 
 private:

@@ -6,7 +6,9 @@
 #include <QJsonObject>
 #include <QJsonParseError>
 
-HqKuaixun::HqKuaixun(QObject *parent) : QThread(parent)
+HqKuaixun::HqKuaixun(QObject *parent)
+    : QThread(parent)
+    , mDisplayWidget(0)
 {
     qRegisterMetaType<KuaiXunList>("const KuaiXunList&");
 
@@ -28,7 +30,16 @@ void HqKuaixun::run()
 //                qDebug()<<data.src_time<<data.local_time<<data.title<<data.sourceString();
 //                }
 //            }
-            emit signalSendKuaiXun(list);
+            if(!mDisplayWidget)
+            {
+                emit signalSendKuaiXun(list);
+            } else
+            {
+                QMetaObject::invokeMethod(mDisplayWidget,
+                                          "appendData",
+                                          Qt::AutoConnection,
+                                          Q_ARG(KuaiXunList, list));
+            }
         }
     }
 }
@@ -75,7 +86,7 @@ void HqKuaixun::parseThs(KuaiXunList &resList)
     static qint64 last_ths_id = -1;
     int page_end = 1;
     qint64 first_id = -1;
-    if(start_ths ) page_end = 5;
+    if(start_ths ) page_end = 2;
     for(int i =1 ; i<=page_end; i++)
     {
         QString url = QString("http://news.10jqka.com.cn/tapp/news/push/stock/?page=%1&tag=&track=website").arg(i);
