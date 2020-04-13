@@ -51,8 +51,8 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
     mInfoListWidget = new QKuaixunListWidget(this);
     HQTaskMagrCenter::instance()->registerInfoDisplaywidget(mInfoListWidget);
     createCtrlObject(QStringLiteral("资讯"), mInfoListWidget);
-    createCtrlObject(QStringLiteral("行情中心"), new QShareTablewidget(this));
-    createCtrlObject(QStringLiteral("港资"), new QNorthFlowInfoDisplayWidget);
+    createCtrlObject(QStringLiteral("行情中心"), new zchxHqDisplayWidget(this));
+    createCtrlObject(QStringLiteral("港资"), new QNorthFlowInfoDisplayWidget(this));
     createCtrlObject(QStringLiteral("龙虎榜"), new QWidget);
     createCtrlObject(QStringLiteral("新股申购"), new QWidget);
 

@@ -33,7 +33,7 @@ zchxHqDisplayWidget::zchxHqDisplayWidget(QWidget *parent) :
 #else
     ui->comboBox->setVisible(false);
 #endif
-//    ui->horizontalLayout->addWidget(new QIndexWidget(this));
+    ui->horizontalLayout->addWidget(new QIndexWidget(this));
     ui->verticalLayout->addWidget(mShareWidget = new QShareTablewidget(this));
 
 }
