@@ -118,7 +118,7 @@ QLabel{
   <customwidget>
    <class>ColorTextLabel</class>
    <extends>QLabel</extends>
-   <header>colortextlabel.h</header>
+   <header location="global">colortextlabel.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

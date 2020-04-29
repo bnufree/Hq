@@ -91,7 +91,8 @@ SOURCES += main.cpp\
     qhqdisplaywidget.cpp \
     table/zchxhqdisplaywidget.cpp \
     qpopwindow.cpp \
-    colortextlabel.cpp
+    colortextlabel.cpp \
+    qeastmoneyshareholderfetcher.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -166,7 +167,8 @@ HEADERS  += dialog.h \
     qhqdisplaywidget.h \
     table/zchxhqdisplaywidget.h \
     qpopwindow.h \
-    colortextlabel.h
+    colortextlabel.h \
+    qeastmoneyshareholderfetcher.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

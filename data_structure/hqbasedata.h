@@ -121,11 +121,14 @@ typedef struct North_South_Bound_Data
     double              mPure;
     double              mChange;
     qint64              mVolTotal;
-    qint64              mVolChange;
     double              mVolMutablePercent;
     double              mVolCh1;
+    double              mVolCh3;
     double              mVolCh5;
     double              mVolCh10;
+    double              mVolChMonth;
+    double              mVolChSeason;
+    double              mVolChYear;
     bool                mIsTop10;
     ShareWorkingDateTime       mDate;
 
@@ -137,11 +140,14 @@ typedef struct North_South_Bound_Data
         mPure = 0.0;
         mChange = 0.0;
         mVolTotal = 0;
-        mVolChange = 0;
         mVolMutablePercent = 0.0;
         mVolCh1 = 0.0;
         mVolCh5 = 0.0;
         mVolCh10 = 0.0;
+        mVolCh3 = 0.0;
+        mVolChMonth = 0.0;
+        mVolChSeason = 0.0;
+        mVolChYear = 0.0;
         mIsTop10 = false;
     }
 
@@ -161,6 +167,55 @@ typedef QList<ShareHsgt>       ShareHsgtList;
 
 Q_DECLARE_METATYPE(ShareHsgt)
 Q_DECLARE_METATYPE(ShareHsgtList)
+
+struct      Counter{
+    qint64          mVolChg;
+    double          mMktCapChg;
+    double          mMktCapChgPercent;
+    double          mVolMutableChgPercent;
+    double          mVolTotalChgPercent;
+
+    Counter()
+    {
+        mVolChg = 0;
+        mMktCapChg = 0.0;
+        mMktCapChgPercent = 0.0;
+        mVolMutableChgPercent = 0.0;
+        mVolTotalChgPercent = 0.0;
+    }
+
+};
+
+typedef struct North_South_Bound_Data_Counter
+{
+    int                 mCode;
+    qint64              mVolTotal;
+    double              mMktCap;
+    double              mVolMutablePercent;
+    double              mVolTotalPercent;
+
+
+    Counter              mDay1;
+    Counter              mDay3;
+    Counter              mDay5;
+    Counter              mDay10;
+    Counter              mMonth;
+    Counter              mSeason;
+    Counter              mYear;
+    quint64              mDate;
+
+    North_South_Bound_Data_Counter()
+    {
+        mCode = 0;
+        mVolTotal = 0;
+        mVolMutablePercent = 0.0;
+        mVolTotalPercent = 0.0;
+        mDate = 0;
+    }
+
+}ShareHsgtCounter;
+
+typedef QList<ShareHsgtCounter>       ShareHsgtCounterList;
 
 struct ShareZjlx
 {

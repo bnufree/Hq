@@ -113,7 +113,7 @@ bool HqTableWidget::gestureEvent(QGestureEvent *event)
 
 void HqTableWidget::wheelEvent(QWheelEvent *e)
 {
-    if(QDateTime::currentMSecsSinceEpoch() - mLastWheelTime < 800) return;
+    if(QDateTime::currentMSecsSinceEpoch() - mLastWheelTime < 100) return;
     if(e->delta() > 0)
     {
         optMoveTable(OPT_UP, 2);

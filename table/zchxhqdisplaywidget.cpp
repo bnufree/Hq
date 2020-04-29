@@ -1,4 +1,4 @@
-#include "zchxhqdisplaywidget.h"
+﻿#include "zchxhqdisplaywidget.h"
 #include "ui_zchxhqdisplaywidget.h"
 #include <QStackedWidget>
 #include <qindexwidget.h>
@@ -10,6 +10,7 @@ zchxHqDisplayWidget::zchxHqDisplayWidget(QWidget *parent) :
     ui->setupUi(this);
 #ifdef Q_OS_ANDROID
     ui->comboBox->setMinimumHeight(40);
+    ui->comboBox->setMaximumWidth(120);
     QList<struMenu> itemlist;
     itemlist.append(struMenu(QStringLiteral("自选"), MKT_ZXG));
     itemlist.append(struMenu(QStringLiteral("沪深"), MKT_ALL));

@@ -142,7 +142,6 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     QShareFHSPWork* fhsp = new QShareFHSPWork(this);
     connect(fhsp, SIGNAL(finished()), fhsp, SLOT(deleteLater()));
     fhsp->start();
-    return;
 
     //更新日线数据
     mHistoryInfoMgr = new QShareHistoryInfoMgr(codes);

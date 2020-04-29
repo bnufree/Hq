@@ -518,7 +518,7 @@ void HqInfoService::slotUpdateShareinfoWithHistory(const QString& code,\
     //data.mHistory.mLastMonthChgPers = lastMonthChange;
     data.mHistory.mChgPersFromYear = lastYearChange;
     data.mHsgtData.mVolTotal = vol;
-    data.mHsgtData.mVolChange = vol_chnage;
+    data.mHsgtData.mVolCh1 = vol_chnage;
     emit signalUpdateShareHistoryFinished(code);
 }
 

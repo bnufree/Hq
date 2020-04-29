@@ -2,6 +2,13 @@
 #include "dbservices/dbservices.h"
 #include "dbservices/qactivedate.h"
 #include "data_structure/shareworkingdatetime.h"
+#include "utils/qhttpget.h"
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QJsonParseError>
 
 QShareHistoryCounterWork::QShareHistoryCounterWork(const QString& code,const ShareHistoryFileDataList& list, QObject* parent)
     :mCode(code),mList(list),mParent(parent),QRunnable()
@@ -158,8 +165,112 @@ void QShareHistoryCounterWork::run()
 //    qDebug()<<mCode<<real_week.toString("yyyyMMdd")<<week_p<<real_month.toString("yyyyMMdd")<<month_p<<real_year.toString("yyyyMMdd")<<year_p<<foreign_chg1<<foreign_chg5<<foreign_chg10<<last_day.toString("yyyy-MM-dd")<<last_money;
 
     emit DATA_SERVICE->signalUpdateShareCounter(counter);
+}
 
+QShareLGTHistoryCounterWork::QShareLGTHistoryCounterWork(const QDate &date, int type, QObject *parent)
+{
+    mDate = date;
+    mType = type;
+    mFilePath = QString("%1/lgt").arg(HQ_DAY_HISTORY_DIR);
+    QDir dir(mFilePath);
+    if(!dir.exists())
+    {
+        dir.mkpath(mFilePath);
+    }
+    
+    mFileName = QString("%1/counter.dat").arg(mFilePath);
+}
+QString QShareLGTHistoryCounterWork::getFileName()
+{
+    return mFilePath;
+}
 
+bool QShareLGTHistoryCounterWork::readFromHisrotyFile()
+{
+    QString fileName = getFileName();
+    if(!QFile::exists(fileName))
+    {
+        qDebug()<<__FUNCTION__<<__LINE__<<fileName<<" not exist";
+        return false;
+    }
+    //读取文件
+    QFile file(fileName);
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        qDebug()<<__FUNCTION__<<__LINE__<<fileName<<" open error";
+        return false;
+    }
+    while (!file.atEnd() ) {
+        ShareHsgtCounter data;
+        file.read((char*)(&data), sizeof(ShareHsgtCounter));
+        mDataMap[data.mCode] = data;
+    }
+    file.close();
 
+    return true;
+}
 
+Counter counterFromObj(const QJsonObject& obj)
+{
+    Counter counter;
+    counter.mMktCapChg = obj.value("ShareSZ_Chg_One").toDouble();
+    counter.mVolChg = obj.value("ShareHold_Chg_One").toDouble();
+    counter.mMktCapChgPercent = obj.value("ShareSZ_Chg_Rate_One").toDouble();
+    counter.mVolMutableChgPercent = obj.value("LTZB_One").toDouble();
+    counter.mVolTotalChgPercent = obj.value("ZZB_One").toDouble();
+    return counter;
+}
+
+void QShareLGTHistoryCounterWork::run()
+{
+    //会自动根据日期获取
+    int cur_page = 1;
+    int total_page = 1;
+    while (true)
+    {
+        QString url = "http://dcfm.eastmoney.com/EM_MutiSvcExpandInterface/api/js/get?type=HSGT20_GGTJ_SUM&token=894050c76af8597a853f5b408b759f5d&st=ShareSZ&sr=-1&ps=5000&js={pages:(tp),data:(x)}&filter=&rt=52937604&p=";
+        QByteArray bytes = QHttpGet::getContentOfURL(url.append(QString::number(cur_page)));
+        QJsonDocument doc = QJsonDocument::fromJson(bytes);
+        if(!doc.isObject()) break;
+        QJsonObject obj = doc.object();
+        total_page = obj.value("pages").toInt();
+        QJsonArray array = obj.value("data").toArray();
+        for(int i=0; i<array.size(); i++)
+        {
+            obj = array[i].toObject();
+            int code = obj.value("SCode").toInt();
+            ShareHsgtCounter &data = mDataMap[code];
+            data.mCode = code;
+            data.mVolTotal = qint64(obj.value("ShareHold").toDouble());
+            data.mMktCap = obj.value("ShareSZ").toDouble();
+            data.mVolMutablePercent = obj.value("LTZB").toDouble();
+            data.mVolTotalPercent = obj.value("ZZB").toDouble();
+            data.mDate = QDateTime(QDate::fromString(obj.value("HdDate").toString(), "yyyy-MM-dd")).toMSecsSinceEpoch();
+            QString type = obj.value("DateType").toString();
+            if(type == "y")
+            {
+                data.mYear = counterFromObj(obj);
+            } else if(type == "jd")
+            {
+                data.mSeason = counterFromObj(obj);
+            } else if(type == "m")
+            {
+                data.mMonth = counterFromObj(obj);
+            } else if(type == "10")
+            {
+                data.mDay10 = counterFromObj(obj);
+            } else if(type == "5")
+            {
+                data.mDay5 = counterFromObj(obj);
+            } else if(type == "3")
+            {
+                data.mDay3 = counterFromObj(obj);
+            } else if(type == "1")
+            {
+                data.mDay1 = counterFromObj(obj);
+            }
+        }
+        cur_page++;
+        if(cur_page > total_page) break;
+    }
 }

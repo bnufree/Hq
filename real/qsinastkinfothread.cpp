@@ -132,8 +132,8 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
             data.mProfit = DATA_SERVICE->getProfit(code);
         }
         data.mForeignCap = data.mHsgtData.mVolTotal * data.mCur ;
-        data.mHsgtData.mVolChange = data.mHsgtData.mVolCh1;
-        data.mForeignCapChg = data.mHsgtData.mVolChange * data.mCur ;
+        data.mHsgtData.mVolCh1 = data.mHsgtData.mVolCh1;
+        data.mForeignCapChg = data.mHsgtData.mVolCh1 * data.mCur ;
         if(data.mHistory.mWeekDayPrice > 0)
         {
             data.mHistory.mChgPersFromWeek = (data.mCur - data.mHistory.mWeekDayPrice) * 100.0 / data.mHistory.mWeekDayPrice;
