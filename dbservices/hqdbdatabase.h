@@ -192,6 +192,7 @@ private:
     bool createShareFavoriteTable();
     bool createShareProfitTable();
     bool createShareBlockTable();
+    bool createShareExchangeRecordTable();
     //历史日线数据表
     bool createShareHistoryInfoTable(const QString& code);
     //股东明细表

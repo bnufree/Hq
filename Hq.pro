@@ -4,7 +4,13 @@
 #
 #-------------------------------------------------
 
-#include(./QtXlsx/QtXlsx.pri)
+# QXlsx code for Application Qt project
+QXLSX_PARENTPATH=$${PWD}/QtXlsx         # current QXlsx path is . (. means curret directory)
+QXLSX_HEADERPATH=$${QXLSX_PARENTPATH}/header/  # current QXlsx header path is ./header/
+QXLSX_SOURCEPATH=$${QXLSX_PARENTPATH}/source/  # current QXlsx source path is ./source/
+message("qt xlsx path:" + $${QXLSX_PARENTPATH})
+include($${QXLSX_PARENTPATH}/QXlsx.pri)
+
 QT       += core gui network sql concurrent
 
 #win32{
@@ -18,7 +24,7 @@ CONFIG += c++11
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = Hq
+TARGET = Hq_Xlsx
 TEMPLATE = app
 DESTDIR = ../bin3/
 

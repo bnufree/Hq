@@ -460,6 +460,25 @@ bool HQDBDataBase::createShareProfitTable()
     return createTable(TABLE_PROFIT, colist);
 }
 
+bool HQDBDataBase::createShareExchangeRecordTable()
+{
+    if(isTableExist(TABLE_SHARE_EXCHANGE_RECORD)) return true;
+    TableColList colist;
+    colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
+    colist.append({HQ_TABLE_COL_CODE, "VARCHAR(10) NOT NULL"});
+    colist.append({HQ_TABLE_COL_NAME, "VARCHAR(30) NOT NULL"});
+    colist.append({HQ_TABLE_COL_DATE, "VARCHAR(10) NOT NULL"});
+    colist.append({HQ_TABLE_COL_EXCHANGE_TYPE, "NUMERIC NULL"});
+    colist.append({HQ_TABLE_COL_EXCHANGE_COUNT, "NUMERIC NULL"});
+    colist.append({HQ_TABLE_COL_EXCHANGE_PRICE, "NUMERIC NULL"});
+    colist.append({HQ_TABLE_COL_EXCHANGE_TOTAL, "NUMERIC NULL"});
+    colist.append({HQ_TABLE_COL_EXCHANGE_YONGJIN, "NUMERIC NULL"});
+    colist.append({HQ_TABLE_COL_EXCHANGE_YINHUASUI, "NUMERIC NULL"});
+    colist.append({HQ_TABLE_COL_EXCHANGE_GUOHUFEI, "NUMERIC NULL"});
+    colist.append({HQ_TABLE_COL_EXCHANGE_SERIAL_NUM, "NUMERIC NULL"});
+    return createTable(TABLE_SHARE_EXCHANGE_RECORD, colist);
+}
+
 bool HQDBDataBase::updateShareProfitInfo(const ShareDataList& dataList)
 {
     int size = dataList.size();

@@ -10,6 +10,7 @@
 #include <iostream>
 #include <new>
 #include <zchxmainwindow.h>
+#include "exchange/qexchangerecordworker.h"
 
 void no_memory () {
   std::cout << "Failed to allocate memory!\n";
@@ -22,20 +23,16 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     std::set_new_handler(no_memory);
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF8"));
-    int *test = new int[5];
-    qDebug()<<"size:"<<sizeof(test);
-    memset(test, 0, 5 * sizeof(int));
-    for(int i=0; i<5; i++)
-    {
-        qDebug()<<"test["<<i<<"]="<<test[i];
-    }
-    delete []test;
-    //make size as 9:16
+
+    QExchangeRecordWorker worker;
+    worker.slotStartImport("D:/20200430.xlsx");
+#if 0
     zchxMainWindow w;
 #ifdef Q_OS_WIN
     w.showMaximized();
 #else
     w.showMaximized();
+#endif
 #endif
 
     return a.exec();

@@ -19,6 +19,7 @@
 #define         TABLE_PROFIT                        "share_profit"
 #define         TABLE_BLOCK_SHARE                   "block_share"
 #define         TABLE_SHARE_HISTORY_COUNTER                 "share_history_counter"
+#define         TABLE_SHARE_EXCHANGE_RECORD         "exchange_record"
 
 //列名
 #define         HQ_TABLE_COL_ID                 "id"
@@ -80,6 +81,16 @@
 #define         HQ_TABLE_COL_FOREIGN_HOLD_CHANGE_WEEK           "foreign_chg_week"
 #define         HQ_TABLE_COL_FOREIGN_HOLD_CHANGE_MONTH          "foreign_chg_month"
 #define         HQ_TABLE_COL_FOREIGN_HOLD_CHANGE_YEAR           "foreign_chg_year"
+#define         HQ_TABLE_COL_EXCHANGE_TYPE                      "exchange_type"
+#define         HQ_TABLE_COL_EXCHANGE_COUNT                       "exchange_count"
+#define         HQ_TABLE_COL_EXCHANGE_PRICE                     "exchange_price"
+#define         HQ_TABLE_COL_EXCHANGE_TOTAL                     "exchange_total"
+#define         HQ_TABLE_COL_EXCHANGE_YONGJIN                   "exchange_yongjin"
+#define         HQ_TABLE_COL_EXCHANGE_YINHUASUI                   "exchange_yinhuasui"
+#define         HQ_TABLE_COL_EXCHANGE_GUOHUFEI                   "exchange_guohufei"
+#define         HQ_TABLE_COL_EXCHANGE_SERIAL_NUM                   "exchange_serial_num"
+
+
 
 //typedef         ShareData               ShareData;
 //typedef         ShareDataList           ShareDataList;
