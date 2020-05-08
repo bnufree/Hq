@@ -7,6 +7,7 @@
 #include "xlsxworkbook.h"
 #include <QDebug>
 #include <QFile>
+#include <QRegularExpression>
 
 
 using namespace QXlsx;
@@ -50,7 +51,8 @@ void QExchangeRecordWorker::slotStartImport(const QString &sFilePathName)
         QStringList rows;
         for(int k=1; k<nColCount; k++)
         {
-            rows.append(xlsx.read(i, k).toString());
+            QString str = xlsx.read(i, k).toString();
+            rows.append(str.remove(QRegularExpression("[=\"]")));
         }
         qDebug()<<"rows:"<<rows;
     }
