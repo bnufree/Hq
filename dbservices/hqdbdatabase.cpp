@@ -474,7 +474,8 @@ bool HQDBDataBase::createShareExchangeRecordTable()
     colist.append({HQ_TABLE_COL_EXCHANGE_TOTAL, "NUMERIC NULL"});
     colist.append({HQ_TABLE_COL_EXCHANGE_YONGJIN, "NUMERIC NULL"});
     colist.append({HQ_TABLE_COL_EXCHANGE_YINHUASUI, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_EXCHANGE_GUOHUFEI, "NUMERIC NULL"});
+    colist.append({HQ_TABLE_COL_EXCHANGE_OTHER, "NUMERIC NULL"});
+    colist.append({HQ_TABLE_COL_EXCHANGE_NETINCOME, "NUMERIC NULL"});
     colist.append({HQ_TABLE_COL_EXCHANGE_SERIAL_NUM, "NUMERIC NULL"});
     return createTable(TABLE_SHARE_EXCHANGE_RECORD, colist);
 }

@@ -429,8 +429,22 @@ public:
     double      mMaxMoney;
 };
 
-
-
+struct ShareExchangeData{
+    int         mID;
+    QString     mCode;
+    QString     mName;
+    QString     mDateTime;
+    int         mType;
+    int         mNum;
+    int         mTotalNum;
+    double      mPrice;
+    double      mMoney;
+    double      mYongjin;
+    double      mYinhuasui;
+    double      mOther;
+    double      mNetIncome;
+    int         mSerialNum;
+};
 
 #if 0
 class ShareDataList : public QList<ShareData>

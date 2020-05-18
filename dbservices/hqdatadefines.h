@@ -87,7 +87,8 @@
 #define         HQ_TABLE_COL_EXCHANGE_TOTAL                     "exchange_total"
 #define         HQ_TABLE_COL_EXCHANGE_YONGJIN                   "exchange_yongjin"
 #define         HQ_TABLE_COL_EXCHANGE_YINHUASUI                   "exchange_yinhuasui"
-#define         HQ_TABLE_COL_EXCHANGE_GUOHUFEI                   "exchange_guohufei"
+#define         HQ_TABLE_COL_EXCHANGE_OTHER                   "exchange_others"
+#define         HQ_TABLE_COL_EXCHANGE_NETINCOME                     "echange_netincome"
 #define         HQ_TABLE_COL_EXCHANGE_SERIAL_NUM                   "exchange_serial_num"
 
 
