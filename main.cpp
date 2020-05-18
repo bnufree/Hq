@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF8"));
 
     QExchangeRecordWorker worker;
-    worker.slotStartImport("D:/data/20200430.xlsx");
+    worker.slotStartImport("D:/20200431.xlsx");
 #if 0
     zchxMainWindow w;
 #ifdef Q_OS_WIN

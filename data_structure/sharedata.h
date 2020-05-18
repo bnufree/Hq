@@ -429,6 +429,15 @@ public:
     double      mMaxMoney;
 };
 
+enum   ShareExchangeType
+{
+    ShareExchange_None = 0,
+    ShareExchange_Buy = 1,
+    ShareExchange_Sell,
+    ShareExchange_Share_Bonus,
+    ShareExchange_Dividend_Bonus,
+};
+
 struct ShareExchangeData{
     int         mID;
     QString     mCode;

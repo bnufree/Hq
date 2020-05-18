@@ -37,6 +37,22 @@ signals:
 public slots:
     void slotStartImport(const QString& sFilePathName);
 private:
+    bool    isSerialNumCol(const QString& title);
+    bool    isAccountCol(const QString& title);
+    bool    isTotalCountCol(const QString& title);
+    bool    isNetCol(const QString& title);
+    bool    isOtherCol(const QString& title);
+    bool    isStamptaxCol(const QString& title);
+    bool    isBrokerageCol(const QString& title);
+    bool    isDateCol(const QString& title);
+    bool    isTypeCol(const QString& title);
+    bool    isCodeCol(const QString& title);
+    bool    isNameCol(const QString& title);
+    bool    isNumberCol(const QString& title);
+    bool    isPriceCol(const QString& title);
+    bool    isMoneyCol(const QString& title);
+    int     parseTypeOfString(const QString& type);
+private:
     QThread         mWorkThread;
     QMap<int, int>  mColMap;
 };
