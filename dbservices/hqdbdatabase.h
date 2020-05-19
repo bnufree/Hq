@@ -31,6 +31,8 @@ enum    HQ_DATA_COMPARE{
     HQ_COMPARE_GREAT,
     HQ_COMPARE_STRLIKE,
     HQ_COMPARE_TEXTIN,
+    HQ_COMPARE_LESS_EQUAL,
+    HQ_COMPARE_GREAT_EQUAL,
 };
 
 struct HQ_COL_VAL{
@@ -180,6 +182,13 @@ public:
     bool updateShareHsgtTop10List(const ShareHsgtList& dataList);
     bool queryShareHsgtTop10List(ShareHsgtList& list, const QString& code, const ShareWorkingDate& date);
     bool delShareHsgtTop10(const QString& code, const ShareWorkingDate& date);
+
+    //明细
+    bool updateExhangeRecordList(const QList<ShareExchangeData>& list);
+    bool queryExchangeRecord(QList<ShareExchangeData>& list, int& total_page, int page, const QString& code, const QString& start_date, const QString& end_date);
+    bool deleteExchangeRecord(const QString& code, const QString& start_date, const QString& end_date);
+
+
 
 
 private:

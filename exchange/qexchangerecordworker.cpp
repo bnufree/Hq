@@ -49,7 +49,7 @@ bool QExchangeRecordWorker::isPriceCol(const QString &title)
 
 bool QExchangeRecordWorker::isSerialNumCol(const QString& title)
 {
-    return title.contains(QStringLiteral("编号")) || title.contains(QStringLiteral("序列号")) || title.contains(QStringLiteral("流水号"));
+    return title.contains(QStringLiteral("成交编号")) || title.contains(QStringLiteral("序列号")) || title.contains(QStringLiteral("流水号"));
 }
 
 bool QExchangeRecordWorker::isAccountCol(const QString& title)
@@ -129,6 +129,8 @@ void QExchangeRecordWorker::slotStartImport(const QString &sFilePathName)
     mColMap.clear();
 
     QList<ShareExchangeData> list;
+    int  index = 0;
+    QString currentDate;
     for(int i=1; i<=nRowCount; i++)
     {
         QStringList rows;
@@ -223,7 +225,21 @@ void QExchangeRecordWorker::slotStartImport(const QString &sFilePathName)
                 data.mMoney = data.mNum * data.mPrice;
             }
             if(mColMap.contains(Other)) data.mOther = rows[mColMap[Other]].toDouble();
-            if(mColMap.contains(SerialNum)) data.mSerialNum = rows[mColMap[SerialNum]].toInt();
+            if(mColMap.contains(SerialNum))
+            {
+                data.mSerialText =  data.mDateTime + rows[mColMap[SerialNum]];
+            } else
+            {
+                if(currentDate != data.mDateTime)
+                {
+                    currentDate = data.mDateTime;
+                    index = 1;
+                } else
+                {
+                    index++;
+                }
+                data.mSerialText = data.mDateTime + data.mCode + QString::number(index);
+            }
             if(mColMap.contains(TotalCount)) data.mTotalNum = rows[mColMap[TotalCount]].toInt();
             if(mColMap.contains(StampTax))
             {
@@ -264,7 +280,7 @@ void QExchangeRecordWorker::slotStartImport(const QString &sFilePathName)
 
             if(data.mPrice < 0.1 && data.mMoney <0.1) continue;
 
-            qDebug()<<data.mDateTime<<data.mCode<<data.mName<<data.mType<<data.mMoney<<data.mNetIncome;
+            qDebug()<<data.mDateTime<<data.mCode<<data.mName<<data.mType<<data.mMoney<<data.mNetIncome<<data.mSerialText;
 
             list.append(data);
         }

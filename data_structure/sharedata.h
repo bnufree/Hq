@@ -452,7 +452,7 @@ struct ShareExchangeData{
     double      mYinhuasui;
     double      mOther;
     double      mNetIncome;
-    int         mSerialNum;
+    QString     mSerialText;
 };
 
 #if 0

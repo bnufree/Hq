@@ -97,9 +97,15 @@ QString DBColValList::whereString() const
             } else if(data.mColCompare == HQ_COMPARE_GREAT)
             {
                 valStrlist.append(QString("%1 > '%2'").arg(data.mColName).arg(data.mColVal.mValue.toString()));
-            } else
+            } else if(data.mColCompare == HQ_COMPARE_LESS)
             {
                 valStrlist.append(QString("%1 < '%2'").arg(data.mColName).arg(data.mColVal.mValue.toString()));
+            } else if(data.mColCompare == HQ_COMPARE_LESS_EQUAL)
+            {
+                valStrlist.append(QString("%1 <= '%2'").arg(data.mColName).arg(data.mColVal.mValue.toString()));
+            } else if(data.mColCompare == HQ_COMPARE_GREAT_EQUAL)
+            {
+                valStrlist.append(QString("%1 >= '%2'").arg(data.mColName).arg(data.mColVal.mValue.toString()));
             }
         } else if(data.mColVal.mType == HQ_DATA_INT)
         {
@@ -109,9 +115,15 @@ QString DBColValList::whereString() const
             } else if(data.mColCompare == HQ_COMPARE_GREAT)
             {
                 valStrlist.append(QString("%1 > %2").arg(data.mColName).arg(data.mColVal.mValue.toInt()));
-            } else
+            } else if(data.mColCompare == HQ_COMPARE_LESS)
             {
                 valStrlist.append(QString("%1 < %2").arg(data.mColName).arg(data.mColVal.mValue.toInt()));
+            } else if(data.mColCompare == HQ_COMPARE_GREAT_EQUAL)
+            {
+                valStrlist.append(QString("%1 >= %2").arg(data.mColName).arg(data.mColVal.mValue.toInt()));
+            } else if(data.mColCompare == HQ_COMPARE_LESS_EQUAL)
+            {
+                valStrlist.append(QString("%1 <= %2").arg(data.mColName).arg(data.mColVal.mValue.toInt()));
             }
         } else if(data.mColVal.mType == HQ_DATA_LONG)
         {
@@ -121,9 +133,15 @@ QString DBColValList::whereString() const
             } else if(data.mColCompare == HQ_COMPARE_GREAT)
             {
                 valStrlist.append(QString("%1 > %2").arg(data.mColName).arg(data.mColVal.mValue.toLongLong()));
-            } else
+            } else if(data.mColCompare == HQ_COMPARE_LESS)
             {
                 valStrlist.append(QString("%1 < %2").arg(data.mColName).arg(data.mColVal.mValue.toLongLong()));
+            } else if(data.mColCompare == HQ_COMPARE_GREAT_EQUAL)
+            {
+                valStrlist.append(QString("%1 >= %2").arg(data.mColName).arg(data.mColVal.mValue.toLongLong()));
+            } else if(data.mColCompare == HQ_COMPARE_LESS_EQUAL)
+            {
+                valStrlist.append(QString("%1 <= %2").arg(data.mColName).arg(data.mColVal.mValue.toLongLong()));
             }
         }
         else
@@ -137,6 +155,12 @@ QString DBColValList::whereString() const
             } else if(data.mColCompare == HQ_COMPARE_LESS)
             {
                 valStrlist.append(QString("%1 < %2").arg(data.mColName).arg(data.mColVal.mValue.toDouble(), 0, 'f', 3));
+            } else if(data.mColCompare == HQ_COMPARE_GREAT_EQUAL)
+            {
+                valStrlist.append(QString("%1 >= %2").arg(data.mColName).arg(data.mColVal.mValue.toDouble(), 0, 'f', 3));
+            } else if(data.mColCompare == HQ_COMPARE_LESS_EQUAL)
+            {
+                valStrlist.append(QString("%1 <= %2").arg(data.mColName).arg(data.mColVal.mValue.toDouble(), 0, 'f', 3));
             }
         }
     }
@@ -476,7 +500,7 @@ bool HQDBDataBase::createShareExchangeRecordTable()
     colist.append({HQ_TABLE_COL_EXCHANGE_YINHUASUI, "NUMERIC NULL"});
     colist.append({HQ_TABLE_COL_EXCHANGE_OTHER, "NUMERIC NULL"});
     colist.append({HQ_TABLE_COL_EXCHANGE_NETINCOME, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_EXCHANGE_SERIAL_NUM, "NUMERIC NULL"});
+    colist.append({HQ_TABLE_COL_EXCHANGE_SERIAL_NUM, "VARCHAR(30) NULL"});
     return createTable(TABLE_SHARE_EXCHANGE_RECORD, colist);
 }
 
@@ -1386,6 +1410,120 @@ ShareWorkingDate HQDBDataBase::getLastHistoryDateOfShare(/*const QString &code*/
 QString HQDBDataBase::errMsg()
 {
     return QString("sql:%1\\nerr:%2").arg(mSQLQuery.lastQuery()).arg(mSQLQuery.lastError().text());
+}
+
+
+bool HQDBDataBase::updateExhangeRecordList(const QList<ShareExchangeData>& list)
+{
+    int size = list.size();
+    if(size > 0)
+    {
+        mDB.transaction();
+        foreach(ShareExchangeData data, list)
+        {
+            DBColValList list;
+            list.append(DBColVal(HQ_TABLE_COL_CODE, data.mCode, HQ_DATA_TEXT));
+            list.append(DBColVal(HQ_TABLE_COL_NAME, data.mName, HQ_DATA_TEXT));
+            list.append(DBColVal(HQ_TABLE_COL_DATE, data.mDateTime, HQ_DATA_TEXT));
+            list.append(DBColVal(HQ_TABLE_COL_EXCHANGE_TYPE, data.mType, HQ_DATA_DOUBLE));
+            list.append(DBColVal(HQ_TABLE_COL_EXCHANGE_COUNT, data.mNum, HQ_DATA_DOUBLE));
+            list.append(DBColVal(HQ_TABLE_COL_EXCHANGE_PRICE, data.mPrice, HQ_DATA_DOUBLE));
+            list.append(DBColVal(HQ_TABLE_COL_EXCHANGE_TOTAL, data.mMoney, HQ_DATA_DOUBLE));
+            list.append(DBColVal(HQ_TABLE_COL_EXCHANGE_YONGJIN, data.mYongjin, HQ_DATA_DOUBLE));
+            list.append(DBColVal(HQ_TABLE_COL_EXCHANGE_YINHUASUI, data.mYinhuasui, HQ_DATA_DOUBLE));
+            list.append(DBColVal(HQ_TABLE_COL_EXCHANGE_OTHER, data.mOther, HQ_DATA_DOUBLE));
+            list.append(DBColVal(HQ_TABLE_COL_EXCHANGE_NETINCOME, data.mNetIncome, HQ_DATA_DOUBLE));
+            list.append(DBColVal(HQ_TABLE_COL_EXCHANGE_SERIAL_NUM, data.mSerialText, HQ_DATA_TEXT));
+
+            DBColValList key;
+            key.append(list.last());
+            if(!updateTable(TABLE_SHARE_EXCHANGE_RECORD, list, key)){
+                mDB.rollback();
+                return false;
+            }
+        }
+        mDB.commit();
+    }
+    return true;
+}
+
+bool HQDBDataBase::queryExchangeRecord(QList<ShareExchangeData>& list, int& total_page, int page, const QString& code, const QString& start_date, const QString& end_date)
+{
+    DBColValList whereList;
+    if(code.length() > 0 )
+    {
+        whereList.append(DBColVal(HQ_TABLE_COL_CODE, code, HQ_DATA_TEXT));
+    }
+    if(!start_date.isNull())
+    {
+        whereList.append(DBColVal(HQ_TABLE_COL_DATE, start_date, HQ_DATA_TEXT, HQ_COMPARE_GREAT_EQUAL));
+    }
+
+    if(!end_date.isNull())
+    {
+        whereList.append(DBColVal(HQ_TABLE_COL_DATE, end_date, HQ_DATA_TEXT, HQ_COMPARE_LESS_EQUAL));
+    }
+    QString sql = "";
+    QMutexLocker locker(&mSQLMutex);
+
+    sql = QString("select count(1) from %1 %2").arg(TABLE_SHARE_EXCHANGE_RECORD).arg(whereList.whereString());
+    if(!mSQLQuery.exec(sql)) return false;
+    int total_rows = 0;
+    while (mSQLQuery.next()) {
+        total_rows = mSQLQuery.value(0).toInt();
+        break;
+    }
+    int page_size = 50;
+    total_page = (total_rows + page_size -1) / page_size;
+
+    //判断是否需要分页显示
+    QString pagestr;
+    if(page > 0)
+    {
+        int startId = (page - 1)  * page_size;
+        pagestr = QString(" limit %1,%2").arg(startId).arg(page_size);
+    }
+    sql = QString("select * from %1 %2 order by %3 desc, %4 desc %5").arg(TABLE_SHARE_EXCHANGE_RECORD).arg(whereList.whereString()).arg(HQ_TABLE_COL_DATE).arg(HQ_TABLE_COL_CODE).arg(pagestr);
+    QMutexLocker locker(&mSQLMutex);
+    if(!mSQLQuery.exec(sql)) return false;
+    while (mSQLQuery.next()) {
+        ShareExchangeData data;
+        data.mID = mSQLQuery.value(HQ_TABLE_COL_ID).toInt();
+        data.mCode = mSQLQuery.value(HQ_TABLE_COL_CODE).toString();
+        data.mName = mSQLQuery.value(HQ_TABLE_COL_NAME).toString();
+        data.mDateTime = mSQLQuery.value(HQ_TABLE_COL_DATE).toString();
+        data.mType = mSQLQuery.value(HQ_TABLE_COL_EXCHANGE_TYPE).toInt();
+        data.mNum = mSQLQuery.value(HQ_TABLE_COL_EXCHANGE_COUNT).toInt();
+        data.mPrice = mSQLQuery.value(HQ_TABLE_COL_EXCHANGE_PRICE).toDouble();
+        data.mMoney = mSQLQuery.value(HQ_TABLE_COL_EXCHANGE_TOTAL).toDouble();
+        data.mYongjin = mSQLQuery.value(HQ_TABLE_COL_EXCHANGE_YONGJIN).toDouble();
+        data.mYinhuasui = mSQLQuery.value(HQ_TABLE_COL_EXCHANGE_YINHUASUI).toDouble();
+        data.mOther = mSQLQuery.value(HQ_TABLE_COL_EXCHANGE_OTHER).toDouble();
+        data.mNetIncome = mSQLQuery.value(HQ_TABLE_COL_EXCHANGE_NETINCOME).toDouble();
+        data.mSerialText = mSQLQuery.value(HQ_TABLE_COL_EXCHANGE_SERIAL_NUM).toString();
+
+        list.append(data);
+    }
+    return true;
+}
+
+bool HQDBDataBase::deleteExchangeRecord(const QString& code, const QString& start_date, const QString& end_date)
+{
+    DBColValList whereList;
+    if(code.length() > 0 )
+    {
+        whereList.append(DBColVal(HQ_TABLE_COL_CODE, code, HQ_DATA_TEXT));
+    }
+    if(!start_date.isNull())
+    {
+        whereList.append(DBColVal(HQ_TABLE_COL_DATE, start_date, HQ_DATA_TEXT, HQ_COMPARE_GREAT_EQUAL));
+    }
+
+    if(!end_date.isNull())
+    {
+        whereList.append(DBColVal(HQ_TABLE_COL_DATE, end_date, HQ_DATA_TEXT, HQ_COMPARE_LESS_EQUAL));
+    }
+    return deleteRecord(TABLE_SHARE_EXCHANGE_RECORD, whereList);
 }
 
 

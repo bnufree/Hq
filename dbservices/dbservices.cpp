@@ -120,6 +120,7 @@ void HqInfoService::initSignalSlot()
     qRegisterMetaType<QMap<QString, BlockData*> >("const QMap<QString, BlockData*>&");
     qRegisterMetaType<QList<QDate> >("const QList<QDate>&");
     qRegisterMetaType<ShareHistoryCounter>("const ShareHistoryCounter&");
+    qRegisterMetaType<QList<ShareExchangeData> >("const QList<ShareExchangeData>&");
 
      connect(this, SIGNAL(signalUpdateShareCloseDate(QList<QDate>)), this, SLOT(slotUpdateShareCloseDate(QList<QDate>)));
     connect(this, SIGNAL(signalInitDBTables()), this, SLOT(slotInitDBTables()));    
@@ -157,6 +158,9 @@ void HqInfoService::initSignalSlot()
     connect(this, SIGNAL(signalUpdateShareFinanceInfo(FinancialDataList)), this, SLOT(slotUpdateShareFinanceInfo(FinancialDataList)));
     connect(this, SIGNAL(signalQueryShareFinanceInfo(QStringList)), this, SLOT(slotQueryShareFinanceList(QStringList)));
     connect(this, SIGNAL(signalQueryShareFHSP(QString,ShareWorkingDate)), this, SLOT(slotQueryShareFHSP(QString,ShareWorkingDate)));
+    connect(this, SIGNAL(signalUpdateShareExchangeRecord(QList<ShareExchangeData>)), this, SLOT(slotUpdateShareExchangeRecord(QList<ShareExchangeData>)));
+    connect(this, SIGNAL(signalQueryShareExchangeRecord(int, QString,QString,QString)), this, SLOT(slotQueryShareExchangeRecord(int, QString,QString,QString)));
+    connect(this, SIGNAL(signalDeleteShareExchangeRecord(QString,QString,QString)), this, SLOT(slotDeleteShareExchangeRecord(QString,QString,QString)));
 }
 
 
@@ -1004,5 +1008,38 @@ QDate HqInfoService::nextActiveDay(const QDate &date)
 QDate HqInfoService::getLgtStartDate()
 {
     return QDate(2017,3,17);
+}
+
+void HqInfoService::slotUpdateShareExchangeRecord(const QList<ShareExchangeData> &list)
+{
+    if(list.size() == 0) return;
+    QString start_date = list.first().mDateTime;
+    QString end_date = list.last().mDateTime;
+    if(!mDataBase.updateExhangeRecordList(list))
+    {
+        emit signalDBErrorMsg(tr("update db exchange record error:%1").arg(mDataBase.errMsg()));
+        return;
+    }
+
+    emit signalQueryShareExchangeRecord(1, "", start_date, end_date);
+}
+
+void HqInfoService::slotDeleteShareExchangeRecord(const QString &code, const QString &start_date, const QString &end_date)
+{
+    if(!mDataBase.deleteExchangeRecord(code, start_date, end_date))
+    {
+        emit signalDBErrorMsg(tr("update db exchange record error:%1").arg(mDataBase.errMsg()));
+        return;
+    }
+
+    emit signalQueryShareExchangeRecord(1, code, start_date, end_date);
+}
+
+void HqInfoService::slotQueryShareExchangeRecord(int page, const QString &code, const QString &start_date, const QString &end_date)
+{
+    QList<ShareExchangeData> list;
+    int total_page = -1;
+    mDataBase.queryExchangeRecord(list, total_page, page, code, start_date, end_date);
+    emit signalSendShareExchangeRecord(page, total_page, list);
 }
 

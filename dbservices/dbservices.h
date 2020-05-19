@@ -148,6 +148,10 @@ signals:
     void signalUpdateShareCloseDate(const QList<QDate>& list );
 
     void signalUpdateShareExchangeRecord(const QList<ShareExchangeData>& list);
+    void signalSendShareExchangeRecord(int cur_page, int total_page, const QList<ShareExchangeData>& list);
+    void signalQueryShareExchangeRecord(int cur_page, const QString& code, const QString& start_date,  const QString& end_date);
+    void signalDeleteShareExchangeRecord(const QString& code, const QString& start_date,  const QString& end_date);
+
 
 public slots:
     void slotSearchCodesOfText(const QString &text);
@@ -196,7 +200,8 @@ public slots:
 
     //
     void slotUpdateShareExchangeRecord(const QList<ShareExchangeData>& list);
-    void slotQueryShareExchangeRecord(const QString& code, const Qtring& start_date,  const QString& end_date);
+    void slotQueryShareExchangeRecord(int cur_page, const QString& code, const QString& start_date,  const QString& end_date);
+    void slotDeleteShareExchangeRecord(const QString& code, const QString& start_date,  const QString& end_date);
 
 private:
     void initSignalSlot();
