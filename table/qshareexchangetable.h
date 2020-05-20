@@ -9,7 +9,6 @@ class QShareExchangeTablewidget : public HqTableWidget
     Q_OBJECT
 public:
     explicit QShareExchangeTablewidget(QWidget *parent = 0);
-    virtual void setSortType(int type);
     virtual void displayNextPage();
     virtual void displayPreviousPage();
     virtual void displayFirstPage();
@@ -17,10 +16,9 @@ public:
 public slots:
     void    setSearchCondition(const QString& code, const QString& start, const QString& end);
 private:
-    void    initMenu();
 
 public slots:
-    void    slotRecvDataList(int page, int pagesize, const QList<ShareExchangeData>& list);
+    void    slotRecvDataList(int page, int total_page, const QList<ShareExchangeData>& list);
     void    slotCustomContextMenuRequested(const QPoint &pos);
     void    slotCellDoubleClicked(int row, int col);
     void    slotCellClicked(int row, int col);

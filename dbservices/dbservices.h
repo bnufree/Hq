@@ -148,9 +148,11 @@ signals:
     void signalUpdateShareCloseDate(const QList<QDate>& list );
 
     void signalUpdateShareExchangeRecord(const QList<ShareExchangeData>& list);
+    void signalUpdateShareExchangeRecordSucceed();
     void signalSendShareExchangeRecord(int cur_page, int total_page, const QList<ShareExchangeData>& list);
     void signalQueryShareExchangeRecord(int cur_page, const QString& code, const QString& start_date,  const QString& end_date);
     void signalDeleteShareExchangeRecord(const QString& code, const QString& start_date,  const QString& end_date);
+    void signalDeleteShareExchangeRecordSucceed();
 
 
 public slots:

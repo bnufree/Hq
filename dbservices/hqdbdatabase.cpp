@@ -1484,7 +1484,7 @@ bool HQDBDataBase::queryExchangeRecord(QList<ShareExchangeData>& list, int& tota
         pagestr = QString(" limit %1,%2").arg(startId).arg(page_size);
     }
     sql = QString("select * from %1 %2 order by %3 desc, %4 desc %5").arg(TABLE_SHARE_EXCHANGE_RECORD).arg(whereList.whereString()).arg(HQ_TABLE_COL_DATE).arg(HQ_TABLE_COL_CODE).arg(pagestr);
-    QMutexLocker locker(&mSQLMutex);
+
     if(!mSQLQuery.exec(sql)) return false;
     while (mSQLQuery.next()) {
         ShareExchangeData data;

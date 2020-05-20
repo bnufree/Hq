@@ -1021,7 +1021,7 @@ void HqInfoService::slotUpdateShareExchangeRecord(const QList<ShareExchangeData>
         return;
     }
 
-    emit signalQueryShareExchangeRecord(1, "", start_date, end_date);
+    emit signalUpdateShareExchangeRecordSucceed();
 }
 
 void HqInfoService::slotDeleteShareExchangeRecord(const QString &code, const QString &start_date, const QString &end_date)
@@ -1032,7 +1032,7 @@ void HqInfoService::slotDeleteShareExchangeRecord(const QString &code, const QSt
         return;
     }
 
-    emit signalQueryShareExchangeRecord(1, code, start_date, end_date);
+    emit signalDeleteShareExchangeRecordSucceed();
 }
 
 void HqInfoService::slotQueryShareExchangeRecord(int page, const QString &code, const QString &start_date, const QString &end_date)
