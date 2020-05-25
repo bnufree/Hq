@@ -24,7 +24,7 @@ CONFIG += c++11
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = Hq_Xlsx
+TARGET = Hq
 TEMPLATE = app
 DESTDIR = ../bin3/
 
@@ -99,7 +99,10 @@ SOURCES += main.cpp\
     qpopwindow.cpp \
     colortextlabel.cpp \
     qeastmoneyshareholderfetcher.cpp \
-    table/qshareexchangetable.cpp
+    table/qshareexchangetable.cpp \
+    table/northboundmoneyflowtablewidget.cpp \
+    table/northboundtop10displaywidget.cpp \
+    table/northboundsharevolwidget.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -176,7 +179,10 @@ HEADERS  += dialog.h \
     qpopwindow.h \
     colortextlabel.h \
     qeastmoneyshareholderfetcher.h \
-    table/qshareexchangetable.h
+    table/qshareexchangetable.h \
+    table/northboundmoneyflowtablewidget.h \
+    table/northboundtop10displaywidget.h \
+    table/northboundsharevolwidget.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

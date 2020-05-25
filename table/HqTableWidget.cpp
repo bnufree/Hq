@@ -403,20 +403,12 @@ void HqTableWidget::resizeEvent(QResizeEvent *event)
     mMaxDisRow = table_height/ mRowHeight;
     if(mMaxDisRow * mRowHeight < table_height)
     {
-        mRowHeight = ceil(table_height * 1.0 / mMaxDisRow);
-        for(int i=0; i<rowCount(); i++)
-        {
-            setRowHeight(i, mRowHeight);
-        }
+        mMaxDisRow++;
     }
     mMaxDisCol = table_width / mColWidth;
     if(mMaxDisCol * mColWidth < table_width)
     {
-        mColWidth = ceil(table_width * 1.0 / mMaxDisCol);
-        for(int i=0; i<columnCount(); i++)
-        {
-            setColumnWidth(i, mColWidth);
-        }
+        mMaxDisCol++;
     }
 //    qDebug()<<"max row:"<<mMaxDisRow<<" max col:"<<mMaxDisCol;
     //重新设定每一列的显示

@@ -7,14 +7,17 @@ class QAndroidListWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit QAndroidListWidget(QWidget *parent = 0);
+    explicit QAndroidListWidget(int w = 0, int h = 0, QWidget *parent = 0);
     void     addItem(const QString& item, const QVariant& data);
 protected:
     void     autoAdjustSize();
 signals:
-    void     signalItemClicked(int data);
+    void     signalItemClicked(const QString& text, int data);
 public slots:
     void    slotItemClicked();
+private:
+    int     mItemWidth;
+    int     mItemHeight;
 };
 
 #endif // QANDROIDLISTWIDGET_H

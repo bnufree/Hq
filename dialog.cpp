@@ -462,7 +462,7 @@ void Dialog::slotUpdateHSGTOfCode(const QString &code)
 void Dialog::on_dataMgrBtn_clicked()
 {
     if(mCtrlListWidget) delete mCtrlListWidget;
-    mCtrlListWidget = new QAndroidListWidget(this);
+    mCtrlListWidget = new QAndroidListWidget(0, 0, this);
     mCtrlListWidget->addItem(QStringLiteral("陆股通"), DATA_MUTUAL_MARKET);
 //    mCtrlListWidget->addItem(QStringLiteral("龙虎榜"), DATA_LHB);
     mCtrlListWidget->addItem(QStringLiteral("北向实时"), DATA_NORTH_REAL);
@@ -527,7 +527,7 @@ void Dialog::slotHqCenterBtnClicked()
     if(ui->mainStackWidget->currentWidget() == mShareTableWidget)
     {
         if(mCtrlListWidget) delete mCtrlListWidget;
-        mCtrlListWidget = new QAndroidListWidget(this);
+        mCtrlListWidget = new QAndroidListWidget(0 , 0 , this);
         mCtrlListWidget->addItem(QStringLiteral("自选"), MKT_ZXG);
         mCtrlListWidget->addItem(QStringLiteral("沪深"), MKT_ALL);
         mCtrlListWidget->addItem(QStringLiteral("沪市"), MKT_SH);

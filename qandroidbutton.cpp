@@ -15,8 +15,7 @@ QAndroidButton::QAndroidButton(const QString& label, QWidget *parent) :\
                             color:red;\
                             font-weight:bold;\
                         }\
-                        QLabel[selec"
-                        "ted=\"false\"]\
+                        QLabel[selected=\"false\"]\
                         {\
                             color:white;\
                             font-weight:normal;\

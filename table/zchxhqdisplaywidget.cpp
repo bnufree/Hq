@@ -1,47 +1,68 @@
 ﻿#include "zchxhqdisplaywidget.h"
 #include "ui_zchxhqdisplaywidget.h"
 #include <QStackedWidget>
-#include <qindexwidget.h>
+#include "qindexwidget.h"
+#include "qandroidlistwidget.h"
 
 zchxHqDisplayWidget::zchxHqDisplayWidget(QWidget *parent) :
     QWidget(parent),
+    mMarketBtn(0),
+    mMarketList(0),
     ui(new Ui::zchxHqDisplayWidget)
 {
     ui->setupUi(this);
-#ifdef Q_OS_ANDROID
-    ui->comboBox->setMinimumHeight(40);
-    ui->comboBox->setMaximumWidth(120);
-    QList<struMenu> itemlist;
-    itemlist.append(struMenu(QStringLiteral("自选"), MKT_ZXG));
-    itemlist.append(struMenu(QStringLiteral("沪深"), MKT_ALL));
-    itemlist.append(struMenu(QStringLiteral("沪市"), MKT_SH));
-    itemlist.append(struMenu(QStringLiteral("深市"), MKT_SZ));
-    itemlist.append(struMenu(QStringLiteral("中小板"), MKT_ZXB));
-    itemlist.append(struMenu(QStringLiteral("创业板"), MKT_CYB));
-    itemlist.append(struMenu(QStringLiteral("科创板"), MKT_KCB));
-    itemlist.append(struMenu(QStringLiteral("沪深基金"), MKT_JJ));
-    itemlist.append(struMenu(QStringLiteral("恒指"), MKT_HK_HSZS));
-    itemlist.append(struMenu(QStringLiteral("恒生国企"), MKT_HK_HSGQ));
-    itemlist.append(struMenu(QStringLiteral("港股通"), MKT_HK_GGT));
-    itemlist.append(struMenu(QStringLiteral("陆股通TOP10"), MKT_LGT_TOP10));
-
-    foreach (struMenu item, itemlist) {
-        ui->comboBox->addItem(item.mDisplayText, item.mCmd);
-    }
-    connect(ui->comboBox,SIGNAL(currentIndexChanged(int)),
-            this, SLOT(slotMarketTypeChanged(int)));
-    ui->comboBox->setCurrentIndex(0);
-#else
-    ui->comboBox->setVisible(false);
-#endif
+    int frameHeight = HqUtils::convertMM2Pixel(10.0);
+    ui->top_frame->setFixedHeight(frameHeight);
+    mMarketBtn = new QAndroidButton(this);
+    mMarketBtn->setAlignment(Qt::AlignCenter);
+    mMarketBtn->setFixedWidth(HqUtils::convertMM2Pixel(30.0));
+    ui->horizontalLayout->addWidget(mMarketBtn);
     ui->horizontalLayout->addWidget(new QIndexWidget(this));
     ui->verticalLayout->addWidget(mShareWidget = new QShareTablewidget(this));
 
+    int item_width = HqUtils::convertMM2Pixel(30.0);
+    int item_height = HqUtils::convertMM2Pixel(10.0);
+    mMarketList = new QAndroidListWidget(item_width, item_height, this);
+
+    mMarketList->addItem(QStringLiteral("自选"), MKT_ZXG);
+    mMarketList->addItem(QStringLiteral("沪深"), MKT_ALL);
+    mMarketList->addItem(QStringLiteral("沪市"), MKT_SH);
+    mMarketList->addItem(QStringLiteral("深市"), MKT_SZ);
+    mMarketList->addItem(QStringLiteral("中小板"), MKT_ZXB);
+    mMarketList->addItem(QStringLiteral("创业板"), MKT_CYB);
+    mMarketList->addItem(QStringLiteral("科创板"), MKT_KCB);
+    mMarketList->addItem(QStringLiteral("沪深基金"), MKT_JJ);
+    mMarketList->addItem(QStringLiteral("恒指"), MKT_HK_HSZS);
+    mMarketList->addItem(QStringLiteral("恒生国企"), MKT_HK_HSGQ);
+    mMarketList->addItem(QStringLiteral("港股通"), MKT_HK_GGT);
+    mMarketList->addItem(QStringLiteral("陆股通TOP10"), MKT_LGT_TOP10);
+
+    connect(mMarketList, SIGNAL(signalItemClicked(QString,int)), this, SLOT(slotMarketTypeChanged(QString, int)));
+    mMarketList->hide();
+
+    //设定初始状态
+    mMarketBtn->setText(QStringLiteral("自选"));
+    mMarketBtn->setSelected(true);
+    mShareWidget->setShareMarketType(MKT_ZXG);
+
+    connect(mMarketBtn, SIGNAL(clicked()), this, SLOT(slotMarketBtnClicked()));
+
 }
 
-void zchxHqDisplayWidget::slotMarketTypeChanged(int index)
+void zchxHqDisplayWidget::slotMarketBtnClicked()
 {
-    mShareWidget->setShareMarketType(ui->comboBox->currentData().toInt());
+    if(mMarketList)
+    {
+        mMarketList->move(mMarketBtn->geometry().bottomLeft());
+        mMarketList->setVisible(true);
+    }
+}
+
+void zchxHqDisplayWidget::slotMarketTypeChanged(const QString& text, int type)
+{
+    if(mMarketList) mMarketList->setVisible(false);
+    mMarketBtn->setText(text);
+    mShareWidget->setShareMarketType(type);
 }
 
 zchxHqDisplayWidget::~zchxHqDisplayWidget()
