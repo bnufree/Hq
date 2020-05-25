@@ -30,7 +30,12 @@ QDate QHKExchangeVolDataProcess::getVolInfoFromHKEX(ShareForignVolFileDataList& 
     QString mktstr = (mkt == 0? "sh":"sz");
     QByteArray value = QHttpGet::getContentOfURLWithPost(QString(HK_URL).arg(mktstr).arg(mktstr), postVal.toUtf8(), 600);
     qDebug()<<"date :"<<date.toString("yyyy-MM-dd")<<" has content length:"<<value.length();
-    if(value.length() < 10000) qDebug()<<value;
+    QFile file(QString("%1.txt").arg(date.toString("yyyy-MM-dd")));
+    if(file.open(QIODevice::WriteOnly))
+    {
+        file.write(value);
+        file.close();
+    }
 
 #ifdef TEST
     qDebug()<<"recv len:"<<value.length();

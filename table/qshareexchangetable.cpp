@@ -60,11 +60,6 @@ void QShareExchangeTablewidget::setSearchCondition(const QString& code, const QS
 
 void QShareExchangeTablewidget::slotRecvDataList(int page, int total_page, const QList<ShareExchangeData>& list)
 {
-//    datalist.append(TableColData(QStringLiteral("价格"), STK_DISPLAY_SORT_TYPE_NONE));
-//    datalist.append(TableColData(QStringLiteral("金额"), STK_DISPLAY_SORT_TYPE_NONE));
-//    datalist.append(TableColData(QStringLiteral("手续费"), STK_DISPLAY_SORT_TYPE_NONE));
-//    datalist.append(TableColData(QStringLiteral("净流入"), STK_DISPLAY_SORT_TYPE_NONE));
-
     mCurPage = page;
     mTotalPage = total_page;
     mPageSize = 50;

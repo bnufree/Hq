@@ -1015,6 +1015,7 @@ void HqInfoService::slotUpdateShareExchangeRecord(const QList<ShareExchangeData>
     if(list.size() == 0) return;
     QString start_date = list.first().mDateTime;
     QString end_date = list.last().mDateTime;
+    qDebug()<<__FUNCTION__<<list.size()<<start_date<<end_date;
     if(!mDataBase.updateExhangeRecordList(list))
     {
         emit signalDBErrorMsg(tr("update db exchange record error:%1").arg(mDataBase.errMsg()));

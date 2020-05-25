@@ -23,10 +23,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     std::set_new_handler(no_memory);
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF8"));
-
-    QExchangeRecordWorker worker;
-    worker.slotStartImport("D:/20200431.xlsx");
-#if 0
+#if 1
     zchxMainWindow w;
 #ifdef Q_OS_WIN
     w.showMaximized();

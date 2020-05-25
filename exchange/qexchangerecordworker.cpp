@@ -9,6 +9,7 @@
 #include <QFile>
 #include <QRegularExpression>
 #include <QStringList>
+#include "dbservices/dbservices.h"
 
 
 using namespace QXlsx;
@@ -16,8 +17,10 @@ using namespace QXlsx;
 
 QExchangeRecordWorker::QExchangeRecordWorker(QObject *parent) : QObject(parent)
 {
-    this->moveToThread(&mWorkThread);
     connect(this, SIGNAL(signalStartImport(QString)), this, SLOT(slotStartImport(QString)));
+    connect(DATA_SERVICE, SIGNAL(signalUpdateShareExchangeRecordSucceed()), this, SLOT(slotUpdateRecordSucceed()));
+    this->moveToThread(&mWorkThread);
+
     mWorkThread.start();
 }
 
@@ -97,6 +100,11 @@ int QExchangeRecordWorker::parseTypeOfString(const QString& type)
     if(type.contains(QStringLiteral("卖出"))) return ShareExchange_Sell;
     if(type.contains(QStringLiteral("买入"))) return ShareExchange_Buy;
     return ShareExchange_None;
+}
+
+void QExchangeRecordWorker::slotUpdateRecordSucceed()
+{
+    emit DATA_SERVICE->signalQueryShareExchangeRecord(1, "000651", "", "");
 }
 
 
@@ -285,6 +293,11 @@ void QExchangeRecordWorker::slotStartImport(const QString &sFilePathName)
             list.append(data);
         }
 
+    }
+
+    if(list.size() > 0)
+    {
+        emit DATA_SERVICE->signalUpdateShareExchangeRecord(list);
     }
 
     return ;

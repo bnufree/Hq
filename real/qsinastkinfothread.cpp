@@ -8,7 +8,7 @@
 #include "utils/qhttpget.h"
 
 
-QSinaStkInfoThread::QSinaStkInfoThread(const QList<QStringList>& list, bool send, QObject *parent)
+QSinaStkInfoThread::QSinaStkInfoThread(const QStringList& list, bool send, QObject *parent)
   : QThread(parent)
   , mSendResFlag(send)
   , mCancel(false)
@@ -27,45 +27,53 @@ QSinaStkInfoThread::~QSinaStkInfoThread()
 void QSinaStkInfoThread::run()
 {
     //开始更新
-    int index  = 0;
+
     while(1)
     {
         if(mCancel) break;
         QString url("http://hq.sinajs.cn/?list=%1");
-        if(mStkList.length() > 0)
-        {
+        QTime t;
+        t.start();
+        int index  = 0;
+        while (index < mStkList.size()) {
             QStringList list = mStkList[index];
             QString wkURL = url.arg(list.join(","));
-            QTime t;
-            t.start();
+
             slotRecvHttpContent(QHttpGet::getContentOfURL(wkURL));
-//            qDebug()<<"parse real info elapsed:"<<t.elapsed()<<mStkList.size();
-            index = (index + 1) % mStkList.size();
-        }
+            index++;
+        }        
+//        qDebug()<<"parse real info elapsed:"<<t.elapsed()<<mStkList.size();
     }
 
 }
 
 
-void QSinaStkInfoThread::setStkList(const QList<QStringList> &slist)
+void QSinaStkInfoThread::setStkList(const QStringList &list)
 {
-    foreach (QStringList list, slist) {
-        QStringList resList;
-        foreach (QString code, list) {
-            if(code.length() == 6)
-            {
-                resList.append(ShareData::prefixCode(code)+code);
-            } else if(code.length() == 8)
-            {
-                resList.append(code);
-            } else
-            {
-                resList.append(code);
-            }
+    //首先给数据添加交易所标识
+    QStringList resList;
+    foreach (QString code, list) {
+        code = code.toLower();
+        if(code.startsWith("sh") || code.startsWith("sz") || code.startsWith("hk"))
+        {
+            resList.append(code);
         }
-        mStkList.append(resList);
+        if(code.length() == 6)
+        {
+            resList.append(ShareData::prefixCode(code)+code);
+        } else if(code.length() == 5)
+        {
+            resList.append("hk" + code);
+        }
     }
-
+    //开始进行分组
+    int group_size = 100;
+    int index = 0;
+    while (1) {
+        mStkList.append(resList.mid(index, group_size));
+        index += group_size;
+        if(index >= resList.size()) break;
+    }
 }
 
 

@@ -36,6 +36,7 @@ signals:
     void signalSendCodeList(const QStringList& list);
 public slots:
     void slotStartImport(const QString& sFilePathName);
+    void slotUpdateRecordSucceed();
 private:
     bool    isSerialNumCol(const QString& title);
     bool    isAccountCol(const QString& title);

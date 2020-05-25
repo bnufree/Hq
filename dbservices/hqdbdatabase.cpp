@@ -412,6 +412,7 @@ bool HQDBDataBase::createDBTables()
     if(!createShareBonusIbfoTable()) return false;
     if(!createShareHsgTop10Table()) return false;
     if(!createShareHistoryCounterTable()) return false;
+    if(!createShareExchangeRecordTable()) return false;
     qDebug()<<__FUNCTION__<<__LINE__;
     return true;
 }
@@ -1413,14 +1414,17 @@ QString HQDBDataBase::errMsg()
 }
 
 
-bool HQDBDataBase::updateExhangeRecordList(const QList<ShareExchangeData>& list)
+bool HQDBDataBase::updateExhangeRecordList(const QList<ShareExchangeData>& srclist)
 {
-    int size = list.size();
+    int size = srclist.size();
     if(size > 0)
     {
+        int total_size = srclist.size();
+        int index = 0;
         mDB.transaction();
-        foreach(ShareExchangeData data, list)
+        foreach(ShareExchangeData data, srclist)
         {
+            qDebug()<<"now update list:"<<index << total_size;
             DBColValList list;
             list.append(DBColVal(HQ_TABLE_COL_CODE, data.mCode, HQ_DATA_TEXT));
             list.append(DBColVal(HQ_TABLE_COL_NAME, data.mName, HQ_DATA_TEXT));
@@ -1441,6 +1445,8 @@ bool HQDBDataBase::updateExhangeRecordList(const QList<ShareExchangeData>& list)
                 mDB.rollback();
                 return false;
             }
+            index ++;
+            qDebug()<<"now update list:"<<index << total_size;
         }
         mDB.commit();
     }

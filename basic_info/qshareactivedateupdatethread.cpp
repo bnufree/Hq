@@ -66,7 +66,6 @@ QList<QDate> QShareActiveDateUpdateThread::getDateListFromHexun()
 
 void QShareActiveDateUpdateThread::run()
 {
-
     QDate workDate;
     //检查当前时间是不是工作日
     while(true)

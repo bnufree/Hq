@@ -32,24 +32,17 @@ void QSinaStkResultMergeThread::setShareCodes(const QStringList &list)
         thread->cancel();
     }
     //生成新的线程
-    int list_size = 6;
-    int thread_code = 100 * list_size;
-    int nthread = (mAllShareCodesList.length() + thread_code-1 ) / thread_code;
+    int thread_code_size = qCeil(mAllShareCodesList.size() / 2.0);
+    int nthread = (mAllShareCodesList.size() + thread_code_size - 1) / thread_code_size;
+    int start  = 0;
     for(int i=0; i<nthread; i++)
     {
-        QList<QStringList> llist;
-        int start = i*thread_code;
-        for(int k=0; k<list_size; k++)
-        {
-            int unit = thread_code / list_size;
-            QStringList wklist = mAllShareCodesList.mid(start + k*unit, unit);
-            llist.append(wklist);
-        }
-
-        QSinaStkInfoThread *wkthread = new QSinaStkInfoThread(llist, false);
+        QStringList wklist = mAllShareCodesList.mid(start, thread_code_size);
+        QSinaStkInfoThread *wkthread = new QSinaStkInfoThread(wklist, false);
         connect(wkthread, SIGNAL(finished()), wkthread, SLOT(deleteLater()));
         mSubThreadList.append(wkthread);
         wkthread->start();
+        start += thread_code_size;
     }
 }
 
