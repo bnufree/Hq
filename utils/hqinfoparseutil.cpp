@@ -14,64 +14,143 @@ HqInfoParseUtil::HqInfoParseUtil()
 
 }
 
+ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryData(const QDate& start, const QString& code)
+{
+    return getShareHistoryDataFromHexun(start, code);
+}
 
 ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromHexun(const QDate& start, const QString& code)
 {
-    ShareHistoryFileDataList list;
-    QDateList dates = ShareWorkingDate::getHisWorkingDay();
-    if(dates.size() > 0)
-    {
-        if(dates.first() == QDate::currentDate()) dates.removeFirst();
-    }
-    int num = 0;
-    for(int i=0; i<dates.size(); i++)
-    {
-        if(dates[i] >= start) num++;
-    }
-    if(num  == 0) return list;
-    num *= (-1);
     QString wkCode = code;
     if(wkCode.size() == 6)
     {
         QString market = code.toInt() < 500000 ? "szse" : "sse";
         wkCode.insert(0, market);
     }
-    QString wkURL = QString("http://webstock.quote.hermes.hexun.com/a/kline?code=%1&start=%2&number=%3&type=5")
-            .arg(wkCode)
-            .arg(dates.first().toString("yyyyMMdd000000"))
-            .arg(num);
 
-    QRegExp weight_reg("\\,(\\d{1,})\\]\\}");
-    QRegExp data_reg("\\[([0-9\,]{1,})\\]");
-    QString result = QString::fromUtf8(QHttpGet::getContentOfURL(wkURL));
+    ShareHistoryFileDataList list;
+    QDate last_update_date = QDate::currentDate();
+    while (last_update_date > start) {
+        QString wkURL = QString("http://webstock.quote.hermes.hexun.com/a/kline?code=%1&start=%2&number=-100&type=5")
+                .arg(wkCode)
+                .arg(last_update_date.toString("yyyyMMdd000000"));
 
-    int pos = weight_reg.lastIndexIn(result, -1);
-    int weight = 0;
-    if(pos != -1)
-    {
-        weight = weight_reg.cap(1).toInt();
-    }
-    if(weight == 0) return list;
-    pos = 0;
-    while ((pos = data_reg.indexIn(result, pos)) != -1) {
-        pos += data_reg.matchedLength();
-        QString src = data_reg.cap(1);
-        QStringList src_list = src.split(",");
-        if(src_list.size() < 8) continue;
-        //{"Time":"时间"},{"LastClose":"前收盘价"},{"Open":"开盘价"},{"Close":"收盘价"},{"High":"最高价"},{"Low":"最低价"},{"Volume":"成交量"},{"Amount":"成交额"}],
-        QDate date = QDate::fromString(src_list[0], "yyyyMMdd000000");
-        if(date < start) continue;
-        if(date == ShareWorkingDate::currentDate().date()) break;
+        QRegExp weight_reg("\\,(\\d{1,})\\]\\}");
+        QRegExp data_reg("\\[([0-9\,]{1,})\\]");
+        QString result = QString::fromUtf8(QHttpGet::getContentOfURL(wkURL));
 
-        ShareHistoryFileData data;
-        data.mDate = QDateTime(date).toTime_t();
-        data.mClose = src_list[3].toDouble() / weight;
-        data.mLastClose = src_list[1].toDouble() / weight;
-        data.mMoney = src_list[7].toDouble();
-        list.append(data);
+        int pos = weight_reg.lastIndexIn(result, -1);
+        int weight = 0;
+        if(pos != -1)
+        {
+            weight = weight_reg.cap(1).toInt();
+        }
+        if(weight == 0) return list;
+        pos = 0;
+        QDateList wklist;
+        while ((pos = data_reg.indexIn(result, pos)) != -1) {
+            pos += data_reg.matchedLength();
+            QString src = data_reg.cap(1);
+            QStringList src_list = src.split(",");
+            if(src_list.size() < 8) continue;
+            //{"Time":"时间"},{"LastClose":"前收盘价"},{"Open":"开盘价"},{"Close":"收盘价"},{"High":"最高价"},{"Low":"最低价"},{"Volume":"成交量"},{"Amount":"成交额"}],
+            QDate date = QDate::fromString(src_list[0], "yyyyMMdd000000");
+            wklist.append(date);
+            if(date < start) continue;
+            if(date == ShareWorkingDate::currentDate().date()) break;
+
+            ShareHistoryFileData data;
+            data.mDate = QDateTime(date).toTime_t();
+            data.mClose = src_list[3].toDouble() / weight;
+            data.mLastClose = src_list[1].toDouble() / weight;
+            data.mMoney = src_list[7].toDouble();
+            list.append(data);
+        }
+        if(wklist.size() == 0) break;
+        else{
+            last_update_date = wklist.first();
+        }
     }
 
     return list;
+
+}
+
+
+bool HqInfoParseUtil::getShareDateRange(const QString& code, QDate& start, QDate& end)
+{
+    QString wkCode = code.right(6);
+    bool found = false;
+    //先从和讯网获取
+    if(wkCode.size() == 6)
+    {
+        QString market = code.toInt() < 500000 ? "szse" : "sse";
+        wkCode.insert(0, market);
+    }
+    QString wkURL = QString("http://webstock.quote.hermes.hexun.com/a/kline?code=%1&start=%2&number=-%3&type=5")
+            .arg(wkCode)
+            .arg(QDate::currentDate().toString("yyyyMMdd000000"))
+            .arg(3);
+
+    QRegExp start_end_date_reg("([0-9]{8})0{6},([0-9]{8})0{6}");
+    QString result = QString::fromUtf8(QHttpGet::getContentOfURL(wkURL));
+    int pos = start_end_date_reg.indexIn(result, 0);
+    if(pos >= 0)
+    {
+        start = QDate::fromString(start_end_date_reg.cap(1), "yyyyMMdd");
+        end = QDate::fromString(start_end_date_reg.cap(2), "yyyyMMdd");
+        found = true;
+        if(start == end) found = false;
+    }
+    if(!found)
+    {
+        //再次从雪球获取
+        QStringList urlList;
+        urlList.append("https://xueqiu.com/");
+        QString wkCode = (code.left(1).toInt() >= 5 ? "SH" : "SZ") + code;
+        QString url = QString("https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=%1&begin=%2&period=day&type=normal&count=-10000").arg(wkCode).arg(QDateTime::currentDateTime().toMSecsSinceEpoch());
+        urlList.append(url);
+        QNetworkAccessManager mgr;
+        int index = 0;
+        foreach (QString url, urlList) {
+            QNetworkReply *reply = mgr.get(QNetworkRequest(url));
+            if(!reply)  continue;
+            QEventLoop subloop;
+            QObject::connect(reply, SIGNAL(finished()), &subloop, SLOT(quit()));
+            QObject::connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), &subloop, SLOT(quit()));
+            QTimer::singleShot(10000, &subloop, SLOT(quit()));
+            subloop.exec();
+            if(reply->error() == QNetworkReply::NoError && reply->isFinished() && index > 0)
+            {
+                QString result = QString::fromUtf8(reply->readAll());
+                QRegExp dateExp("(\[([0-9]{8}0{5}),");
+                int pos = dateExp.indexIn(result, 0);
+                if(pos > 0)
+                {
+                    start = QDateTime::fromMSecsSinceEpoch(dateExp.cap(1).toLongLong()).date();
+                    found = true;
+                }
+//                qDebug()<<"found from Xueqiu:"<<result.left(4000)<<pos;
+                pos = dateExp.lastIndexIn(result);
+                if(pos >= 0)
+                {
+                    end = QDateTime::fromMSecsSinceEpoch(dateExp.cap(1).toLongLong()).date();
+                    found = true;
+                }
+
+            }
+            if(found)
+            {
+//                qDebug()<<"found from Xueqiu:"<<start<<end;
+            }
+
+            reply->abort();
+            reply->close();
+            delete reply;
+            index++;
+        }
+    }
+    return found;
 }
 
 ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFrom163(const QDate &start, const QString &code)

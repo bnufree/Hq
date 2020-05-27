@@ -7,6 +7,9 @@
 #include "dbservices/qactivedate.h"
 #include "utils/comdatadefines.h"
 #include "utils/hqinfoparseutil.h"
+#include "utils/profiles.h"
+
+#define     UPDATE_SEC              "CodeInfo"
 
 QShareHistoryInfoThread::QShareHistoryInfoThread(const QString& code, const ShareWorkingDate& start, const ShareWorkingDate& end, QObject* parent) :
     mCode(code),
@@ -102,11 +105,26 @@ void QShareHistoryInfoThread::run()
 {
     QTime t;
     t.start();
-    //基金不更新
-//    if(mCode.left(1) == "5" || mCode.left(1) == "1") return;
-    //默认上一次更新日期是一年前的第一天
-    ShareWorkingDate last_update_date(ShareWorkingDate::getHisWorkingDay().last());
-    //获取当前文件已经更新的日期
+    //获取代码上市日期（开始，结束）
+    QStringList dateList = PROFILES_INS->value(UPDATE_SEC, mCode.right(6)).toStringList();
+    QDate start, end;
+    if(dateList.size() > 0)
+    {
+        start = QDate::fromString(dateList[0], "yyyyMMdd");
+        end = QDate::fromString(dateList[1], "yyyyMMdd");
+    } else
+    {
+        if(!HqInfoParseUtil::getShareDateRange(mCode.right(6), start, end)) return;
+        QStringList list;
+        list.append(start.toString("yyyyMMdd"));
+        list.append(end.toString("yyyyMMdd"));
+        PROFILES_INS->setValue(UPDATE_SEC, mCode.right(6), list);
+    }
+
+    return;
+
+    //default is
+    ShareWorkingDate last_update_date(start);
     bool adjust = false;
     ShareHistoryFileDataList list;
     readFile(list, adjust);
