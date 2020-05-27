@@ -19,6 +19,57 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryData(const QDate& start
     return getShareHistoryDataFromHexun(start, code);
 }
 
+ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromXueqiu(const QDate &start, const QString &code)
+{
+    ShareHistoryFileDataList list;
+    //再次从雪球获取
+    QStringList urlList;
+    urlList.append("https://xueqiu.com/");
+    QString wkCode = (code.left(1).toInt() >= 5 ? "SH" : "SZ") + code;
+    QString url = QString("https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=%1&begin=%2&period=day&type=normal&count=10000").arg(wkCode).arg(QDateTime(start).toMSecsSinceEpoch());
+    urlList.append(url);
+    QNetworkAccessManager mgr;
+    int index = 0;
+    foreach (QString url, urlList)
+    {
+        QNetworkReply *reply = mgr.get(QNetworkRequest(url));
+        if(!reply)  continue;
+        QEventLoop subloop;
+        QObject::connect(reply, SIGNAL(finished()), &subloop, SLOT(quit()));
+        QObject::connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), &subloop, SLOT(quit()));
+        QTimer::singleShot(10000, &subloop, SLOT(quit()));
+        subloop.exec();
+        if(reply->error() == QNetworkReply::NoError && reply->isFinished() && index > 0)
+        {
+            QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+            if(doc.isObject())
+            {
+                QJsonArray array = doc.object().value("item").toArray();
+                for(int i=0; i<array.size(); i++)
+                {
+                    QJsonArray subarray = array[i].toArray();
+                    if(subarray.size() >= 10)
+                    {
+                        ShareHistoryFileData data;
+                        data.mDate = QDateTime::fromMSecsSinceEpoch(subarray[0].toVariant().toLongLong()).toTime_t();
+                        data.mClose = subarray[5].toDouble();
+                        double chg = subarray[6].toDouble();
+                        data.mLastClose = data.mClose - chg;
+                        data.mMoney = subarray[9].toDouble();
+                        list.append(data);
+                    }
+                }
+            }
+            reply->abort();
+            reply->close();
+            delete reply;
+            index++;
+        }
+    }
+
+    return list;
+}
+
 ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromHexun(const QDate& start, const QString& code)
 {
     QString wkCode = code;
@@ -29,9 +80,9 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromHexun(const QDa
     }
 
     ShareHistoryFileDataList list;
-    QDate last_update_date = QDate::currentDate();
-    while (last_update_date > start) {
-        QString wkURL = QString("http://webstock.quote.hermes.hexun.com/a/kline?code=%1&start=%2&number=-100&type=5")
+    QDate last_update_date = start;
+    while (1) {
+        QString wkURL = QString("http://webstock.quote.hermes.hexun.com/a/kline?code=%1&start=%2&number=1000&type=5")
                 .arg(wkCode)
                 .arg(last_update_date.toString("yyyyMMdd000000"));
 
@@ -45,9 +96,8 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromHexun(const QDa
         {
             weight = weight_reg.cap(1).toInt();
         }
-        if(weight == 0) return list;
+        if(weight == 0) return list;   //没有找到的情况
         pos = 0;
-        QDateList wklist;
         while ((pos = data_reg.indexIn(result, pos)) != -1) {
             pos += data_reg.matchedLength();
             QString src = data_reg.cap(1);
@@ -55,7 +105,6 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromHexun(const QDa
             if(src_list.size() < 8) continue;
             //{"Time":"时间"},{"LastClose":"前收盘价"},{"Open":"开盘价"},{"Close":"收盘价"},{"High":"最高价"},{"Low":"最低价"},{"Volume":"成交量"},{"Amount":"成交额"}],
             QDate date = QDate::fromString(src_list[0], "yyyyMMdd000000");
-            wklist.append(date);
             if(date < start) continue;
             if(date == ShareWorkingDate::currentDate().date()) break;
 
@@ -66,9 +115,9 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromHexun(const QDa
             data.mMoney = src_list[7].toDouble();
             list.append(data);
         }
-        if(wklist.size() == 0) break;
-        else{
-            last_update_date = wklist.first();
+        if(list.size() > 0)
+        {
+            last_update_date = QDateTime::fromTime_t(list.last().mDate).date().addDays(1);
         }
     }
 

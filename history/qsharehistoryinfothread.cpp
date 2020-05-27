@@ -105,32 +105,19 @@ void QShareHistoryInfoThread::run()
 {
     QTime t;
     t.start();
-    //获取代码上市日期（开始，结束）
-    QStringList dateList = PROFILES_INS->value(UPDATE_SEC, mCode.right(6)).toStringList();
     QDate start, end;
-    if(dateList.size() > 0)
-    {
-        start = QDate::fromString(dateList[0], "yyyyMMdd");
-        end = QDate::fromString(dateList[1], "yyyyMMdd");
-    } else
-    {
-        if(!HqInfoParseUtil::getShareDateRange(mCode.right(6), start, end)) return;
-        QStringList list;
-        list.append(start.toString("yyyyMMdd"));
-        list.append(end.toString("yyyyMMdd"));
-        PROFILES_INS->setValue(UPDATE_SEC, mCode.right(6), list);
-    }
-
-    return;
-
     //default is
-    ShareWorkingDate last_update_date(start);
+    ShareWorkingDate start_update_date;
     bool adjust = false;
     ShareHistoryFileDataList list;
     readFile(list, adjust);
     if(list.size() > 0)
     {
-        last_update_date.setDate(QDateTime::fromTime_t(list.last().mDate).date().addDays(1));
+        start_update_date.setDate(QDateTime::fromTime_t(list.last().mDate).date().addDays(1));
+    } else
+    {
+        if(!HqInfoParseUtil::getShareDateRange(mCode.right(6), start, end)) return;
+        start_update_date.setDate(start);
     }
     //开始更新日线数据到今天
     int new_size = 0;
@@ -138,16 +125,16 @@ void QShareHistoryInfoThread::run()
     bool need_update = true;
     if(ShareWorkingDate::getCurWorkDay().date() == QDate::currentDate())
     {
-        if(last_update_date == QDate::currentDate()) need_update = false;
+        if(start_update_date == QDate::currentDate()) need_update = false;
     } else
     {
-        if(last_update_date.date().addDays(-1) == ShareWorkingDate::getCurWorkDay().date()) need_update = false;
+        if(start_update_date.date().addDays(-1) == ShareWorkingDate::getCurWorkDay().date()) need_update = false;
     }
 //    qDebug()<<mCode<<" update:"<<need_update;
     if(need_update)
     {
 //        new_list = HqInfoParseUtil::getShareHistoryDataFrom163(last_update_date.date(), mCode);
-        if(new_list.size() == 0) new_list = HqInfoParseUtil::getShareHistoryDataFromHexun(last_update_date.date(), mCode);
+        if(new_list.size() == 0) new_list = HqInfoParseUtil::getShareHistoryData(start_update_date.date(), mCode);
     }
 #if 0
     if(last_update_date < ShareWorkingDate::currentDate())
