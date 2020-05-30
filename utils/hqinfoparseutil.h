@@ -13,6 +13,9 @@ public:
     static QDateList getActiveDateListOfYear(int year = QDate::currentDate().year());
     static ShareHistoryFileDataList getShareHistoryDataFromHexun(const QDate& start, const QString& code);
     static ShareHistoryFileDataList getShareHistoryDataFrom163(const QDate& start, const QString& code);
+    static ShareHistoryFileDataList getShareHistoryDataFromXueqiu(const QDate& start, const QString& code);
+    static ShareHistoryFileDataList getShareHistoryData(const QDate& start, const QString& code);
+    static bool     getShareDateRange(const QString& code, QDate& start, QDate& end);
     static bool parseShareDataFromSinaA(ShareData& data, const QString& hqstr);
     static bool parseShareDataFromSinaHK(ShareData& data, const QString &hqstr);
 

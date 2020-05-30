@@ -20,6 +20,9 @@ QShareHistoryInfoMgr::QShareHistoryInfoMgr(const QStringList& codes, QObject *pa
     mCodesList = codes;
     mPool.setExpiryTimeout(-1);
     mPool.setMaxThreadCount(2);
+#ifdef Q_OS_WIN
+    mPool.setMaxThreadCount(8);
+#endif
     connect(this, SIGNAL(signalStartGetHistory()), this, SLOT(slotStartGetHistoryWithAllCodes()));
     connect(this, SIGNAL(signalStartStatic()), this, SLOT(slotStartStatics()));
     this->moveToThread(&mWorkThread);
@@ -61,6 +64,7 @@ void QShareHistoryInfoMgr::slotStartGetHistoryWithAllCodes()
     mPool.waitForDone();
 
     qDebug()<<"start counter"<<t.elapsed();
+    return;
     slotStartStatics();
 }
 
