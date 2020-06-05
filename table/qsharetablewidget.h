@@ -3,6 +3,7 @@
 
 #include "HqTableWidget.h"
 #include "data_structure/sharedata.h"
+#include <QMutex>
 
 class QSinaStkResultMergeThread;
 
@@ -34,7 +35,7 @@ signals:
     void    signalDisplayDetailOfCode(const QString& code);
 
 public slots:
-    void    setDataList(int page, int pagesize, const ShareDataList& list, qint64 time);
+    void    updateTable();
     void    slotCustomContextMenuRequested(const QPoint &pos);
     void    setShareMarket();
     void    setShareMarketType(int type);
@@ -45,13 +46,14 @@ public slots:
     void    slotCellDoubleClicked(int row, int col);
     void    setSpecialConcer();
     void    slotCellClicked(int row, int col);
-    void    slotRecvAllShareCodes(const QStringList& list);
-    void    slotUpdateTimeOut();
+    void    slotRecvAllShareDateList(const ShareDataList& list,qint64 time);
 private:
     QMap<QString, double>   mShareMap;
     QList<QAction*>         mCodesActionList;
-    QSinaStkResultMergeThread*          mMergeThread;
-    QTimer                              *mUpdateTimer;
+//    QSinaStkResultMergeThread*          mMergeThread;
+//    QTimer                              *mUpdateTimer;
+    ShareDataList                       mShareDataList;
+    QMutex                              mDataMutex;
 };
 
 #endif // QSHARETABLEWIDGET_H

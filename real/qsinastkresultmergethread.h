@@ -17,7 +17,7 @@ class QSinaStkResultMergeThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit QSinaStkResultMergeThread(int pageSize, QObject *parent = 0);
+    explicit QSinaStkResultMergeThread(QObject *parent = 0);
     ~QSinaStkResultMergeThread();
 public:
     bool isActive();
@@ -27,7 +27,6 @@ public:
     void displayNext();
     void displayPrevious();
     void displayLast();
-    ShareDataList  getDataList(int& page, int& pageSize);
 
 signals:
 
@@ -42,15 +41,11 @@ public slots:
     void        setDisplayPage(int val);
     void        setDisplayChinaTop10();
     void        setShareCodes(const QStringList& list);
-    void        setPagetSize(int size) {mPageSize = size; mParamChange = true;}
 
 signals:
-    void    sendStkDataList(int page, int size, const ShareDataList& list, qint64 time);
+    void    sendStkDataList(const ShareDataList& list, qint64 time);
     void    sendStkinfoUpdateProgress(int cur, int total);
 private:
-    int                                                     mTotalPage;
-    int                                                     mCurPage;
-    int                                                     mPageSize;
     MKT_TYPE                                                mMktType;
     QList<QStringList>                                      mSecCodesList;
     QMutex                                                  mSecCodesLock;
@@ -64,7 +59,7 @@ private:
     QMutex                                                  mCodeMutex;
     bool                                                    mParamChange;
     QList<QSinaStkInfoThread*>                              mSubThreadList;
-    ShareDataList                                           mResDataList;
+//    ShareDataList                                           mResDataList;
 };
 
 #endif // QSINASTKRESULTMERGETHREAD_H

@@ -46,29 +46,29 @@ void QShareExchangeTablewidget::setSearchCondition(const QString& code, const QS
     //检查条件是否发生了变化
     if(mCode != code || mStartDate != start || mEndDate != end)
     {
-        mCurPage = 0;
+        //mCurPage = 0;
         mCode = code;
         mStartDate = start;
         mEndDate = end;
     } else
     {
-        mCurPage++;
+        //mCurPage++;
     }
-    emit DATA_SERVICE->signalQueryShareExchangeRecord(mCurPage, mCode, mStartDate, mEndDate);
+//    emit DATA_SERVICE->signalQueryShareExchangeRecord(mCurPage, mCode, mStartDate, mEndDate);
 }
 
 
 void QShareExchangeTablewidget::slotRecvDataList(int page, int total_page, const QList<ShareExchangeData>& list)
 {
-    mCurPage = page;
-    mTotalPage = total_page;
-    mPageSize = 50;
+//    mCurPage = page;
+//    mTotalPage = total_page;
+//    mPageSize = 50;
 
     prepareUpdateTable(list.size());
     int i = 0;
     foreach (ShareExchangeData data, list) {
         int k =0;
-        this->setItemText(i, k++, QString::number((mCurPage-1) * mPageSize + 1));
+//        this->setItemText(i, k++, QString::number((mCurPage-1) * mPageSize + 1));
         this->setItemText(i, k++, data.mDateTime);
         this->setItemText(i, k++, data.mCode);
         this->setItemText(i, k++, data.mName);
@@ -93,18 +93,18 @@ void QShareExchangeTablewidget::displayFirstPage()
 
 void QShareExchangeTablewidget::displayNextPage()
 {
-    emit DATA_SERVICE->signalQueryShareExchangeRecord(++mCurPage, mCode, mStartDate, mEndDate);
+    //emit DATA_SERVICE->signalQueryShareExchangeRecord(++mCurPage, mCode, mStartDate, mEndDate);
 }
 
 
 void QShareExchangeTablewidget::displayLastPage()
 {
-    emit DATA_SERVICE->signalQueryShareExchangeRecord(mTotalPage, mCode, mStartDate, mEndDate);
+    //emit DATA_SERVICE->signalQueryShareExchangeRecord(mTotalPage, mCode, mStartDate, mEndDate);
 }
 
 void QShareExchangeTablewidget::displayPreviousPage()
 {
-    emit DATA_SERVICE->signalQueryShareExchangeRecord(--mCurPage, mCode, mStartDate, mEndDate);
+    //emit DATA_SERVICE->signalQueryShareExchangeRecord(--mCurPage, mCode, mStartDate, mEndDate);
 }
 
 

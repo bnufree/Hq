@@ -22,10 +22,15 @@ HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
     QObject(parent),\
     mHistoryInfoMgr(0),
     mTimeMonitorThread(0),
-    mInfoThread724(0)
+    mInfoThread724(0),
+    mHqCenter(0)
 {
-    //
+    //及时信息
     mInfoThread724 = new HqKuaixun(this);
+    //行情中心
+    mHqCenter = new QSinaStkResultMergeThread();
+    mHqCenter->setActive(true);
+    mHqCenter->setMktType(MKT_ZXG);
     //创建时间监控线程
     mTimeMonitorThread = new QShareActiveDateUpdateThread(this);
     connect(mTimeMonitorThread, SIGNAL(signalUpdateHistoryWorkDays()), this, SLOT(slotFinishUpdateWorkDays()));
@@ -64,6 +69,10 @@ void HQTaskMagrCenter::start()
     if(mInfoThread724 && !mInfoThread724->isRunning())
     {
         mInfoThread724->start();
+    }
+    if(mHqCenter && !mHqCenter->isRunning())
+    {
+        mHqCenter->start();
     }
 }
 
@@ -133,7 +142,9 @@ void HQTaskMagrCenter::setCurBlockType(int type)
 
 void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
 {
-    emit signalSendAllShareCodesList(codes);
+    //开始行情获取
+    if(mHqCenter) mHqCenter->setShareCodes(codes);
+
     //获取财务信息
     QShareFinancialInfoWork* finance = new QShareFinancialInfoWork(codes, this);
     connect(finance, SIGNAL(finished()), finance, SLOT(deleteLater()));
@@ -144,10 +155,10 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     fhsp->start();
 
     //更新日线数据
-    mHistoryInfoMgr = new QShareHistoryInfoMgr(codes);
-    connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SIGNAL(signalUpdateHistoryMsg(QString)));
-    connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryFinished()), this, SLOT(slotUpdateHistoryFinished()));
-    mHistoryInfoMgr->signalStartGetHistory();
+//    mHistoryInfoMgr = new QShareHistoryInfoMgr(codes);
+//    connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SIGNAL(signalUpdateHistoryMsg(QString)));
+//    connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryFinished()), this, SLOT(slotUpdateHistoryFinished()));
+//    mHistoryInfoMgr->signalStartGetHistory();
     return;
 }
 

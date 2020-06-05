@@ -5,14 +5,11 @@
 #include <QRegularExpression>
 #include "dbservices/dbservices.h"
 
-QSinaStkResultMergeThread::QSinaStkResultMergeThread(int pagesize, QObject *parent) : QThread(parent)
+QSinaStkResultMergeThread::QSinaStkResultMergeThread(QObject *parent) : QThread(parent)
 {
     mParamChange = false;
     mIsCodeChg = false;
     mStkCntPerTrd = 200;
-    mTotalPage = -1;
-    mPageSize = pagesize;
-    mCurPage = 1;
     mMktType = MKT_ALL;
     mActive = true;
     QEastMoneyZjlxThread *zjt = new QEastMoneyZjlxThread();
@@ -64,7 +61,6 @@ bool QSinaStkResultMergeThread::isActive()
 
 void QSinaStkResultMergeThread::setSortType(int type)
 {
-    mCurPage = 1;
     if(ShareData::stk_sort_type == type)
     {
         ShareData::stk_sort_rule = (ShareData::stk_sort_rule == -1 ? 1: -1);
@@ -85,13 +81,6 @@ void QSinaStkResultMergeThread::setSortType(int type)
     mParamChange = true;
 }
 
-ShareDataList QSinaStkResultMergeThread::getDataList(int& page, int& pageSize)
-{
-    QMutexLocker locker(&mListMutex);
-    page = mCurPage;
-    pageSize = mPageSize;
-    return mResDataList;
-}
 
 void QSinaStkResultMergeThread::run()
 {
@@ -123,11 +112,6 @@ void QSinaStkResultMergeThread::run()
                 }
             }
         }
-        mTotalPage = 0;
-        if(mPageSize > 0)
-        {
-            mTotalPage = (wklist.length() + mPageSize -1) / mPageSize;
-        }
 
         if(wklist.length())
         {
@@ -140,12 +124,12 @@ void QSinaStkResultMergeThread::run()
         {
 
             QMutexLocker locker(&mListMutex);
-            mResDataList = wklist.mid((mCurPage - 1) * mPageSize, mPageSize);
+            emit sendStkDataList(wklist, QDateTime::currentMSecsSinceEpoch());
         }
 
         if(!mParamChange)
         {
-//            msleep(1000);
+            msleep(2000);
         } else
         {
             mParamChange = false;
@@ -162,7 +146,6 @@ void QSinaStkResultMergeThread::setMktType(int type)
 {
     qDebug()<<"mkt:"<<type;
     mMktType = (MKT_TYPE)type;
-    mCurPage = 1;
     qDebug()<<"set mkt:"<<mMktType;
     //updateStkCodes(mMktType);
     mParamChange = true;
@@ -192,35 +175,22 @@ MktType QSinaStkResultMergeThread::getMktType()
 
 void QSinaStkResultMergeThread::displayFirst()
 {
-    mCurPage = 1;
 }
 
 void QSinaStkResultMergeThread::displayLast()
 {
-    mCurPage = mTotalPage;
 }
 
 void QSinaStkResultMergeThread::displayPrevious()
 {
-    mCurPage--;
-    if(mCurPage <= 0) mCurPage = 1;
 }
 
 void QSinaStkResultMergeThread::displayNext()
 {
-    mCurPage++;
-    if(mCurPage > mTotalPage) mCurPage = mTotalPage;
 }
 
 void QSinaStkResultMergeThread::setCurPage(int page)
 {
-    mCurPage = page;
-    if(mCurPage >= mTotalPage)
-    {
-        mCurPage = mTotalPage;
-    }
-    if(mCurPage <= 0)
-        mCurPage = 1;
 }
 
 void QSinaStkResultMergeThread::setDisplayPage(int val)

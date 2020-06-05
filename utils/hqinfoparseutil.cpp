@@ -16,7 +16,9 @@ HqInfoParseUtil::HqInfoParseUtil()
 
 ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryData(const QDate& start, const QString& code)
 {
-    return getShareHistoryDataFromHexun(start, code);
+    ShareHistoryFileDataList list = getShareHistoryDataFromXueqiu(start, code);
+    if(list.size() == 0) list = getShareHistoryDataFromHexun(start, code);
+    return list;
 }
 
 ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromXueqiu(const QDate &start, const QString &code)
@@ -25,47 +27,64 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromXueqiu(const QD
     //再次从雪球获取
     QStringList urlList;
     urlList.append("https://xueqiu.com/");
-    QString wkCode = (code.left(1).toInt() >= 5 ? "SH" : "SZ") + code;
-    QString url = QString("https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=%1&begin=%2&period=day&type=normal&count=10000").arg(wkCode).arg(QDateTime(start).toMSecsSinceEpoch());
-    urlList.append(url);
     QNetworkAccessManager mgr;
-    int index = 0;
-    foreach (QString url, urlList)
-    {
-        QNetworkReply *reply = mgr.get(QNetworkRequest(url));
-        if(!reply)  continue;
-        QEventLoop subloop;
-        QObject::connect(reply, SIGNAL(finished()), &subloop, SLOT(quit()));
-        QObject::connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), &subloop, SLOT(quit()));
-        QTimer::singleShot(10000, &subloop, SLOT(quit()));
-        subloop.exec();
-        if(reply->error() == QNetworkReply::NoError && reply->isFinished() && index > 0)
+    QString wkCode = (code.left(1).toInt() >= 5 ? "SH" : "SZ") + code;
+    QDate wkDate(start);
+    while (1) {
+        QString url = QString("https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=%1&begin=%2&period=day&type=normal&count=10000").arg(wkCode).arg(QDateTime(wkDate).toMSecsSinceEpoch());
+        urlList.append(url);
+        int index = 0;
+        bool isOver = false;
+        foreach (QString url, urlList)
         {
-            QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-            if(doc.isObject())
+            QNetworkReply *reply = mgr.get(QNetworkRequest(url));
+            if(!reply)  continue;
+            QEventLoop subloop;
+            QObject::connect(reply, SIGNAL(finished()), &subloop, SLOT(quit()));
+            QObject::connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), &subloop, SLOT(quit()));
+            QTimer::singleShot(10000, &subloop, SLOT(quit()));
+            subloop.exec();
+            qDebug()<<url<<index<<urlList.size();
+            if(reply->error() == QNetworkReply::NoError && reply->isFinished() && index  == urlList.size()-1)
             {
-                QJsonArray array = doc.object().value("item").toArray();
-                for(int i=0; i<array.size(); i++)
+                QByteArray recv = reply->readAll();
+                QJsonDocument doc = QJsonDocument::fromJson(recv);
+                if(doc.isObject())
                 {
-                    QJsonArray subarray = array[i].toArray();
-                    if(subarray.size() >= 10)
+                    QJsonArray array = doc.object().value("data").toObject().value("item").toArray();
+                    if(array.size() == 0) isOver = true;
+                    for(int i=0; i<array.size(); i++)
                     {
-                        ShareHistoryFileData data;
-                        data.mDate = QDateTime::fromMSecsSinceEpoch(subarray[0].toVariant().toLongLong()).toTime_t();
-                        data.mClose = subarray[5].toDouble();
-                        double chg = subarray[6].toDouble();
-                        data.mLastClose = data.mClose - chg;
-                        data.mMoney = subarray[9].toDouble();
-                        list.append(data);
+                        QJsonArray subarray = array[i].toArray();
+                        if(subarray.size() >= 10)
+                        {
+                            ShareHistoryFileData data;
+                            data.mDate = QDateTime::fromMSecsSinceEpoch(subarray[0].toVariant().toLongLong()).toTime_t();
+                            data.mClose = subarray[5].toDouble();
+                            double chg = subarray[6].toDouble();
+                            data.mLastClose = data.mClose - chg;
+                            data.mMoney = subarray[9].toDouble();
+                            list.append(data);
+                            wkDate = QDateTime::fromTime_t(data.mDate).date().addDays(1);
+//                            qDebug()<<QDateTime::fromTime_t(data.mDate).date()<<code<<data.mClose<<data.mLastClose<<data.mMoney;
+                        }
                     }
                 }
+                reply->abort();
+                reply->close();
+                delete reply;
+
+                if(wkDate >= QDate::currentDate()) isOver = true;
             }
-            reply->abort();
-            reply->close();
-            delete reply;
+
             index++;
+
+            if(isOver) break;
         }
+        urlList.clear();
+        if(isOver) break;
     }
+
 
     return list;
 }
@@ -114,6 +133,7 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromHexun(const QDa
             data.mLastClose = src_list[1].toDouble() / weight;
             data.mMoney = src_list[7].toDouble();
             list.append(data);
+            qDebug()<<date<<code<<data.mClose<<data.mLastClose<<data.mMoney;
         }
         if(list.size() > 0)
         {

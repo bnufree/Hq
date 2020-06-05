@@ -48,9 +48,10 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
     ui->centralwidget->layout()->addWidget(mCtrlWidget);
     ui->statusbar->setVisible(false);
     //快讯信息显示
-    mInfoListWidget = new QKuaixunListWidget(this);
-    HQTaskMagrCenter::instance()->registerInfoDisplaywidget(mInfoListWidget);
-    createCtrlObject(QStringLiteral("资讯"), mInfoListWidget);
+//    mInfoListWidget = new QKuaixunListWidget(this);
+//    connect(mInfoListWidget, SIGNAL(sendRecvInfoList(KuaiXunList)), this, SLOT(slotRecvKuaiXunList(KuaiXunList)));
+//    HQTaskMagrCenter::instance()->registerInfoDisplaywidget(mInfoListWidget);
+//    createCtrlObject(QStringLiteral("资讯"), mInfoListWidget);
     createCtrlObject(QStringLiteral("行情中心"), new zchxHqDisplayWidget(this));
     createCtrlObject(QStringLiteral("港资"), new QNorthFlowInfoDisplayWidget(this));
     createCtrlObject(QStringLiteral("龙虎榜"), new QWidget);
@@ -154,7 +155,7 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
 #endif
 
 //    slotCtrlBtnClicked(mCtrlWidget->layout()->itemAt(0)->widget());
-    connect(mInfoListWidget, SIGNAL(sendRecvInfoList(KuaiXunList)), this, SLOT(slotRecvKuaiXunList(KuaiXunList)));
+
 
 
     HQTaskMagrCenter::instance()->start();
