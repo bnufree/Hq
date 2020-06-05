@@ -45,6 +45,7 @@ signals:
     void        signalSendAllShareCodesList(const QStringList& list);
 
 public slots:
+    void        slotFinishNetworkCheck(bool sts);
     void        slotDBInitFinished();
     void        slotFinishUpdateWorkDays();
     void        slotNewWorDayChangeNow();

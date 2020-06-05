@@ -64,15 +64,29 @@ HQTaskMagrCenter::~HQTaskMagrCenter()
 
 void HQTaskMagrCenter::start()
 {
-    //开启数据库初始化
-    DATA_SERVICE->signalInitDBTables();
-    if(mInfoThread724 && !mInfoThread724->isRunning())
+    //开始检查本地网络情况
+    QByteArray recv = QHttpGet::getContentOfURL("http://hq.sinajs.cn/list=sh000001");
+    qDebug()<<"recv:"<<recv;
+    if(recv.length() > 0 )
     {
-        mInfoThread724->start();
+        slotFinishNetworkCheck(true);
     }
-    if(mHqCenter && !mHqCenter->isRunning())
+}
+
+void HQTaskMagrCenter::slotFinishNetworkCheck(bool sts)
+{
+    if(sts)
     {
-        mHqCenter->start();
+        //开启数据库初始化
+        DATA_SERVICE->signalInitDBTables();
+        if(mInfoThread724 && !mInfoThread724->isRunning())
+        {
+            mInfoThread724->start();
+        }
+        if(mHqCenter && !mHqCenter->isRunning())
+        {
+            mHqCenter->start();
+        }
     }
 }
 

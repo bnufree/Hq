@@ -46,6 +46,9 @@ zchxHqDisplayWidget::zchxHqDisplayWidget(QWidget *parent) :
     mShareWidget->setShareMarketType(MKT_ZXG);
 
     connect(mMarketBtn, SIGNAL(clicked()), this, SLOT(slotMarketBtnClicked()));
+#ifdef Q_OS_WIN
+    mMarketBtn->setVisible(false);
+#endif
 
 }
 
