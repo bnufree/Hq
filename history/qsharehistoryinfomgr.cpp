@@ -56,6 +56,8 @@ void QShareHistoryInfoMgr::slotStartGetHistoryWithAllCodes()
     t.start();
     qDebug()<<"start get history";
     //陆股通数据同步更新
+    mCodesList.clear();
+    mCodesList.append("300521");
     foreach (QString code, mCodesList) {
         if(code.size() > 6) code = code.right(6);
         QShareHistoryInfoThread* thread = new QShareHistoryInfoThread(code, &mShareForeignDataMap, this);

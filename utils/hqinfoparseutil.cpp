@@ -16,7 +16,10 @@ HqInfoParseUtil::HqInfoParseUtil()
 
 ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryData(const QDate& start, const QString& code)
 {
+    ShareHistoryFileDataList list = getShareHistoryDataFrom163(start, code);
+#if 0
     ShareHistoryFileDataList list = getShareHistoryDataFromXueqiu(start, code);
+#endif
     if(list.size() == 0) list = getShareHistoryDataFromHexun(start, code);
     return list;
 }
@@ -44,7 +47,7 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromXueqiu(const QD
             QObject::connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), &subloop, SLOT(quit()));
             QTimer::singleShot(10000, &subloop, SLOT(quit()));
             subloop.exec();
-            qDebug()<<url<<index<<urlList.size();
+            qDebug()<<url<<index<<wkDate;
             if(reply->error() == QNetworkReply::NoError && reply->isFinished() && index  == urlList.size()-1)
             {
                 QByteArray recv = reply->readAll();
@@ -260,6 +263,7 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFrom163(const QDate
                 data.mCloseAdjust = data.mClose;
                 data.mMoney = cols[12].toDouble();
 //                data.mTotalShareCount = qint64(floor(cols[13].toDouble() / data.mClose));
+                qDebug()<<curDate<<code<<data.mClose;
                 list.append(data);
             }
         }
