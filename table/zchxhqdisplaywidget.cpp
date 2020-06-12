@@ -15,13 +15,13 @@ zchxHqDisplayWidget::zchxHqDisplayWidget(QWidget *parent) :
     ui->top_frame->setFixedHeight(frameHeight);
     mMarketBtn = new QAndroidButton(this);
     mMarketBtn->setAlignment(Qt::AlignCenter);
-    mMarketBtn->setFixedWidth(HqUtils::convertMM2Pixel(30.0));
+    mMarketBtn->setFixedWidth(HqUtils::convertMM2Pixel(15.0));
     ui->horizontalLayout->addWidget(mMarketBtn);
     ui->horizontalLayout->addWidget(new QIndexWidget(this));
     ui->verticalLayout->addWidget(mShareWidget = new QShareTablewidget(this));
 
-    int item_width = HqUtils::convertMM2Pixel(30.0);
-    int item_height = HqUtils::convertMM2Pixel(10.0);
+    int item_width = HqUtils::convertMM2Pixel(15.0);
+    int item_height = HqUtils::convertMM2Pixel(6.0);
     mMarketList = new QAndroidListWidget(item_width, item_height, this);
 
     mMarketList->addItem(QStringLiteral("自选"), MKT_ZXG);
