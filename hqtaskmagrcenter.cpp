@@ -22,10 +22,15 @@ HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
     QObject(parent),\
     mHistoryInfoMgr(0),
     mTimeMonitorThread(0),
-    mInfoThread724(0)
+    mInfoThread724(0),
+    mHqCenter(0)
 {
-    //
+    //及时信息
     mInfoThread724 = new HqKuaixun(this);
+    //行情中心
+    mHqCenter = new QSinaStkResultMergeThread();
+    mHqCenter->setActive(true);
+    mHqCenter->setMktType(MKT_ZXG);
     //创建时间监控线程
     mTimeMonitorThread = new QShareActiveDateUpdateThread(this);
     connect(mTimeMonitorThread, SIGNAL(signalUpdateHistoryWorkDays()), this, SLOT(slotFinishUpdateWorkDays()));
@@ -59,11 +64,29 @@ HQTaskMagrCenter::~HQTaskMagrCenter()
 
 void HQTaskMagrCenter::start()
 {
-    //开启数据库初始化
-    DATA_SERVICE->signalInitDBTables();
-    if(mInfoThread724 && !mInfoThread724->isRunning())
+    //开始检查本地网络情况
+    QByteArray recv = QHttpGet::getContentOfURL("http://hq.sinajs.cn/list=sh000001");
+    qDebug()<<"recv:"<<recv;
+    if(recv.length() > 0 )
     {
-        mInfoThread724->start();
+        slotFinishNetworkCheck(true);
+    }
+}
+
+void HQTaskMagrCenter::slotFinishNetworkCheck(bool sts)
+{
+    if(sts)
+    {
+        //开启数据库初始化
+        DATA_SERVICE->signalInitDBTables();
+        if(mInfoThread724 && !mInfoThread724->isRunning())
+        {
+            mInfoThread724->start();
+        }
+        if(mHqCenter && !mHqCenter->isRunning())
+        {
+            mHqCenter->start();
+        }
     }
 }
 
@@ -133,7 +156,9 @@ void HQTaskMagrCenter::setCurBlockType(int type)
 
 void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
 {
-    emit signalSendAllShareCodesList(codes);
+    //开始行情获取
+    if(mHqCenter) mHqCenter->setShareCodes(codes);
+
     //获取财务信息
     QShareFinancialInfoWork* finance = new QShareFinancialInfoWork(codes, this);
     connect(finance, SIGNAL(finished()), finance, SLOT(deleteLater()));

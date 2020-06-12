@@ -64,7 +64,6 @@ void QShareHistoryInfoMgr::slotStartGetHistoryWithAllCodes()
     mPool.waitForDone();
 
     qDebug()<<"start counter"<<t.elapsed();
-    return;
     slotStartStatics();
 }
 

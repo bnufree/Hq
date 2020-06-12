@@ -8,20 +8,15 @@
 #include "hqtaskmagrcenter.h"
 
 
-QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent), mUpdateTimer(0), mMergeThread(0)
+QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent)
 {
     //设定抬头
     TableColDataList datalist;
-//    datalist.append(TableColData(QStringLiteral("序号"), STK_DISPLAY_SORT_TYPE_CODE));
     datalist.append(TableColData(QStringLiteral("名称"), STK_DISPLAY_SORT_TYPE_NAME));
-//    datalist.append(TableColData(QStringLiteral(""), STK_DISPLAY_SORT_TYPE_CODE));
     datalist.append(TableColData(QStringLiteral("最新"), STK_DISPLAY_SORT_TYPE_PRICE));
     datalist.append(TableColData(QStringLiteral("涨跌(%)"), STK_DISPLAY_SORT_TYPE_CHGPER));
     datalist.append(TableColData(QStringLiteral("成交(亿)"), STK_DISPLAY_SORT_TYPE_CJE));
     datalist.append(TableColData(QStringLiteral("资金比"), STK_DISPLAY_SORT_TYPE_MONEYR));
-//    datalist.append(TableColData(QStringLiteral("3日变动"), STK_DISPLAY_SORT_TYPE_LAST3));
-//    datalist.append(TableColData(QStringLiteral("5日变动"), STK_DISPLAY_SORT_TYPE_LAST5));
-//    datalist.append(TableColData(QStringLiteral("10日变动"), STK_DISPLAY_SORT_TYPE_LAST10));
     datalist.append(TableColData(QStringLiteral("周变动"), STK_DISPLAY_SORT_TYPE_LAST_WEEK));
     datalist.append(TableColData(QStringLiteral("月变动"), STK_DISPLAY_SORT_TYPE_LAST_MONTH));
     datalist.append(TableColData(QStringLiteral("年变动"), STK_DISPLAY_SORT_TYPE_LAST_YEAR,true));
@@ -46,48 +41,27 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqTableWidget(parent), m
     setHeaders(datalist);
     initMenu();
     setAutoChangePage(true);
-    mMergeThread = new QSinaStkResultMergeThread(mPageSize);
-    connect(this, SIGNAL(signalPageSizeChanged(int)), mMergeThread, SLOT(setPagetSize(int)));
-    connect(mMergeThread, SIGNAL(sendStkDataList(int, int, ShareDataList, qint64)), this, SLOT(setDataList(int, int, ShareDataList, qint64)));
-    mMergeThread->setActive(true);
-    mMergeThread->setMktType(MKT_ZXG);
-    mMergeThread->start();
     //开始更新数据
-    connect(HQTaskMagrCenter::instance(), SIGNAL(signalSendAllShareCodesList(QStringList)),
-            this, SLOT(slotRecvAllShareCodes(QStringList)));
+    connect(HQTaskMagrCenter::instance()->hqCenter(), SIGNAL(sendStkDataList(ShareDataList,qint64)),
+            this, SLOT(slotRecvAllShareDateList(ShareDataList,qint64)));
 
 
 }
 
 
-void QShareTablewidget::slotRecvAllShareCodes(const QStringList &list)
+void QShareTablewidget::slotRecvAllShareDateList(const ShareDataList& list,qint64 time)
 {
-    if(mMergeThread) mMergeThread->setShareCodes(list);
-    if(mUpdateTimer)
-    {
-        mUpdateTimer->stop();
-        mUpdateTimer->deleteLater();
-    }
-    mUpdateTimer = new QTimer(this);
-    mUpdateTimer->setInterval(2000);
-    connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdateTimeOut()));
-    mUpdateTimer->start();
+//    qDebug()<<"recv time:"<<QDateTime::currentDateTime()<<QDateTime::fromMSecsSinceEpoch(time);
+    QMutexLocker locker(&mDataMutex);
+    mShareDataList = list;
+    setTotalCount(mShareDataList.size());
+    QTimer::singleShot(100, this, SLOT(updateTable()));
 }
 
-void QShareTablewidget::slotUpdateTimeOut()
+void QShareTablewidget::updateTable()
 {
-    if(!mMergeThread) return;
-    int page, pagesize;
-
-    ShareDataList list = mMergeThread->getDataList(page, pagesize);
-    setDataList(page, pagesize, list, QDateTime::currentMSecsSinceEpoch());
-}
-
-void QShareTablewidget::setDataList(int page, int  pagesize, const ShareDataList &list, qint64 time)
-{
-//    qDebug()<<"update:"<<page<<pagesize<<list.size()<<"datatime:"<<QDateTime::fromMSecsSinceEpoch(time).toString("hh:mm:ss")<<" current:"<<QDateTime::currentDateTime().toString("hh:mm:ss");
-    QTime t;
-    t.start();
+    QMutexLocker locker(&mDataMutex);
+    ShareDataList list = mShareDataList.mid(mDisplayRowStart, mMaxDisRow);
     prepareUpdateTable(list.size());
     int i = 0;
     foreach (ShareData data, list) {
@@ -136,7 +110,7 @@ void QShareTablewidget::setDataList(int page, int  pagesize, const ShareDataList
 
 void QShareTablewidget::setShareMarketType(int type)
 {
-    if(mMergeThread) mMergeThread->setMktType(type);
+    HQTaskMagrCenter::instance()->hqCenter()->setMktType(type);
 }
 
 void QShareTablewidget::setShareMarket()
@@ -145,38 +119,38 @@ void QShareTablewidget::setShareMarket()
     if(act == NULL) return;
     qDebug()<<"mkt_type:"<<act->data().toInt();
     resetPageDisplay();
-    if(mMergeThread) mMergeThread->setMktType(act->data().toInt());
+    HQTaskMagrCenter::instance()->hqCenter()->setMktType(act->data().toInt());
 }
 
 void QShareTablewidget::setSelfShareCodesList(const QStringList &list)
 {
-    if(mMergeThread) mMergeThread->setSelfCodesList(list);
+    HQTaskMagrCenter::instance()->hqCenter()->setSelfCodesList(list);
 }
 
 void QShareTablewidget::setSortType(int type)
 {
-    if(mMergeThread) mMergeThread->setSortType(type);
+    HQTaskMagrCenter::instance()->hqCenter()->setSortType(type);
 }
 
 void QShareTablewidget::displayFirstPage()
 {
-    if(mMergeThread) mMergeThread->setDisplayPage(FIRST_PAGE);
+    HQTaskMagrCenter::instance()->hqCenter()->setDisplayPage(FIRST_PAGE);
 }
 
 void QShareTablewidget::displayNextPage()
 {
-    if(mMergeThread) mMergeThread->setDisplayPage(NEXT_PAGE);
+    HQTaskMagrCenter::instance()->hqCenter()->setDisplayPage(NEXT_PAGE);
 }
 
 
 void QShareTablewidget::displayLastPage()
 {
-    if(mMergeThread) mMergeThread->setDisplayPage(END_PAGE);
+    HQTaskMagrCenter::instance()->hqCenter()->setDisplayPage(END_PAGE);
 }
 
 void QShareTablewidget::displayPreviousPage()
 {
-    if(mMergeThread) mMergeThread->setDisplayPage(PRE_PAGE);
+    HQTaskMagrCenter::instance()->hqCenter()->setDisplayPage(PRE_PAGE);
 }
 
 void QShareTablewidget::initMenu()
@@ -316,7 +290,7 @@ void QShareTablewidget::setDisplayBlockDetail()
     {
         QStringList list = act->data().toStringList();
         emit signalSetDisplayBlockDetail(list);
-        if(mMergeThread) mMergeThread->setSelfCodesList(list);
+        HQTaskMagrCenter::instance()->hqCenter()->setSelfCodesList(list);
     }
 }
 
@@ -348,10 +322,10 @@ void QShareTablewidget::slotCellDoubleClicked(int row, int col)
     QString code = item->data(Qt::UserRole).toString();
     QRect rect = this->visualItemRect(item);
     qDebug()<<rect;
-    QSahreOptWidget* widget = new QSahreOptWidget(code, this);
+    QSahreOptWidget* widget = new QSahreOptWidget(code, 0);
     QPoint pos = QCursor::pos();
-    QPoint target = this->mapFromGlobal(pos);
-    widget->move(target.x() - widget->width() / 2, target.y());
+    QPoint target = /*this->mapFromGlobal(pos)*/pos;
+    widget->move(target);
     widget->show();
 
 //    emit signalDoubleClickCode(code);

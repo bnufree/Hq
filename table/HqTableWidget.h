@@ -24,45 +24,12 @@ public:
     explicit HqTableWidget(QWidget *parent = 0);
     bool isColVisible(int i) const {return !isColumnHidden(i);}
     bool isRowVisible(int i) const {return !isRowHidden(i);}
+    void setTotalCount(int count) {mTotalDisplayRowCount = count;}
     void resetPageDisplay()
     {
-        mDisRowEnd = mMaxDisRow-1;
-        mDisRowStart = 0;
-        displayVisibleRows();
-    }
-
-    void  resetDisplayRows(OPT_MOVE_MODE dir)
-    {
-        bool page_change = false;
-        if(dir == OPT_DOWN)
-        {
-            mDisRowStart++;
-            mDisRowEnd++;
-        } else if(dir == OPT_UP)
-        {
-            mDisRowStart--;
-            mDisRowEnd--;
-        } else
-        {
-            return;
-        }
-        if(mDisRowEnd == rowCount())
-        {
-            page_change = true;
-            displayNextPage();
-        } else if(mDisRowStart == -1)
-        {
-            page_change = true;
-            displayPreviousPage();
-        }
-        if(page_change)
-        {
-            mDisRowEnd = mMaxDisRow-1;
-            mDisRowStart = 0;
-
-        }
-        qDebug()<<"row start:"<<mDisRowStart<<" end:"<<mDisRowEnd<<" page:"<<page_change;
-        displayVisibleRows();
+        mDisplayRowEnd = mMaxDisRow-1;
+        mDisplayRowStart = 0;
+        updateTable();
     }
     void setAutoChangePage(bool sts) {mAutoChangePage = sts;}
     void setHeaders(const TableColDataList& list);
@@ -85,11 +52,12 @@ public:
     virtual void displayPreviousPage() {}
     virtual void displayFirstPage(){}
     virtual void displayLastPage(){}
+public slots:
+    virtual void updateTable() {}
 private:
 protected:
     void resizeEvent(QResizeEvent *event);
     void displayVisibleCols();
-    void displayVisibleRows();
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
@@ -97,6 +65,9 @@ protected:
     void wheelEvent(QWheelEvent *e);
     void keyPressEvent(QKeyEvent *event);
 private slots:
+    void checkColDisplayStatus();
+    void checkRowDisplayStatus();
+    void checkDisplayStatus();
 
 signals:
     void signalDisplayPage(int val);
@@ -125,17 +96,16 @@ private:
     QPoint                  mPressPnt;
     QPoint                  mMovePnt;
     int                     mMoveDir;
-    int                     mMaxDisCol;
-    int                     mMaxDisRow;
+    int                     mMaxDisCol;    
     bool                    mAutoChangePage;
     bool                    mIsWorkInMini;
     quint64               mLastWheelTime;
+    QList<int>              mColWidthList;
 protected:
-    int                     mDisRowStart;
-    int                     mDisRowEnd;
-    int                     mCurPage;
-    int                     mTotalPage;
-    int                     mPageSize;
+    int                     mDisplayRowStart;
+    int                     mDisplayRowEnd;
+    int                     mTotalDisplayRowCount;
+    int                     mMaxDisRow;
 
 };
 

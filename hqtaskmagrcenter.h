@@ -27,6 +27,7 @@ public:
     ~HQTaskMagrCenter();
     void start();
     void  registerInfoDisplaywidget(QWidget* w);
+    QSinaStkResultMergeThread*  hqCenter() {return mHqCenter;}
 signals:
     void        signalUpdateHistoryMsg(const QString& msg);
     void        signalUpdateHistoryFinished();
@@ -44,6 +45,7 @@ signals:
     void        signalSendAllShareCodesList(const QStringList& list);
 
 public slots:
+    void        slotFinishNetworkCheck(bool sts);
     void        slotDBInitFinished();
     void        slotFinishUpdateWorkDays();
     void        slotNewWorDayChangeNow();
@@ -76,6 +78,7 @@ private:
     QThread                     mWorkThread;
     QShareHistoryInfoMgr                *mHistoryInfoMgr;
     QShareActiveDateUpdateThread*       mTimeMonitorThread;
+    QSinaStkResultMergeThread*          mHqCenter;
     HqKuaixun*  mInfoThread724;
 
 };
