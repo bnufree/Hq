@@ -35,7 +35,7 @@ void NorthFlowCurveWidget::setNorthRealInfo(const QList<NorthBoundData> &list, i
 {
     mDataList = list;
     if(max > mMax) mMax = max;
-    mMin = min;
+    mMin = min;    
     update();
 }
 
@@ -195,11 +195,23 @@ QNorthFlowInfoDisplayWidget::QNorthFlowInfoDisplayWidget(QWidget *parent) :
 
 
     mRealInfoThread = new QSinaNorthRealInfoThread;
-    connect(mRealInfoThread, SIGNAL(signalUpdateNorthBoundList(QList<NorthBoundData>, int, int)), mDisplayWidget, SLOT(setNorthRealInfo(QList<NorthBoundData>,int, int)));
+    connect(mRealInfoThread, SIGNAL(signalUpdateNorthBoundList(QList<NorthBoundData>, int, int, QDate)), this, SLOT(setNorthRealInfo(QList<NorthBoundData>,int, int, QDate)));
     mRealInfoThread->start();
+}
+
+
+void QNorthFlowInfoDisplayWidget::setDate(const QString &date)
+{
+    ui->date->setText(date);
 }
 
 QNorthFlowInfoDisplayWidget::~QNorthFlowInfoDisplayWidget()
 {
     delete ui;
+}
+
+void QNorthFlowInfoDisplayWidget::setNorthRealInfo(const QList<NorthBoundData> &list, int max, int min, const QDate &date)
+{
+    setDate(date.toString("MM-dd"));
+    if(mDisplayWidget) mDisplayWidget->setNorthRealInfo(list, max, min);
 }

@@ -36,6 +36,10 @@ class QNorthFlowInfoDisplayWidget : public QWidget
 public:
     explicit QNorthFlowInfoDisplayWidget(QWidget *parent = 0);
     ~QNorthFlowInfoDisplayWidget();
+    void  setDate(const QString& date);
+
+public slots:
+    void setNorthRealInfo(const QList<NorthBoundData>& list, int mMax, int mMin, const QDate& date);
 
 private:
     Ui::QNorthFlowInfoDisplayWidget *ui;
