@@ -102,7 +102,8 @@ SOURCES += main.cpp\
     table/qshareexchangetable.cpp \
     table/northboundmoneyflowtablewidget.cpp \
     table/northboundtop10displaywidget.cpp \
-    table/northboundsharevolwidget.cpp
+    table/northboundsharevolwidget.cpp \
+    northbound/qnorthbounddisplayweidget.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -182,7 +183,8 @@ HEADERS  += dialog.h \
     table/qshareexchangetable.h \
     table/northboundmoneyflowtablewidget.h \
     table/northboundtop10displaywidget.h \
-    table/northboundsharevolwidget.h
+    table/northboundsharevolwidget.h \
+    northbound/qnorthbounddisplayweidget.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \
@@ -198,7 +200,8 @@ FORMS    += dialog.ui \
     real/qhqsysteminfowidget.ui \
     qkuaixunlistwidget.ui \
     table/zchxhqdisplaywidget.ui \
-    qpopwindow.ui
+    qpopwindow.ui \
+    northbound/qnorthbounddisplayweidget.ui
 
 RESOURCES += \
     image.qrc
