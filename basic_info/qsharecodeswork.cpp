@@ -26,9 +26,15 @@ QShareCodesWork::~QShareCodesWork()
 void QShareCodesWork::run()
 {
     //首先获取数据库的更新日期
-    //http://query.sse.com.cn/security/stock/downloadStockListFile.do?csrcCode=&stockCode=&areaName=&stockType=1
-
     ShareDataList list;
+//    parseShCode(list);
+    parseSzCode(list);
+//    {
+//        //
+//        QEtfScaleThread *etf = new QEtfScaleThread(this);
+//        connect(etf, SIGNAL(finished()), etf, SLOT(deleteLater()));
+//        etf->start();
+//    }
     ShareWorkingDate update_date = DATA_SERVICE->getLastUpdateDateOfBasicInfo();
     if(update_date.isNull() || update_date < ShareWorkingDate::getCurWorkDay())
     {
@@ -43,7 +49,7 @@ void QShareCodesWork::run()
         parseHttp(list, fund_code_url, 2);
         qDebug()<<"fund:"<<t.elapsed();
     }
-    DATA_SERVICE->signalUpdateShareBasicInfo(list);
+  //  DATA_SERVICE->signalUpdateShareBasicInfo(list);
     return;
 }
 
@@ -99,6 +105,81 @@ void QShareCodesWork::parseHttp(ShareDataList& list, const QString& url, int mod
     }
 }
 
-//
+void QShareCodesWork::parseShCode(ShareDataList &result_list)
+{
+    QList<QNetworkCookie> list;
+    list.append(QNetworkCookie("Referer", "http://www.sse.com.cn/market/funddata/volumn/etfvolumn/"));
+    list.append(QNetworkCookie("Cookie", "yfx_c_g_u_id_10000042=_ck20072115125217721926968350309; yfx_f_l_v_t_10000042=f_t_1595315572764__r_t_1595579117057__v_t_1595579117057__r_c_1; VISITED_MENU=%5B%228864%22%2C%228528%22%2C%2210025%22%2C%228547%22%2C%228491%22%5D"));
 
+    QList<int> typeList;
+    typeList<<1<<8;
+    foreach (int type, typeList) {
+        QByteArray recv = QHttpGet::getContentOfURL(QString("http://query.sse.com.cn/security/stock/getStockListData.do?&jsonCallBack=&isPagination=true&stockCode=&csrcCode=&areaName=&stockType=%1&pageHelp.cacheSize=1&pageHelp.beginPage=1&pageHelp.pageSize=250000&pageHelp.pageNo=1&_=%2").arg(type).arg(QDateTime::currentMSecsSinceEpoch()), list);
+        QJsonParseError error;
+        QJsonDocument doc = QJsonDocument::fromJson(recv, &error);
+        if(!doc.isObject()) return;
+        QJsonArray dataArray = doc.object().value("pageHelp").toObject().value("data").toArray();
+        foreach (QJsonValue val, dataArray) {
+            QJsonObject obj = val.toObject();
+            ShareData data;
+            data.mCode = obj.value("COMPANY_CODE").toString();
+            data.mName = obj.value("COMPANY_ABBR").toString();
+            data.mShareType = ShareData::shareType(data.mCode);
+            data.mPY = HqUtils::GetFirstLetter(QTextCodec::codecForLocale()->toUnicode(data.mName.toUtf8()));
+            qDebug()<<data.mCode<<data.mName<<data.mPY;
+            result_list.append(data);
+
+        }
+    }
+}
+
+
+void QShareCodesWork::parseSzCode(ShareDataList &result_list)
+{
+    int page_num = 1;
+    int page_size = 10000;
+    int page_count = 1;
+    int total_record_count = 0;
+    while (page_num <= page_count) {
+        QString url = QString("http://www.szse.cn/api/report/ShowReport/data?SHOWTYPE=JSON&CATALOGID=1110&TABKEY=tab1&tab1PAGENO=%1&tab1PAGESIZE=%2&random=0.9825325365046125")
+                .arg(page_num)
+                .arg(page_size);
+        QByteArray recv = QHttpGet::getContentOfURL(url);
+        qDebug()<<url<<recv.size();
+        QJsonParseError error;
+        QJsonDocument doc = QJsonDocument::fromJson(recv, &error);
+        if(!doc.isArray()) return;
+        QJsonArray array = doc.array();
+        QJsonObject metaObj = array[0].toObject().value("metadata").toObject();
+        if(metaObj.isEmpty()) break;
+        QDate curDate = QDate::fromString(metaObj.value("subname").toString(), "yyyy-MM-dd");
+        if(!curDate.isValid()) break;
+        page_count = metaObj.value("pagecount").toInt();
+        qDebug()<<curDate<<page_count;
+        if(page_count <= 0) break;
+        total_record_count = metaObj.value("recordcount").toInt();
+
+        QJsonArray dataArray = array[0].toObject().value("data").toArray();
+        QRegExp nameEXp("<u>(.{1,})</u>");
+        foreach (QJsonValue val, dataArray) {
+            QJsonObject obj = val.toObject();
+            QString code = obj.value("agdm").toString();
+            QString name = obj.value("agjc").toString();
+            int index = nameEXp.indexIn(name);
+            if(index > 0)
+            {
+                name = nameEXp.cap(1);
+            }
+            ShareData data;
+            data.mCode = code;
+            data.mName = name;
+            data.mShareType = ShareData::shareType(data.mCode);
+            data.mPY = HqUtils::GetFirstLetter(QTextCodec::codecForLocale()->toUnicode(data.mName.toUtf8()));
+            qDebug()<<data.mCode<<data.mName<<data.mPY;
+            result_list.append(data);
+        }
+        page_num++;
+    }
+
+}
 

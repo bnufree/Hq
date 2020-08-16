@@ -14,6 +14,7 @@
 #include "real/qhqindexthread.h"
 #include "real/qhqeastmoneyrealinfothread.h"
 #include "real/hqkuaixun.h"
+#include "qetfscalethread.h"
 
 HQTaskMagrCenter* HQTaskMagrCenter::m_pInstance = 0;
 HQTaskMagrCenter::CGarbo HQTaskMagrCenter::s_Garbo;
@@ -118,6 +119,8 @@ void HQTaskMagrCenter::slotFinishUpdateWorkDays()
     QShareHsgtTop10Work* hsgtTop10 = new QShareHsgtTop10Work(this);
     connect(hsgtTop10, SIGNAL(finished()), hsgtTop10, SLOT(deleteLater()));
     hsgtTop10->start();
+
+
 }
 
 void HQTaskMagrCenter::slotNewWorDayChangeNow()

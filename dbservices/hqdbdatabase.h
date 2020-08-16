@@ -131,7 +131,7 @@ public:
     //基本数据更新
     bool updateShareBasicInfo(const ShareDataList& dataList);
     bool queryShareBasicInfo(ShareDataMap& map);
-    bool delShareBasicInfo(const QString& code);
+    bool delShareBasicInfo(const QString& code = QString());
     bool getSimilarCodeOfText(QStringList& codes, const QString& text);
 
     //自选股更新

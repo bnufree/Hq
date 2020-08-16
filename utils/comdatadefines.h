@@ -138,6 +138,7 @@ typedef QList<TableColData>         TableColDataList;
 #define         HQ_LGT_TOP10_DIR            QString("%1/hstop10").arg(HQ_DATA_DIR)
 #define         HQ_LGT_HISTORY_DIR          QString("%1/hs_foreign").arg(HQ_DATA_DIR)
 #define         HQ_DAY_HISTORY_DIR          QString("%1/history").arg(HQ_DATA_DIR)
+#define         HQ_ETF_DIR          QString("%1/etf").arg(HQ_DATA_DIR)
 
 #endif // COMDATADEFINES_H
 

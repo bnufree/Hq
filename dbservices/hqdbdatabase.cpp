@@ -572,6 +572,7 @@ bool HQDBDataBase::updateShareBasicInfo(const ShareDataList& dataList)
 {
     int size = dataList.size();
     if(size == 0) return true;
+    if(!delShareBasicInfo()) return false;
     mDB.transaction();
     foreach (ShareData data, dataList) {
         DBColValList list;
