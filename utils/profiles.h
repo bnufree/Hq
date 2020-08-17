@@ -1,4 +1,4 @@
-#ifndef PROFILE_H
+﻿#ifndef PROFILE_H
 #define PROFILE_H
 
 #include <QObject>
@@ -14,6 +14,7 @@
 #define     FAV_CODE_KEY            "Codes"
 #define     CLOSE_DATE_SEC          "CloseDates"
 #define     CLOSE_DATE_KEY          "Dates"
+#define     CLOSE_DATE_YEAR         "Year"
 
 class Profiles : public QObject
 {

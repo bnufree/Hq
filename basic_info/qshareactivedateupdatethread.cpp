@@ -2,6 +2,10 @@
 #include "utils/qhttpget.h"
 #include "dbservices/dbservices.h"
 #include "utils/hqinfoparseutil.h"
+#include "utils/profiles.h"
+#include "annualcloseddaydisclosure.h"
+#include <QEventLoop>
+#include <QTimer>
 
 QShareActiveDateUpdateThread::QShareActiveDateUpdateThread(QObject *parent) : QThread(parent)
 {
@@ -64,12 +68,50 @@ QList<QDate> QShareActiveDateUpdateThread::getDateListFromHexun()
     return list;
 }
 
+QList<QDate> QShareActiveDateUpdateThread::getCurrentYearClosedDateList()
+{
+    QDateList list;
+    while (true) {
+        AnnualClosedDayDisclosure *closure = new AnnualClosedDayDisclosure(false);
+        QEventLoop subloop;
+        connect(closure, SIGNAL(finished()), &subloop, SLOT(quit()));
+        QTimer timer;
+        timer.setSingleShot(true);
+        connect(&timer, SIGNAL(timeout()), &subloop, SLOT(quit()));
+        timer.start(10*1000);
+        closure->start();
+        subloop.exec();
+        if(timer.isActive()) timer.stop();
+        list = closure->getClosedDateList();
+        closure->deleteLater();
+        if(list.size() > 0)
+        {
+            break;
+        }
+
+        sleep(3);
+    }
+
+    return list;
+}
+
 void QShareActiveDateUpdateThread::run()
 {
     QDate workDate;
     //检查当前时间是不是工作日
+    QDateList closedDateList;
     while(true)
     {
+        //获取当前年度对应的节假日休市
+        if(closedDateList.size() == 0 || closedDateList.first().year() != QDate::currentDate().year())
+        {
+            closedDateList.clear();
+            closedDateList = getCurrentYearClosedDateList();
+            if(closedDateList.size() == 0) continue;
+            PROFILES_INS->setValue(CLOSE_DATE_SEC, CLOSE_DATE_KEY, HqInfoParseUtil::dateListToStringList(closedDateList));
+        }
+
+
         QTime t;
         t.start();
         QString wkURL = QString("http://hq.sinajs.cn/list=sh000001");

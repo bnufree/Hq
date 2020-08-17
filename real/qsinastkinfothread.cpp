@@ -79,8 +79,7 @@ void QSinaStkInfoThread::setStkList(const QStringList &list)
 
 void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
 {
-    QTextCodec *codes = QTextCodec::codecForName("GBK");
-    QString result = codes->toUnicode(bytes);
+    QString result =  QString::fromUtf8(bytes);
     //先换行
     QStringList resultlist = result.split(QRegExp("[\\n;]"), QString::SkipEmptyParts);
     //再分割具体的字段

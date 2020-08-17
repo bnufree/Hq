@@ -13,6 +13,7 @@ public:
 private:
     QList<QDate> getDateListFromNetease();
     QList<QDate> getDateListFromHexun();
+    QList<QDate> getCurrentYearClosedDateList();
 
 signals:
     void signalNewWorkDateNow();

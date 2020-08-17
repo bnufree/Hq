@@ -11,6 +11,7 @@
 #include <new>
 #include <zchxmainwindow.h>
 #include "exchange/qexchangerecordworker.h"
+#include "annualcloseddaydisclosure.h"
 
 void no_memory () {
   std::cout << "Failed to allocate memory!\n";

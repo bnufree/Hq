@@ -1,4 +1,4 @@
-#include "hqinfoparseutil.h"
+﻿#include "hqinfoparseutil.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
@@ -8,6 +8,27 @@
 #include <QTextCodec>
 #include "data_structure/shareworkingdatetime.h"
 #include <math.h>
+
+
+QDateList  HqInfoParseUtil::dateListFromStringList(const QStringList &list)
+{
+    QDateList res;
+    foreach (QString str, list) {
+        res.append(QDate::fromString(str, "yyyy-MM-dd"));
+    }
+
+    return res;
+}
+QStringList HqInfoParseUtil::dateListToStringList(const QDateList& list )
+{
+    QStringList res;
+    for(int i=0; i<list.size(); i++)
+    {
+        res.append(list[i].toString("yyyy-MM-dd"));
+    }
+
+    return res;
+}
 
 HqInfoParseUtil::HqInfoParseUtil()
 {

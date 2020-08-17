@@ -1,4 +1,4 @@
-#include "qhqindexthread.h"
+﻿#include "qhqindexthread.h"
 #include "utils/qhttpget.h"
 #include "utils/profiles.h"
 #include "utils/hqinfoparseutil.h"
@@ -26,9 +26,7 @@ void QHqIndexThread::run()
     QString url("http://hq.sinajs.cn/?list=%1");
     QString wkURL = url.arg(index_list.join(","));
     while (1) {
-        QByteArray bytes = QHttpGet::getContentOfURL(wkURL);
-        QTextCodec *codes = QTextCodec::codecForName("GBK");
-        QString result = codes->toUnicode(bytes);
+        QString result = QString::fromUtf8(QHttpGet::getContentOfURL(wkURL));
         //先换行
         QStringList resultlist = result.split(QRegExp("[\\n;]"), QString::SkipEmptyParts);
         ShareDataList datalist;

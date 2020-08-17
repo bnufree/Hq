@@ -1,4 +1,4 @@
-#ifndef HQINFOPARSEUTIL_H
+﻿#ifndef HQINFOPARSEUTIL_H
 #define HQINFOPARSEUTIL_H
 
 #include "data_structure/sharedata.h"
@@ -18,6 +18,9 @@ public:
     static bool     getShareDateRange(const QString& code, QDate& start, QDate& end);
     static bool parseShareDataFromSinaA(ShareData& data, const QString& hqstr);
     static bool parseShareDataFromSinaHK(ShareData& data, const QString &hqstr);
+    static QDateList  dateListFromStringList(const QStringList& list);
+    static QStringList dateListToStringList(const QDateList& list );
+
 
 private:
 

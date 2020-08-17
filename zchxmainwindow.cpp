@@ -41,11 +41,6 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
     mSysTrayIcon(0)
 {
     ui->setupUi(this);
-    setWindowTitle(QStringLiteral("XXXXXXXXXXXXXXXXXX终端"));
-    QEtfScaleThread * test = new QEtfScaleThread;
-    test->start();
-
-    return;
     mWidgetMgr = new QStackedWidget(this);
     ui->centralwidget->layout()->addWidget(mWidgetMgr);
     //添加TAB按钮
