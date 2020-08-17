@@ -13,36 +13,48 @@
 
 #define         SH_FUND_REG         "(sh){0,1}5[0-9]{5}"
 #define         SH_INDEX_REG        "sh0[0-9]{5}"
+#define         SH_ZB_SHARE_REG        "(sh){0,1}6[0-9]{5}"
+#define         SH_KCB_SHARE_REG    "(sh){0,1}688[0-9]{3}"
+#define         SH_KZZ_REG          "(sh){0,1}11[0-9]{4}"
+
 #define         SZ_FUND_REG         "(sz){0,1}1[0-9]{5}"
 #define         SZ_INDEX_REG        "sz399[0-9]{3}"
-#define         SH_SHARE_REG        "(sh){0,1}6[0-9]{5}"
-#define         SZZB_SHARE_REG        "(sz){0,1}(00[01]{1}[0-9]{3})"
-#define         SZZXB_SHARE_REG        "(sz){0,1}(002[0-9]{3})"
-#define         SZCYB_SHARE_REG        "(sz){0,1}(30[0-9]{4})"
+#define         SZ_ZB_SHARE_REG        "(sz){0,1}(00[01]{1}[0-9]{3})"
+#define         SZ_ZXB_SHARE_REG        "(sz){0,1}(002[0-9]{3})"
+#define         SZ_CYB_SHARE_REG        "(sz){0,1}(30[0-9]{4})"
+#define         SZ_KZZ_REG          "(sz){0,1}12[0-9]{4}"
+
 #define         HK_SHARE_REG        "(hk){0,1}\\d{5}"
-#define         SH_KZZ_REG          "11[0-9]{4}"
-#define         SZ_KZZ_REG          "12[0-9]{4}"
+
+
 
 typedef    enum     share_data_type
 {
     SHARE_UNDEF = 0x0000,
-    SHARE_INDEX_SH = 0x0001,
-    SHARE_INDEX_SZ = 0x0002,
-    SHARE_INDEX_HK = 0x0004,
-    SHARE_INDEX_US = 0x0008,
+    SHARE_INDEX_SH = 1,
+    SHARE_INDEX_SZ = 1<<1,
+    SHARE_INDEX_HK = 1<<2,
+    SHARE_INDEX_US = 1<<3,
     SHARE_INDEX = SHARE_INDEX_SH | SHARE_INDEX_SZ | SHARE_INDEX_HK | SHARE_INDEX_US,
-    SHARE_SH_ZB = 0x0010,
-    SHARE_SH_FUND = 0x0020,
-    SHARE_SH = SHARE_SH_ZB | SHARE_SH_FUND,
-    SHARE_SZ_ZB = 0x0100,
-    SHARE_SZ_ZXB = 0x0200,
-    SHARE_SZ_CYB = 0x0400,
-    SHARE_SZ_FUND = 0x0800,
-    SHARE_SZ = SHARE_SZ_ZB | SHARE_SZ_FUND |SHARE_SZ_ZXB | SHARE_SZ_CYB,
+
+    SHARE_SH_ZB = 1<<4,
+    SHARE_SH_KCB = 1<<5,
+    SHARE_SH = SHARE_SH_ZB | SHARE_SH_KCB,
+
+    SHARE_SZ_ZB = 1<<7,
+    SHARE_SZ_ZXB = 1<<8,
+    SHARE_SZ_CYB = 1<<9,
+    SHARE_SZ = SHARE_SZ_ZB  |SHARE_SZ_ZXB | SHARE_SZ_CYB,
+
+    SHARE_SH_FUND = 1<<6,
+    SHARE_SZ_FUND = 1<<10,
     SHARE_FUND = SHARE_SH_FUND | SHARE_SZ_FUND,
-    SHARE_US = 0x1000,
-    SHARE_HK = 0x2000,
-    SHARE_KZZ = 0x4000,
+
+    SHARE_US = 1<<11,
+    SHARE_HK = 1<<12,
+    SHARE_SH_KZZ = 1<<13,
+    SHARE_SZ_KZZ = 1<<14,
+    SHARE_KZZ = SHARE_SH_KZZ | SHARE_SZ_KZZ,
 }SHARE_DATA_TYPE;
 
 struct HistoryInfo{
@@ -147,6 +159,7 @@ public:
     static QString shareTypeString(SHARE_DATA_TYPE type)
     {
         if(type == SHARE_SH_ZB) return QObject::tr("上证A股");
+        if(type == SHARE_SH_KCB) return QObject::tr("科创板");
         if(type == SHARE_SZ_ZB) return QObject::tr("深证主板");
         if(type == SHARE_SZ_ZXB) return QObject::tr("深证中小");
         if(type == SHARE_SZ_CYB) return QObject::tr("深证创业");
@@ -161,20 +174,31 @@ public:
     //通过证券的代码来获取证券的类型(不包括指数,指数需要强制指定)
     static SHARE_DATA_TYPE shareType(const QString &src)
     {
-        QRegExp shShare(SH_SHARE_REG);
-        QRegExp szZBShare(SZZB_SHARE_REG);
-        QRegExp szZXBShare(SZZXB_SHARE_REG);
-        QRegExp szCYBShare(SZCYB_SHARE_REG);
+        QRegExp shZBShare(SH_ZB_SHARE_REG);
+        QRegExp shKCBShare(SH_KCB_SHARE_REG);
+        QRegExp shKZZShare(SH_KZZ_REG);
+
+        QRegExp szZBShare(SZ_ZB_SHARE_REG);
+        QRegExp szZXBShare(SZ_ZXB_SHARE_REG);
+        QRegExp szCYBShare(SZ_CYB_SHARE_REG);
+        QRegExp szKZZShare(SZ_KZZ_REG);
+
         QRegExp hkShare(HK_SHARE_REG);
+
         QRegExp shFund(SH_FUND_REG);
         QRegExp szFund(SZ_FUND_REG);
         QRegExp shIndex(SH_INDEX_REG);
         QRegExp szIndex(SZ_INDEX_REG);
 
-        if(shShare.exactMatch(src)) return SHARE_SH_ZB;
+        if(shZBShare.exactMatch(src)) return SHARE_SH_ZB;
+        if(shKCBShare.exactMatch(src)) return SHARE_SH_KCB;
+        if(shKZZShare.exactMatch(src)) return SHARE_SH_KZZ;
+
         if(szZBShare.exactMatch(src)) return SHARE_SZ_ZB;
         if(szZXBShare.exactMatch(src)) return SHARE_SZ_ZXB;
         if(szCYBShare.exactMatch(src)) return SHARE_SZ_CYB;
+        if(szKZZShare.exactMatch(src)) return SHARE_SZ_KZZ;
+
         if(shIndex.exactMatch(src)) return SHARE_INDEX_SH;
         if(szIndex.exactMatch(src)) return SHARE_INDEX_SZ;
         if(shFund.exactMatch(src)) return SHARE_SH_FUND;

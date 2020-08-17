@@ -25,7 +25,7 @@ QShareCodesWork::~QShareCodesWork()
 
 void QShareCodesWork::parseKZZ(ShareDataList &list)
 {
-    QString url = "http://dcfm.eastmoney.com/em_mutisvcexpandinterface/api/js/get?type=KZZ_LB&token=70f12f2f4f091e459a279469fe49eca5&st=STARTDATE&sr=-1&p=1&ps=10&js=";
+    QString url = "http://dcfm.eastmoney.com/em_mutisvcexpandinterface/api/js/get?type=KZZ_LB&token=70f12f2f4f091e459a279469fe49eca5&st=STARTDATE&sr=-1&p=1&ps=10000&js=";
     QString result = QString::fromUtf8(QHttpGet::getContentOfURL(url));
 
     int start_index = result.indexOf("[", 0);
@@ -39,6 +39,7 @@ void QShareCodesWork::parseKZZ(ShareDataList &list)
     for(int i=0; i<array.size(); i++)
     {
         QJsonObject obj = array.at(i).toObject();
+//        qDebug()<<obj;
         if(obj.value("LISTDATE").toString() == "-") continue;
         if(obj.value("DELISTDATE").toString() != "-") continue;
         ShareData data;
@@ -46,6 +47,7 @@ void QShareCodesWork::parseKZZ(ShareDataList &list)
         data.mCode = obj.value("BONDCODE").toString();
         data.mPY = HqUtils::GetFirstLetter(QTextCodec::codecForLocale()->toUnicode(data.mName.toUtf8()));
         data.mShareType = ShareData::shareType(data.mCode);
+        qDebug()<<data.mCode<<data.mName;
         list.append(data);
     }
 }
@@ -54,18 +56,9 @@ void QShareCodesWork::run()
 {
     //首先获取数据库的更新日期
     ShareDataList list;
-    //股票数据
-    parseShCode(list);
-    parseSzCode(list);
-    //ETF数据
-    //可转债数据
-//    {
-//        //
-//        QEtfScaleThread *etf = new QEtfScaleThread(this);
-//        connect(etf, SIGNAL(finished()), etf, SLOT(deleteLater()));
-//        etf->start();
-//    }
+
     ShareWorkingDate update_date = DATA_SERVICE->getLastUpdateDateOfBasicInfo();
+    qDebug()<<"last code date:"<<update_date.date();
 //    if(update_date.isNull() || update_date < ShareWorkingDate::getCurWorkDay())
     {
         QString stock_code_url = "http://18.push2.eastmoney.com/api/qt/clist/get?cb=&pn=1&pz=20000&po=0&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f6&fs=m:0+t:6,m:0+t:13,m:0+t:80,m:1+t:2,m:1+t:23&fields=f12,f14&_=";
@@ -73,11 +66,20 @@ void QShareCodesWork::run()
         fund_code_url.append(QString::number(QDateTime::currentMSecsSinceEpoch()));
         QTime t;
         t.start();
-        parseHttp(list, stock_code_url, 1);
+        //股票数据
+//        parseShCode(list);
+//        parseSzCode(list);
+        //ETF数据
+        //可转债数据
+        parseKZZ(list);
+//        parseHttp(list, stock_code_url, 1);
         qDebug()<<"code:"<<t.elapsed();
         t.start();
-        parseHttp(list, fund_code_url, 2);
+//        parseHttp(list, fund_code_url, 2);
         qDebug()<<"fund:"<<t.elapsed();
+    }
+    foreach (ShareData data, list) {
+        qDebug()<<data.mCode<<data.mName<<data.mPY;
     }
   //  DATA_SERVICE->signalUpdateShareBasicInfo(list);
     return;

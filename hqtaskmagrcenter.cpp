@@ -106,6 +106,7 @@ void HQTaskMagrCenter::slotDBInitFinished()
 
 void HQTaskMagrCenter::slotFinishUpdateWorkDays()
 {
+    qDebug()<<"start get stock code";
 //    emit signalWorkingDayfinished();
     qDebug()<<__FUNCTION__<<__LINE__;
     //数据库初始化完成,开始获取最新的代码列表
