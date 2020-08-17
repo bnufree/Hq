@@ -23,6 +23,33 @@ QShareCodesWork::~QShareCodesWork()
 {
 }
 
+void QShareCodesWork::parseKZZ(ShareDataList &list)
+{
+    QString url = "http://dcfm.eastmoney.com/em_mutisvcexpandinterface/api/js/get?type=KZZ_LB&token=70f12f2f4f091e459a279469fe49eca5&st=STARTDATE&sr=-1&p=1&ps=10&js=";
+    QString result = QString::fromUtf8(QHttpGet::getContentOfURL(url));
+
+    int start_index = result.indexOf("[", 0);
+    if(start_index < 0) return;
+    result = result.mid(start_index);
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(result.toUtf8(), &error);
+    if(error.error != QJsonParseError::NoError) return;
+    if(!doc.isArray()) return;
+    QJsonArray array = doc.array();
+    for(int i=0; i<array.size(); i++)
+    {
+        QJsonObject obj = array.at(i).toObject();
+        if(obj.value("LISTDATE").toString() == "-") continue;
+        if(obj.value("DELISTDATE").toString() != "-") continue;
+        ShareData data;
+        data.mName = obj.value("SNAME").toString();
+        data.mCode = obj.value("BONDCODE").toString();
+        data.mPY = HqUtils::GetFirstLetter(QTextCodec::codecForLocale()->toUnicode(data.mName.toUtf8()));
+        data.mShareType = ShareData::shareType(data.mCode);
+        list.append(data);
+    }
+}
+
 void QShareCodesWork::run()
 {
     //首先获取数据库的更新日期

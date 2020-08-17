@@ -20,6 +20,8 @@
 #define         SZZXB_SHARE_REG        "(sz){0,1}(002[0-9]{3})"
 #define         SZCYB_SHARE_REG        "(sz){0,1}(30[0-9]{4})"
 #define         HK_SHARE_REG        "(hk){0,1}\\d{5}"
+#define         SH_KZZ_REG          "11[0-9]{4}"
+#define         SZ_KZZ_REG          "12[0-9]{4}"
 
 typedef    enum     share_data_type
 {
@@ -40,6 +42,7 @@ typedef    enum     share_data_type
     SHARE_FUND = SHARE_SH_FUND | SHARE_SZ_FUND,
     SHARE_US = 0x1000,
     SHARE_HK = 0x2000,
+    SHARE_KZZ = 0x4000,
 }SHARE_DATA_TYPE;
 
 struct HistoryInfo{
