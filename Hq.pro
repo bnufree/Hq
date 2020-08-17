@@ -112,7 +112,6 @@ HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
     qglobalapplication.h \
 #    qthook.h \
-    dbservices.h \
     qindexframe.h \
     qindexwidget.h \
     history/qsharehistoryinfomgr.h \

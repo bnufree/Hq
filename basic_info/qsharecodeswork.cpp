@@ -27,8 +27,11 @@ void QShareCodesWork::run()
 {
     //首先获取数据库的更新日期
     ShareDataList list;
-//    parseShCode(list);
+    //股票数据
+    parseShCode(list);
     parseSzCode(list);
+    //ETF数据
+    //可转债数据
 //    {
 //        //
 //        QEtfScaleThread *etf = new QEtfScaleThread(this);
@@ -126,7 +129,6 @@ void QShareCodesWork::parseShCode(ShareDataList &result_list)
             data.mName = obj.value("COMPANY_ABBR").toString();
             data.mShareType = ShareData::shareType(data.mCode);
             data.mPY = HqUtils::GetFirstLetter(QTextCodec::codecForLocale()->toUnicode(data.mName.toUtf8()));
-            qDebug()<<data.mCode<<data.mName<<data.mPY;
             result_list.append(data);
 
         }
@@ -152,7 +154,7 @@ void QShareCodesWork::parseSzCode(ShareDataList &result_list)
         QJsonArray array = doc.array();
         QJsonObject metaObj = array[0].toObject().value("metadata").toObject();
         if(metaObj.isEmpty()) break;
-        QDate curDate = QDate::fromString(metaObj.value("subname").toString(), "yyyy-MM-dd");
+        QDate curDate = QDate::fromString(metaObj.value("subname").toString().trimmed(), "yyyy-MM-dd");
         if(!curDate.isValid()) break;
         page_count = metaObj.value("pagecount").toInt();
         qDebug()<<curDate<<page_count;
@@ -164,7 +166,7 @@ void QShareCodesWork::parseSzCode(ShareDataList &result_list)
         foreach (QJsonValue val, dataArray) {
             QJsonObject obj = val.toObject();
             QString code = obj.value("agdm").toString();
-            QString name = obj.value("agjc").toString();
+            QString name = obj.value("agjc").toString().remove(" ");
             int index = nameEXp.indexIn(name);
             if(index > 0)
             {
@@ -175,7 +177,10 @@ void QShareCodesWork::parseSzCode(ShareDataList &result_list)
             data.mName = name;
             data.mShareType = ShareData::shareType(data.mCode);
             data.mPY = HqUtils::GetFirstLetter(QTextCodec::codecForLocale()->toUnicode(data.mName.toUtf8()));
-            qDebug()<<data.mCode<<data.mName<<data.mPY;
+            QRegExp py("[A-Z]{1,}");
+            int index2 = py.indexIn(data.mPY);
+            int length = py.matchedLength();
+            data.mPY = data.mPY.mid(index2, length);
             result_list.append(data);
         }
         page_num++;
