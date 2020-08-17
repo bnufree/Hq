@@ -105,7 +105,8 @@ SOURCES += main.cpp\
     table/northboundsharevolwidget.cpp \
     northbound/qnorthbounddisplayweidget.cpp \
     qetfscalethread.cpp \
-    annualcloseddaydisclosure.cpp
+    annualcloseddaydisclosure.cpp \
+    northbundwidget.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -188,7 +189,8 @@ HEADERS  += dialog.h \
     table/northboundsharevolwidget.h \
     northbound/qnorthbounddisplayweidget.h \
     qetfscalethread.h \
-    annualcloseddaydisclosure.h
+    annualcloseddaydisclosure.h \\
+    northbundwidget.h\
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

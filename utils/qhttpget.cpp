@@ -108,7 +108,11 @@ QByteArray QHttpGet::getContentOfURL(const QString &url, const QList<QNetworkCoo
 {
     QByteArray recv;
     QNetworkAccessManager mgr;
-    QNetworkReply *reply = mgr.get(QNetworkRequest(url));
+    QNetworkRequest request(url);
+    foreach (QNetworkCookie cookie, list) {
+        request.setRawHeader(cookie.name(), cookie.value());
+    }
+    QNetworkReply *reply = mgr.get(request);
 //    qDebug()<<reply;
     if(!reply) return recv;
 

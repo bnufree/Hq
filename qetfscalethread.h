@@ -2,10 +2,14 @@
 #define QETFSCALETHREAD_H
 
 #include <QThread>
+#include <QMap>
+#include <QDate>
 
 struct EtfScaleData{
     QString         mCode;
-    qint64          mScale;
+    double          mScale;
+    QString         mName;
+    QDate           mDate;
 };
 
 class QEtfScaleThread : public QThread
@@ -13,8 +17,13 @@ class QEtfScaleThread : public QThread
     Q_OBJECT
 public:
     explicit QEtfScaleThread(QObject *parent = 0);
+    ~QEtfScaleThread();
 
     void run();
+private:
+    void parseShEtf(const QDate& date);
+    void parseSzEtf(const QDate& date);
+    QMap<QString, EtfScaleData>       mEtfVolMap;
 
 signals:
     void    signalSendAllEtfScaleDataList(const QList<EtfScaleData>& list);

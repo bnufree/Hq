@@ -24,6 +24,7 @@
 #include <QKeyEvent>
 #include <QTextBrowser>
 #include <qetfscalethread.h>
+#include "northbundwidget.h"
 
 enum zchxBtnIndex{
     Btn_Info = 0,
@@ -54,7 +55,7 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
 //    HQTaskMagrCenter::instance()->registerInfoDisplaywidget(mInfoListWidget);
 //    createCtrlObject(QStringLiteral("资讯"), mInfoListWidget);
     createCtrlObject(QStringLiteral("行情中心"), new zchxHqDisplayWidget(this));
-    createCtrlObject(QStringLiteral("港资"), new QNorthFlowInfoDisplayWidget(this));
+    createCtrlObject(QStringLiteral("港资"), new NorthBundWidget(this));
     createCtrlObject(QStringLiteral("龙虎榜"), new QWidget);
     createCtrlObject(QStringLiteral("新股申购"), new QWidget);
 
