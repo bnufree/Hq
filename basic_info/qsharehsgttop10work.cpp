@@ -1,4 +1,4 @@
-#include "qsharehsgttop10work.h"
+﻿#include "qsharehsgttop10work.h"
 #include "utils/qhttpget.h"
 #include <QJsonDocument>
 #include <QJsonValue>
@@ -8,7 +8,7 @@
 #include <QDebug>
 #include "data_structure/hqutils.h"
 #include "data_structure/sharedata.h"
-#include "data_structure/shareworkingdatetime.h"
+#include "date/shareworkingdatetime.h"
 #include "dbservices/dbservices.h"
 #include <QFile>
 
@@ -24,40 +24,38 @@ QShareHsgtTop10Work::~QShareHsgtTop10Work()
 void QShareHsgtTop10Work::run()
 {
     while (true) {
-        ShareWorkingDate last_update_date = DATA_SERVICE->getLastUpdateDateOfHsgtTop10();
-        qDebug()<<"last date:"<<last_update_date.toString()<<last_update_date.isNull();
+        QDate last_update_date = DATA_SERVICE->getLastUpdateDateOfHsgtTop10();
+        qDebug()<<"last date:"<<ShareTradeDateTime(last_update_date).toString()<<last_update_date.isNull();
         //如果日期就是当前的工作日,证明更新完成,不再需要继续更新,结束线程
-        if(last_update_date == ShareWorkingDate::getCurWorkDay())
+        if(last_update_date == TradeDateMgr::instance()->lastTradeDay())
         {
 
             DATA_SERVICE->signalUpdateHsgtTop10Keys(last_update_date);
             return;
         }
-        ShareWorkingDate curDate = ShareWorkingDate::currentDate();
-        if(last_update_date.isNull()) last_update_date.setDate(curDate.date().addDays(-30));
+        QDate curDate = QDate::currentDate();
+        if(last_update_date.isNull()) last_update_date = curDate.addDays(-30);
 
-        ShareWorkingDate final_date = last_update_date;
+        QDate final_date = last_update_date;
         ShareHsgtList list;
-        last_update_date.next();
-        qDebug()<<"start get north top10 from date:"<<last_update_date.toString();
+        last_update_date = ShareTradeDateTime(last_update_date).nextTradeDay();
+        qDebug()<<"start get north top10 from date:"<<ShareTradeDateTime(last_update_date).toString();
         while (last_update_date <= curDate) {
             int old_size = list.size();
-            if(last_update_date.isWeekend())
+            if(TradeDateMgr::instance()->isTradeDay(last_update_date))
             {
-                last_update_date.next();
-                continue;
+                //从网络获取
+                if(!getDataFromEastMoney(list, last_update_date))
+                {
+                    getDataFromHKEX(list, last_update_date);
+                }
+                int new_size = list.size();
+                if(new_size != old_size)
+                {
+                    final_date = last_update_date;
+                }
             }
-            //从网络获取
-            if(!getDataFromEastMoney(list, last_update_date))
-            {
-                getDataFromHKEX(list, last_update_date);
-            }
-            int new_size = list.size();
-            if(new_size != old_size)
-            {
-                final_date = last_update_date;
-            }
-            last_update_date.next();
+            last_update_date = last_update_date.addDays(1);
         }
         if(list.size() > 0)
         {
@@ -65,13 +63,12 @@ void QShareHsgtTop10Work::run()
         }
 
         DATA_SERVICE->signalUpdateHsgtTop10Keys(final_date);
-        qDebug()<<"final update date"<<final_date.toString();
 
         sleep(600);
     }
 }
 
-bool QShareHsgtTop10Work::getDataFromEastMoney(ShareHsgtList &list, const ShareWorkingDate &date)
+bool QShareHsgtTop10Work::getDataFromEastMoney(ShareHsgtList &list, const QDate &date)
 {
     //从网络获取.
     QString url = QString("http://dcfm.eastmoney.com//EM_MutiSvcExpandInterface/api/js/get?type=HSGTCJB&token=70f12f2f4f091e459a279469fe49eca5&filter=(DetailDate=^%1^)&js=(x)&sr=1&st=Rank&rt=50014200")
@@ -104,7 +101,7 @@ bool QShareHsgtTop10Work::getDataFromEastMoney(ShareHsgtList &list, const ShareW
         }
         data.mIsTop10 = true;
         data.mPure = data.mBuy - data.mSell;
-        data.mDate = ShareWorkingDateTime(date.date());
+        data.mDate = date;
         resList.append(data);
     }
     if(resList.size() > 0) list.append(resList);
@@ -112,7 +109,7 @@ bool QShareHsgtTop10Work::getDataFromEastMoney(ShareHsgtList &list, const ShareW
     return resList.size() > 0;
 }
 
-bool QShareHsgtTop10Work::getDataFromHKEX(ShareHsgtList &list, const ShareWorkingDate &date)
+bool QShareHsgtTop10Work::getDataFromHKEX(ShareHsgtList &list, const QDate &date)
 {
     return true;
 }

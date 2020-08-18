@@ -42,11 +42,16 @@ void QShareHistoryInfoMgr::slotStartGetHistoryWithAllCodes()
     PROFILES_INS ->setDefault(UPDATE_SEC, UPDATE_DATE, QActiveDateTime(QDate::currentDate().addDays(-365)).toString(DATE_FORMAT));
     qDebug()<<"start get hk"<<QThread::currentThread()<<((QThread*)&mWorkThread);
     //首先获取从一年前到现在的陆股通数据
-    QList<QDate> historyDatesList = ShareWorkingDate::getHisWorkingDay();
-    foreach (QDate start, historyDatesList) {
-        if(start == QDate::currentDate()) continue;
-        QHKExchangeVolDataProcess * process = new QHKExchangeVolDataProcess(start, QHKExchangeVolDataProcess::Fetch_All, this);
-        mPool.start(process);
+    QDate start = QDate::currentDate().addYears(-1);
+    while (1) {
+        if(start == QDate::currentDate()) break;
+        if(TradeDateMgr::instance()->isTradeDay(start))
+        {
+            QHKExchangeVolDataProcess * process = new QHKExchangeVolDataProcess(start, QHKExchangeVolDataProcess::Fetch_All, this);
+            mPool.start(process);
+        }
+        start = start.addDays(1);
+
     }
     mPool.waitForDone();
     if(mCodesList.size() == 0) return;

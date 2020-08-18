@@ -1,7 +1,7 @@
 ﻿#include "qsharehistorycounterwork.h"
 #include "dbservices/dbservices.h"
 #include "dbservices/qactivedate.h"
-#include "data_structure/shareworkingdatetime.h"
+#include "date/shareworkingdatetime.h"
 #include "utils/qhttpget.h"
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -56,8 +56,8 @@ void QShareHistoryCounterWork::run()
 {
     if(mList.size() == 0) readFile(mList);
     //获取当前交易日的日期
-    QDate now = ShareWorkingDate::getCurWorkDay().date();
-    QDate last_day = ShareWorkingDate::getLastWorkDay().date();
+    QDate now = TradeDateMgr::instance()->currentTradeDay();
+    QDate last_day = TradeDateMgr::instance()->lastTradeDay();
     //获取对应的年,月,周对应的参考基准日
     //周参考日对应上周的星期五
     QDate week = now.addDays(-1*(now.dayOfWeek()) - 2);

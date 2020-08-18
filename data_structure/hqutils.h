@@ -5,7 +5,7 @@
 #include <QDebug>
 #include <QDateTime>
 #include <QStringList>
-#include "shareworkingdatetime.h"
+#include "date/shareworkingdatetime.h"
 
 #define         ANDROID_FILE_PATH       "/mnt/sdcard/com.hq.info"
 

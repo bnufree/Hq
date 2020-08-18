@@ -10,7 +10,7 @@
 #include "basic_info/qsharehsgttop10work.h"
 #include "basic_info/qsharefhspwork.h"
 #include "basic_info/qsharefinancialinfowork.h"
-#include "basic_info/qshareactivedateupdatethread.h"
+#include "date/qshareactivedateupdatethread.h"
 #include "real/qhqindexthread.h"
 #include "real/qhqeastmoneyrealinfothread.h"
 #include "real/hqkuaixun.h"
@@ -33,7 +33,6 @@ HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
     mHqCenter->setMktType(MKT_ZXG);
     //创建时间监控线程
     mTimeMonitorThread = new QShareActiveDateUpdateThread(this);
-    connect(mTimeMonitorThread, SIGNAL(signalUpdateHistoryWorkDays()), this, SLOT(slotFinishUpdateWorkDays()));
     connect(mTimeMonitorThread, SIGNAL(signalNewWorkDateNow()), this, SLOT(slotFinishUpdateWorkDays()));
     connect(mTimeMonitorThread, SIGNAL(signalSystemStatus(qint64,int)), this, SIGNAL(signalCurSystemInfo(qint64,int)));
 
@@ -62,13 +61,15 @@ HQTaskMagrCenter::~HQTaskMagrCenter()
     mWorkThread.quit();
 }
 
-void HQTaskMagrCenter::start()
+void HQTaskMagrCenter::slotStart()
 {
+    qDebug()<<QThread::currentThread()<<((QThread*) (&mWorkThread));
     //开始检查本地网络情况
     QByteArray recv = QHttpGet::getContentOfURL("http://hq.sinajs.cn/list=sh000001");
-    qDebug()<<"recv:"<<recv;
+    qDebug()<<"recv:"<<QString::fromUtf8(recv);
     if(recv.length() > 0 )
     {
+        //网络是好的
         slotFinishNetworkCheck(true);
     }
 }
@@ -77,8 +78,6 @@ void HQTaskMagrCenter::slotFinishNetworkCheck(bool sts)
 {
     if(sts)
     {
-        //开启数据库初始化
-        DATA_SERVICE->signalInitDBTables();
         if(mInfoThread724 && !mInfoThread724->isRunning())
         {
             mInfoThread724->start();
@@ -86,7 +85,10 @@ void HQTaskMagrCenter::slotFinishNetworkCheck(bool sts)
         if(mHqCenter && !mHqCenter->isRunning())
         {
             mHqCenter->start();
-        }
+        }        
+
+        //开启数据库初始化
+        DATA_SERVICE->signalInitDBTables();
     }
 }
 
@@ -106,7 +108,6 @@ void HQTaskMagrCenter::slotDBInitFinished()
 
 void HQTaskMagrCenter::slotFinishUpdateWorkDays()
 {
-    qDebug()<<"start get stock code";
 //    emit signalWorkingDayfinished();
     qDebug()<<__FUNCTION__<<__LINE__;
     //数据库初始化完成,开始获取最新的代码列表

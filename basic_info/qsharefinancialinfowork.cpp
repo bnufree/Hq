@@ -1,4 +1,4 @@
-#include "qsharefinancialinfowork.h"
+﻿#include "qsharefinancialinfowork.h"
 #include "utils/qhttpget.h"
 #include "dbservices/dbservices.h"
 
@@ -16,10 +16,10 @@ QShareFinancialInfoWork::~QShareFinancialInfoWork()
 
 void QShareFinancialInfoWork::run()
 {
-    ShareWorkingDate last_update_date = DATA_SERVICE->getLastUpdateDateOfFinanceInfo();
+    QDate last_update_date = DATA_SERVICE->getLastUpdateDateOfFinanceInfo();
     FinancialDataList dataList;
 
-    if(last_update_date.isNull() || last_update_date < ShareWorkingDate::getCurWorkDay())
+    if(last_update_date.isNull() || last_update_date < QDate::currentDate())
     {
         int pos = 0;
         int section = 200;

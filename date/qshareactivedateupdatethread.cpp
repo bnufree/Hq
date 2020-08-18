@@ -14,14 +14,12 @@ QShareActiveDateUpdateThread::QShareActiveDateUpdateThread(QObject *parent) : QT
 QList<QDate> QShareActiveDateUpdateThread::getDateListFromNetease()
 {
     //首先获取当前的日期列表
-    ShareWorkingDate cur = ShareWorkingDate::currentDate();
-    ShareWorkingDate start(cur.date().addYears(-1));
+    QDate cur = QDate::currentDate();
+    QDate start(cur.addYears(-1));
     QString wkURL = QString("http://quotes.money.163.com/service/chddata.html?code=0000001&start=%1&end=%2")
             .arg(start.toString("yyyyMMdd")).arg(cur.toString("yyyyMMdd"));
     QByteArray recv = QHttpGet::getContentOfURL(wkURL);
-    QTextCodec* gbk = QTextCodec::codecForName("GBK");
-    QTextCodec* utf8 = QTextCodec::codecForName("UTF-8");
-    QString result = QString::fromUtf8(utf8->fromUnicode(gbk->toUnicode(recv)));
+    QString result = QString::fromUtf8(recv);
 
     QStringList lines = result.split("\r\n");
     QList<QDate> list;
@@ -31,9 +29,8 @@ QList<QDate> QShareActiveDateUpdateThread::getDateListFromNetease()
         if(cols.length() >= 15)
         {
             //if(mCode == "000400")qDebug()<<recv.mid(20, 200);
-            ShareWorkingDate curDate = ShareWorkingDate::fromString(cols[0]);
-            if(curDate.isWeekend()) continue;
-            list.append(curDate.date());
+            QDate curDate = QDate::fromString(cols[0]);
+            list.append(curDate);
         }
     }
 
@@ -43,13 +40,11 @@ QList<QDate> QShareActiveDateUpdateThread::getDateListFromNetease()
 QList<QDate> QShareActiveDateUpdateThread::getDateListFromHexun()
 {
     //首先获取当前的日期列表
-    ShareWorkingDate cur = ShareWorkingDate::currentDate();
-    ShareWorkingDate start(cur.date().addYears(-1));
+    QDate cur = QDate::currentDate();
+    QDate start(cur.addYears(-1));
     QString wkURL = "http://webstock.quote.hermes.hexun.com/a/kline?code=sse000001&start=20191011000000&number=-252&type=5&callback=callback";
     QByteArray recv = QHttpGet::getContentOfURL(wkURL);
-    QTextCodec* gbk = QTextCodec::codecForName("GBK");
-    QTextCodec* utf8 = QTextCodec::codecForName("UTF-8");
-    QString result = QString::fromUtf8(utf8->fromUnicode(gbk->toUnicode(recv)));
+    QString result = QString::fromUtf8(recv);
 
     QStringList lines = result.split("\r\n");
     QList<QDate> list;
@@ -59,9 +54,8 @@ QList<QDate> QShareActiveDateUpdateThread::getDateListFromHexun()
         if(cols.length() >= 15)
         {
             //if(mCode == "000400")qDebug()<<recv.mid(20, 200);
-            ShareWorkingDate curDate = ShareWorkingDate::fromString(cols[0]);
-            if(curDate.isWeekend()) continue;
-            list.append(curDate.date());
+            QDate curDate = QDate::fromString(cols[0]);
+            list.append(curDate);
         }
     }
 
@@ -99,63 +93,74 @@ void QShareActiveDateUpdateThread::run()
 {
     QDate workDate;
     //检查当前时间是不是工作日
-    QDateList closedDateList;
+//    QDateList closedDateList = HqInfoParseUtil::dateListFromStringList(PROFILES_INS->value(CLOSE_DATE_SEC, CLOSE_DATE_KEY).toStringList());
     while(true)
     {
-        //获取当前年度对应的节假日休市
-        if(closedDateList.size() == 0 || closedDateList.first().year() != QDate::currentDate().year())
-        {
-            closedDateList.clear();
-            closedDateList = getCurrentYearClosedDateList();
-            if(closedDateList.size() == 0) continue;
-            PROFILES_INS->setValue(CLOSE_DATE_SEC, CLOSE_DATE_KEY, HqInfoParseUtil::dateListToStringList(closedDateList));
-        }
+        //获取当前的的系统时间状态
+//        QByteArray bytes = QHttpGet::getContentOfURL("http://www.sse.com.cn/js/common/systemDate_global.js;wa287bd80a8b07ed8e");
+//        qDebug()<<bytes;
 
+//        //获取当前年度对应的节假日休市
+//        if(closedDateList.size() == 0 || closedDateList.first().year() != QDate::currentDate().year())
+//        {
+//            closedDateList.clear();
+//            closedDateList = getCurrentYearClosedDateList();
+//            if(closedDateList.size() == 0) continue;
+//            PROFILES_INS->setValue(CLOSE_DATE_SEC, CLOSE_DATE_KEY, HqInfoParseUtil::dateListToStringList(closedDateList));
+//        }
 
-        QTime t;
-        t.start();
-        QString wkURL = QString("http://hq.sinajs.cn/list=sh000001");
-        QByteArray recv = QHttpGet::getContentOfURL(wkURL);
-        QTextCodec* gbk = QTextCodec::codecForName("GBK");
-        QTextCodec* utf8 = QTextCodec::codecForName("UTF-8");
-        QString result = QString::fromUtf8(utf8->fromUnicode(gbk->toUnicode(recv)));
+        //获取当前行情系统的时间
+        QByteArray recv = QHttpGet::getContentOfURL("http://hq.sinajs.cn/list=sh000001");
+        QString result = QString::fromUtf8(recv);
         QRegularExpression dateExp("[0-9]{4}\\-[0-9]{2}\\-[0-9]{2}");
         int index = result.indexOf(dateExp);
         bool code_change = false;
+        bool update_hs_top10 = false;
         if(index >= 0)
         {
-            QDateTime nowDateTime = QDateTime::fromString(result.mid(index, 19), "yyyy-MM-dd,hh:mm:ss");
-            QDate now = nowDateTime.date();
-            if(now!= workDate)
+            QDateTime hqDateTime = QDateTime::fromString(result.mid(index, 19), "yyyy-MM-dd,hh:mm:ss");
+            QDate now = hqDateTime.date();
+            if(now != workDate)
             {
+                //行情系统时间进行切换到最新的时间
                 workDate = now;
-                ShareWorkingDate::setCurWorkDate(now);
+                TradeDateMgr::instance()->setCurrentTradeDay(now);
                 //新的日期开始了,开始更新历史日期
                 QList<QDate> list = HqInfoParseUtil::getActiveDateListOfLatestYearPeriod();
                 if(list.size() > 0)
                 {
-                    ShareWorkingDate::setHisWorkingDay(list);
+                    if(list.contains(workDate)) list.removeOne(workDate);
+                    TradeDateMgr::instance()->setHistoryTradeDays(list);
                 }
                 code_change = true;
+                update_hs_top10 = false;
             }
-
-            //检查当前的时间,如果是9:00以后,需要开始重新获取代码
+            //更新系统的交易状态
             QTime   time = QDateTime::currentDateTime().time();
             QDate   date = QDateTime::currentDateTime().date();
             int status = DATA_SERVICE->getSystemStatus();
-            if(date <= workDate)
+            if(date > TradeDateMgr::instance()->currentTradeDay())
+            {
+                status = HQ_NotOpen;
+            } else
             {
                 QString nowStr = time.toString("hhmmss");
                 if(nowStr >= "150000")
                 {
-                    status = HQ_Closed;
+                    if(status != HQ_Closed)
+                    {
+                        status = HQ_Closed;
+                        emit signalSaveTodayShareHistory();
+                    }
+                    if(nowStr >= "173000" && !update_hs_top10)
+                    {
+                        emit signalUpdateHsgtTop10();
+                        update_hs_top10 = true;
+                    }
+
                 } else if(nowStr >= "091000")
                 {
-                    if(status != HQ_InCharge)
-                    {
-                        status = HQ_InCharge;
-                        code_change = true;
-                    }
+                    status = HQ_InCharge;
                 } else
                 {
                     status = HQ_NotOpen;
@@ -163,21 +168,14 @@ void QShareActiveDateUpdateThread::run()
 
             }
             DATA_SERVICE->setSystemStatus(status);
-            if(status == HQ_InCharge)
-            {
-                nowDateTime = QDateTime::currentDateTime();
-            }
-            emit signalSystemStatus(nowDateTime.toMSecsSinceEpoch(), status);
+            emit signalSystemStatus(QDateTime::currentDateTime().toMSecsSinceEpoch(), status);
             if(code_change)
             {
                 emit signalNewWorkDateNow();
             }
         }
-
-
-
         //每分钟运行
-        QThread::msleep(500);
+        QThread::sleep(3);
     }
 
 

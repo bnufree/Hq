@@ -6,7 +6,7 @@
 #include <QJsonArray>
 #include "qhttpget.h"
 #include <QTextCodec>
-#include "data_structure/shareworkingdatetime.h"
+#include "date/shareworkingdatetime.h"
 #include <math.h>
 
 
@@ -149,7 +149,7 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromHexun(const QDa
             //{"Time":"时间"},{"LastClose":"前收盘价"},{"Open":"开盘价"},{"Close":"收盘价"},{"High":"最高价"},{"Low":"最低价"},{"Volume":"成交量"},{"Amount":"成交额"}],
             QDate date = QDate::fromString(src_list[0], "yyyyMMdd000000");
             if(date < start) continue;
-            if(date == ShareWorkingDate::currentDate().date()) break;
+            if(date == QDate::currentDate()) break;
 
             ShareHistoryFileData data;
             data.mDate = QDateTime(date).toTime_t();
@@ -249,7 +249,7 @@ bool HqInfoParseUtil::getShareDateRange(const QString& code, QDate& start, QDate
 ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFrom163(const QDate &start, const QString &code)
 {
     ShareHistoryFileDataList list;
-    if(start < ShareWorkingDate::currentDate().date())
+    if(start < QDate::currentDate())
     {
         QString wkCode;
         if(code.left(1) == "6" || code.left(1) == "5")
@@ -261,7 +261,7 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFrom163(const QDate
         }
         //取得日线数据
         QString wkURL = QString("http://quotes.money.163.com/service/chddata.html?code=%1&start=%2&end=%3")
-                .arg(wkCode).arg(start.toString("yyyyMMdd")).arg(ShareWorkingDate::currentDate().date().toString("yyyyMMdd"));
+                .arg(wkCode).arg(start.toString("yyyyMMdd")).arg(QDate::currentDate().toString("yyyyMMdd"));
         QByteArray recv = QHttpGet::getContentOfURL(wkURL);
         QTextCodec* gbk = QTextCodec::codecForName("GBK");
         QTextCodec* utf8 = QTextCodec::codecForName("UTF-8");
@@ -284,7 +284,7 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFrom163(const QDate
                 data.mCloseAdjust = data.mClose;
                 data.mMoney = cols[12].toDouble();
 //                data.mTotalShareCount = qint64(floor(cols[13].toDouble() / data.mClose));
-                qDebug()<<curDate<<code<<data.mClose;
+//                qDebug()<<curDate<<code<<data.mClose;
                 list.append(data);
             }
         }

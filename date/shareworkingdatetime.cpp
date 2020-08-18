@@ -1,13 +1,88 @@
 ﻿#include "shareworkingdatetime.h"
 #include "utils/qhttpget.h"
 #include <QTextCodec>
+#include <QMutex>
 
 #define         DATE_STR_FORMAT         "yyyy-MM-dd"
 
-QList<QDate> ShareWorkingDate::mHisWorkingDayList = QList<QDate>();
-QDate        ShareWorkingDate::mLastWorkDay = QDate();
-QDate        ShareWorkingDate::mCurWorkDay = QDate();
+TradeDateMgr*        TradeDateMgr::mInstance = 0;
+QMutex               global_trade_mutex;
 
+TradeDateMgr* TradeDateMgr::instance()
+{
+    if(mInstance == 0)
+    {
+        QMutexLocker locker(&global_trade_mutex);
+        if(mInstance == 0) mInstance = new TradeDateMgr;
+    }
+
+    return mInstance;
+}
+
+QDate  TradeDateMgr::firstTradeDayOfYear() const
+{
+    int year  = mCurTradeDay.year();
+    QDate now(year, 1, 1);
+    while (1) {
+        if(isTradeDay(now)) break;
+        now = now.addDays(1);
+        if(now == mCurTradeDay) break;
+    }
+
+    return now;
+}
+
+QDate  TradeDateMgr::firstTradeDayOfMonth() const
+{
+    int year  = mCurTradeDay.year();
+    int month = mCurTradeDay.month();
+    QDate now(year, month, 1);
+    while (1) {
+        if(isTradeDay(now)) break;
+        now = now.addDays(1);
+        if(now == mCurTradeDay) break;
+    }
+
+    return now;
+}
+
+QDate  TradeDateMgr::firstTradeDayOfWeek() const
+{
+    QDate now = mCurTradeDay;
+    now = now.addDays(1 - now.dayOfWeek());
+    while (1) {
+        if(isTradeDay(now)) break;
+        now = now.addDays(1);
+        if(now == mCurTradeDay) break;
+    }
+
+    return now;
+}
+
+QDate  ShareTradeDateTime::nextTradeDay() const
+{
+    QDate next = this->date();
+    while (1) {
+        if(next == TradeDateMgr::instance()->currentTradeDay()) break;
+        next = next.addDays(1);
+        if(TradeDateMgr::instance()->isTradeDay(next)) break;
+    }
+    return next;
+}
+
+QDate  ShareTradeDateTime::previousTradeDay() const
+{
+    QDate previous = this->date();
+    while (1) {
+        if(previous == TradeDateMgr::instance()->firstTradeDayOfYear()) break;
+        previous = previous.addDays(-1);
+        if(TradeDateMgr::instance()->isTradeDay(previous)) break;
+    }
+    return previous;
+}
+
+
+#if 0
 
 void ShareWorkingDate::updateShareHistoryWoringDate()
 {
@@ -95,4 +170,6 @@ void ShareWorkingDate::setCurWorkDate(const QDate& date)
         mLastWorkDay = mHisWorkingDayList.value(index);
     }
 }
+
+#endif
 

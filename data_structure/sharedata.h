@@ -124,7 +124,7 @@ public:
     double                  mMoney;
     double                  mRZRQ;
     qint64                  mVol;
-    ShareWorkingDateTime           mTime;
+    ShareTradeDateTime           mTime;
     QStringList             mBlockCodeList;
     FinancialData           mFinanceData;
     ShareBonus              mBonusData;

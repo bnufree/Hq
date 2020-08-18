@@ -159,8 +159,7 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
 //    slotCtrlBtnClicked(mCtrlWidget->layout()->itemAt(0)->widget());
 
 
-
-    HQTaskMagrCenter::instance()->start();
+    QTimer::singleShot(1000, HQTaskMagrCenter::instance(), SLOT(slotStart()));
 
 }
 

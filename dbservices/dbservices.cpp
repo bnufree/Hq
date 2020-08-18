@@ -8,7 +8,7 @@
 #include "utils/profiles.h"
 #include "qactivedate.h"
 #include "utils/comdatadefines.h"
-#include "data_structure/shareworkingdatetime.h"
+//#include "date/shareworkingdatetime.h"
 
 #define         DATE_STR_FORMAT         "yyyy-MM-dd"
 
@@ -27,8 +27,6 @@ HqInfoService::HqInfoService(QObject *parent) :
 {
     mHistoryInfoCount = 0;
     mFavCodeList = Profiles::instance()->value(GLOBAL_SETTING, FAV_CODE, QStringList()).toStringList();
-    QActiveDateTime::mCloseDateList = PROFILES_INS->value(CLOSE_DATE_SEC, CLOSE_DATE_KEY, QStringList()).toStringList();
-    qDebug()<<"close:"<<QActiveDateTime::mCloseDateList;
     initSignalSlot();
     //3、开启异步通讯
 //    m_threadWork.setStackSize(20*1000000);
@@ -107,7 +105,7 @@ bool HqInfoService::createHistoryTable(const QString &pTableName)
 
 void HqInfoService::initSignalSlot()
 {
-    qRegisterMetaType<ShareWorkingDate>("const ShareWorkingDate&");
+    qRegisterMetaType<QDate>("const QDate&");
     qRegisterMetaType<ShareData>("const ShareData&");
     qRegisterMetaType<ShareDataList>("const ShareDataList&");
     qRegisterMetaType<ShareHsgtList >("const ShareHsgtList&");
@@ -128,15 +126,15 @@ void HqInfoService::initSignalSlot()
     connect(this, SIGNAL(signalUpdateShareBonusInfo(ShareBonusList)), this, SLOT(slotUpdateShareBonusInfo(ShareBonusList)));
     connect(this, SIGNAL(signalUpdateShareHsgtTop10Info(ShareHsgtList)),
             this, SLOT(slotUpdateHsgtTop10Info(ShareHsgtList)));
-    connect(this, SIGNAL(signalUpdateHsgtTop10Keys(ShareWorkingDate)),
-            this, SLOT(slotUpdateHsgtTop10Keys(ShareWorkingDate)));
-    connect(this, SIGNAL(signalQueryShareHsgtTop10List(QString,ShareWorkingDate)),
-            this, SLOT(slotQueryShareHsgtTop10List(QString,ShareWorkingDate)));
+    connect(this, SIGNAL(signalUpdateHsgtTop10Keys(QDate)),
+            this, SLOT(slotUpdateHsgtTop10Keys(QDate)));
+    connect(this, SIGNAL(signalQueryShareHsgtTop10List(QString,QDate)),
+            this, SLOT(slotQueryShareHsgtTop10List(QString,QDate)));
 
     connect(this, SIGNAL(signalRecvShareHistoryInfos(ShareDataList, int)),
             this, SLOT(slotRecvShareHistoryInfos(ShareDataList, int)));
-    connect(this, SIGNAL(signalSendShareHistoryUpdateDate(ShareWorkingDate, bool)),
-            this, SLOT(slotSendShareHistoryUpdateDate(ShareWorkingDate, bool)));
+    connect(this, SIGNAL(signalSendShareHistoryUpdateDate(QDate, bool)),
+            this, SLOT(slotSendShareHistoryUpdateDate(QDate, bool)));
     connect(this, SIGNAL(signalQueryShareHistoryUpdateDateList()),
             this, SLOT(slotQueryShareHistoryUpdateDateList()));
 //    connect(this, SIGNAL(signalSendShareHistoryCloseInfo(ShareDataList)),
@@ -157,7 +155,7 @@ void HqInfoService::initSignalSlot()
     connect(this, SIGNAL(signalSearchCodesOfText(QString)), this, SLOT(slotSearchCodesOfText(QString)));
     connect(this, SIGNAL(signalUpdateShareFinanceInfo(FinancialDataList)), this, SLOT(slotUpdateShareFinanceInfo(FinancialDataList)));
     connect(this, SIGNAL(signalQueryShareFinanceInfo(QStringList)), this, SLOT(slotQueryShareFinanceList(QStringList)));
-    connect(this, SIGNAL(signalQueryShareFHSP(QString,ShareWorkingDate)), this, SLOT(slotQueryShareFHSP(QString,ShareWorkingDate)));
+    connect(this, SIGNAL(signalQueryShareFHSP(QString,QDate)), this, SLOT(slotQueryShareFHSP(QString,QDate)));
     connect(this, SIGNAL(signalUpdateShareExchangeRecord(QList<ShareExchangeData>)), this, SLOT(slotUpdateShareExchangeRecord(QList<ShareExchangeData>)));
     connect(this, SIGNAL(signalQueryShareExchangeRecord(int, QString,QString,QString)), this, SLOT(slotQueryShareExchangeRecord(int, QString,QString,QString)));
     connect(this, SIGNAL(signalDeleteShareExchangeRecord(QString,QString,QString)), this, SLOT(slotDeleteShareExchangeRecord(QString,QString,QString)));
@@ -222,14 +220,14 @@ bool HqInfoService::isActive()
 
 
 
-ShareWorkingDate HqInfoService::getLastUpdateDateOfHSGT()
+QDate HqInfoService::getLastUpdateDateOfHSGT()
 {
     return mDataBase.getLastUpdateDateOfTable("hstop10");
 }
 
-ShareWorkingDate HqInfoService::getLastUpdateDateOfHSGTVol()
+QDate HqInfoService::getLastUpdateDateOfHSGTVol()
 {
-    ShareWorkingDate date = mDataBase.getLastUpdateDateOfTable(HSGT_TABLE);
+    QDate date = mDataBase.getLastUpdateDateOfTable(HSGT_TABLE);
     if(date.isNull())
     {
         date = QDate::currentDate().addDays(-30);
@@ -238,36 +236,36 @@ ShareWorkingDate HqInfoService::getLastUpdateDateOfHSGTVol()
     return date;
 }
 
-ShareWorkingDate HqInfoService::getLastUpdateDateOfBasicInfo()
+QDate HqInfoService::getLastUpdateDateOfBasicInfo()
 {
     return getLastUpdateDateOfTable(TABLE_SHARE_BASIC_INFO);
 }
 
-ShareWorkingDate HqInfoService::getLastUpdateDateOfBonusInfo()
+QDate HqInfoService::getLastUpdateDateOfBonusInfo()
 {
     return getLastUpdateDateOfTable(TABLE_SHARE_BONUS);
 }
 
-ShareWorkingDate HqInfoService::getLastUpdateDateOfHsgtTop10()
+QDate HqInfoService::getLastUpdateDateOfHsgtTop10()
 {
     return getLastUpdateDateOfTable(TABLE_HSGT_TOP10);
 }
 
-ShareWorkingDate HqInfoService::getLastUpdateDateOfFinanceInfo()
+QDate HqInfoService::getLastUpdateDateOfFinanceInfo()
 {
     return getLastUpdateDateOfTable(TABLE_SHARE_FINANCE);
 }
 
 
-ShareWorkingDate HqInfoService::getLastUpdateDateOfHistoryInfo()
+QDate HqInfoService::getLastUpdateDateOfHistoryInfo()
 {
 #if 0
     return getLastUpdateDateOfTable(TABLE_SHARE_HISTORY);
 #endif
-    return ShareWorkingDate();
+    return QDate();
 }
 
-ShareWorkingDate HqInfoService::getLastUpdateDateOfTable(const QString& table)
+QDate HqInfoService::getLastUpdateDateOfTable(const QString& table)
 {
     return mDataBase.getLastUpdateDateOfTable(table);
 }
@@ -291,14 +289,14 @@ void HqInfoService::slotRecvShareHistoryInfos(const ShareDataList &list, int mod
 
     }
     //
-//    if(!mDataBase.delShareHistory("", ShareWorkingDate(), ShareWorkingDate(ShareWorkingDate::latestActiveDay().date().addYears(-1))))
+//    if(!mDataBase.delShareHistory("", QDate(), QDate(QDate::latestActiveDay().date().addYears(-1))))
 //    {
 //        qDebug()<<mDataBase.errMsg();
 //        return;
 //    }
 }
 
-void HqInfoService::slotSendShareHistoryUpdateDate(const ShareWorkingDate &date, bool update)
+void HqInfoService::slotSendShareHistoryUpdateDate(const QDate &date, bool update)
 {
 #if 0
     if(update)
@@ -314,10 +312,10 @@ void HqInfoService::slotSendShareHistoryUpdateDate(const ShareWorkingDate &date,
     //1)获取当前所有的代码数据
     QStringList codeList = mRealShareMap.keys();
     //2)根据每一个代码获取今年以来的成交信息
-    ShareWorkingDate year_day(QDate(QDate::currentDate().year(), 1, 1));
-    ShareWorkingDate month_date(QDate(QDate::currentDate().year(), QDate::currentDate().month(), 1));
+    QDate year_day(QDate(QDate::currentDate().year(), 1, 1));
+    QDate month_date(QDate(QDate::currentDate().year(), QDate::currentDate().month(), 1));
     int dayNum = QDate::currentDate().dayOfWeek();
-    ShareWorkingDate week_date(QDate::currentDate().addDays( -1* (dayNum-1)));
+    QDate week_date(QDate::currentDate().addDays( -1* (dayNum-1)));
     foreach (QString code, codeList) {
         ShareDataList list;
         if(!mDataBase.queryHistoryInfoFromDate(list, code, year_day)) continue;
@@ -364,14 +362,14 @@ void HqInfoService::slotQueryShareHistoryUpdateDateList()
         qDebug()<<mDataBase.errMsg();
         return;
     }    
-    ShareWorkingDate last_update_date = getLastUpdateDateOfHistoryInfo();
+    QDate last_update_date = getLastUpdateDateOfHistoryInfo();
     //检查数据表的更新日期和表的最后一次的日期是否相同，如果不相同，则将数据表的记录删除知道制定的日期
     if(list.size() > 0)
     {
         //清空数据记录
         if(!last_update_date.isNull())
         {
-            if( !mDataBase.delShareHistory("", last_update_date, ShareWorkingDate()))
+            if( !mDataBase.delShareHistory("", last_update_date, QDate()))
             {
                 qDebug()<<mDataBase.errMsg();
                 return;
@@ -383,9 +381,9 @@ void HqInfoService::slotQueryShareHistoryUpdateDateList()
         last_update_date.setDate(QDate());
     }
     //检查时间是否符合要求
-    ShareWorkingDate cur_date = ShareWorkingDate::currentDate();
-    ShareWorkingDate latest_act_date = ShareWorkingDate::latestActiveDay();
-    ShareWorkingDate start_check_date = cur_date;
+    QDate cur_date = QDate::currentDate();
+    QDate latest_act_date = QDate::latestActiveDay();
+    QDate start_check_date = cur_date;
     if(cur_date == latest_act_date)
     {
         //今天是交易日，从今天的前一个交易日开始更新
@@ -399,7 +397,7 @@ void HqInfoService::slotQueryShareHistoryUpdateDateList()
     QList<QDate> update_list;
     if(last_update_date.isNull())
     {
-        last_update_date = ShareWorkingDate(QDate::currentDate().addYears(-1));
+        last_update_date = QDate(QDate::currentDate().addYears(-1));
         if(last_update_date.isWeekend())
         {
             last_update_date = last_update_date.previousActiveDay();
@@ -415,11 +413,11 @@ void HqInfoService::slotQueryShareHistoryUpdateDateList()
     //检查已经更新的时间中是否中间有断开的，吧断开的也一并添加
     for(int i=0; i<list.size(); i++)
     {
-        ShareWorkingDate cur(list[i]);
+        QDate cur(list[i]);
         if(i+1 < list.size())
         {
             cur = cur.previousActiveDay();
-            ShareWorkingDate next(list[i+1]);
+            QDate next(list[i+1]);
             while (cur!= next)
             {
                 if(!mShareCloseDateList.contains(cur.date()))
@@ -617,7 +615,7 @@ void HqInfoService::slotUpdateShareBonusInfo(const ShareBonusList &list)
 
 void HqInfoService::slotUpdateHsgtTop10Info(const ShareHsgtList &list)
 {
-    ShareWorkingDate last_update_date;
+    QDate last_update_date;
     if( list.size() > 0 && !mDataBase.updateShareHsgtTop10List(list))
     {
         qDebug()<<"update share hsgt info error:"<<mDataBase.getErrorString();
@@ -626,7 +624,7 @@ void HqInfoService::slotUpdateHsgtTop10Info(const ShareHsgtList &list)
 
 }
 
-void HqInfoService::slotUpdateHsgtTop10Keys(const ShareWorkingDate& date)
+void HqInfoService::slotUpdateHsgtTop10Keys(const QDate& date)
 {
     ShareHsgtList list2;
     mHsgtTop10Kyes.clear();
@@ -641,7 +639,7 @@ void HqInfoService::slotUpdateHsgtTop10Keys(const ShareWorkingDate& date)
 
 }
 
-void HqInfoService::slotQueryShareHsgtTop10List(const QString &code, const ShareWorkingDate &date)
+void HqInfoService::slotQueryShareHsgtTop10List(const QString &code, const QDate &date)
 {
     ShareHsgtList list;
     if(!mDataBase.queryShareHsgtTop10List(list, code, date))
@@ -692,13 +690,13 @@ void HqInfoService::slotUpdateShareCloseDate(const QList<QDate> &list)
         QList<QDate> list;
         if(mDataBase.queryShareCloseDates(list))
         {
-            ShareWorkingDate::setUnWorkingDay(list);
+            QDate::setUnWorkingDay(list);
         }
     }
 #endif
 }
 
-void HqInfoService::slotQueryShareFHSP(const QString &code, const ShareWorkingDate &date)
+void HqInfoService::slotQueryShareFHSP(const QString &code, const QDate &date)
 {
     ShareBonusList list;
     //根据各种情况查询分红送配信息, 如果两个都不设定,查询对应的单独的最近的送配信息,否则就查询指定的信息并且推送出去

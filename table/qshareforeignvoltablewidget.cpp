@@ -1,5 +1,5 @@
 ﻿#include "qshareforeignvoltablewidget.h"
-#include "data_structure/shareworkingdatetime.h"
+#include "date/shareworkingdatetime.h"
 #include <QPushButton>
 #include "history/qhkexchangevoldataprocess.h"
 
@@ -16,6 +16,7 @@ QShareForeignVolTableWidget::QShareForeignVolTableWidget(QWidget *parent) : HqTa
 
 void QShareForeignVolTableWidget::slotStartInit()
 {
+#if 0
     //初始化
     //获取当前一年对应的工作日
     QList<QDate> dataList =  ShareWorkingDate::getHisWorkingDay();
@@ -38,6 +39,7 @@ void QShareForeignVolTableWidget::slotStartInit()
         connect(process, SIGNAL(signalSendDataList(ShareForignVolFileDataList,QDate)), this, SLOT(slotFetchForeignData(ShareForignVolFileDataList,QDate)));
         mPool.start(process);
     }
+#endif
 }
 
 void QShareForeignVolTableWidget::slotFetchBtnClicked()

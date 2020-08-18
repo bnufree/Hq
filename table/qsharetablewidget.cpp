@@ -166,7 +166,8 @@ void QShareTablewidget::initMenu()
     itemlist.append(struMenu(QStringLiteral("中小板"), MKT_ZXB));
     itemlist.append(struMenu(QStringLiteral("创业板"), MKT_CYB));
     itemlist.append(struMenu(QStringLiteral("科创板"), MKT_KCB));
-    itemlist.append(struMenu(QStringLiteral("沪深基金"), MKT_JJ));
+    itemlist.append(struMenu(QStringLiteral("沪深ETF"), MKT_JJ));
+    itemlist.append(struMenu(QStringLiteral("可转债"), MKT_KZZ));
     itemlist.append(struMenu(QStringLiteral("恒指"), MKT_HK_HSZS));
     itemlist.append(struMenu(QStringLiteral("恒生国企"), MKT_HK_HSGQ));
     itemlist.append(struMenu(QStringLiteral("港股通"), MKT_HK_GGT));

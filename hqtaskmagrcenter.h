@@ -25,7 +25,7 @@ public:
 
 public:
     ~HQTaskMagrCenter();
-    void start();
+
     void  registerInfoDisplaywidget(QWidget* w);
     QSinaStkResultMergeThread*  hqCenter() {return mHqCenter;}
 signals:
@@ -45,6 +45,7 @@ signals:
     void        signalSendAllShareCodesList(const QStringList& list);
 
 public slots:
+    void        slotStart();
     void        slotFinishNetworkCheck(bool sts);
     void        slotDBInitFinished();
     void        slotFinishUpdateWorkDays();

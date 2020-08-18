@@ -1,6 +1,6 @@
 ﻿#include "qforignvolcheckdlg.h"
 #include "ui_qforignvolcheckdlg.h"
-#include "data_structure/shareworkingdatetime.h"
+#include "date/shareworkingdatetime.h"
 #include "qhkexchangevoldataprocess.h"
 #include <QPushButton>
 
@@ -22,8 +22,9 @@ QForignVolCheckDlg::~QForignVolCheckDlg()
 
 void QForignVolCheckDlg::initTable()
 {
+#if 0
     //获取当前一年对应的工作日
-    QList<QDate> dataList =  ShareWorkingDate::getHisWorkingDay();
+    QList<QDate> dataList =  TradeDateMgr::getHisWorkingDay();
     ui->tableWidget->setRowCount(dataList.count());
 
     for(int i=0; i<dataList.size(); i++)
@@ -42,6 +43,7 @@ void QForignVolCheckDlg::initTable()
         connect(process, SIGNAL(signalSendDataList(ShareForignVolFileDataList,QDate)), this, SLOT(slotFetchForeignData(ShareForignVolFileDataList,QDate)));
         mPool.start(process);
     }
+#endif
 }
 
 void QForignVolCheckDlg::slotFetchBtnClicked()

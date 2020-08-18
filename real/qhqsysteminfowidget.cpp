@@ -1,7 +1,7 @@
 ﻿#include "qhqsysteminfowidget.h"
 #include "ui_qhqsysteminfowidget.h"
 #include "dbservices/dbservices.h"
-#include "basic_info/qshareactivedateupdatethread.h"
+#include "date/qshareactivedateupdatethread.h"
 #include <QDateTime>
 #include "hqtaskmagrcenter.h"
 

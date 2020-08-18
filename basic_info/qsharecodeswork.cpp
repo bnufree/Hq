@@ -47,7 +47,6 @@ void QShareCodesWork::parseKZZ(ShareDataList &list)
         data.mCode = obj.value("BONDCODE").toString();
         data.mPY = HqUtils::GetFirstLetter(QTextCodec::codecForLocale()->toUnicode(data.mName.toUtf8()));
         data.mShareType = ShareData::shareType(data.mCode);
-        qDebug()<<data.mCode<<data.mName;
         list.append(data);
     }
 }
@@ -57,9 +56,9 @@ void QShareCodesWork::run()
     //首先获取数据库的更新日期
     ShareDataList list;
 
-    ShareWorkingDate update_date = DATA_SERVICE->getLastUpdateDateOfBasicInfo();
-    qDebug()<<"last code date:"<<update_date.date();
-//    if(update_date.isNull() || update_date < ShareWorkingDate::getCurWorkDay())
+    QDate update_date = DATA_SERVICE->getLastUpdateDateOfBasicInfo();
+    qDebug()<<"last code date:"<<update_date;
+    if(update_date.isNull() || update_date < QDate::currentDate())
     {
         QString stock_code_url = "http://18.push2.eastmoney.com/api/qt/clist/get?cb=&pn=1&pz=20000&po=0&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f6&fs=m:0+t:6,m:0+t:13,m:0+t:80,m:1+t:2,m:1+t:23&fields=f12,f14&_=";
         QString fund_code_url = "http://18.push2.eastmoney.com/api/qt/clist/get?cb=&pn=1&pz=10000&po=0&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f12&fs=b:MK0021,b:MK0022,b:MK0023,b:MK0024&fields=f12,f14&_=";
@@ -67,21 +66,21 @@ void QShareCodesWork::run()
         QTime t;
         t.start();
         //股票数据
-//        parseShCode(list);
-//        parseSzCode(list);
+        parseShCode(list);
+        parseSzCode(list);
         //ETF数据
         //可转债数据
         parseKZZ(list);
 //        parseHttp(list, stock_code_url, 1);
-        qDebug()<<"code:"<<t.elapsed();
+//        qDebug()<<"code:"<<t.elapsed();
         t.start();
-//        parseHttp(list, fund_code_url, 2);
-        qDebug()<<"fund:"<<t.elapsed();
+        parseHttp(list, fund_code_url, 2);
+//        qDebug()<<"fund:"<<t.elapsed();
     }
-    foreach (ShareData data, list) {
-        qDebug()<<data.mCode<<data.mName<<data.mPY;
-    }
-  //  DATA_SERVICE->signalUpdateShareBasicInfo(list);
+//    foreach (ShareData data, list) {
+//        qDebug()<<data.mCode<<data.mName<<data.mPY;
+//    }
+    DATA_SERVICE->signalUpdateShareBasicInfo(list);
     return;
 }
 
@@ -132,7 +131,6 @@ void QShareCodesWork::parseHttp(ShareDataList& list, const QString& url, int mod
         data.mShareType = ShareData::shareType(data.mCode);
 //            qDebug()<<data.mCode<<data.mName<<name.toUtf8().toHex()<<name.toUtf8().size();
         data.mPY = HqUtils::GetFirstLetter(UTF8->toUnicode(data.mName.toUtf8()));
-        qDebug()<<data.mCode<<data.mName<<data.mPY;
         list.append(data);
     }
 }

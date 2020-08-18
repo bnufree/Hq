@@ -81,8 +81,6 @@ SOURCES += main.cpp\
     qcontainerwidget.cpp \
     real/qsinanorthrealinfothread.cpp \
     real/qnorthflowinfodisplaywidget.cpp \
-    basic_info/qshareactivedateupdatethread.cpp \
-    data_structure/shareworkingdatetime.cpp \
     history/sharehistoryreadthread.cpp \
     history/qforignvolcheckdlg.cpp \
     table/qshareforeignvoltablewidget.cpp \
@@ -105,8 +103,10 @@ SOURCES += main.cpp\
     table/northboundsharevolwidget.cpp \
     northbound/qnorthbounddisplayweidget.cpp \
     qetfscalethread.cpp \
-    annualcloseddaydisclosure.cpp \
-    northbundwidget.cpp
+    northbundwidget.cpp \
+    date/annualcloseddaydisclosure.cpp \
+    date/qshareactivedateupdatethread.cpp \
+    date/shareworkingdatetime.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -164,8 +164,6 @@ HEADERS  += dialog.h \
     qcontainerwidget.h \
     real/qsinanorthrealinfothread.h \
     real/qnorthflowinfodisplaywidget.h \
-    basic_info/qshareactivedateupdatethread.h \
-    data_structure/shareworkingdatetime.h \
     history/sharehistoryreadthread.h \
     history/qforignvolcheckdlg.h \
     table/qshareforeignvoltablewidget.h \
@@ -188,8 +186,10 @@ HEADERS  += dialog.h \
     table/northboundsharevolwidget.h \
     northbound/qnorthbounddisplayweidget.h \
     qetfscalethread.h \
-    annualcloseddaydisclosure.h \\
     northbundwidget.h\
+    date/annualcloseddaydisclosure.h \
+    date/qshareactivedateupdatethread.h \
+    date/shareworkingdatetime.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

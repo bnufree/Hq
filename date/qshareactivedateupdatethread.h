@@ -19,6 +19,8 @@ signals:
     void signalNewWorkDateNow();
     void signalUpdateHistoryWorkDays();
     void signalSystemStatus(qint64 time, int sts);
+    void signalUpdateHsgtTop10();
+    void signalSaveTodayShareHistory();
 
 private:
 

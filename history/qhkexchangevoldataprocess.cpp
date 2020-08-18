@@ -275,7 +275,7 @@ void QHKExchangeVolDataProcess::run()
     } else
     {
         //如果是历史交易日,检查是不是在历史的交易日中
-        if(!ShareWorkingDate::getHisWorkingDay().contains(mDate)) return;
+        if(!TradeDateMgr::instance()->isTradeDay(mDate)) return;
     }
     //开始获取对应的日期的记录
     getVolofDate(list, mDate);
