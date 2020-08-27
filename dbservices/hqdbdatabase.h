@@ -130,7 +130,7 @@ public:
 
     //基本数据更新
     bool updateShareBasicInfo(const ShareDataList& dataList);
-    bool queryShareBasicInfo(ShareDataMap& map);
+    bool queryShareBasicInfo(ShareDataMap& map, const QStringList& favlist);
     bool delShareBasicInfo(const QString& code = QString());
     bool getSimilarCodeOfText(QStringList& codes, const QString& text);
 

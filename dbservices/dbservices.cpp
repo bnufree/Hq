@@ -187,7 +187,7 @@ void HqInfoService::initShareData()
 {
     QMutexLocker locker(&mShareMutex);
     mRealShareData.clear();
-    mDataBase.queryShareBasicInfo(mRealShareData);
+    mDataBase.queryShareBasicInfo(mRealShareData, mFavCodeList);
     emit signalAllShareCodeList(mRealShareData.keys());
 }
 
@@ -547,10 +547,19 @@ void HqInfoService::slotUpdateHistoryChange(const QString &code)
 }
 
 void HqInfoService::slotSetFavCode(const QString &code)
-{
+{    
     ShareData& data = getShareData(code);
     data.mIsFav = !(data.mIsFav);
-    emit signalSaveFavCode(code, data.mIsFav);
+    qDebug()<<"set code:"<<code<<data.mCode;
+    if(data.mIsFav)
+    {
+        if(!mFavCodeList.contains(data.mCode)) mFavCodeList.append(data.mCode);
+    } else
+    {
+        mFavCodeList.removeOne(data.mCode);
+    }
+
+    Profiles::instance()->setValue(GLOBAL_SETTING, FAV_CODE, mFavCodeList);
 }
 
 void HqInfoService::slotSaveFavCode(const QString &code, bool fav)

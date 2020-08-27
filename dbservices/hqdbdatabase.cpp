@@ -595,7 +595,7 @@ bool HQDBDataBase::updateShareBasicInfo(const ShareDataList& dataList)
 }
 
 
-bool HQDBDataBase::queryShareBasicInfo(ShareDataMap& map)
+bool HQDBDataBase::queryShareBasicInfo(ShareDataMap& map, const QStringList& favlist)
 {
     QMutexLocker locker(&mSQLMutex);
     if(!mSQLQuery.exec(tr("select * from %1").arg(TABLE_SHARE_BASIC_INFO))) return false;
@@ -603,11 +603,12 @@ bool HQDBDataBase::queryShareBasicInfo(ShareDataMap& map)
         QString code = mSQLQuery.value(HQ_TABLE_COL_CODE).toString();
         if(code.length() <= 6) code = ShareData::prefixCode(code) + code;
         ShareData& info = map[code];
-        if(info.mCode.length() == 0) info.mCode = code;
+        info.mCode = code;
         info.mName = mSQLQuery.value(HQ_TABLE_COL_NAME).toString();
         info.mPY = mSQLQuery.value(HQ_TABLE_COL_PY_ABBR).toString();
         info.mShareType =  (SHARE_DATA_TYPE)(mSQLQuery.value(HQ_TABLE_COL_TYPE).toInt());
         info.mIsFav = mSQLQuery.value(HQ_TABLE_COL_FAVORITE).toBool();
+        info.mIsFav = favlist.contains(code);
 
     }
     return true;

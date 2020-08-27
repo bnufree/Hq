@@ -131,26 +131,28 @@ QByteArray QHttpGet::getContentOfURL(const QString &url, const QList<QNetworkCoo
     }
 
 //    qDebug()<<reply->isFinished()<<reply->errorString();
-    if(reply->error() == QNetworkReply::NoError && reply->isFinished())
+    if(reply->error() == QNetworkReply::NoError)
     {
-        QString content_type = reply->header(QNetworkRequest::ContentTypeHeader).toString();
-        int index = content_type.indexOf("charset=");
-        QTextCodec *htmlCodes = 0;
-        if(index >= 0)
+        if(reply->isFinished())
         {
-            int last_index = content_type.indexOf(QRegExp("[;\"]"), index);
-            QString name = content_type.mid(index+8);
-            htmlCodes = QTextCodec::codecForName(name.toLatin1());
+            QString content_type = reply->header(QNetworkRequest::ContentTypeHeader).toString();
+            int index = content_type.indexOf("charset=");
+            QTextCodec *htmlCodes = 0;
+            if(index >= 0)
+            {
+                int last_index = content_type.indexOf(QRegExp("[;\"]"), index);
+                QString name = content_type.mid(index+8);
+                htmlCodes = QTextCodec::codecForName(name.toLatin1());
+            }
+            recv = reply->readAll();
+            if(htmlCodes && htmlCodes->name() != QTextCodec::codecForLocale()->name())
+            {
+                recv = QTextCodec::codecForLocale()->fromUnicode(htmlCodes->toUnicode(recv));
+            }
         }
-        recv = reply->readAll();
-        if(htmlCodes && htmlCodes->name() != QTextCodec::codecForLocale()->name())
-        {
-            recv = QTextCodec::codecForLocale()->fromUnicode(htmlCodes->toUnicode(recv));
-        }
-    }
-
-    reply->abort();
-    reply->close();
+        reply->abort();
+        reply->close();
+    }    
     delete reply;
     reply = 0;
     return recv;

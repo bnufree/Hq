@@ -124,16 +124,22 @@ void QShareActiveDateUpdateThread::run()
             {
                 //行情系统时间进行切换到最新的时间
                 workDate = now;
-                TradeDateMgr::instance()->setCurrentTradeDay(now);
                 //新的日期开始了,开始更新历史日期
-                QList<QDate> list = HqInfoParseUtil::getActiveDateListOfLatestYearPeriod();
-                if(list.size() > 0)
-                {
-                    if(list.contains(workDate)) list.removeOne(workDate);
-                    TradeDateMgr::instance()->setHistoryTradeDays(list);
+                QList<QDate> list;
+                while (1) {
+                    list = HqInfoParseUtil::getActiveDateListOfLatestYearPeriod();
+                    if(list.size() > 0)
+                    {
+//                        if(list.contains(workDate)) list.removeOne(workDate);
+                        TradeDateMgr::instance()->setHistoryTradeDays(list);
+                        QDate previous_day = ShareTradeDateTime(now).previousTradeDay();
+                        TradeDateMgr::instance()->setCurrentTradeDay(now);
+                        TradeDateMgr::instance()->setLastTradeDay(previous_day);
+                        code_change = true;
+                        update_hs_top10 = false;
+                        break;
+                    }
                 }
-                code_change = true;
-                update_hs_top10 = false;
             }
             //更新系统的交易状态
             QTime   time = QDateTime::currentDateTime().time();

@@ -30,7 +30,7 @@ public:
 
     bool isTradeDay( const QDate& day) const
     {
-        return mHistoryTradeDaysOfYear.contains(day);
+        return mHistoryTradeDaysOfYear.contains(day) || day == currentTradeDay();
     }
 
     void setHistoryTradeDays(const QList<QDate>& list)

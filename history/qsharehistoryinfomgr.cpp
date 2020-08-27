@@ -39,7 +39,7 @@ QShareHistoryInfoMgr::~QShareHistoryInfoMgr()
 
 void QShareHistoryInfoMgr::slotStartGetHistoryWithAllCodes()
 {
-    PROFILES_INS ->setDefault(UPDATE_SEC, UPDATE_DATE, QActiveDateTime(QDate::currentDate().addDays(-365)).toString(DATE_FORMAT));
+//    PROFILES_INS ->setDefault(UPDATE_SEC, UPDATE_DATE, QActiveDateTime(QDate::currentDate().addDays(-365)).toString(DATE_FORMAT));
     qDebug()<<"start get hk"<<QThread::currentThread()<<((QThread*)&mWorkThread);
     //首先获取从一年前到现在的陆股通数据
     QDate start = QDate::currentDate().addYears(-1);
