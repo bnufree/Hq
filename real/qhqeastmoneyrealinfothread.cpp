@@ -1,4 +1,4 @@
-#include "qhqeastmoneyrealinfothread.h"
+﻿#include "qhqeastmoneyrealinfothread.h"
 #include "utils/qhttpget.h"
 #include <QTextCodec>
 #include "dbservices/dbservices.h"
@@ -23,14 +23,12 @@ void QHqEastMoneyRealInfoThread::parseHttpUrl(const QString &url)
     t.start();
     QStringList top10Keys = DATA_SERVICE->getHshtTop10List();
     QByteArray http = QHttpGet::getContentOfURL(url);
-    QTextCodec *UTF8 = QTextCodec::codecForName("UTF-8");
-    QString result = QString::fromUtf8(http);
-    QString utf8_result = QString::fromUtf8(UTF8->fromUnicode(result));
+    QString utf8_result = QString::fromUtf8(http);
     utf8_result.remove(QRegExp("[\\(\\[\\]\\)]"));
     QStringList resultlist = utf8_result.split("\",\"", QString::SkipEmptyParts);
     for(int i=0; i<resultlist.size(); i++)
     {
-        result = resultlist[i];
+        QString result = resultlist[i];
 
         //\"1,688399,硕世生物,50.75,0.22,0.44,10416,52176804,2.75,50.99,49.60,50.10,50.53,0.34,0.77,7.81,44.83,3.01,2974965000,676927352,-9.51%,-9.51%,0.26,2019-12-05,2019-12-10 10:16:56,10416"
 //result: "1,688389,普门科技,15.73,0.12,0.77,10854,16928156,2.31,15.78,15.42,15.60,15.61,0.00,1.78,3.12,75.35,6.54,6641205807,546645877,-21.09%,-20.48%,-0.06,2019-11-05,2019-12-10 10:16:56,10854"

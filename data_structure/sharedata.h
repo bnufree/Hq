@@ -13,7 +13,7 @@
 
 #define         SH_FUND_REG         "(sh){0,1}5[0-9]{5}"
 #define         SH_INDEX_REG        "sh0[0-9]{5}"
-#define         SH_ZB_SHARE_REG        "(sh){0,1}6[0-9]{5}"
+#define         SH_ZB_SHARE_REG        "(sh){0,1}60[0-9]{4}"
 #define         SH_KCB_SHARE_REG    "(sh){0,1}688[0-9]{3}"
 #define         SH_KZZ_REG          "(sh){0,1}11[0-9]{4}"
 
@@ -55,6 +55,8 @@ typedef    enum     share_data_type
     SHARE_SH_KZZ = 1<<13,
     SHARE_SZ_KZZ = 1<<14,
     SHARE_KZZ = SHARE_SH_KZZ | SHARE_SZ_KZZ,
+    SHARE_SH_TOTAL = SHARE_SH | SHARE_SH_FUND | SHARE_SH_KZZ,
+    SHARE_SZ_TOTAL = SHARE_SZ | SHARE_SZ_FUND | SHARE_SZ_KZZ,
 }SHARE_DATA_TYPE;
 
 struct HistoryInfo{
@@ -156,6 +158,7 @@ public:
         return mBlockCodeList;
     }
 
+
     static QString shareTypeString(SHARE_DATA_TYPE type)
     {
         if(type == SHARE_SH_ZB) return QObject::tr("上证A股");
@@ -167,6 +170,8 @@ public:
         if(type == SHARE_INDEX_SZ) return QObject::tr("深圳指数");
         if(type == SHARE_SH_FUND) return QObject::tr("上证基金");
         if(type == SHARE_SZ_FUND) return QObject::tr("深圳基金");
+        if(type == SHARE_SZ_KZZ) return QObject::tr("深圳可转债");
+        if(type == SHARE_SH_KZZ) return QObject::tr("上海可转债");
         if(type == SHARE_HK) return QObject::tr("港股");
         return "-";
     }
@@ -210,8 +215,8 @@ public:
     static QString prefixCode(const QString&  code)
     {
         SHARE_DATA_TYPE type = shareType(code);
-        if(type & SHARE_SH) return "sh";
-        if(type & SHARE_SZ) return "sz";
+        if((type & SHARE_SH) || (type & SHARE_SH_KZZ) || (type & SHARE_SH_FUND)) return "sh";
+        if((type & SHARE_SZ) || (type & SHARE_SZ_KZZ) || (type & SHARE_SZ_FUND)) return "sz";
         if(type & SHARE_HK) return "hk";
         if(type & SHARE_US) return "us";
         return "undefined";
@@ -285,8 +290,8 @@ typedef struct hqShareHistoryFileData{
     double          mLastClose;             //昨日最后价格
     double          mCloseAdjust;           //复权  计算涨跌幅使用
     double          mMoney;
-    qint64          mForeignVol;
-    double          mForeignMututablePercent;
+//    qint64          mForeignVol;
+//    double          mForeignMututablePercent;
 
     hqShareHistoryFileData()
     {
@@ -295,9 +300,8 @@ typedef struct hqShareHistoryFileData{
         mLastClose = 0.0;
         mCloseAdjust = 0.0;
         mMoney = 0.0;
-        mForeignVol = 0;
-        mForeignVol = 0;
-        mForeignMututablePercent = 0.0;
+//        mForeignVol = 0;
+//        mForeignMututablePercent = 0.0;
     }
 }ShareHistoryFileData;
 
@@ -407,7 +411,7 @@ public:
             GRAPHIC_DATA graph;
             graph.mDate = QDateTime::fromTime_t(data.mDate).date();
             graph.mClose = data.mClose;
-            graph.mForVol = data.mForeignVol;
+//            graph.mForVol = data.mForeignVol;
             graph.mMoney = data.mMoney;
 //            graph.mRzye = data.mRZRQ;
 //            graph.mZjlx = data.mZJLX;

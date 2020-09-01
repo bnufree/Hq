@@ -1,4 +1,4 @@
-#ifndef HQDATADEFINES
+﻿#ifndef HQDATADEFINES
 #define HQDATADEFINES
 
 #include <QString>

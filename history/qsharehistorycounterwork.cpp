@@ -54,6 +54,7 @@ bool QShareHistoryCounterWork::readFile(ShareHistoryFileDataList& list)
 
 void QShareHistoryCounterWork::run()
 {
+#if 0
     if(mList.size() == 0) readFile(mList);
     //获取当前交易日的日期
     QDate now = TradeDateMgr::instance()->currentTradeDay();
@@ -165,6 +166,7 @@ void QShareHistoryCounterWork::run()
 //    qDebug()<<mCode<<real_week.toString("yyyyMMdd")<<week_p<<real_month.toString("yyyyMMdd")<<month_p<<real_year.toString("yyyyMMdd")<<year_p<<foreign_chg1<<foreign_chg5<<foreign_chg10<<last_day.toString("yyyy-MM-dd")<<last_money;
 
     emit DATA_SERVICE->signalUpdateShareCounter(counter);
+#endif
 }
 
 QShareLGTHistoryCounterWork::QShareLGTHistoryCounterWork(const QDate &date, int type, QObject *parent)

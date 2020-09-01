@@ -108,7 +108,7 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
         double sell1 = detailList[22].toDouble();
 
         //竞价时段的特殊处理
-        if(data.mCur == 0)
+        if(QTime::currentTime().toString("hhmmss") >= "091500" && QTime::currentTime().toString("hhmmss") <= "092500")
         {
             double temp = fmax(buy, buy1);
             if(temp == 0) temp = data.mLastClose;

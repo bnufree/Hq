@@ -610,6 +610,8 @@ bool HQDBDataBase::queryShareBasicInfo(ShareDataMap& map, const QStringList& fav
         info.mIsFav = mSQLQuery.value(HQ_TABLE_COL_FAVORITE).toBool();
         info.mIsFav = favlist.contains(code);
 
+        qDebug()<<info.mCode<<info.mShareType<<ShareData::shareTypeString(info.mShareType);
+
     }
     return true;
 }

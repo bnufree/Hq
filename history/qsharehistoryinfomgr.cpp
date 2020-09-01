@@ -11,17 +11,13 @@
 #include "utils/comdatadefines.h"
 
 #define     SAVE_DIR                QDir::currentPath() + "/data/"
-#define     UPDATE_SEC              "UPDATE"
-#define     UPDATE_DATE             "DATE"
 QShareHistoryInfoMgr::QShareHistoryInfoMgr(const QStringList& codes, QObject *parent) : QObject(parent)
 {
-    //设定初始化的日线更新时期
-    PROFILES_INS ->setDefault(UPDATE_SEC, UPDATE_DATE, QActiveDateTime(QDate::currentDate().addDays(-365)).toString(DATE_FORMAT));
     mCodesList = codes;
     mPool.setExpiryTimeout(-1);
     mPool.setMaxThreadCount(2);
 #ifdef Q_OS_WIN
-    mPool.setMaxThreadCount(8);
+    mPool.setMaxThreadCount(16);
 #endif
     connect(this, SIGNAL(signalStartGetHistory()), this, SLOT(slotStartGetHistoryWithAllCodes()));
     connect(this, SIGNAL(signalStartStatic()), this, SLOT(slotStartStatics()));
@@ -63,13 +59,14 @@ void QShareHistoryInfoMgr::slotStartGetHistoryWithAllCodes()
     //陆股通数据同步更新
     foreach (QString code, mCodesList) {
         if(code.size() > 6) code = code.right(6);
-        QShareHistoryInfoThread* thread = new QShareHistoryInfoThread(code, &mShareForeignDataMap, this);
+        QMap<QDate, ShareForignVolFileData> list = mShareForeignDataMap[code.toInt()];
+        QShareHistoryInfoThread* thread = new QShareHistoryInfoThread(code, list, true, this);
         mPool.start(thread);
     }
     mPool.waitForDone();
 
-    qDebug()<<"start counter"<<t.elapsed();
-    slotStartStatics();
+    qDebug()<<"end"<<t.elapsed();
+//    slotStartStatics();
 }
 
 void QShareHistoryInfoMgr::slotStartStatics()
@@ -88,8 +85,12 @@ void QShareHistoryInfoMgr::slotStartStatics()
 
 void QShareHistoryInfoMgr::slotUpdateForignVolInfo(const ShareForignVolFileDataList& list, const QDate& date)
 {
+    QMutexLocker locker(&mForeignHistoryMutex);
     if(list.size() == 0) return;
-    mShareForeignDataMap[date] = list;
+    foreach (ShareForignVolFileData data, list) {
+        mShareForeignDataMap[data.mCode][date] = data;
+    }
+
 }
 
 void QShareHistoryInfoMgr::slotUpdateShareHistoryProcess(const ShareHistoryFileDataList& list, const QString& code)

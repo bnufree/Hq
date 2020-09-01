@@ -42,10 +42,11 @@ private:
 private:
     QThread             mWorkThread;
     QStringList         mCodesList;
+    QMutex              mForeignHistoryMutex;
     QMutex              mShareHistoryMutex;
     QThreadPool         mPool;
     QMap<QString,       ShareHistoryFileDataList>  mShareInfoHistoryMap;
-    QMap<QDate,         ShareForignVolFileDataList>         mShareForeignDataMap;
+    QMap<int,         QMap<QDate, ShareForignVolFileData> >         mShareForeignDataMap;
 };
 
 #endif // QSHAREHISTORYINFOMGR_H

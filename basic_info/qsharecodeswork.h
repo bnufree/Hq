@@ -27,6 +27,8 @@ public:
     void parseShCode(ShareDataList& list);
     void parseSzCode(ShareDataList& list);
     void parseKZZ(ShareDataList& list);
+    void parseSzEtf(ShareDataList &result_list);
+    void parseShEtf(ShareDataList &result_list);
 private:
     void parseHttp(ShareDataList& list, const QString& url, int mode = 1); //1:stock 2:fund
 };

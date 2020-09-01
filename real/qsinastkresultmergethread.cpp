@@ -103,8 +103,8 @@ void QSinaStkResultMergeThread::run()
                         (mMktType == MKT_ZXG && data.mIsFav)||\
                         (mMktType == MKT_LGT_TOP10 && data.mHsgtData.mIsTop10) ||\
                         (mMktType == MKT_JJ && (data.mShareType & SHARE_FUND))||\
-                        (mMktType == MKT_KCB && (data.mShareType & SHARE_SH_KCB)) ||
-                        (mMktType == MKT_KZZ && (data.mShareType & SHARE_KZZ)) ||
+                        (mMktType == MKT_KCB && (data.mShareType & SHARE_SH_KCB)) ||\
+                        (mMktType == MKT_KZZ && (data.mShareType & SHARE_KZZ)) ||\
                         (mMktType == MKT_OTHER && mSelfCodesList.contains(data.mCode));
 
                 if(sts && data.mCur > 0.001)

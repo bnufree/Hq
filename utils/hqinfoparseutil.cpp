@@ -37,11 +37,15 @@ HqInfoParseUtil::HqInfoParseUtil()
 
 ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryData(const QDate& start, const QString& code)
 {
-    ShareHistoryFileDataList list = getShareHistoryDataFrom163(start, code);
-#if 0
-    ShareHistoryFileDataList list = getShareHistoryDataFromXueqiu(start, code);
-#endif
-    if(list.size() == 0) list = getShareHistoryDataFromHexun(start, code);
+    ShareHistoryFileDataList list;
+    if(ShareData::shareType(code) & SHARE_FUND)
+    {
+        list = getShareHistoryDataFromXueqiu(start, code);
+    } else
+    {
+        list = getShareHistoryDataFrom163(start, code);
+        if(list.size() == 0) list = getShareHistoryDataFromHexun(start, code);
+    }
     return list;
 }
 
@@ -157,7 +161,7 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromHexun(const QDa
             data.mLastClose = src_list[1].toDouble() / weight;
             data.mMoney = src_list[7].toDouble();
             list.append(data);
-            qDebug()<<date<<code<<data.mClose<<data.mLastClose<<data.mMoney;
+//            qDebug()<<date<<code<<data.mClose<<data.mLastClose<<data.mMoney;
         }
         if(list.size() > 0)
         {
@@ -177,7 +181,7 @@ bool HqInfoParseUtil::getShareDateRange(const QString& code, QDate& start, QDate
     //先从和讯网获取
     if(wkCode.size() == 6)
     {
-        QString market = code.toInt() < 500000 ? "szse" : "sse";
+        QString market = (ShareData::shareType(code) & SHARE_SZ_TOTAL? "szse" : "sse");
         wkCode.insert(0, market);
     }
     QString wkURL = QString("http://webstock.quote.hermes.hexun.com/a/kline?code=%1&start=%2&number=-%3&type=5")
@@ -200,7 +204,7 @@ bool HqInfoParseUtil::getShareDateRange(const QString& code, QDate& start, QDate
         //再次从雪球获取
         QStringList urlList;
         urlList.append("https://xueqiu.com/");
-        QString wkCode = (code.left(1).toInt() >= 5 ? "SH" : "SZ") + code;
+        QString wkCode = (ShareData::shareType(code) & SHARE_SH_TOTAL? "SH" : "SZ") + code;
         QString url = QString("https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=%1&begin=%2&period=day&type=normal&count=-10000").arg(wkCode).arg(QDateTime::currentDateTime().toMSecsSinceEpoch());
         urlList.append(url);
         QNetworkAccessManager mgr;
@@ -263,9 +267,7 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFrom163(const QDate
         QString wkURL = QString("http://quotes.money.163.com/service/chddata.html?code=%1&start=%2&end=%3")
                 .arg(wkCode).arg(start.toString("yyyyMMdd")).arg(QDate::currentDate().toString("yyyyMMdd"));
         QByteArray recv = QHttpGet::getContentOfURL(wkURL);
-        QTextCodec* gbk = QTextCodec::codecForName("GBK");
-        QTextCodec* utf8 = QTextCodec::codecForName("UTF-8");
-        QString result = QString::fromUtf8(utf8->fromUnicode(gbk->toUnicode(recv)));
+        QString result = QString::fromUtf8(recv);
 
         QStringList lines = result.split("\r\n");
         int size = lines.length();
@@ -310,9 +312,7 @@ QDateList HqInfoParseUtil::getActiveDateList(const QDate &from, const QDate &end
             .arg(total_gap);
     QByteArray recv = QHttpGet::getContentOfURL(wkURL);
     QRegExp exp("20\\d{6}000000");
-    QTextCodec* gbk = QTextCodec::codecForName("GBK");
-    QTextCodec* utf8 = QTextCodec::codecForName("UTF-8");
-    QString result = QString::fromUtf8(utf8->fromUnicode(gbk->toUnicode(recv)));
+    QString result = QString::fromUtf8(recv);
     int pos = 0;
     while ((pos = exp.indexIn(result, pos)) != -1) {
         QDate date = QDate::fromString(exp.cap(), "yyyyMMdd000000");

@@ -11,12 +11,10 @@
 
 #define     UPDATE_SEC              "CodeInfo"
 
-QShareHistoryInfoThread::QShareHistoryInfoThread(const QString& code, const QDate& start, const QDate& end, QObject* parent) :
+QShareHistoryInfoThread::QShareHistoryInfoThread(const QString& code, const QMap<QDate, ShareForignVolFileData>& list, bool counter, QObject* parent) :
     mCode(code),
-    mStart(start),
-    mEnd(end),
     mParent(parent),
-    mExistForeignMap(0),
+    mCounter(counter),
     QRunnable()
 {
     mCode = code;
@@ -24,17 +22,7 @@ QShareHistoryInfoThread::QShareHistoryInfoThread(const QString& code, const QDat
     {
         mCode = mCode.right(6);
     }
-}
-
-QShareHistoryInfoThread::QShareHistoryInfoThread(const QString &code, QMap<QDate, ShareForignVolFileDataList>* map, QObject *parent)
-    : mCode(code)
-    , mParent(parent)
-    , mStart(QDate())
-    , mEnd(QDate())
-    , mExistForeignMap(map)
-    , QRunnable()
-{
-
+    mForeignList = list;
 }
 
 QShareHistoryInfoThread::~QShareHistoryInfoThread()
@@ -66,46 +54,26 @@ bool QShareHistoryInfoThread::readFile(ShareHistoryFileDataList& list, bool& adj
     while (!file.atEnd() ) {
         ShareHistoryFileData data;
         file.read((char*)(&data), sizeof(ShareHistoryFileData));
-        //检查当前的外资持股数据是否需要更新,这里主要是防止获取外资持股数据出现了遗漏
-        qint64 vol = 0;
-        double percent = 0;
-        getForeignVolData(vol, percent, QDateTime::fromTime_t(data.mDate).date());
-        if(vol > 0 && data.mForeignVol != vol)
-        {
-            data.mForeignVol = vol;
-            data.mForeignMututablePercent = percent;
-            adjust = true;
-        }
-//        if(mCode == "002057")
-//        {
-//            qDebug()<<QDateTime::fromTime_t(data.mDate).toString("yyyyMMdd")<<data.mClose<<data.mLastClose<<data.mCloseAdjust<<data.mForeignVolOri<<data.mForeignVolAdjust;
-//        }
-
         list.append(data);
+        if(mCode.toInt() == 159949)
+        qDebug()<<QDateTime::fromTime_t(data.mDate).date()<<data.mClose<<data.mMoney / 10000.0;
     }
     file.close();
 
     return true;
 }
 
-void QShareHistoryInfoThread::getForeignVolData(qint64 &vol, double &percent, const QDate &date)
-{
-    if(!mExistForeignMap) return;
-    if(!mExistForeignMap->contains(date)) return;
-    //获取当日对应的陆股通数据
-    ShareForignVolFileDataList wklist = mExistForeignMap->value(date);
-    int index = wklist.indexOf(ShareForignVolFileData(mCode.toUInt()));
-    if(index < 0) return;
-    ShareForignVolFileData temp = wklist[index];
-    vol = temp.mForeignVol;
-    percent = temp.mMutuablePercent;
-}
 
 void QShareHistoryInfoThread::run()
 {
     QTime t;
     t.start();
     QDate start, end;
+
+    HqInfoParseUtil::getShareDateRange(mCode.right(6), start, end);
+    qDebug()<<mCode<<start<<end;
+    return;
+
     //default is
     QDate start_update_date;
     bool adjust = false;
@@ -123,8 +91,16 @@ void QShareHistoryInfoThread::run()
     int new_size = 0;
     ShareHistoryFileDataList new_list;
     bool need_update = true;
-    if(start_update_date >= TradeDateMgr::instance()->currentTradeDay()) need_update = false;
-//    qDebug()<<mCode<<" update:"<<need_update;
+    if(start_update_date >= TradeDateMgr::instance()->currentTradeDay())
+    {
+        if(QDate::currentDate() == TradeDateMgr::instance()->currentTradeDay())
+        {
+            if(QTime::currentTime().toString("hhmmss") < "150000")
+            {
+                need_update = false;
+            }
+        }
+    }
     if(need_update)
     {
 //        new_list = HqInfoParseUtil::getShareHistoryDataFrom163(last_update_date.date(), mCode);
@@ -200,8 +176,6 @@ void QShareHistoryInfoThread::run()
     {
         ShareHistoryFileData data = new_list[i];
         data.mCloseAdjust = data.mClose;
-        //获取当日对应的陆股通数据
-        getForeignVolData(data.mForeignVol, data.mForeignMututablePercent, QDateTime::fromTime_t(data.mDate).date());
         //检查是否有除权处理,如果有就更新前面所有的除权价格
         if(list.size() > 0 && list.last().mClose != data.mLastClose)
         {
@@ -235,12 +209,127 @@ void QShareHistoryInfoThread::run()
             writeFile(list.mid(list.size() - new_size , new_size), "ab+");
         }
     }
-//    qDebug()<<mCode<<" history size:"<<list.size();
-    //最后更新到管理类,便于开始统计
-//    if(list.size() > 0)
-//    {
-//        qDebug()<<__LINE__<<mCode<<QDateTime::fromTime_t(list.last().mDate).toString("yyyyMMdd")<<list.last().mForeignVol<<list.last().mForeignMututablePercent;
-//    }
+    if(mCounter)
+    {
+        //获取当前交易日的日期
+        QDate now = TradeDateMgr::instance()->currentTradeDay();
+        QDate last_day = TradeDateMgr::instance()->lastTradeDay();
+        //获取对应的年,月,周对应的参考基准日
+        //周参考日对应上周的星期五
+        QDate week = now.addDays(-1*(now.dayOfWeek()) - 2);
+        //月参考日对应上月的最后一个交易日
+        QDate month = QDate(now.year(), now.month(), 1).addDays(-1);
+        //年参考日
+        QDate year = QDate(now.year(), 1, 1).addDays(-1);
+
+        //开始获取参考日对应的复权价
+        int size = list.size();
+        if(size == 0) return;
+        double week_p = 0.0, month_p = 0.0, year_p = 0.0;
+        bool week_found = false, month_found = false, year_found = false;
+        double last_money = list.last().mMoney;
+        //从后开始往前找,找到对应日期或者最靠近日期
+        QDate real_week, real_month, real_year;
+        for(int i = size - 1; i >= 0; i--)
+        {
+            ShareHistoryFileData data = list[i];
+            QDate wkDate = QDateTime::fromTime_t(data.mDate).date();
+            if(wkDate == last_day) last_money = data.mMoney;
+            if((!week_found) && (wkDate <= week))
+            {
+                week_found = true;
+                week_p = data.mCloseAdjust;
+                real_week = wkDate;
+            }
+            if((!month_found) &&(wkDate <= month))
+            {
+                month_found = true;
+                month_p = data.mCloseAdjust;
+                real_month = wkDate;
+            }
+
+            if((!year_found) && (wkDate <= year))
+            {
+                year_found = true;
+                year_p = data.mCloseAdjust;
+                real_year = wkDate;
+            }
+            if(week_found && month_found && year_found) break;
+        }
+        //最后仍然没有找到
+        if(!week_found)
+        {
+            week_p = list.first().mLastClose;
+            real_week = QDateTime::fromTime_t(list.first().mDate).date();
+        }
+
+        if(!month_found)
+        {
+            month_p = list.first().mLastClose;
+            real_month = QDateTime::fromTime_t(list.first().mDate).date();
+        }
+
+        if(!year_found)
+        {
+            year_p = list.first().mLastClose;
+            real_year = QDateTime::fromTime_t(list.first().mDate).date();
+        }
+
+
+        //获取当前陆股通持股信息的变化情况 1日 5日 10日
+        double foreign_now = 0;
+        double foreign_mutaul = 0;
+        double foreign_chg1 = 0.0, foreign_chg5 = 0.0, foreign_chg10 = 0.0;
+        int size2 = mForeignList.size();
+        if(size2 > 0)
+        {
+            foreign_now = mForeignList.last().mForeignVol;
+            foreign_mutaul = mForeignList.last().mMutuablePercent;
+            qDebug()<<mForeignList.firstKey()<<mForeignList.lastKey();
+            QMap<QDate, ShareForignVolFileData>::const_iterator end = mForeignList.constEnd();
+            if(size2 >= 2)
+            {
+                foreign_chg1 = (end-1).value().mForeignVol - (end-2).value().mForeignVol;
+            } else
+            {
+                foreign_chg1 = (end-1).value().mForeignVol - mForeignList.first().mForeignVol;
+            }
+            if(size2 >= 5)
+            {
+                foreign_chg5 = (end-1).value().mForeignVol - (end-5).value().mForeignVol;
+            } else
+            {
+                foreign_chg5 = (end-1).value().mForeignVol - mForeignList.first().mForeignVol;
+            }
+
+            if(size2 >= 10)
+            {
+                foreign_chg10 = (end-1).value().mForeignVol - (end-10).value().mForeignVol;
+            } else
+            {
+                foreign_chg10 = (end-1).value().mForeignVol - mForeignList.first().mForeignVol;
+            }
+        }
+
+        ShareHistoryCounter counter;
+        counter.code = mCode;
+        counter.foreign_percent = foreign_mutaul;
+        counter.foreign_ch1 = foreign_chg1;
+        counter.foreign_ch5 = foreign_chg5;
+        counter.foreign_ch10 = foreign_chg10;
+        counter.foreign_vol = foreign_now;
+        counter.lastMoney = last_money;
+        counter.monthDay = real_month;
+        counter.monthP = month_p;
+        counter.weekDay = real_week;
+        counter.weekP = week_p;
+        counter.yearDay = real_year;
+        counter.yearP = year_p;
+        qDebug()<<mCode<<real_week.toString("yyyyMMdd")<<week_p<<real_month.toString("yyyyMMdd")<<month_p<<real_year.toString("yyyyMMdd")<<year_p<<foreign_chg1<<foreign_chg5<<foreign_chg10<<last_day.toString("yyyy-MM-dd")<<last_money;
+
+        emit DATA_SERVICE->signalUpdateShareCounter(counter);
+//#endif
+    }
 FUNC_END:
     if(mParent)
     {
@@ -270,6 +359,7 @@ void QShareHistoryInfoThread::writeFile(const ShareHistoryFileDataList& list, co
     {
         foreach (ShareHistoryFileData data, list) {
             fwrite(&data, sizeof(ShareHistoryFileData), 1, fp);
+//            qDebug()<<QDateTime::fromTime_t(data.mDate).date()<<data.mClose<<data.mMoney / 10000.0;
         }
         fclose(fp);
     }
