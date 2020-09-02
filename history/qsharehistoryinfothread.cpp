@@ -30,7 +30,7 @@ QShareHistoryInfoThread::~QShareHistoryInfoThread()
 
 }
 
-QString QShareHistoryInfoThread::getFileName()
+QString QShareHistoryInfoThread::getPath()
 {
     //根据code的不同进行选择
     QString dir;
@@ -43,10 +43,22 @@ QString QShareHistoryInfoThread::getFileName()
     }
     dir.append("/");
     dir.append(mCode.left(3));
-    dir.append("/");
-    dir.append(mCode);
+
+    dir = QString("%1/%2").arg(HQ_DAY_HISTORY_DIR).arg(dir);
+
+    QDir path(dir);
+    if(!path.exists())
+    {
+        path.mkpath(dir);
+    }
+
+    return dir;
+}
+
+QString QShareHistoryInfoThread::getFileName()
+{
     //设定保存的文件名
-    return QString("%1/%2").arg(HQ_DAY_HISTORY_DIR).arg(dir);
+    return QString("%1/%2").arg(getPath()).arg(mCode);
 }
 
 bool QShareHistoryInfoThread::readFile(ShareHistoryFileDataList& list, bool& adjust)
@@ -89,6 +101,7 @@ void QShareHistoryInfoThread::run()
     if(list.size() > 0)
     {
         start_update_date =  ShareTradeDateTime(list.last().mDate).date().addDays(1);
+        //检查从开始到结束的交易日
         if(start != ShareTradeDateTime(list.first().mDate).date())
         {
             start_update_date = start;
@@ -101,88 +114,19 @@ void QShareHistoryInfoThread::run()
     //开始更新日线数据到今天
     int new_size = 0;
     ShareHistoryFileDataList new_list;
-    bool need_update = true;
-    if(start_update_date >= TradeDateMgr::instance()->currentTradeDay())
+    bool need_update = false;
+    if(start_update_date <= TradeDateMgr::instance()->lastTradeDay())
     {
-        if(QDate::currentDate() == TradeDateMgr::instance()->currentTradeDay())
-        {
-            if(QTime::currentTime().toString("hhmmss") < "150000")
-            {
-                need_update = false;
-            }
-        }
+        need_update = true;
+    } else
+    {
+        need_update = false;
     }
     if(need_update)
     {
 //        new_list = HqInfoParseUtil::getShareHistoryDataFrom163(last_update_date.date(), mCode);
         if(new_list.size() == 0) new_list = HqInfoParseUtil::getShareHistoryData(start_update_date, mCode);
     }
-#if 0
-    if(last_update_date < QDate::currentDate())
-    {
-
-        QString wkCode;
-        if(mCode.left(1) == "6" || mCode.left(1) == "5")
-        {
-            wkCode = "0" + mCode;
-        } else
-        {
-            wkCode = "1" + mCode;
-        }
-        //取得日线数据
-        QString wkURL = QString("http://quotes.money.163.com/service/chddata.html?code=%1&start=%2&end=%3")
-                .arg(wkCode).arg(last_update_date.date().toString("yyyyMMdd")).arg(QDate::currentDate().date().toString("yyyyMMdd"));
-        QByteArray recv = QHttpGet::getContentOfURL(wkURL);
-        QTextCodec* gbk = QTextCodec::codecForName("GBK");
-        QTextCodec* utf8 = QTextCodec::codecForName("UTF-8");
-        QString result = QString::fromUtf8(utf8->fromUnicode(gbk->toUnicode(recv)));
-
-        QStringList lines = result.split("\r\n");
-        int size = lines.length();
-        for(int i=size-1; i>0; i--)
-        {
-            QStringList cols = lines[i].split(",");
-            if(cols.length() >= 15)
-            {
-                QDate curDate = QDate::fromString(cols[0], "yyyy-MM-dd");
-                if(curDate.dayOfWeek() == 6 || curDate.dayOfWeek() == 7) continue;
-                if(cols[3].toDouble() < 0.001) continue;
-                ShareHistoryFileData data;
-                data.mDate = QDateTime(curDate).toTime_t();
-                data.mClose = cols[3].toDouble();
-                data.mLastClose = cols[7].toDouble();
-                data.mCloseAdjust = data.mClose;
-                data.mMoney = cols[12].toDouble();
-                data.mTotalShareCount = qint64(floor(cols[13].toDouble() / data.mClose));
-                //获取当日对应的陆股通数据
-                getForeignVolData(data.mForeignVolOri, data.mForeignMututablePercent, curDate);
-                data.mForeignVolAdjust = data.mForeignVolOri;
-                //检查是否有除权处理,如果有就更新前面所有的除权价格
-                if(list.size() > 0 && list.last().mClose != data.mLastClose)
-                {
-                    //前一笔的最后价格和当前获取的前一次的最后价格不相同,那么今天就是进行了除权处理,对前面的所有价格都进行除权
-#if 0
-                    double adjust_price = data.mLastClose - list.last().mClose;
-#else
-                    double adjust_price = data.mLastClose / list.last().mClose;
-#endif
-                    if(adjust == false) adjust = true;
-                    //检查股本是否发生了变化
-                    double share_ratio = 1;
-                    if(list.last().mTotalShareCount > 0 ) share_ratio = data.mTotalShareCount * 1.0 / list.last().mTotalShareCount;
-                    adjustDataList(list, adjust_price, share_ratio);
-                }
-                if(list.size() > 0 && data.mForeignVolOri == 0 && list.last().mForeignVolOri != 0)
-                {
-                    data.mForeignVolOri = list.last().mForeignVolOri;
-                    data.mForeignMututablePercent = list.last().mForeignMututablePercent;
-                }
-                list.append(data);
-                new_size++;
-            }
-        }
-    }
-#else
     for(int i=0; i<new_list.size(); i++)
     {
         ShareHistoryFileData data = new_list[i];
@@ -205,8 +149,6 @@ void QShareHistoryInfoThread::run()
         list.append(data);
         new_size++;
     }
-
-#endif
     //对新的数据更新陆股痛数据处理
     if(adjust)
     {
@@ -339,7 +281,6 @@ void QShareHistoryInfoThread::run()
         qDebug()<<mCode<<real_week.toString("yyyyMMdd")<<week_p<<real_month.toString("yyyyMMdd")<<month_p<<real_year.toString("yyyyMMdd")<<year_p<<foreign_chg1<<foreign_chg5<<foreign_chg10<<last_day.toString("yyyy-MM-dd")<<last_money;
 
         emit DATA_SERVICE->signalUpdateShareCounter(counter);
-//#endif
     }
 FUNC_END:
     if(mParent)

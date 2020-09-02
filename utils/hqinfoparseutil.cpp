@@ -72,7 +72,6 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromXueqiu(const QD
             QObject::connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), &subloop, SLOT(quit()));
             QTimer::singleShot(10000, &subloop, SLOT(quit()));
             subloop.exec();
-            qDebug()<<url<<index<<wkDate;
             if(reply->error() == QNetworkReply::NoError && reply->isFinished() && index  == urlList.size()-1)
             {
                 QByteArray recv = reply->readAll();

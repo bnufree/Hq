@@ -51,9 +51,6 @@ void QShareHistoryInfoMgr::slotStartGetHistoryWithAllCodes()
     if(mCodesList.size() == 0) return;
     QDir dir(HQ_DAY_HISTORY_DIR);
     if(!dir.exists()) dir.mkpath(HQ_DAY_HISTORY_DIR);
-    QTime t;
-    t.start();
-    qDebug()<<"start get history";
     //陆股通数据同步更新
     foreach (QString code, mCodesList) {
         if(code.size() > 6) code = code.right(6);
@@ -62,9 +59,6 @@ void QShareHistoryInfoMgr::slotStartGetHistoryWithAllCodes()
         mPool.start(thread);
     }
     mPool.waitForDone();
-
-    qDebug()<<"end"<<t.elapsed();
-//    slotStartStatics();
 }
 
 void QShareHistoryInfoMgr::slotStartStatics()

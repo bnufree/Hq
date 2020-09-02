@@ -21,6 +21,7 @@ private:
     void                        adjustDataList(ShareHistoryFileDataList& list, double price, double ratio);
     bool                        readFile(ShareHistoryFileDataList& list, bool& adjust);
     QString                     getFileName();
+    QString                     getPath();
     void                        writeFile(const ShareHistoryFileDataList& list, const char* mode);
 private:
     QString         mCode;
