@@ -177,6 +177,10 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SIGNAL(signalUpdateHistoryMsg(QString)));
     connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryFinished()), this, SLOT(slotUpdateHistoryFinished()));
     mHistoryInfoMgr->signalStartGetHistory();
+
+
+
+
     return;
 }
 

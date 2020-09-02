@@ -16,6 +16,39 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include "utils/profiles.h"
+#include <QtConcurrent>
+#include <QMutex>
+
+struct ShareCodeDate{
+    QString         code;
+    QString         date;
+    bool            valid;
+};
+ShareCodeDate updateShetfDate(const QString &code)
+{
+    ShareCodeDate res;
+    res.valid = false;
+    QDate start, end;
+    HqInfoParseUtil::getShareDateRange(code, start, end);
+    if(start.isValid())
+    {
+        res.code = code;
+        res.valid = true;
+        res.date = start.toString("yyyy-MM-dd");
+    }
+
+    return res;
+}
+
+
+
+enum MarketType{
+    Market_SH,
+    Market_SZ,
+    Market_KZZ,
+    Market_SZ_ETF,
+    Market_SH_ETF,
+};
 
 QShareCodesWork::QShareCodesWork(QObject *parent) : QThread(parent)
 {
@@ -41,15 +74,14 @@ void QShareCodesWork::parseKZZ(ShareDataList &list)
     for(int i=0; i<array.size(); i++)
     {
         QJsonObject obj = array.at(i).toObject();
-//        qDebug()<<obj;
         if(obj.value("LISTDATE").toString() == "-") continue;
         if(obj.value("DELISTDATE").toString() != "-") continue;
         ShareData data;
         data.mName = obj.value("SNAME").toString();
         data.mCode = obj.value("BONDCODE").toString();
-//        data.mListDate = QDateTime::fromString(obj.value("LISTDATE").toString().left(10), "yyyy-MM-dd").toTime_t();
         data.mPY = HqUtils::GetFirstLetter(QTextCodec::codecForLocale()->toUnicode(data.mName.toUtf8()));
         data.mShareType = ShareData::shareType(data.mCode);
+        PROFILES_INS->setValue(LIST_DATE, data.mCode, obj.value("LISTDATE").toString().left(10));
         list.append(data);
     }
 }
@@ -61,28 +93,31 @@ void QShareCodesWork::run()
 
     QDate update_date = DATA_SERVICE->getLastUpdateDateOfBasicInfo();
     qDebug()<<"last code date:"<<update_date;
-//    if(update_date.isNull() || update_date < QDate::currentDate())
+    if(update_date.isNull() || update_date < QDate::currentDate())
     {
 //        QString stock_code_url = "http://18.push2.eastmoney.com/api/qt/clist/get?cb=&pn=1&pz=20000&po=0&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f6&fs=m:0+t:6,m:0+t:13,m:0+t:80,m:1+t:2,m:1+t:23&fields=f12,f14&_=";
 //        QString fund_code_url = "http://18.push2.eastmoney.com/api/qt/clist/get?cb=&pn=1&pz=10000&po=0&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f12&fs=b:MK0021,b:MK0022,b:MK0023,b:MK0024&fields=f12,f14&_=";
 //        fund_code_url.append(QString::number(QDateTime::currentMSecsSinceEpoch()));
-        QTime t;
-        t.start();
         //股票数据
         parseShCode(list);
         parseSzCode(list);
-        //ETF数据
-        //可转债数据
         parseKZZ(list);
         parseShEtf(list);
         parseSzEtf(list);
-        foreach (ShareData data, list) {
-            qDebug()<<data.mCode<<data.mName;
+        //重新获取上海ETF的上市时间
+        if(mShetfCodeList.size() > 0)
+        {
+            QList<ShareCodeDate> res = QtConcurrent::blockingMapped(mShetfCodeList, updateShetfDate);
+            foreach (ShareCodeDate now, res) {
+                PROFILES_INS->setValue(LIST_DATE, now.code, now.date);
+            }
         }
     }
-//    DATA_SERVICE->signalUpdateShareBasicInfo(list);
+    DATA_SERVICE->signalUpdateShareBasicInfo(list);
     return;
 }
+
+
 
 void QShareCodesWork::parseHttp(ShareDataList& list, const QString& url, int mode)
 {
@@ -154,9 +189,9 @@ void QShareCodesWork::parseShCode(ShareDataList &result_list)
             ShareData data;
             data.mCode = obj.value("COMPANY_CODE").toString();
             data.mName = obj.value("COMPANY_ABBR").toString();
-//            data.mListDate = QDateTime::fromString(obj.value("LISTING_DATE").toString(), "yyyy-MM-dd").toTime_t();
             data.mShareType = ShareData::shareType(data.mCode);
             data.mPY = HqUtils::GetFirstLetter(QTextCodec::codecForLocale()->toUnicode(data.mName.toUtf8()));
+            PROFILES_INS->setValue(LIST_DATE, data.mCode, obj.value("LISTING_DATE").toString().left(10));
             result_list.append(data);
 
         }
@@ -175,7 +210,6 @@ void QShareCodesWork::parseSzCode(ShareDataList &result_list)
                 .arg(page_num)
                 .arg(page_size);
         QByteArray recv = QHttpGet::getContentOfURL(url);
-        qDebug()<<url<<recv.size();
         QJsonParseError error;
         QJsonDocument doc = QJsonDocument::fromJson(recv, &error);
         if(!doc.isArray()) return;
@@ -204,7 +238,7 @@ void QShareCodesWork::parseSzCode(ShareDataList &result_list)
             data.mCode = code;
             data.mName = name;
             data.mShareType = ShareData::shareType(data.mCode);
-//            data.mListDate = QDateTime::fromString(obj.value("agssrq").toString(), "yyyy-MM-dd").toTime_t();
+            PROFILES_INS->setValue(LIST_DATE, data.mCode, obj.value("agssrq").toString());
             data.mPY = HqUtils::GetFirstLetter(QTextCodec::codecForLocale()->toUnicode(data.mName.toUtf8()));
             QRegExp py("[A-Z]{1,}");
             int index2 = py.indexIn(data.mPY);
@@ -247,7 +281,6 @@ void QShareCodesWork::parseSzEtf(ShareDataList &result_list)
         QRegExp nameEXp("<u>(.{1,})</u>");
         foreach (QJsonValue val, dataArray) {
             QJsonObject obj = val.toObject();
-            qDebug()<<obj;
             QString code = obj.value("sys_key").toString();
             int index = codeExp.indexIn(code);
             if(index > 0)
@@ -267,7 +300,7 @@ void QShareCodesWork::parseSzEtf(ShareDataList &result_list)
             data.mName = name;
             data.mShareType = ShareData::shareType(data.mCode);
             data.mPY = HqUtils::GetFirstLetter(QTextCodec::codecForLocale()->toUnicode(data.mName.toUtf8()));
-//            data.mListDate = QDateTime::fromString(obj.value("ssrq").toString(), "yyyy-MM-dd").toTime_t();
+            PROFILES_INS->setValue(LIST_DATE, data.mCode, obj.value("ssrq").toString());
             result_list.append(data);
         }
         page_num++;
@@ -296,19 +329,11 @@ void QShareCodesWork::parseShEtf(ShareDataList &result_list)
         data.mName = name;
         data.mShareType = ShareData::shareType(data.mCode);
         data.mPY = HqUtils::GetFirstLetter(QTextCodec::codecForLocale()->toUnicode(data.mName.toUtf8()));
-        QDate date = Profiles::instance()->value("ListDate", code).toDate();
-        if(!date.isValid())
-        {
-            QDate start, end;
-            HqInfoParseUtil::getShareDateRange(code.right(6), start, end);
-            if(start.isValid())
-            {
-                Profiles::instance()->setValue("ListDate", code, start);
-                date = start;
-            }
-        }
-//        data.mListDate = QDateTime(date).toTime_t();
         result_list.append(data);
+        if(PROFILES_INS->value(LIST_DATE, code).toString().isEmpty())
+        {
+            mShetfCodeList.append(code);
+        }
     }
 }
 

@@ -8,6 +8,7 @@
 #include "utils/profiles.h"
 #include "utils/comdatadefines.h"
 #include <QDir>
+#include "date/shareworkingdatetime.h"
 
 
 #define     PROFILES_SEC            "ETF"
@@ -16,7 +17,7 @@
 QEtfScaleThread::QEtfScaleThread(QObject *parent) : QThread(parent)
 {
     qRegisterMetaType<QList<EtfScaleData>>("const QList<EtfScaleData>&");
-    PROFILES_INS->setDefault(PROFILES_SEC, PROFILES_KEY, "2019-12-31");
+    PROFILES_INS->setDefault(PROFILES_SEC, PROFILES_KEY, QDate::currentDate().addDays(-30).toString("yyyy-MM-dd"));
     QDir dir(HQ_ETF_DIR);
     if(!dir.exists()) dir.mkpath(HQ_ETF_DIR);
 }
@@ -30,10 +31,13 @@ QEtfScaleThread::~QEtfScaleThread()
 void QEtfScaleThread::run()
 {
     QDate last_update = QDate::fromString(PROFILES_INS->value(PROFILES_SEC, PROFILES_KEY).toString(), "yyyy-MM-dd").addDays(1);
-    while (last_update < QDate::currentDate()) {
+    while (last_update <= TradeDateMgr::instance()->currentTradeDay()) {
         mEtfVolMap.clear();
         parseShEtf(last_update);
-        parseSzEtf(last_update);
+        if(mEtfVolMap.size() > 0)
+        {
+            parseSzEtf(last_update);
+        }
         if(mEtfVolMap.size() > 0)
         {
             //write fo file
@@ -99,9 +103,9 @@ void QEtfScaleThread::parseSzEtf(const QDate& date)
         QJsonArray array = doc.array();
         QJsonObject metaObj = array[0].toObject().value("metadata").toObject();
         if(metaObj.isEmpty()) break;
-        QDate curDate = QDate::fromString(metaObj.value("subname").toString(), "yyyy-MM-dd");
+        QDate curDate = QDate::fromString(metaObj.value("subname").toString().trimmed(), "yyyy-MM-dd");
         if(!curDate.isValid()) break;
-        if(curDate != date) break;
+        if(curDate != ShareTradeDateTime(date).nextTradeDay()) break;
         page_count = metaObj.value("pagecount").toInt();
         if(page_count <= 0) break;
         total_record_count = metaObj.value("recordcount").toInt();

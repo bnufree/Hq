@@ -1,12 +1,21 @@
 ﻿#include "qsharefinancialinfowork.h"
 #include "utils/qhttpget.h"
 #include "dbservices/dbservices.h"
+#include "utils/profiles.h"
+#include "qetfscalethread.h"
+#include <QEventLoop>
 
 QShareFinancialInfoWork::QShareFinancialInfoWork(const QStringList& list, QObject* parent)
     : QThread(parent)
-    , mShareCodeList(list)
 {
-
+    //只更新股票数据，基金数据另外更新
+    foreach (QString code, list) {
+        int share_type = ShareData::shareType(code);
+        if(share_type & SHARE_SHARE_ONLY )
+        {
+            mShareCodeList.append(code);
+        }
+    }
 }
 
 QShareFinancialInfoWork::~QShareFinancialInfoWork()
@@ -19,8 +28,43 @@ void QShareFinancialInfoWork::run()
     QDate last_update_date = DATA_SERVICE->getLastUpdateDateOfFinanceInfo();
     FinancialDataList dataList;
 
-    if(last_update_date.isNull() || last_update_date < QDate::currentDate())
+//    if(last_update_date.isNull() || last_update_date < QDate::currentDate())
     {
+        //先更新基金规模数据
+        QEventLoop loop;
+        QEtfScaleThread *etf = new QEtfScaleThread;
+        connect(etf,  SIGNAL(finished()), &loop, SLOT(quit()));
+        connect(etf,  SIGNAL(finished()), etf, SLOT(deleteLater()));
+        etf->start();
+        loop.exec();
+        //检索保存目录的
+        QDir dir(HQ_ETF_DIR);
+        QFileInfoList fileList = dir.entryInfoList(QDir::Files, QDir::Name);
+        if(fileList.size() >0 )
+        {
+            QString fileName = fileList.last().filePath();
+            QFile file(fileName);
+            if(file.open(QIODevice::ReadOnly | QIODevice::Text))
+            {
+                while (!file.atEnd()) {
+                    QString line =  QString::fromUtf8(file.readLine());
+                    QStringList list = line.split(",");
+                    if(line.size() >= 4)
+                    {
+                        FinancialData data;
+                        data.mCode = list[0];
+                        data.mEPS = 0;
+                        data.mBVPS = 0;
+                        data.mTotalShare = list[3].toDouble() * 10000;
+                        data.mMutalShare = list[3].toDouble() * 10000;
+                        data.mROE = 0;
+                        dataList.append(data);
+                    }
+                }
+                file.close();
+            }
+        }
+
         int pos = 0;
         int section = 200;
         while(pos < mShareCodeList.length())

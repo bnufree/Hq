@@ -32,8 +32,21 @@ QShareHistoryInfoThread::~QShareHistoryInfoThread()
 
 QString QShareHistoryInfoThread::getFileName()
 {
+    //根据code的不同进行选择
+    QString dir;
+    if(ShareData::shareType(mCode) & SHARE_SH_TOTAL)
+    {
+        dir.append("sh");
+    } else
+    {
+        dir.append("sz");
+    }
+    dir.append("/");
+    dir.append(mCode.left(3));
+    dir.append("/");
+    dir.append(mCode);
     //设定保存的文件名
-    return QString("%1/%2").arg(HQ_DAY_HISTORY_DIR).arg(mCode);
+    return QString("%1/%2").arg(HQ_DAY_HISTORY_DIR).arg(dir);
 }
 
 bool QShareHistoryInfoThread::readFile(ShareHistoryFileDataList& list, bool& adjust)
@@ -55,8 +68,6 @@ bool QShareHistoryInfoThread::readFile(ShareHistoryFileDataList& list, bool& adj
         ShareHistoryFileData data;
         file.read((char*)(&data), sizeof(ShareHistoryFileData));
         list.append(data);
-        if(mCode.toInt() == 159949)
-        qDebug()<<QDateTime::fromTime_t(data.mDate).date()<<data.mClose<<data.mMoney / 10000.0;
     }
     file.close();
 
@@ -68,11 +79,7 @@ void QShareHistoryInfoThread::run()
 {
     QTime t;
     t.start();
-    QDate start, end;
-
-    HqInfoParseUtil::getShareDateRange(mCode.right(6), start, end);
-    qDebug()<<mCode<<start<<end;
-    return;
+    QDate start = QDate::fromString(PROFILES_INS->value(LIST_DATE, mCode.right(6)).toString(), "yyyy-MM-dd");
 
     //default is
     QDate start_update_date;
@@ -82,9 +89,13 @@ void QShareHistoryInfoThread::run()
     if(list.size() > 0)
     {
         start_update_date =  ShareTradeDateTime(list.last().mDate).date().addDays(1);
+        if(start != ShareTradeDateTime(list.first().mDate).date())
+        {
+            start_update_date = start;
+            adjust = true;
+        }
     } else
     {
-        if(!HqInfoParseUtil::getShareDateRange(mCode.right(6), start, end)) return;
         start_update_date = start;
     }
     //开始更新日线数据到今天

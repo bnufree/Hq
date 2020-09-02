@@ -15,6 +15,7 @@
 #define     CLOSE_DATE_SEC          "CloseDates"
 #define     CLOSE_DATE_KEY          "Dates"
 #define     CLOSE_DATE_YEAR         "Year"
+#define     LIST_DATE               "ListDate"
 
 class Profiles : public QObject
 {

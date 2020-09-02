@@ -20,6 +20,7 @@ public:
     ~QEtfScaleThread();
 
     void run();
+    QList<EtfScaleData> getAllEtfScales() const {return mEtfVolMap.values();}
 private:
     void parseShEtf(const QDate& date);
     void parseSzEtf(const QDate& date);
