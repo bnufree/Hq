@@ -106,7 +106,8 @@ SOURCES += main.cpp\
     northbundwidget.cpp \
     date/annualcloseddaydisclosure.cpp \
     date/qshareactivedateupdatethread.cpp \
-    date/shareworkingdatetime.cpp
+    date/shareworkingdatetime.cpp \
+    history/qsharehsgthistorychangethread.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -189,7 +190,8 @@ HEADERS  += dialog.h \
     northbundwidget.h\
     date/annualcloseddaydisclosure.h \
     date/qshareactivedateupdatethread.h \
-    date/shareworkingdatetime.h
+    date/shareworkingdatetime.h \
+    history/qsharehsgthistorychangethread.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \
