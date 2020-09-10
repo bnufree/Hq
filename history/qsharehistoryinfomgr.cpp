@@ -55,6 +55,10 @@ void QShareHistoryInfoMgr::slotStartGetHistoryWithAllCodes()
     foreach (QString code, mCodesList) {
         if(code.size() > 6) code = code.right(6);
         QMap<QDate, ShareForignVolFileData> list = mShareForeignDataMap[code.toInt()];
+        bool counter = false;
+#ifdef Q_OS_WIN
+        counter = true;
+#endif
         QShareHistoryInfoThread* thread = new QShareHistoryInfoThread(code, list, true, this);
         mPool.start(thread);
     }

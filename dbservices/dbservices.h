@@ -153,6 +153,7 @@ signals:
     void signalQueryShareExchangeRecord(int cur_page, const QString& code, const QString& start_date,  const QString& end_date);
     void signalDeleteShareExchangeRecord(const QString& code, const QString& start_date,  const QString& end_date);
     void signalDeleteShareExchangeRecordSucceed();
+    void signalUpdateShareHsgtCounter(const ShareHsgtList& list);
 
 
 public slots:
@@ -161,6 +162,7 @@ public slots:
     void slotSaveFavCode(const QString& code, bool fav);
     void slotInitDBTables();
     void slotUpdateShareCloseDate(const QList<QDate>& list);
+    void slotUpdateShareHsgtCounter(const ShareHsgtList&list);
     //历史数据
     void slotRecvShareHistoryInfos(const ShareDataList& list, int mode);
     void slotSendShareHistoryUpdateDate(const QDate& date, bool update);

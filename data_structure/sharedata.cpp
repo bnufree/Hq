@@ -1,4 +1,4 @@
-#include "sharedata.h"
+﻿#include "sharedata.h"
 
 int ShareData::stk_sort_type = STK_DISPLAY_SORT_TYPE_CHGPER;
 int ShareData::stk_sort_rule = 1;
@@ -79,7 +79,7 @@ bool ShareData::ShareSort(const ShareData &d1, const ShareData &d2)
         sts = stk_sort_rule == 1? d1.mForeignCap > d2.mForeignCap : d1.mForeignCap < d2.mForeignCap;
         break;
     case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG:
-        sts = stk_sort_rule == 1? d1.mHsgtData.mVolCh1> d2.mHsgtData.mVolCh1 : d1.mHsgtData.mVolCh1 < d2.mHsgtData.mVolCh1;
+        sts = stk_sort_rule == 1? d1.mHsgtData.volChg("1")> d2.mHsgtData.volChg("1") : d1.mHsgtData.volChg("1") < d2.mHsgtData.volChg("1");
         break;
     case STK_DISPLAY_SORT_TYPE_FOREIGN_CAP_CHG:
         sts = stk_sort_rule == 1? d1.mForeignCapChg > d2.mForeignCapChg :d1.mForeignCapChg < d2.mForeignCapChg;
@@ -103,10 +103,10 @@ bool ShareData::ShareSort(const ShareData &d1, const ShareData &d2)
         sts = stk_sort_rule == 1? d1.mFinanceData.mROE > d2.mFinanceData.mROE : d1.mFinanceData.mROE < d2.mFinanceData.mROE;
         break;
     case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG5:
-        sts = stk_sort_rule == 1? d1.mHsgtData.mVolCh5> d2.mHsgtData.mVolCh5 : d1.mHsgtData.mVolCh5 < d2.mHsgtData.mVolCh5;
+        sts = stk_sort_rule == 1? d1.mHsgtData.volChg("5")> d2.mHsgtData.volChg("5") : d1.mHsgtData.volChg("5") < d2.mHsgtData.volChg("5");
         break;
     case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG10:
-        sts = stk_sort_rule == 1? d1.mHsgtData.mVolCh10 > d2.mHsgtData.mVolCh10 : d1.mHsgtData.mVolCh10 < d2.mHsgtData.mVolCh10;
+        sts = stk_sort_rule == 1? d1.mHsgtData.volChg("10") > d2.mHsgtData.volChg("10") : d1.mHsgtData.volChg("10") < d2.mHsgtData.volChg("10");
         break;
     default:
         break;

@@ -5,6 +5,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
+#include "dbservices/dbservices.h"
 
 QShareHSGTHistoryChangeThread::QShareHSGTHistoryChangeThread(QObject *parent) : QObject(parent)
 {
@@ -14,7 +15,7 @@ QShareHSGTHistoryChangeThread::QShareHSGTHistoryChangeThread(QObject *parent) : 
 void QShareHSGTHistoryChangeThread::run()
 {
     QDate date = QDate::currentDate();
-    QMap<QString, ShareHSGTHistoryData> dataMap;
+    QMap<QString, ShareHsgt> dataMap;
     for(int i=HSGT_CHG_1DAY; i<=HSGT_CHG_YEAR; i++)
     {
         QString type = "";
@@ -62,20 +63,14 @@ void QShareHSGTHistoryChangeThread::run()
                 {
                     obj = array[i].toObject();
                     QString code = obj.value("SCode").toString();
-                    ShareHSGTHistoryData &data = dataMap[code];
-                    data.mChgPercent = obj.value("Zdf").toDouble();
+                    ShareHsgt &data = dataMap[code];
+                    data.mChange = obj.value("Zdf").toDouble();
                     data.mCode = code;
-                    data.mCurPrice = obj.value("NewPrice").toDouble();
-                    data.mDate = obj.value("HdDate").toString();
-                    data.mHYCode = obj.value("ORIGINALCODE").toString();
-                    data.mJGNum = int(obj.value("JG_SUM").toDouble());
-                    data.mJGShareRate = obj.value("SharesRate").toDouble();
+                    data.mDate = QDate::fromString(obj.value("HdDate").toString(),"yyyy-MM-dd");
                     data.mName = obj.value("SName").toString();
-                    data.mTotalShareMktCap = obj.value("ZSZ").toDouble();
-                    data.mMutalShareMktCap = obj.value("LTSZ").toDouble();
-                    data.mNowHSGTTotalShare = obj.value("ShareHold").toDouble();
-                    data.mNowHSGTTotalSharePercent = obj.value("ZZB").toDouble();
-                    data.mNowHSGTMutalSharePercent = obj.value("LTZB").toDouble();
+                    data.mVolTotal = obj.value("ShareHold").toDouble();
+                    data.mVolTotalChangePercent = obj.value("ZZB").toDouble();
+                    data.mVolMutablePercent = obj.value("LTZB").toDouble();
                     ShareHSGTChgData chg;
                     chg.mVolChg = obj.value("ShareHold_Chg_One").toDouble();
                     chg.mVolMutalChangePercent = obj.value("LTZB_One").toDouble();
@@ -89,4 +84,5 @@ void QShareHSGTHistoryChangeThread::run()
         }
 
     }
+    if(dataMap.size() > 0) emit DATA_SERVICE->signalUpdateShareHsgtCounter(dataMap.values());
 }

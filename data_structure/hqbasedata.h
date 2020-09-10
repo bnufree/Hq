@@ -111,6 +111,18 @@ typedef QMap<QString, ShareBonusList> ShareBonusMap;
 Q_DECLARE_METATYPE(ShareBonus)
 Q_DECLARE_METATYPE(ShareBonusList)
 
+struct ShareHSGTChgData{
+    double      mVolChg;
+    double      mVolToalChgPercent;
+    double      mVolMutalChangePercent;
+
+    ShareHSGTChgData()
+    {
+        mVolChg = 0.0;
+        mVolToalChgPercent = 0.0;
+        mVolMutalChangePercent = 0.0;
+    }
+};
 typedef struct North_South_Bound_Data
 {
     QString             mCode;
@@ -122,13 +134,8 @@ typedef struct North_South_Bound_Data
     double              mChange;
     qint64              mVolTotal;
     double              mVolMutablePercent;
-    double              mVolCh1;
-    double              mVolCh3;
-    double              mVolCh5;
-    double              mVolCh10;
-    double              mVolChMonth;
-    double              mVolChSeason;
-    double              mVolChYear;
+    double              mVolTotalChangePercent;
+    QMap<QString,   ShareHSGTChgData>       mCounterMap;      // "1,3,5,10,m,jd,y"
     bool                mIsTop10;
     QDate               mDate;
 
@@ -141,13 +148,6 @@ typedef struct North_South_Bound_Data
         mChange = 0.0;
         mVolTotal = 0;
         mVolMutablePercent = 0.0;
-        mVolCh1 = 0.0;
-        mVolCh5 = 0.0;
-        mVolCh10 = 0.0;
-        mVolCh3 = 0.0;
-        mVolChMonth = 0.0;
-        mVolChSeason = 0.0;
-        mVolChYear = 0.0;
         mIsTop10 = false;
     }
 
@@ -160,6 +160,8 @@ typedef struct North_South_Bound_Data
     {
         return ((*this).mPure) > (data.mPure);
     }
+
+    double  volChg(const QString& type) const {return mCounterMap[type].mVolChg;}
 
 }ShareHsgt;
 

@@ -90,9 +90,9 @@ void QShareTablewidget::updateTable()
         this->setItemText(i, k++, QString("").sprintf("%.0f",data.mFinanceData.mROE));
 //        this->setItemText(i, k++, QString("").sprintf("%.0f",data.mProfit));
         this->setItemText(i, k++, QString("").sprintf("%.0f", data.mHsgtData.mVolTotal / 10000.0));
-        this->setItemText(i, k++, QString("").sprintf("%.0f", data.mHsgtData.mVolCh1 / 10000.0));
-        this->setItemText(i, k++, QString("").sprintf("%.0f", data.mHsgtData.mVolCh5/ 10000.0));
-        this->setItemText(i, k++, QString("").sprintf("%.0f", data.mHsgtData.mVolCh10 / 10000.0));
+        this->setItemText(i, k++, QString("").sprintf("%.0f", data.mHsgtData.mCounterMap["1"].mVolChg / 10000.0));
+        this->setItemText(i, k++, QString("").sprintf("%.0f", data.mHsgtData.mCounterMap["5"].mVolChg/ 10000.0));
+        this->setItemText(i, k++, QString("").sprintf("%.0f", data.mHsgtData.mCounterMap["10"].mVolChg / 10000.0));
         this->setItemText(i, k++, QString("").sprintf("%.2f", data.mForeignCap / 100000000.0));
         this->setItemText(i, k++, QString("").sprintf("%.2f", data.mForeignCapChg / 100000000.0));
         this->setItemText(i, k++, QString("").sprintf("%.2f",data.mHsl * 100));

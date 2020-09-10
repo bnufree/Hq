@@ -126,6 +126,8 @@ void HqInfoService::initSignalSlot()
     connect(this, SIGNAL(signalUpdateShareBonusInfo(ShareBonusList)), this, SLOT(slotUpdateShareBonusInfo(ShareBonusList)));
     connect(this, SIGNAL(signalUpdateShareHsgtTop10Info(ShareHsgtList)),
             this, SLOT(slotUpdateHsgtTop10Info(ShareHsgtList)));
+    connect(this, SIGNAL(signalUpdateShareHsgtCounter(ShareHsgtList)),
+            this, SLOT(slotUpdateShareHsgtCounter(ShareHsgtList)));
     connect(this, SIGNAL(signalUpdateHsgtTop10Keys(QDate)),
             this, SLOT(slotUpdateHsgtTop10Keys(QDate)));
     connect(this, SIGNAL(signalQueryShareHsgtTop10List(QString,QDate)),
@@ -270,7 +272,14 @@ QDate HqInfoService::getLastUpdateDateOfTable(const QString& table)
     return mDataBase.getLastUpdateDateOfTable(table);
 }
 
-
+void HqInfoService::slotUpdateShareHsgtCounter(const ShareHsgtList &list)
+{
+    foreach (ShareHsgt hsgt, list) {
+        QString code = hsgt.mCode.right(6);
+        ShareData& data = getShareData(code);
+        data.mHsgtData = hsgt;
+    }
+}
 
 void HqInfoService::slotRecvShareHistoryInfos(const ShareDataList &list, int mode)
 {
@@ -520,7 +529,7 @@ void HqInfoService::slotUpdateShareinfoWithHistory(const QString& code,\
     //data.mHistory.mLastMonthChgPers = lastMonthChange;
     data.mHistory.mChgPersFromYear = lastYearChange;
     data.mHsgtData.mVolTotal = vol;
-    data.mHsgtData.mVolCh1 = vol_chnage;
+    data.mHsgtData.mCounterMap["1"].mVolChg = vol_chnage;
     emit signalUpdateShareHistoryFinished(code);
 }
 
@@ -535,9 +544,9 @@ void HqInfoService::slotUpdateShareCounter(const ShareHistoryCounter& counter)
     data.mHistory.mWeekDayPrice = counter.weekP;
     data.mHsgtData.mVolTotal = counter.foreign_vol;
     data.mHsgtData.mVolMutablePercent = counter.foreign_percent;
-    data.mHsgtData.mVolCh1 = counter.foreign_ch1;
-    data.mHsgtData.mVolCh5 = counter.foreign_ch5;
-    data.mHsgtData.mVolCh10 = counter.foreign_ch10;
+    data.mHsgtData.mCounterMap["1"].mVolChg = counter.foreign_ch1;
+    data.mHsgtData.mCounterMap["5"].mVolChg = counter.foreign_ch5;
+    data.mHsgtData.mCounterMap["10"].mVolChg = counter.foreign_ch10;
     //emit signalUpdateShareHistoryFinished(code);
 }
 
