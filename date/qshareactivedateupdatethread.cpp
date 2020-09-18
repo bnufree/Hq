@@ -92,23 +92,8 @@ QList<QDate> QShareActiveDateUpdateThread::getCurrentYearClosedDateList()
 void QShareActiveDateUpdateThread::run()
 {
     QDate workDate;
-    //检查当前时间是不是工作日
-//    QDateList closedDateList = HqInfoParseUtil::dateListFromStringList(PROFILES_INS->value(CLOSE_DATE_SEC, CLOSE_DATE_KEY).toStringList());
     while(true)
     {
-        //获取当前的的系统时间状态
-//        QByteArray bytes = QHttpGet::getContentOfURL("http://www.sse.com.cn/js/common/systemDate_global.js;wa287bd80a8b07ed8e");
-//        qDebug()<<bytes;
-
-//        //获取当前年度对应的节假日休市
-//        if(closedDateList.size() == 0 || closedDateList.first().year() != QDate::currentDate().year())
-//        {
-//            closedDateList.clear();
-//            closedDateList = getCurrentYearClosedDateList();
-//            if(closedDateList.size() == 0) continue;
-//            PROFILES_INS->setValue(CLOSE_DATE_SEC, CLOSE_DATE_KEY, HqInfoParseUtil::dateListToStringList(closedDateList));
-//        }
-
         //获取当前行情系统的时间
         QByteArray recv = QHttpGet::getContentOfURL("http://hq.sinajs.cn/list=sh000001");
         QString result = QString::fromUtf8(recv);

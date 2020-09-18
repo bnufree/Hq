@@ -21,6 +21,7 @@ signals:
     void signalSystemStatus(qint64 time, int sts);
     void signalUpdateHsgtTop10();
     void signalSaveTodayShareHistory();
+    void signalRestartMe();
 
 private:
 

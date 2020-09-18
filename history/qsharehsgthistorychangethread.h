@@ -6,6 +6,7 @@
 #include "data_structure/sharedata.h"
 
 enum HSGT_CHG_MODE{
+    HSGT_CHG_NONE = -1,
     HSGT_CHG_1DAY = 0,
     HSGT_CHG_3DAY,
     HSGT_CHG_5DAY,
@@ -15,40 +16,19 @@ enum HSGT_CHG_MODE{
     HSGT_CHG_YEAR,
 };
 
-//struct ShareHSGTChgData{
-//    double      mVolChg;
-//    double      mVolToalChgPercent;
-//    double      mVolMutalChangePercent;
-//};
-
-//struct ShareHSGTHistoryData{
-//    QString     mCode;
-//    QString     mName;
-//    QString     mDate;
-//    double      mCurPrice;
-//    double      mChgPercent;
-//    double      mTotalShareMktCap;
-//    double      mMutalShareMktCap;
-//    QString     mHYCode;
-//    int         mJGNum;
-//    double      mJGShareRate;
-//    double      mNowHSGTTotalShare;
-//    double      mNowHSGTTotalSharePercent;
-//    double      mNowHSGTMutalSharePercent;
-
-//    QMap<QString, ShareHSGTChgData> mCounterMap;
-//};
 
 class QShareHSGTHistoryChangeThread : public QObject
 {
     Q_OBJECT
 public:
-    explicit QShareHSGTHistoryChangeThread(QObject *parent = 0);
+    explicit QShareHSGTHistoryChangeThread(HSGT_CHG_MODE mode = HSGT_CHG_NONE, QObject *parent = 0);
     void run();
 
 signals:
 
 public slots:
+private:
+    HSGT_CHG_MODE       mMode;
 };
 
 #endif // QSHAREHSGTHISTORYCHANGETHREAD_H

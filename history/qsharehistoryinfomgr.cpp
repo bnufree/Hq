@@ -42,10 +42,10 @@ void QShareHistoryInfoMgr::slotStartGetHistoryWithAllCodes()
         if(TradeDateMgr::instance()->isTradeDay(start))
         {
             QHKExchangeVolDataProcess * process = new QHKExchangeVolDataProcess(start, QHKExchangeVolDataProcess::Fetch_All, this);
+            process->setAutoDelete(true);
             mPool.start(process);
         }
         start = start.addDays(1);
-
     }
     mPool.waitForDone();
     if(mCodesList.size() == 0) return;
@@ -56,9 +56,7 @@ void QShareHistoryInfoMgr::slotStartGetHistoryWithAllCodes()
         if(code.size() > 6) code = code.right(6);
         QMap<QDate, ShareForignVolFileData> list = mShareForeignDataMap[code.toInt()];
         bool counter = false;
-#ifdef Q_OS_WIN
         counter = true;
-#endif
         QShareHistoryInfoThread* thread = new QShareHistoryInfoThread(code, list, true, this);
         mPool.start(thread);
     }

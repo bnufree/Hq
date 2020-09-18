@@ -7,7 +7,9 @@
 #include <QJsonValue>
 #include "dbservices/dbservices.h"
 
-QShareHSGTHistoryChangeThread::QShareHSGTHistoryChangeThread(QObject *parent) : QObject(parent)
+QShareHSGTHistoryChangeThread::QShareHSGTHistoryChangeThread(HSGT_CHG_MODE mode, QObject *parent) :
+    QObject(parent),
+    mMode(mode)
 {
 
 }
