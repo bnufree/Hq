@@ -1,5 +1,4 @@
 ﻿#include "qexchangerecordworker.h"
-#include "xlsxdocument.h"
 #include "xlsxchartsheet.h"
 #include "xlsxcellrange.h"
 #include "xlsxchart.h"
@@ -9,19 +8,40 @@
 #include <QFile>
 #include <QRegularExpression>
 #include <QStringList>
-#include "dbservices/dbservices.h"
+#include <QTimer>
+
 
 
 using namespace QXlsx;
+bool profit_cmp_desc = true;
 
-
-QExchangeRecordWorker::QExchangeRecordWorker(QObject *parent) : QObject(parent)
+bool ShareExchangeDataMgr_CMP(const ShareExchangeDataMgr& p1, const ShareExchangeDataMgr& p2)
 {
-    connect(this, SIGNAL(signalStartImport(QString)), this, SLOT(slotStartImport(QString)));
-    connect(DATA_SERVICE, SIGNAL(signalUpdateShareExchangeRecordSucceed()), this, SLOT(slotUpdateRecordSucceed()));
-    this->moveToThread(&mWorkThread);
+    if(profit_cmp_desc) return p1.mProfit > p2.mProfit;
+    return p1.mProfit <p2.mProfit;
+}
 
+
+QExchangeRecordWorker::QExchangeRecordWorker(QObject *parent) :
+    QObject(parent),
+    mXlsx(0)
+{
+    qRegisterMetaType<QList<ShareExchangeDataMgr>>("const QList<ShareExchangeDataMgr>&");
+    connect(this, SIGNAL(signalQueryShareProfitList(bool)), this, SLOT(slotQueryShareProfitList(bool)));
+    moveToThread(&mWorkThread);
     mWorkThread.start();
+    QTimer::singleShot(1000, this, SLOT(slotStartImport()));
+}
+
+QExchangeRecordWorker::~QExchangeRecordWorker()
+{
+    qDebug()<<"file end now...........";
+    mWorkThread.quit();
+    if(mXlsx)
+    {
+        mXlsx->save();
+        delete mXlsx;
+    }
 }
 
 bool QExchangeRecordWorker::isDateCol(const QString &title)
@@ -99,18 +119,39 @@ int QExchangeRecordWorker::parseTypeOfString(const QString& type)
 {
     if(type.contains(QStringLiteral("卖出"))) return ShareExchange_Sell;
     if(type.contains(QStringLiteral("买入"))) return ShareExchange_Buy;
+    if(type.contains(QStringLiteral("派息"))) return ShareExchange_Share_Bonus;
+    if(type.contains(QStringLiteral("送转"))) return ShareExchange_Dividend_Bonus;
     return ShareExchange_None;
 }
 
 void QExchangeRecordWorker::slotUpdateRecordSucceed()
 {
-    emit DATA_SERVICE->signalQueryShareExchangeRecord(1, "000651", "", "");
+//    emit DATA_SERVICE->signalQueryShareExchangeRecord(1, "000651", "", "");
 }
 
-
-
-void QExchangeRecordWorker::slotStartImport(const QString &sFilePathName)
+void QExchangeRecordWorker::slotQueryShareProfitList(bool clear)
 {
+    if(mShareDataMgrMap.size() == 0) return;
+    QList<ShareExchangeDataMgr> list;
+    foreach (ShareExchangeDataMgr data, mShareDataMgrMap) {
+        if(clear && data.mVol == 0)
+        {
+            list.append(data);
+        }
+        if((!clear) && data.mVol > 0)
+        {
+            list.append(data);
+        }
+    }
+
+    qStableSort(list.begin(), list.end(), ShareExchangeDataMgr_CMP);
+
+
+}
+
+void QExchangeRecordWorker::slotStartImport()
+{
+    QString sFilePathName = "record.xlsx";
     //检查文件是否存在
     if(sFilePathName.isEmpty() || !QFile::exists(sFilePathName))
     {
@@ -119,8 +160,8 @@ void QExchangeRecordWorker::slotStartImport(const QString &sFilePathName)
         return ;
     }
 
-    QXlsx::Document xlsx(sFilePathName);
-    QXlsx::Worksheet *sheet = xlsx.currentWorksheet();
+    mXlsx = new QXlsx::Document(sFilePathName);
+    QXlsx::Worksheet *sheet = mXlsx->currentWorksheet();
     if(!sheet)
     {
         qDebug()<<"not found sheet....";
@@ -136,7 +177,7 @@ void QExchangeRecordWorker::slotStartImport(const QString &sFilePathName)
 
     mColMap.clear();
 
-    QList<ShareExchangeData> list;
+    mShareDataMgrMap.clear();
     int  index = 0;
     QString currentDate;
     for(int i=1; i<=nRowCount; i++)
@@ -144,8 +185,8 @@ void QExchangeRecordWorker::slotStartImport(const QString &sFilePathName)
         QStringList rows;
         for(int k=1; k<=nColCount; k++)
         {
-            QString str = xlsx.read(i, k).toString();
-            rows.append(str.remove(QRegularExpression("[=\"]")));
+            QString str = mXlsx->read(i, k).toString();
+            rows.append(str.remove(QRegularExpression("[=\",]")));
         }
 //        qDebug()<<"rows:"<<rows;
 
@@ -217,11 +258,14 @@ void QExchangeRecordWorker::slotStartImport(const QString &sFilePathName)
 
             ShareExchangeData data;
             data.mCode = rows[mColMap[Code]].right(6);
+            if(data.mCode.trimmed().size() == 0) continue;
             data.mDateTime = rows[mColMap[Date]].remove("-");
             data.mID = -1;
             data.mNum = rows[mColMap[Number]].toInt();
             data.mPrice = rows[mColMap[Price]].toDouble();
             data.mType = parseTypeOfString(rows[mColMap[Type]]);
+            if(data.mType == 0) continue;
+            if(data.mType == ShareExchange_Share_Bonus) data.mNum = 0;
 
             if(mColMap.contains(Name))  data.mName = rows[mColMap[Name]];
             if(data.mName.contains(QStringLiteral("金腾通"))) continue;
@@ -285,21 +329,22 @@ void QExchangeRecordWorker::slotStartImport(const QString &sFilePathName)
                     data.mNetIncome = 0.0;
                 }
             }
+            ShareExchangeDataMgr  &mgr = mShareDataMgrMap[data.mCode];
+            mgr.mProfit += data.mNetIncome;
+            mgr.mCode = data.mCode;
+            mgr.mName = data.mName;
+            int preVol = mgr.mVol;
+            mgr.mVol += data.mNum *(data.mType == ShareExchange_Buy || data.mType == ShareExchange_Dividend_Bonus? 1:(-1));
+            if(preVol >= 0)
+            {
+                mgr.mList.append(data);
+            } else
+            {
+                mgr.mList.insert(mgr.mList.size() - 1, data);
+            }
 
-            if(data.mPrice < 0.1 && data.mMoney <0.1) continue;
-
-            qDebug()<<data.mDateTime<<data.mCode<<data.mName<<data.mType<<data.mMoney<<data.mNetIncome<<data.mSerialText;
-
-            list.append(data);
         }
-
     }
-
-    if(list.size() > 0)
-    {
-        emit DATA_SERVICE->signalUpdateShareExchangeRecord(list);
-    }
-
     return ;
 
 }
