@@ -149,6 +149,7 @@ typedef struct North_South_Bound_Data
         mVolTotal = 0;
         mVolMutablePercent = 0.0;
         mIsTop10 = false;
+        mCounterMap.clear();
     }
 
     bool operator <(const North_South_Bound_Data& data) const

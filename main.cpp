@@ -24,6 +24,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     std::set_new_handler(no_memory);
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF8"));
-    QExchangeRecordWorker work;
+    zchxMainWindow w;
+    w.showMaximized();
     return a.exec();
 }
