@@ -25,6 +25,7 @@
 #include <QTextBrowser>
 #include <qetfscalethread.h>
 #include "northbundwidget.h"
+#include "qshareexchangedisplaywidget.h"
 
 enum zchxBtnIndex{
     Btn_Info = 0,
@@ -58,6 +59,7 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
     createCtrlObject(QStringLiteral("港资"), new NorthBundWidget(this));
     createCtrlObject(QStringLiteral("龙虎榜"), new QWidget);
     createCtrlObject(QStringLiteral("新股申购"), new QWidget);
+    createCtrlObject(QStringLiteral("交易记录"), new QShareExchangeDisplayWidget(this));
 
 
 
@@ -160,6 +162,10 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
 
 
     QTimer::singleShot(1000, HQTaskMagrCenter::instance(), SLOT(slotStart()));
+
+    int total_height = QApplication::desktop()->geometry().height();
+    int total_mm = QApplication::desktop()->heightMM();
+    qDebug()<<"total height:"<<total_height<<total_mm;
 
 }
 

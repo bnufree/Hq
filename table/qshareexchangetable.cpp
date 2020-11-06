@@ -17,6 +17,54 @@ QString ShareExchangeType2String(int type)
     if(type == ShareExchange_Dividend_Bonus) return QStringLiteral("除息");
 }
 
+QShareProfitTablewidget::QShareProfitTablewidget(QWidget *parent) : HqTableWidget(parent)
+{
+    //设定抬头
+    TableColDataList datalist;
+    datalist.append(TableColData(QStringLiteral("序号"), STK_DISPLAY_SORT_TYPE_NONE));
+    datalist.append(TableColData(QStringLiteral("代码"), STK_DISPLAY_SORT_TYPE_NONE));
+    datalist.append(TableColData(QStringLiteral("名称"), STK_DISPLAY_SORT_TYPE_NONE));
+    datalist.append(TableColData(QStringLiteral("数量"), STK_DISPLAY_SORT_TYPE_NONE));
+    datalist.append(TableColData(QStringLiteral("盈亏"), STK_DISPLAY_SORT_TYPE_NONE));
+
+    setHeaders(datalist);
+    setAutoChangePage(true);
+    QExchangeRecordWorker* worker = new QExchangeRecordWorker();
+    connect(worker, SIGNAL(signalSendShareProfitList(QList<ShareExchangeDataMgr>)), this, SLOT(slotRecvProfitDataList(QList<ShareExchangeDataMgr>)));
+
+}
+
+
+void QShareProfitTablewidget:: slotRecvProfitDataList(const QList<ShareExchangeDataMgr>& list )
+{
+    prepareUpdateTable(list.size());
+    int i = 0;
+    foreach (ShareExchangeDataMgr data, list) {
+        int k =0;
+        this->setItemText(i, k++, QString::number(i+1));
+        this->setItemText(i, k++, data.mCode);
+        this->setItemText(i, k++, data.mName);
+        this->setItemText(i, k++, QString::number(data.mVol));
+        this->setItemText(i, k++, HqUtils::double2Str(data.mProfit));
+        this->item(i, 0)->setData(Qt::UserRole, QVariant::fromValue(data));
+        i++;
+    }
+
+    for(int i=0; i<this->columnCount(); i++)
+    {
+        updateColumn(i);
+    }
+}
+
+
+
+
+void QShareProfitTablewidget::slotCellDoubleClicked(int row, int col)
+{
+
+}
+
+
 QShareExchangeTablewidget::QShareExchangeTablewidget(QWidget *parent) : HqTableWidget(parent)
 {
     //设定抬头

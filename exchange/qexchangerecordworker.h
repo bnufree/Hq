@@ -39,6 +39,8 @@ struct ShareExchangeDataMgr
     }
 };
 
+Q_DECLARE_METATYPE(ShareExchangeDataMgr)
+
 class QExchangeRecordWorker : public QObject
 {
     Q_OBJECT

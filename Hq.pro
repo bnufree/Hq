@@ -101,13 +101,13 @@ SOURCES += main.cpp\
     table/northboundmoneyflowtablewidget.cpp \
     table/northboundtop10displaywidget.cpp \
     table/northboundsharevolwidget.cpp \
-    northbound/qnorthbounddisplayweidget.cpp \
     qetfscalethread.cpp \
     northbundwidget.cpp \
     date/annualcloseddaydisclosure.cpp \
     date/qshareactivedateupdatethread.cpp \
     date/shareworkingdatetime.cpp \
-    history/qsharehsgthistorychangethread.cpp
+    history/qsharehsgthistorychangethread.cpp \
+    qshareexchangedisplaywidget.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -185,13 +185,13 @@ HEADERS  += dialog.h \
     table/northboundmoneyflowtablewidget.h \
     table/northboundtop10displaywidget.h \
     table/northboundsharevolwidget.h \
-    northbound/qnorthbounddisplayweidget.h \
     qetfscalethread.h \
     northbundwidget.h\
     date/annualcloseddaydisclosure.h \
     date/qshareactivedateupdatethread.h \
     date/shareworkingdatetime.h \
-    history/qsharehsgthistorychangethread.h
+    history/qsharehsgthistorychangethread.h \
+    qshareexchangedisplaywidget.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \
@@ -208,7 +208,7 @@ FORMS    += dialog.ui \
     qkuaixunlistwidget.ui \
     table/zchxhqdisplaywidget.ui \
     qpopwindow.ui \
-    northbound/qnorthbounddisplayweidget.ui
+    qshareexchangedisplaywidget.ui
 
 RESOURCES += \
     image.qrc

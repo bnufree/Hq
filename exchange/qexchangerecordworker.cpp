@@ -345,6 +345,8 @@ void QExchangeRecordWorker::slotStartImport()
 
         }
     }
+
+    emit signalSendShareProfitList(mShareDataMgrMap.values());
     return ;
 
 }

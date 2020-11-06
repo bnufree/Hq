@@ -2,7 +2,25 @@
 #define QSHAREEXCHANGETABLE_H
 
 #include "HqTableWidget.h"
-#include "data_structure/sharedata.h"
+#include "exchange/qexchangerecordworker.h"
+
+class QShareProfitTablewidget : public HqTableWidget
+{
+    Q_OBJECT
+public:
+    explicit QShareProfitTablewidget(QWidget *parent = 0);
+public slots:
+    void    slotRecvProfitDataList(const QList<ShareExchangeDataMgr>& list );
+private:
+
+public slots:
+    void    slotCellDoubleClicked(int row, int col);
+private:
+    QString     mCode;
+    QString     mStartDate;
+    QString     mEndDate;
+};
+
 
 class QShareExchangeTablewidget : public HqTableWidget
 {
