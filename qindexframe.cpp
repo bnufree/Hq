@@ -128,8 +128,6 @@ int QIndexFrame::status() const
 
 void QIndexFrame::setStatus(int sts)
 {
-//    mStatus = sts;
-//    style()->polish(this);
     mStatus = sts;
     QLayout* pLayout = layout();
     if(!pLayout) return;

@@ -25,6 +25,12 @@ int main(int argc, char *argv[])
     std::set_new_handler(no_memory);
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF8"));
     zchxMainWindow w;
+#ifdef Q_OS_WIN
+    int height = QApplication::desktop()->availableGeometry().height();
+    w.setFixedSize(0.4*height, height*0.9);
+    w.show();
+#else
     w.showMaximized();
+#endif
     return a.exec();
 }
