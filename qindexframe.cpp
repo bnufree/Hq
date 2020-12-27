@@ -3,6 +3,7 @@
 #include <QDebug>
 #include "data_structure/hqutils.h"
 #include <QStyle>
+#include <QResizeEvent>
 
 int         frame_Width = 0;
 QIndexFrame::QIndexFrame(const QString& name, QWidget *parent) :
@@ -17,7 +18,8 @@ QIndexFrame::QIndexFrame(const QString& name, QWidget *parent) :
     ui->chgper->clear();
     ui->money->clear();
     setStatus(0);
-    frame_Width = width();
+    setFixedSize(HqUtils::convertMM2Pixel(50.0), HqUtils::convertMM2Pixel(10.0));
+
 }
 
 QIndexFrame::~QIndexFrame()
@@ -25,30 +27,57 @@ QIndexFrame::~QIndexFrame()
     delete ui;
 }
 
-
-QSize QIndexFrame::calSize() const
+void QIndexFrame::resizeEvent(QResizeEvent *e)
 {
-    int half_height = HqUtils::convertMM2Pixel(4);
+    adjustFrameFont(e->size().width(), e->size().height());
+}
+
+void QIndexFrame::adjustFrameFont(int width, int height) const
+{
+    ui->horizontalLayout_2->setMargin(0);
+    ui->verticalLayout->setMargin(0);
+    ui->verticalLayout->setSpacing(2);
+    int name_max_width = (width - 3 * ui->horizontalLayout_2->spacing()) / 4;
     QFont font = ui->name->font();
-    HqUtils::setFontPixelSize(&font, half_height);
-    font.setBold(false);
+    while (1) {
+        if(font.pixelSize() > 0)
+            font.setPixelSize(font.pixelSize() + 1);
+        else if(font.pointSize() > 0)
+            font.setPixelSize(font.pointSize() + 1);
+        else
+            break;
+        int cur_name_width =  QFontMetrics(font).width(tr("上证指数"));
+        int cur_name_frame_height = QFontMetrics(font).height() / 0.9 * 2;
+        if(cur_name_frame_height >= height || cur_name_width >= name_max_width)
+        {
+            break;
+        }
+
+    }
+
     ui->name->setFont(font);
     ui->cur->setFont(font);
 
-    int total_height = 2* half_height + 4;
-    int width = 18;
-    //测试frame的宽度
-    width += QFontMetrics(font).width(tr("上证指数"));
-    HqUtils::setFontPixelSize(&font,total_height);
+    font = ui->money->font();
+    while (1) {
+        if(font.pixelSize() > 0)
+            font.setPixelSize(font.pixelSize() + 1);
+        else if(font.pointSize() > 0)
+            font.setPixelSize(font.pointSize() + 1);
+        else
+            break;
+        int cur_name_width =  QFontMetrics(font).width(tr("10000亿"));
+        int cur_name_frame_height = QFontMetrics(font).height() / 0.9 * 2;
+        if(cur_name_frame_height >= height || cur_name_width >= name_max_width)
+        {
+            break;
+        }
+    }
+
     ui->chg->setFont(font);
     ui->chgper->setFont(font);
     ui->money->setFont(font);
-    width += QFontMetrics(font).width(tr("+300.00"));
-    width += QFontMetrics(font).width(tr("+10.12%"));
-    width += QFontMetrics(font).width(tr("10000亿"));
-    width += 18;
     frame_Width = width;
-    return QSize(width, total_height);
 }
 
 

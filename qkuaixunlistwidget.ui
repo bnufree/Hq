@@ -20,6 +20,13 @@
 
 QListWidget{ 
     outline:0px;
+}
+
+
+QListWidget::item::focus
+{
+    background-color:transparent;
+	border:none;
 }</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">

@@ -31,7 +31,6 @@ public:
         mDisplayRowStart = 0;
         updateTable();
     }
-    void setAutoChangePage(bool sts) {mAutoChangePage = sts;}
     void setHeaders(const TableColDataList& list);
     void appendRow();
     void setCodeName(int row, int column,const QString& code,const QString& name);
@@ -96,8 +95,7 @@ private:
     QPoint                  mPressPnt;
     QPoint                  mMovePnt;
     int                     mMoveDir;
-    int                     mMaxDisCol;    
-    bool                    mAutoChangePage;
+    int                     mMaxDisCol;
     bool                    mIsWorkInMini;
     quint64               mLastWheelTime;
     QList<int>              mColWidthList;
@@ -108,5 +106,17 @@ protected:
     int                     mMaxDisRow;
 
 };
+
+//class HqDisTableWidget : public QWidget
+//{
+//    Q_OBJECT
+//public:
+//    explicit HqDisTableWidget(QWidget *parent = 0);
+//    ~HqDisTableWidget();
+
+//private:
+//    QTableWidget*               mFixTable;
+//    HqTableWidget*              mMoveTable;
+//};
 
 #endif // HqTableWidget_H

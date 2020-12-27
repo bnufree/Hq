@@ -107,7 +107,8 @@ SOURCES += main.cpp\
     date/qshareactivedateupdatethread.cpp \
     date/shareworkingdatetime.cpp \
     history/qsharehsgthistorychangethread.cpp \
-    qshareexchangedisplaywidget.cpp
+    qshareexchangedisplaywidget.cpp \
+    table/HqMergeTableWidget.cpp
 
 HEADERS  += dialog.h \
     qeastmoneylhbthread.h \
@@ -191,7 +192,8 @@ HEADERS  += dialog.h \
     date/qshareactivedateupdatethread.h \
     date/shareworkingdatetime.h \
     history/qsharehsgthistorychangethread.h \
-    qshareexchangedisplaywidget.h
+    qshareexchangedisplaywidget.h \
+    table/HqMergeTableWidget.h
 
 FORMS    += dialog.ui \
     qexchangedatemangagedialog.ui \

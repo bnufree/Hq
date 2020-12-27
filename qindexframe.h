@@ -42,7 +42,8 @@ public:
     void setName(const QString& name);
     void setLayoutLabel(QLayout* layout, int sts);
 protected:
-    QSize calSize() const;
+    void  adjustFrameFont(int width, int height) const;
+    void  resizeEvent(QResizeEvent* e);
 
 private:
     Ui::QIndexFrame *ui;

@@ -12,8 +12,9 @@ QSahreOptWidget::QSahreOptWidget(const QString& code, QWidget *parent) :
     ui->setupUi(this);
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::SubWindow);
     this->setAttribute(Qt::WA_DeleteOnClose);
-    int height = HqUtils::convertMM2Pixel(10);
-    this->setFixedSize(4*height+3, height);
+    int height = HqUtils::convertMM2Pixel(8);
+    int width = HqUtils::convertMM2Pixel(50);
+    this->setFixedSize(width, height);
     QTimer::singleShot(3*1000, this, SLOT(close()));
 }
 

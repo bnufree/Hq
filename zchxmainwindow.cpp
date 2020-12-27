@@ -26,6 +26,7 @@
 #include <qetfscalethread.h>
 #include "northbundwidget.h"
 #include "qshareexchangedisplaywidget.h"
+#include "table/HqMergeTableWidget.h"
 
 enum zchxBtnIndex{
     Btn_Info = 0,
@@ -51,11 +52,11 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
     ui->centralwidget->layout()->addWidget(mCtrlWidget);
     ui->statusbar->setVisible(false);
     //快讯信息显示
-//    mInfoListWidget = new QKuaixunListWidget(this);
+    mInfoListWidget = new QKuaixunListWidget(this);
 //    connect(mInfoListWidget, SIGNAL(sendRecvInfoList(KuaiXunList)), this, SLOT(slotRecvKuaiXunList(KuaiXunList)));
-//    HQTaskMagrCenter::instance()->registerInfoDisplaywidget(mInfoListWidget);
-//    createCtrlObject(QStringLiteral("资讯"), mInfoListWidget);
-    createCtrlObject(QStringLiteral("行情中心"), new zchxHqDisplayWidget(this));
+    HQTaskMagrCenter::instance()->registerInfoDisplaywidget(mInfoListWidget);
+    createCtrlObject(QStringLiteral("资讯"), mInfoListWidget);
+    createCtrlObject(QStringLiteral("行情中心"), new HqMergeTableWidget(this));
     createCtrlObject(QStringLiteral("港资"), new NorthBundWidget(this));
     createCtrlObject(QStringLiteral("龙虎榜"), new QWidget);
     createCtrlObject(QStringLiteral("新股申购"), new QWidget);
@@ -158,7 +159,9 @@ zchxMainWindow::zchxMainWindow(QWidget *parent) :
     connect(mSysTrayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(slotSystemTrayOperation(QSystemTrayIcon::ActivationReason)));
 #endif
 
-//    slotCtrlBtnClicked(mCtrlWidget->layout()->itemAt(0)->widget());
+//
+
+    slotCtrlBtnClicked(mCtrlWidget->layout()->itemAt(0)->widget());
 
 
     QTimer::singleShot(1000, HQTaskMagrCenter::instance(), SLOT(slotStart()));

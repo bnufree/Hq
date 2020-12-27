@@ -65,6 +65,7 @@ QKuaixunListWidget::QKuaixunListWidget(QWidget *parent) :
     qDebug()<<"gesture type:"<<type;
 #endif
     this->setStyleSheet("font-size:16pt;");
+    ui->listWidget->setFocusPolicy(Qt::NoFocus);
     ui->listWidget->setWrapping(false);
     ui->listWidget->setWordWrap(true);
     ui->listWidget->verticalScrollBar()->setVisible(false);
@@ -113,6 +114,8 @@ void QKuaixunListWidget::appendData(const KuaiXunList &list)
         content.first().append(data.digest);
         ui->listWidget->insertItems(0, content);
         QListWidgetItem *item = ui->listWidget->item(0);
+        item->setTextColor(QColor(255, 100,100));
+        item->setFlags(item->flags()& ~Qt::ItemIsSelectable);
         item->setData(Qt::UserRole, QVariant::fromValue(data));
     }
     int rowCount = ui->listWidget->count();

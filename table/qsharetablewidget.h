@@ -13,10 +13,6 @@ class QShareTablewidget : public HqTableWidget
 public:
     explicit QShareTablewidget(QWidget *parent = 0);
     virtual void setSortType(int type);
-    virtual void displayNextPage();
-    virtual void displayPreviousPage();
-    virtual void displayFirstPage();
-    virtual void displayLastPage();
 public slots:
     void    setSelfShareCodesList(const QStringList& list);
 private:
@@ -50,8 +46,6 @@ public slots:
 private:
     QMap<QString, double>   mShareMap;
     QList<QAction*>         mCodesActionList;
-//    QSinaStkResultMergeThread*          mMergeThread;
-//    QTimer                              *mUpdateTimer;
     ShareDataList                       mShareDataList;
     QMutex                              mDataMutex;
 };

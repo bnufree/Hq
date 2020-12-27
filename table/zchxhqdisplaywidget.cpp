@@ -12,7 +12,7 @@ zchxHqDisplayWidget::zchxHqDisplayWidget(QWidget *parent) :
 {
     ui->setupUi(this);
     int frameHeight = HqUtils::convertMM2Pixel(10.0);
-    ui->top_frame->setFixedHeight(frameHeight);
+//    ui->top_frame->setFixedHeight(frameHeight);
     mMarketBtn = new QAndroidButton(this);
     mMarketBtn->setAlignment(Qt::AlignCenter);
     mMarketBtn->setFixedWidth(HqUtils::convertMM2Pixel(15.0));

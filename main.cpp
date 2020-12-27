@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
 #ifdef Q_OS_WIN
     int height = QApplication::desktop()->availableGeometry().height();
     w.setFixedSize(0.4*height, height*0.9);
+    qDebug()<<"window size:"<<w.size();
     w.show();
 #else
     w.showMaximized();
