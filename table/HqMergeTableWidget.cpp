@@ -590,6 +590,8 @@ void HqMergeTableWidget::removeRows(int start, int count)
 void HqMergeTableWidget::resetDisplayRows()
 {
     mDisplayRowStart = 0;
+    mFixTable->resetPageDisplay();
+    mMoveTable->resetPageDisplay();
 }
 
 void HqMergeTableWidget::updateDisplayRange()
