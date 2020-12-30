@@ -12,16 +12,15 @@
 #include "data_structure/hqutils.h"
 #include <QScroller>
 #include <QTimer>
+#include <QHBoxLayout>
 
 #define     COL_TYPE_ROLE               Qt::UserRole + 1
 #define     COL_SORT_ROLE               Qt::UserRole + 2
 
 HqSingleTableWidget::HqSingleTableWidget(QWidget *parent) :
     QTableWidget(parent),
-    mMoveDir(-1),
     mDisplayRowStart(0),
-    mDisplayRowEnd(0),
-    mLastWheelTime(0)
+    mDisplayRowEnd(0)
 {
     this->setItemDelegate(new RowDelegate);
     mColDataList.clear();
@@ -260,7 +259,6 @@ void HqSingleTableWidget::checkRowDisplayStatus()
     //开始重新设定行的显示
     mDisplayRowEnd = mDisplayRowStart + mMaxDisRow - 1;
     updateTable();
-
 }
 
 void HqSingleTableWidget::checkDisplayStatus()
@@ -273,49 +271,18 @@ void HqSingleTableWidget::mousePressEvent(QMouseEvent *event)
 {
     event->ignore();
     return;
-    mPressPnt = QCursor::pos();
-    mMovePnt = mPressPnt;
-    mMoveDir = -1;
-    QTableWidget::mousePressEvent(event);
 }
 
 void HqSingleTableWidget::mouseMoveEvent(QMouseEvent *event)
 {
     event->ignore();
     return;
-    //窗口跟着鼠标移动
-    QPoint move_pnt = QCursor::pos();
-    //判断鼠标当前是水平移动还是数值运动
-    mMoveDir = 1; //0水平，1竖直
-    double rad = qAbs(atan2(move_pnt.y() - mPressPnt.y(), move_pnt.x() - mPressPnt.x()));
-    if( (0<=rad && rad<=0.25*3.1415926) || (rad >= 0.75 *3.1415926 && rad<=3.1415926))
-    {
-        mMoveDir = 0;
-    }
-    int move_distance = (mMoveDir == 1? move_pnt.y() - mMovePnt.y() : move_pnt.x() - mMovePnt.x());
-//    qDebug()<<__func__<<mMoveDir<<move_distance;
-    if(move_distance == 0) return;
-    if(mMoveDir == 0)
-    {
-        if(qAbs(move_distance) < 0.5 *mColWidth) return;
-        OPT_MOVE_MODE mode = move_distance < 0 ? OPT_LEFT : OPT_RIGHT;
-        optMoveTable(mode);
-
-    } else
-    {
-        if(qAbs(move_distance) < 0.5*mRowHeight) return;
-        OPT_MOVE_MODE mode = move_distance < 0 ? OPT_DOWN : OPT_UP;
-        optMoveTable(mode);
-    }
-    mMovePnt = move_pnt;
-    QTableWidget::mouseMoveEvent(event);
 }
 
 void HqSingleTableWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     event->ignore();
     return;
-    return QTableWidget::mouseReleaseEvent(event);
 }
 
 int  HqSingleTableWidget::adjusVal(int val, int step, int max, int min)
@@ -446,40 +413,25 @@ int HqSingleTableWidget::getTotalColWidth() const
     return sum;
 }
 
+void HqSingleTableWidget::getDisplayRowRange(int &start, int &rows)
+{
+    start = mDisplayRowStart;
+    rows = mMaxDisRow;
+}
+
 
 HqMergeTableWidget::HqMergeTableWidget(QWidget *parent) : QWidget(parent)
 {
+    QHBoxLayout *lay = new QHBoxLayout(this);
+    this->setLayout(lay);
     mFixTable = new HqSingleTableWidget(this);
-    mMoveTable = new HqSingleTableWidget(this);
-    mMoveTable->setWindowFlags(mMoveTable->windowFlags() | Qt::WindowStaysOnBottomHint);
+    QFrame* move_frm = new QFrame(this);
+    mMoveTable = new HqSingleTableWidget(move_frm);
+    lay->addWidget(mFixTable);
+    lay->addWidget(move_frm);
+    lay->setSpacing(0);
+    lay->setMargin(0);
     mMovColCount = 0;
-    //设定抬头
-    TableColDataList datalist;
-    datalist.append(TableColData(QStringLiteral("名称"), STK_DISPLAY_SORT_TYPE_NAME));
-    datalist.append(TableColData(QStringLiteral("最新"), STK_DISPLAY_SORT_TYPE_PRICE));
-    datalist.append(TableColData(QStringLiteral("涨跌(%)"), STK_DISPLAY_SORT_TYPE_CHGPER));
-    datalist.append(TableColData(QStringLiteral("成交(亿)"), STK_DISPLAY_SORT_TYPE_CJE));
-    datalist.append(TableColData(QStringLiteral("资金比"), STK_DISPLAY_SORT_TYPE_MONEYR));
-    datalist.append(TableColData(QStringLiteral("周变动"), STK_DISPLAY_SORT_TYPE_LAST_WEEK));
-    datalist.append(TableColData(QStringLiteral("月变动"), STK_DISPLAY_SORT_TYPE_LAST_MONTH));
-    datalist.append(TableColData(QStringLiteral("年变动"), STK_DISPLAY_SORT_TYPE_LAST_YEAR,true));
-    datalist.append(TableColData(QStringLiteral("资金(万)"), STK_DISPLAY_SORT_TYPE_ZJLX));
-//    datalist.append(TableColData(QStringLiteral("股息率%"), STK_DISPLAY_SORT_TYPE_GXL, true));
-//    datalist.append(TableColData(QStringLiteral("送转"), STK_DISPLAY_SORT_TYPE_SZZBL, true));
-    datalist.append(TableColData(QStringLiteral("市值(亿)"), STK_DISPLAY_SORT_TYPE_TCAP));
-    datalist.append(TableColData(QStringLiteral("流通市值(亿)"), STK_DISPLAY_SORT_TYPE_MCAP, true));
-//    datalist.append(TableColData(QStringLiteral("净资产收益率(%)"), STK_DISPLAY_SORT_TYPE_JZCSYL, true));
-//    datalist.append(TableColData(QStringLiteral("外资持股(万)"), STK_DISPLAY_SORT_TYPE_FOREIGN_VOL));
-//    datalist.append(TableColData(QStringLiteral("外资持股△1(万)"), STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG));
-//    datalist.append(TableColData(QStringLiteral("外资持股△5(万)"), STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG5));
-//    datalist.append(TableColData(QStringLiteral("外资持股△10(万)"), STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG10));
-    datalist.append(TableColData(QStringLiteral("持股市值(亿)"), STK_DISPLAY_SORT_TYPE_FOREIGN_CAP));
-    datalist.append(TableColData(QStringLiteral("持股市值△(亿)"), STK_DISPLAY_SORT_TYPE_FOREIGN_CAP_CHG));
-    datalist.append(TableColData(QStringLiteral("换手率(%)"), STK_DISPLAY_SORT_TYPE_HSL));
-    datalist.append(TableColData(QStringLiteral("登记日"), STK_DISPLAY_SORT_TYPE_GQDJR));
-    datalist.append(TableColData(QStringLiteral("公告日"), STK_DISPLAY_SORT_TYPE_YAGGR));
-
-    setHeaders(datalist, datalist.size() -1);
 }
 
 HqMergeTableWidget::~HqMergeTableWidget()
@@ -507,16 +459,8 @@ void HqMergeTableWidget::resizeEvent(QResizeEvent *e)
 
 void HqMergeTableWidget::resetPos(int move_pos, bool isok)
 {
-    int used_width = 0;
-    //获取固定表的宽度
-    used_width = mFixTable->getTotalColWidth();
-    mFixTable->resize(used_width, height());
-    //移动表紧挨着
     mMoveTable->resize(mMoveTable->getTotalColWidth(), height());
-    if(!isok) move_pos = used_width;
     mMoveTable->move(move_pos, 0);
-
-    mFixTable->move(0, 0);
 }
 
 
@@ -546,23 +490,24 @@ void HqMergeTableWidget::mouseMoveEvent(QMouseEvent *event)
         if(mFixTable->getTotalColWidth() + mMoveTable->getTotalColWidth() <= width()) return;
         if(qAbs(move_distance) < 2) return;
         OPT_MOVE_MODE mode = move_distance < 0 ? OPT_LEFT : OPT_RIGHT;
+        int step = 0.10*mMoveTable->getColWidth();
         if(mode == OPT_LEFT)
         {
-            if(mMoveTable->geometry().right() <= width()) return;
-            int left = mMoveTable->geometry().left() - 0.5*mMoveTable->getColWidth();;
+            if(mMoveTable->geometry().right() <=  mMoveTable->parentWidget()->width()) return;
+            int left = mMoveTable->geometry().left() - step;
+            if(left + mMoveTable->width() <= mMoveTable->parentWidget()->width())
+            {
+                left = mMoveTable->parentWidget()->width() - mMoveTable->width();
+            }
             resetPos(left, true);
-//            if(mMoveTable->geometry().right() <= width())
-//            {
-//                left = width() - mMoveTable->geometry().width();
-//            }
         } else
         {
-            if(mMoveTable->geometry().left() >= mFixTable->getTotalColWidth()) return;
-            int left = mMoveTable->geometry().left() + 0.5*mMoveTable->getColWidth();
-//            if(left + mMoveTable->geometry().width() >= width())
-//            {
-//                left = width() - mMoveTable->geometry().width();
-//            }
+            if(mMoveTable->geometry().left() >= 0) return;
+            int left = mMoveTable->geometry().left() + step;
+            if(left >= 0)
+            {
+                left = 0;
+            }
             resetPos(left, true);
         }
 
@@ -586,19 +531,19 @@ void HqMergeTableWidget::mouseReleaseEvent(QMouseEvent *event)
 void HqMergeTableWidget::keyPressEvent(QKeyEvent *event)
 {
 #ifdef Q_OS_WIN
-    if(event->key() == Qt::Key_Left)
-    {
-        optMoveTable(OPT_RIGHT);
-    } else if(event->key() == Qt::Key_Right)
-    {
-        optMoveTable(OPT_LEFT);
-    } else if(event->key() == Qt::Key_Up)
-    {
-        optMoveTable(OPT_UP);
-    } else if(event->key() == Qt::Key_Down)
-    {
-        optMoveTable(OPT_DOWN);
-    }
+//    if(event->key() == Qt::Key_Left)
+//    {
+//        optMoveTable(OPT_RIGHT);
+//    } else if(event->key() == Qt::Key_Right)
+//    {
+//        optMoveTable(OPT_LEFT);
+//    } else if(event->key() == Qt::Key_Up)
+//    {
+//        optMoveTable(OPT_UP);
+//    } else if(event->key() == Qt::Key_Down)
+//    {
+//        optMoveTable(OPT_DOWN);
+//    }
 #else
     event->ignore();
 #endif
@@ -611,13 +556,45 @@ void HqMergeTableWidget::setHeaders(const TableColDataList &list, int move_count
     TableColDataList fix_list = list.mid(0, list.size() - move_count);
     if(fix_list.size() > 0)
     {
-        if(mFixTable) mFixTable->setHeaders(fix_list);
+        if(mFixTable)
+        {
+            mFixTable->setHeaders(fix_list);
+            mFixTable->setFixedWidth(mFixTable->getTotalColWidth());
+        }
     }
     TableColDataList mov_list = list.mid(fix_list.size());
     if(mov_list.size() > 0)
     {
-        if(mMoveTable) mMoveTable->setHeaders(mov_list);
+        if(mMoveTable)
+        {
+            mMoveTable->setHeaders(mov_list);
+            mMoveTable->setFixedWidth(mMoveTable->getTotalColWidth());
+        }
     }
+
+    resetPos();
+}
+
+void HqMergeTableWidget::prepareUpdateTable(int newRowCount)
+{
+    mFixTable->prepareUpdateTable(newRowCount);
+    mMoveTable->prepareUpdateTable(newRowCount);
+}
+
+void HqMergeTableWidget::removeRows(int start, int count)
+{
+    mFixTable->removeRows(start, count);
+    mMoveTable->removeRows(start, count);
+}
+
+void HqMergeTableWidget::resetDisplayRows()
+{
+    mDisplayRowStart = 0;
+}
+
+void HqMergeTableWidget::updateDisplayRange()
+{
+    mFixTable->getDisplayRowRange(mDisplayRowStart, mMaxDisRow);
 }
 
 

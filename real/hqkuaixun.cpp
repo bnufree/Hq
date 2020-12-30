@@ -1,4 +1,4 @@
-#include "hqkuaixun.h"
+﻿#include "hqkuaixun.h"
 #include <QDateTime>
 #include "utils/qhttpget.h"
 #include <QJsonArray>
@@ -24,7 +24,7 @@ void HqKuaixun::run()
         parseThs(list);
         if(list.size() > 0)
         {
-            std::stable_sort(list.begin(), list.end(), std::greater<KuaixunData>());
+//            std::stable_sort(list.begin(), list.end(), std::greater<KuaixunData>());
 //            {
 //                foreach (KuaixunData data, list) {
 //                qDebug()<<data.src_time<<data.local_time<<data.title<<data.sourceString();

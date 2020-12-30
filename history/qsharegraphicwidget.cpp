@@ -2,6 +2,7 @@
 #include <QPainter>
 #include "sharehistoryreadthread.h"
 #include <QWheelEvent>
+#include <QPainterPath>
 
 QShareGraphicWidget::QShareGraphicWidget(QWidget *parent) : QWidget(parent)
 {

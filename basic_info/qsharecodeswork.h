@@ -24,14 +24,14 @@ public:
     explicit QShareCodesWork(QObject *parent = 0);
     ~QShareCodesWork();
     void run();
-    void parseShCode(ShareDataList& list);
-    void parseSzCode(ShareDataList& list);
-    void parseKZZ(ShareDataList& list);
-    void parseSzEtf(ShareDataList &result_list);
-    void parseShEtf(ShareDataList &result_list);
+    void parseShCode();
+    void parseSzCode();
+    void parseKZZ();
+    void parseSzEtf();
+    void parseShEtf();
 private:
     void parseHttp(ShareDataList& list, const QString& url, int mode = 1); //1:stock 2:fund
-    QList<QString>         mShetfCodeList;
+    QMap<QString, ShareData>        mShareCodeMap;
 };
 #endif
 

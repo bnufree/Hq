@@ -12,6 +12,9 @@ message("qt xlsx path:" + $${QXLSX_PARENTPATH})
 include($${QXLSX_PARENTPATH}/QXlsx.pri)
 
 QT       += core gui network sql concurrent
+android {
+ QT+= androidextras
+ }
 
 #win32{
 # QT += webkitwidgets
@@ -233,3 +236,15 @@ DISTFILES += \
     android/assets/profiles.ini
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
+
+ANDROID_ABIS = armeabi-v7a x86
+
+ANDROID_EXTRA_LIBS =
+
+contains(ANDROID_TARGET_ARCH,) {
+    ANDROID_EXTRA_LIBS =
+
+    ANDROID_ABIS = \
+        armeabi-v7a \
+        x86
+}

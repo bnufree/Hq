@@ -175,7 +175,7 @@ public slots:
     //void slotUpdateShareHistoryInfos(const QMap<QString, ShareDataList> map);
     bool slotAddHistoryData(const ShareData& data);
     void initBlockData(int type = 0);
-    void initShareData();
+    void initShareData(bool send);
 //    void slotQueryShareHistoryLastDate(const QString& code);
     void slotUpdateShareinfoWithHistory(const QString& code,\
                                         double lastMoney,\

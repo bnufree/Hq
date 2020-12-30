@@ -55,7 +55,7 @@ void HqInfoService::slotInitDBTables()
     if(mDataBase.createDBTables())
     {
 //        initBlockData();
-//        initShareData();
+        initShareData(false);
         emit signalDbInitFinished();
     } else
     {
@@ -185,12 +185,12 @@ void HqInfoService::slotSearchCodesOfText(const QString &text)
 }
 
 //从数据库中获取已经保存的数据
-void HqInfoService::initShareData()
+void HqInfoService::initShareData(bool send)
 {
     QMutexLocker locker(&mShareMutex);
     mRealShareData.clear();
     mDataBase.queryShareBasicInfo(mRealShareData, mFavCodeList);
-    emit signalAllShareCodeList(mRealShareData.keys());
+    if(send)    emit signalAllShareCodeList(mRealShareData.keys());
 }
 
 void HqInfoService::saveShares()
@@ -615,7 +615,7 @@ void HqInfoService::slotUpdateShareBasicInfo(const ShareDataList &list)
         qDebug()<<"update share basic info error:"<<mDataBase.getErrorString();
         return;
     }
-    initShareData();
+    initShareData(true);
     return;
 }
 

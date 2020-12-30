@@ -14,14 +14,14 @@
 #define         SH_FUND_REG         "(sh){0,1}5[0-9]{5}"
 #define         SH_INDEX_REG        "sh0[0-9]{5}"
 #define         SH_ZB_SHARE_REG        "(sh){0,1}60[0-9]{4}"
-#define         SH_KCB_SHARE_REG    "(sh){0,1}688[0-9]{3}"
+#define         SH_KCB_SHARE_REG    "(sh){0,1}68[0-9]{4}"
 #define         SH_KZZ_REG          "(sh){0,1}11[0-9]{4}"
 
 #define         SZ_FUND_REG         "(sz){0,1}1[0-9]{5}"
 #define         SZ_INDEX_REG        "sz399[0-9]{3}"
 #define         SZ_ZB_SHARE_REG        "(sz){0,1}(00[01]{1}[0-9]{3})"
-#define         SZ_ZXB_SHARE_REG        "(sz){0,1}(002[0-9]{3})"
-#define         SZ_CYB_SHARE_REG        "(sz){0,1}(30[0-9]{4})"
+#define         SZ_ZXB_SHARE_REG        "(sz){0,1}(00[23]{1}[0-9]{3})"
+#define         SZ_CYB_SHARE_REG        "(sz){0,1}(3[0-9]{5})"
 #define         SZ_KZZ_REG          "(sz){0,1}12[0-9]{4}"
 
 #define         HK_SHARE_REG        "(hk){0,1}\\d{5}"
@@ -59,6 +59,21 @@ typedef    enum     share_data_type
     SHARE_SZ_TOTAL = SHARE_SZ | SHARE_SZ_FUND | SHARE_SZ_KZZ,
     SHARE_SHARE_ONLY = SHARE_SH | SHARE_SZ,
 }SHARE_DATA_TYPE;
+
+struct ShareDailyInfo{
+    qint64              time;                       //时间
+    double             money;                      //成交额
+    double             vol;                        //成交量
+    double             lgt_money;                  //陆股通成交额
+    double             lgt_pure;                   //陆股通净买入额
+    double             lgt_mutable_percent;         //陆股通比例
+    double             lgt_vol;                     //陆股通持股数
+    double             close;                      //收盘价
+    double             subscription_price;          //复权价
+    double             last_close;                  //上一日收盘价
+    double             total_share_vol;             //总股本
+    double              mutal_share_vol;            //流通股本
+};
 
 struct HistoryInfo{
     double                  mLastMoney;
@@ -132,6 +147,7 @@ public:
     FinancialData           mFinanceData;
     ShareBonus              mBonusData;
     ShareHsgt               mHsgtData;
+    QString                 mListTime;
 public:
     ShareData();
     static int  stk_sort_type;

@@ -22,6 +22,7 @@
 #include "table/qshareforeignvoltablewidget.h"
 #include <QMessageBox>
 #include "qsahreoptwidget.h"
+#include <QHeaderView>
 
 #define     STK_ZXG_SEC         "0520"
 #define     STK_HSJJ_SEC        "4521"
@@ -349,19 +350,19 @@ void Dialog::slotDisplayShareFull()
 
 void Dialog::slotDisplayShareMini()
 {
-    if(mDisplayMode != E_DISPLAY_Share_MINI)
-    {
-        mDisplayMode = E_DISPLAY_Share_MINI;
-    }
-    mBlockTableWidget->setVisible(false);
-    mShareTableWidget->setVisible(true);
-    mDisplayCol = 0;
-    for(int i=0; i<mShareTableWidget->columnCount(); i++)
-    {
-        if(!mShareTableWidget->isColumnHidden(i)) mDisplayCol++;
-    }
-    mTargetSize.setWidth(mDisplayCol * mSecSize);
-    setTargetSize(mTargetSize);
+//    if(mDisplayMode != E_DISPLAY_Share_MINI)
+//    {
+//        mDisplayMode = E_DISPLAY_Share_MINI;
+//    }
+//    mBlockTableWidget->setVisible(false);
+//    mShareTableWidget->setVisible(true);
+//    mDisplayCol = 0;
+//    for(int i=0; i<mShareTableWidget->columnCount(); i++)
+//    {
+//        if(!mShareTableWidget->isColumnHidden(i)) mDisplayCol++;
+//    }
+//    mTargetSize.setWidth(mDisplayCol * mSecSize);
+//    setTargetSize(mTargetSize);
 }
 
 void Dialog::setTargetSize(const QSize &size)

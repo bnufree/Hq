@@ -22,7 +22,6 @@ void QSinaNorthRealInfoThread::run()
         QByteArray http = QHttpGet::getContentOfURL(url.append(QString::number(QDateTime::currentMSecsSinceEpoch())));
         if(http.size() > 0)
         {
-            //获取数组部分的数据
             QJsonDocument doc = QJsonDocument::fromJson(http);
             if(doc.isObject())
             {
@@ -37,7 +36,7 @@ void QSinaNorthRealInfoThread::run()
                         QJsonValue  data = obj.value("s2n");
                         if(data.isArray())
                         {
-                            //开始正式解析
+                            
                             QList<NorthBoundData> list;
                             int max = 5;
                             int min = 0;
@@ -49,6 +48,7 @@ void QSinaNorthRealInfoThread::run()
                                 if(strlist.size() != 4) continue;
                                 north.time.setDate(now);
                                 north.time.setTime(QTime::fromString(strlist[0], "h:mm"));
+                                if(strlist[1] == "-" || strlist[2] == "-") continue;
                                 north.sh_flow = strlist[1].toDouble()/10000;
                                 north.sz_flow = strlist[2].toDouble()/10000;
                                 north.total_flow = north.sh_flow + north.sz_flow;

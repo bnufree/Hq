@@ -3,8 +3,40 @@
 
 #include "HqTableWidget.h"
 #include "data_structure/sharedata.h"
+#include <QThread>
+#include <QLabel>
 
-class NorthBoundTop10DisplayWidget : public HqTableWidget
+class QShareLgtTop10Thread :  public QThread
+{
+    Q_OBJECT
+public:
+    explicit QShareLgtTop10Thread( QObject *parent = 0);
+    ~QShareLgtTop10Thread();
+    void run();
+private:
+    bool getDataFromEastMoney(ShareHsgtList& list, QDate& date);
+    bool getDataFromHKEX(ShareHsgtList& list, QDate& date);
+signals:
+    void signalChinaAShareTop10Updated(const ShareHsgtList& list, const QString& date);
+
+private:
+};
+
+
+class NorthBoundTop10DisplayTable : public HqTableWidget
+{
+    Q_OBJECT
+public:
+    explicit NorthBoundTop10DisplayTable(QWidget *parent = nullptr);
+
+signals:
+
+public slots:
+    void slotSetDataList(const ShareHsgtList &list);
+    void slotCellDoubleClicked(int row, int col);
+};
+
+class NorthBoundTop10DisplayWidget : public QWidget
 {
     Q_OBJECT
 public:
@@ -13,8 +45,19 @@ public:
 signals:
 
 public slots:
-    void slotSetDataList(const ShareHsgtList &list);
-    void slotCellDoubleClicked(int row, int col);
+    void slotSetDataList(const ShareHsgtList &list, const QString& date);
+private:
+    QLabel      *mTimeLabel;
+    NorthBoundTop10DisplayTable * mTable;
+    QString     mCommonStr;
+
+
+
+
+
+
+
+
 };
 
 #endif // NORTHBOUNDTOP10DISPLAYWIDGET_H

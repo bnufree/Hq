@@ -194,6 +194,7 @@ public:
 private:
     bool initSqlDB();
     //创建数据库需要的各类表
+    TableColList queryTableDef(const QString& table);
     //板块明细
     bool createBlockTable();
     //基本信息
@@ -217,8 +218,9 @@ private:
     //各个表的最后更新日期
     bool createDBUpdateDateTable();
 
-    bool isTableExist(const QString &pTable);
+    bool tableExist(const QString &pTable);
     bool createTable(const QString& pTable, const TableColList& cols);
+    bool deleteTable(const QString& pTable);
 
     //表的通用操作
     bool updateTable(const QString& tableName, const DBColValList& values, const DBColValList& key, bool check = true );

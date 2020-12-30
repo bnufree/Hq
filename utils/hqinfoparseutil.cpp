@@ -38,14 +38,17 @@ HqInfoParseUtil::HqInfoParseUtil()
 ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryData(const QDate& start, const QString& code)
 {
     ShareHistoryFileDataList list;
-    if(ShareData::shareType(code) & SHARE_FUND)
-    {
-        list = getShareHistoryDataFromXueqiu(start, code);
-    } else
-    {
-        list = getShareHistoryDataFrom163(start, code);
-        if(list.size() == 0) list = getShareHistoryDataFromHexun(start, code);
-    }
+//    if(ShareData::shareType(code) & SHARE_FUND)
+//    {
+//        list = getShareHistoryDataFromXueqiu(start, code);
+//    } else
+//    {
+//        list = getShareHistoryDataFrom163(start, code);
+//        if(list.size() == 0) list = getShareHistoryDataFromHexun(start, code);
+//    }
+    list = getShareHistoryDataFromXueqiu(start, code);
+    if(list.size() == 0)    list = getShareHistoryDataFrom163(start, code);
+    if(list.size() == 0)    list = getShareHistoryDataFromHexun(start, code);
     return list;
 }
 
@@ -56,7 +59,7 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromXueqiu(const QD
     QStringList urlList;
     urlList.append("https://xueqiu.com/");
     QNetworkAccessManager mgr;
-    QString wkCode = (code.left(1).toInt() >= 5 ? "SH" : "SZ") + code;
+    QString wkCode = (ShareData::shareType(code) & SHARE_SH_TOTAL ? "SH" : "SZ") + code;
     QDate wkDate(start);
     while (1) {
         QString url = QString("https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=%1&begin=%2&period=day&type=normal&count=10000").arg(wkCode).arg(QDateTime(wkDate).toMSecsSinceEpoch());
@@ -118,12 +121,9 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromXueqiu(const QD
 
 ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromHexun(const QDate& start, const QString& code)
 {
-    QString wkCode = code;
-    if(wkCode.size() == 6)
-    {
-        QString market = code.toInt() < 500000 ? "szse" : "sse";
-        wkCode.insert(0, market);
-    }
+    QString wkCode = code.right(6);
+    QString market = (ShareData::shareType(code) & SHARE_SH_TOTAL ? "sse" : "szse");
+    wkCode.insert(0, market);
 
     ShareHistoryFileDataList list;
     QDate last_update_date = start;
@@ -254,14 +254,7 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFrom163(const QDate
     ShareHistoryFileDataList list;
     if(start < QDate::currentDate())
     {
-        QString wkCode;
-        if(code.left(1) == "6" || code.left(1) == "5")
-        {
-            wkCode = "0" + code;
-        } else
-        {
-            wkCode = "1" + code;
-        }
+        QString wkCode = (ShareData::shareType(code) & SHARE_SH_TOTAL ? "0" : "1") + code.right(6);
         //取得日线数据
         QString wkURL = QString("http://quotes.money.163.com/service/chddata.html?code=%1&start=%2&end=%3")
                 .arg(wkCode).arg(start.toString("yyyyMMdd")).arg(QDate::currentDate().toString("yyyyMMdd"));

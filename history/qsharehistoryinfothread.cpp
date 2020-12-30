@@ -91,7 +91,8 @@ void QShareHistoryInfoThread::run()
 {
     QTime t;
     t.start();
-    QDate start = QDate::fromString(PROFILES_INS->value(LIST_DATE, mCode.right(6)).toString(), "yyyy-MM-dd");
+//    QDate start = QDate::fromString(PROFILES_INS->value(LIST_DATE, mCode.right(6)).toString(), "yyyy-MM-dd");
+    QDate start = QDate::fromString(DATA_SERVICE->getShareData(mCode).mListTime, "yyyy-MM-dd");
 
     //default is
     QDate start_update_date;

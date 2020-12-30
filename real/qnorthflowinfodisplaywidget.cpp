@@ -99,15 +99,18 @@ void NorthFlowCurveWidget::paintEvent(QPaintEvent *e)
         painters.drawLine(QPointF(left_x, left_y), QPointF(curve_rect.right(), left_y));
         painters.restore();
 
-        painters.save();
-        pen.setColor(Qt::white);
-        painters.setPen(pen);
-        //计算文本的举行大小
-        QRect text_rect(0, 0, yTextWidth, xTextHeight);
-        text_rect.moveLeft(curve_rect.left() - yTextWidth);
-        text_rect.moveBottom(left_y + 0.5 * xTextHeight);
-        painters.drawText(text_rect, Qt::AlignRight | Qt::AlignVCenter, QString::number(val, 'f', 1));
-        painters.restore();
+        if(i+1 % 2)
+        {
+            painters.save();
+            pen.setColor(Qt::white);
+            painters.setPen(pen);
+            //计算文本的举行大小
+            QRect text_rect(0, 0, yTextWidth, xTextHeight);
+            text_rect.moveLeft(curve_rect.left() - yTextWidth);
+            text_rect.moveBottom(left_y + 0.5 * xTextHeight);
+            painters.drawText(text_rect, Qt::AlignRight | Qt::AlignVCenter, QString::number(val, 'f', 1));
+            painters.restore();
+        }
 //        qDebug()<<"draw value:"<<mMax<<mMin<<val;
 
     }
@@ -120,6 +123,7 @@ void NorthFlowCurveWidget::paintEvent(QPaintEvent *e)
     for(int i=0; i<mDataList.size(); i++)
     {
         NorthBoundData data = mDataList[i];
+//        qDebug()<<"data time:"<<data.time.toString("hh:mm:ss")<<data.sh_flow<<data.sz_flow;
         //计算数据对应的X坐标
         QTime cur = data.time.time();
         int time_elapsed = start_time.secsTo(cur);

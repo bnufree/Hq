@@ -1,13 +1,13 @@
 ﻿#ifndef QSHARETABLEWIDGET_H
 #define QSHARETABLEWIDGET_H
 
-#include "HqTableWidget.h"
+#include "HqMergeTableWidget.h"
 #include "data_structure/sharedata.h"
 #include <QMutex>
 
 class QSinaStkResultMergeThread;
 
-class QShareTablewidget : public HqTableWidget
+class QShareTablewidget : public HqMergeTableWidget
 {
     Q_OBJECT
 public:
@@ -32,22 +32,14 @@ signals:
 
 public slots:
     void    updateTable();
-    void    slotCustomContextMenuRequested(const QPoint &pos);
-    void    setShareMarket();
     void    setShareMarketType(int type);
-    void    setDisplayMinuteGraph();
-    void    setDisplayDayGraph();
-    void    setDisplayBlockDetail();
-    void    setDisplayHSHK();
-    void    slotCellDoubleClicked(int row, int col);
-    void    setSpecialConcer();
-    void    slotCellClicked(int row, int col);
     void    slotRecvAllShareDateList(const ShareDataList& list,qint64 time);
 private:
     QMap<QString, double>   mShareMap;
     QList<QAction*>         mCodesActionList;
     ShareDataList                       mShareDataList;
     QMutex                              mDataMutex;
+    QList<struMenu>                     mMktTypeList;
 };
 
 #endif // QSHARETABLEWIDGET_H

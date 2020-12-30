@@ -28,7 +28,6 @@ QShareProfitTablewidget::QShareProfitTablewidget(QWidget *parent) : HqTableWidge
     datalist.append(TableColData(QStringLiteral("盈亏"), STK_DISPLAY_SORT_TYPE_NONE));
 
     setHeaders(datalist);
-    setAutoChangePage(true);
     QExchangeRecordWorker* worker = new QExchangeRecordWorker();
     connect(worker, SIGNAL(signalSendShareProfitList(QList<ShareExchangeDataMgr>)), this, SLOT(slotRecvProfitDataList(QList<ShareExchangeDataMgr>)));
 
@@ -81,7 +80,6 @@ QShareExchangeTablewidget::QShareExchangeTablewidget(QWidget *parent) : HqTableW
     datalist.append(TableColData(QStringLiteral("净流入"), STK_DISPLAY_SORT_TYPE_NONE));
 
     setHeaders(datalist);
-    setAutoChangePage(true);
     //开始更新数据
     connect(DATA_SERVICE, SIGNAL(signalSendShareExchangeRecord(int, int, QList<ShareExchangeData>)), this, SLOT(slotRecvDataList(int,int, QList<ShareExchangeData>)));
     setSearchCondition("", "", "");

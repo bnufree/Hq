@@ -34,7 +34,7 @@ void QShareHsgtTop10Work::run()
             return;
         }
         QDate curDate = TradeDateMgr::instance()->currentTradeDay();
-        if(last_update_date.isNull()) last_update_date = curDate.addDays(-30);
+        if(last_update_date.isNull()) last_update_date = curDate.addYears(-1);
 
         QDate final_date = last_update_date;
         ShareHsgtList list;

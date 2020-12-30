@@ -33,6 +33,8 @@ public:
         updateTable();
     }
 
+    void getDisplayRowRange(int& start, int& rows);
+
     int  getTotalColWidth() const;
     int  getColWidth() const {return mColWidth;}
     void setHeaders(const TableColDataList& list);
@@ -78,11 +80,6 @@ private:
     TableColDataList        mColDataList;
     int                     mColWidth;
     int                     mRowHeight;
-    QPoint                  mPressPnt;
-    QPoint                  mMovePnt;
-    int                     mMoveDir;
-    int                     mMaxDisCol;
-    quint64               mLastWheelTime;
     QList<int>              mColWidthList;
 protected:
     int                     mDisplayRowStart;
@@ -99,9 +96,14 @@ public:
     explicit HqMergeTableWidget(QWidget *parent = 0);
     ~HqMergeTableWidget();
     virtual void setHeaders(const TableColDataList &list, int move_count = 0);
-private:
+    virtual void updateTable() {}
+    void    resetDisplayRows();
+    void    updateDisplayRange();
+public:
     void setFixTable(HqSingleTableWidget* fix);
     void setMovTable(HqSingleTableWidget* mov);
+    void prepareUpdateTable(int newRowCount);
+    void removeRows(int start, int count);
 
 protected:
     void resizeEvent(QResizeEvent*);
@@ -116,6 +118,8 @@ protected:
     HqSingleTableWidget*                mFixTable;
     HqSingleTableWidget*                mMoveTable;
     int                                 mMovColCount;
+    int                                 mDisplayRowStart;
+    int                                 mMaxDisRow;
 private:
     QPoint                              mPressPnt;
     QPoint                              mMovePnt;

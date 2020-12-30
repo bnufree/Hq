@@ -2,6 +2,7 @@
 #include <QMutexLocker>
 #include <QDebug>
 #include <QFile>
+#include <QApplication>
 #include "utils/comdatadefines.h"
 
 #define     QDebug()                    qDebug()<<__FUNCTION__<<__LINE__
@@ -202,6 +203,8 @@ bool HQDBDataBase::initSqlDB()
     {
         mDB = QSqlDatabase::addDatabase("QSQLITE");
     }
+
+    qDebug()<<"db driver:"<<mDB.driverName()<<mDB.driver();
     QDir dir(HQ_DATA_DIR);
     if(!dir.exists())
     {
@@ -219,7 +222,7 @@ QString HQDBDataBase::getErrorString()
     return QString("sql: \\n %1 \\n error:%2").arg(mSQLQuery.lastQuery()).arg(mSQLQuery.lastError().text());
 }
 
-bool HQDBDataBase::isTableExist(const QString &pTable)
+bool HQDBDataBase::tableExist(const QString &pTable)
 {
     QMutexLocker locker(&mSQLMutex);
     if(!mSQLQuery.exec(tr("SELECT COUNT(*) FROM sqlite_master where type='table' and name='%1'").arg(pTable))) return false;
@@ -229,11 +232,46 @@ bool HQDBDataBase::isTableExist(const QString &pTable)
     return false;
 }
 
+bool HQDBDataBase::deleteTable(const QString &pTable)
+{
+    QString sql = tr("DROP TABLE %1 ").arg(pTable);
+    qDebug()<<"sql:"<<sql;
+    QMutexLocker locker(&mSQLMutex);
+    return mSQLQuery.exec(sql);
+}
+
 bool HQDBDataBase::createTable(const QString &pTable, const TableColList& cols)
 {
+    bool exist = tableExist(pTable);
+    if(exist)
+    {
+        bool delete_table = false;
+        //检查二者的列定义是否一样
+        TableColList old_cols = queryTableDef(pTable);
+        if(cols.size() == old_cols.size())
+        {
+            foreach(TABLE_COL_DEF def, cols)
+            {
+                int index = old_cols.indexOf(def);
+                if(index == -1)
+                {
+                    delete_table = true;
+                    break;
+                }
+            }
+        } else
+        {
+            delete_table = true;
+        }
+        if(!delete_table) return true;
+        delDBUpdateDate(pTable);
+        if(!deleteTable(pTable)) return false;
+        return true;
+
+    }
     QStringList colist;
     foreach (TABLE_COL_DEF data, cols) {
-        colist.append(tr(" [%1] %2 ").arg(data.mKey).arg(data.mDef));
+        colist.append(tr(" [%1] %2 ").arg(data.mName).arg(data.toSTring()));
     }
 
     QString sql = tr("CREATE TABLE [%1] ( %2 )").arg(pTable).arg(colist.join(","));
@@ -244,11 +282,10 @@ bool HQDBDataBase::createTable(const QString &pTable, const TableColList& cols)
 
 bool HQDBDataBase::createShareBlockTable()
 {
-    if(isTableExist(TABLE_BLOCK_SHARE)) return true;
     TableColList colist;
-    colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
-    colist.append({HQ_TABLE_COL_CODE, "VARCHAR(10) NOT NULL"});
-    colist.append({HQ_TABLE_COL_BLOCK_SHARE_LIST, "VARCHAR(10000) NULL"});
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_CODE, "VARCHAR(10) NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_BLOCK_SHARE_LIST, "VARCHAR(10000) NULL"));
     return createTable(TABLE_BLOCK_SHARE, colist);
 }
 
@@ -312,18 +349,55 @@ bool HQDBDataBase::delShareBlockInfo(const QString &code)
     return deleteRecord(TABLE_BLOCK_SHARE, list);
 }
 
+TableColList HQDBDataBase::queryTableDef(const QString& pTable)
+{
+    TableColList list;
+    QString sql = tr("PRAGMA table_info([%1])").arg(pTable);
+    QMutexLocker locker(&mSQLMutex);
+    if(!mSQLQuery.exec(sql)) return list;
+    while (mSQLQuery.next()) {
+        TABLE_COL_DEF col;
+        col.mName = mSQLQuery.value("name").toString();
+        QString def = mSQLQuery.value("type").toString();
+        col.mStrSize = 0;
+        if(def.contains("INTEGER")) col.mType = DB_INTEGER;
+        if(def.contains("BOOL")) col.mType = DB_BOOL;
+        if(def.contains("NUMERIC")) col.mType = DB_NUMERIC;
+        if(def.contains("VARCHAR"))
+        {
+            col.mType = DB_VARCHAR;
+            int index = def.indexOf("(");
+            if(index >= 0)
+            {
+                int end = def.indexOf(")", index);
+                if(end >= 0)
+                {
+                    col.mStrSize = def.mid(index+ 1, end - index - 1).toInt();
+                }
+            }
+        }
+        col.mPrimaryKey = (mSQLQuery.value("pk").toString().toInt() == 1) ? true : false;
+        col.mNull = mSQLQuery.value("notnull").toString().toInt() == 1 ? false : true;
+
+        list.append(col);
+
+    }
+
+    return list;
+
+}
+
 bool HQDBDataBase::createBlockTable()
 {
-    if(isTableExist(TABLE_BLOCK)) return true;
     TableColList colist;
-    colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
-    colist.append({HQ_TABLE_COL_CODE, "VARCHAR(10) NOT NULL"});
-    colist.append({HQ_TABLE_COL_NAME, "VARCHAR(100) NOT NULL"});
-    colist.append({HQ_TABLE_COL_CLOSE, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_FAVORITE, "BOOL NULL"});
-    colist.append({HQ_TABLE_COL_CHANGE_PERCENT, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_BLOCK_TYPE, "INTEGER NULL"});
-    colist.append({HQ_TABLE_COL_DATE, "VARCHAR(10) NOT NULL"});
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_CODE, "VARCHAR(10) NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_NAME, "VARCHAR(100) NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_CLOSE, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_FAVORITE, "BOOL NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_CHANGE_PERCENT, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_BLOCK_TYPE, "INTEGER NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_DATE, "VARCHAR(10) NOT NULL"));
     return createTable(TABLE_BLOCK, colist);
 }
 
@@ -418,11 +492,10 @@ bool HQDBDataBase::createDBTables()
 }
 bool HQDBDataBase::createShareFavoriteTable()
 {
-    if(isTableExist(TABLE_FAVORITE)) return true;
     TableColList colist;
-    colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
-    colist.append({HQ_TABLE_COL_CODE, "VARCHAR(10) NOT NULL"});
-    colist.append({HQ_TABLE_COL_FAVORITE, "BOOL NULL"});
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_CODE, "VARCHAR(10) NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_FAVORITE, "BOOL NULL"));
     return createTable(TABLE_FAVORITE, colist);
 }
 
@@ -477,31 +550,29 @@ bool HQDBDataBase::delShareFavInfo(const QString& code)
 
 bool HQDBDataBase::createShareProfitTable()
 {
-    if(isTableExist(TABLE_PROFIT)) return true;
     TableColList colist;
-    colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
-    colist.append({HQ_TABLE_COL_CODE, "VARCHAR(10) NOT NULL"});
-    colist.append({HQ_TABLE_COL_PROFIT, "NUMERIC NULL"});
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_CODE, "VARCHAR(10) NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_PROFIT, "NUMERIC NULL"));
     return createTable(TABLE_PROFIT, colist);
 }
 
 bool HQDBDataBase::createShareExchangeRecordTable()
 {
-    if(isTableExist(TABLE_SHARE_EXCHANGE_RECORD)) return true;
     TableColList colist;
-    colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
-    colist.append({HQ_TABLE_COL_CODE, "VARCHAR(10) NOT NULL"});
-    colist.append({HQ_TABLE_COL_NAME, "VARCHAR(30) NOT NULL"});
-    colist.append({HQ_TABLE_COL_DATE, "VARCHAR(10) NOT NULL"});
-    colist.append({HQ_TABLE_COL_EXCHANGE_TYPE, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_EXCHANGE_COUNT, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_EXCHANGE_PRICE, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_EXCHANGE_TOTAL, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_EXCHANGE_YONGJIN, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_EXCHANGE_YINHUASUI, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_EXCHANGE_OTHER, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_EXCHANGE_NETINCOME, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_EXCHANGE_SERIAL_NUM, "VARCHAR(30) NULL"});
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_CODE, "VARCHAR(10) NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_NAME, "VARCHAR(30) NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_DATE, "VARCHAR(10) NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_EXCHANGE_TYPE, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_EXCHANGE_COUNT, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_EXCHANGE_PRICE, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_EXCHANGE_TOTAL, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_EXCHANGE_YONGJIN, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_EXCHANGE_YINHUASUI, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_EXCHANGE_OTHER, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_EXCHANGE_NETINCOME, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_EXCHANGE_SERIAL_NUM, "VARCHAR(30) NULL"));
     return createTable(TABLE_SHARE_EXCHANGE_RECORD, colist);
 }
 
@@ -556,14 +627,14 @@ bool HQDBDataBase::delShareProfitInfo(const QString& code)
 //基本信息更新
 bool HQDBDataBase::createShareBasicTable()
 {
-    if(isTableExist(TABLE_SHARE_BASIC_INFO)) return true;
     TableColList colist;
-    colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
-    colist.append({HQ_TABLE_COL_CODE, "VARCHAR(10) NOT NULL"});
-    colist.append({HQ_TABLE_COL_NAME, "VARCHAR(100) NULL"});
-    colist.append({HQ_TABLE_COL_PY_ABBR, "VARCHAR(10) NULL"});
-    colist.append({HQ_TABLE_COL_TYPE, "INTEGER NOT NULL"});
-    colist.append({HQ_TABLE_COL_FAVORITE, "BOOL NULL"});
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_CODE, "VARCHAR(10) NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_NAME, "VARCHAR(100) NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_PY_ABBR, "VARCHAR(10) NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_TYPE, "INTEGER NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_LISTTIME, "VARCHAR(10) NOT NULL"));
+//    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_FAVORITE, "BOOL NULL"));
     return createTable(TABLE_SHARE_BASIC_INFO, colist);
 }
 
@@ -579,7 +650,8 @@ bool HQDBDataBase::updateShareBasicInfo(const ShareDataList& dataList)
         list.append(DBColVal(HQ_TABLE_COL_CODE, data.mCode, HQ_DATA_TEXT));
         list.append(DBColVal(HQ_TABLE_COL_NAME, data.mName, HQ_DATA_TEXT));
         list.append(DBColVal(HQ_TABLE_COL_PY_ABBR, data.mPY, HQ_DATA_TEXT));
-        list.append(DBColVal(HQ_TABLE_COL_TYPE, data.mShareType, HQ_DATA_TEXT));
+        list.append(DBColVal(HQ_TABLE_COL_TYPE, data.mShareType, HQ_DATA_INT));
+        list.append(DBColVal(HQ_TABLE_COL_LISTTIME, data.mListTime, HQ_DATA_TEXT));
         if(!updateTable(TABLE_SHARE_BASIC_INFO, list, list[0])){
             mDB.rollback();
             return false;
@@ -607,7 +679,7 @@ bool HQDBDataBase::queryShareBasicInfo(ShareDataMap& map, const QStringList& fav
         info.mName = mSQLQuery.value(HQ_TABLE_COL_NAME).toString();
         info.mPY = mSQLQuery.value(HQ_TABLE_COL_PY_ABBR).toString();
         info.mShareType =  (SHARE_DATA_TYPE)(mSQLQuery.value(HQ_TABLE_COL_TYPE).toInt());
-        info.mIsFav = mSQLQuery.value(HQ_TABLE_COL_FAVORITE).toBool();
+        info.mListTime = mSQLQuery.value(HQ_TABLE_COL_LISTTIME).toString();
         info.mIsFav = favlist.contains(code);
 
     }
@@ -684,49 +756,47 @@ bool HQDBDataBase::getSimilarCodeOfText(QStringList &codes, const QString &text)
 bool HQDBDataBase::createShareHistoryInfoTable(const QString& code)
 {
     QString table = QString(TABLE_SHARE_HISTORY_TEMPLATE).arg(code);
-    if(isTableExist(table)) return true;
     TableColList colist;
-    colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
-    colist.append({HQ_TABLE_COL_CODE, "VARCHAR(6) NOT NULL"});
-    colist.append({HQ_TABLE_COL_NAME, "VARCHAR(100) NOT NULL"});
-    colist.append({HQ_TABLE_COL_CLOSE, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_CHANGE_PERCENT, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_CLOSE_LAST, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_CLOSE_LAST_ADJUST, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_VOL, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_MONEY, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_ZJLX, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_RZRQ, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_HSGT_HAVE, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_HSGT_HAVE_PERCENT, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_HSGT_HAVE_CHANGE, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_HSGT_TOP10_MONEY, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_HSGT_TOP10_FLAG, "BOOL NULL"});
-    colist.append({HQ_TABLE_COL_TOTALMNT, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_MUTAL, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_DATE, "VARCHAR(10) NOT NULL"});
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_CODE, "VARCHAR(6) NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_NAME, "VARCHAR(100) NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_CLOSE, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_CHANGE_PERCENT, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_CLOSE_LAST, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_CLOSE_LAST_ADJUST, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_VOL, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_MONEY, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_ZJLX, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_RZRQ, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_HSGT_HAVE, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_HSGT_HAVE_PERCENT, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_HSGT_HAVE_CHANGE, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_HSGT_TOP10_MONEY, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_HSGT_TOP10_FLAG, "BOOL NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_TOTALMNT, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_MUTAL, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_DATE, "VARCHAR(10) NOT NULL"));
     return createTable(table, colist);
 }
 
 bool HQDBDataBase::createShareHistoryCounterTable()
 {
-    if(isTableExist(TABLE_SHARE_HISTORY_COUNTER)) return true;
     TableColList colist;
-    colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
-    colist.append({HQ_TABLE_COL_CODE, "VARCHAR(6) NOT NULL"});
-    colist.append({HQ_TABLE_COL_NAME, "VARCHAR(100) NOT NULL"});
-    colist.append({HQ_TABLE_COL_CLOSE, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_CHANGE_PERCENT, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_MONEY, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_WEEK_CHANGE, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_MONTH_CHANGE, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_YEAR_CHANGE, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_FOREIGN_HOLD, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_FOREIGN_HOLD_CHANGE_DAY, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_FOREIGN_HOLD_CHANGE_MONTH, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_FOREIGN_HOLD_CHANGE_WEEK, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_FOREIGN_HOLD_CHANGE_YEAR, "NUMERIC NULL"});
-    colist.append({HQ_TABLE_COL_DATE, "VARCHAR(10) NOT NULL"});
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_CODE, "VARCHAR(6) NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_NAME, "VARCHAR(100) NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_CLOSE, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_CHANGE_PERCENT, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_MONEY, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_WEEK_CHANGE, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_MONTH_CHANGE, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_YEAR_CHANGE, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_FOREIGN_HOLD, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_FOREIGN_HOLD_CHANGE_DAY, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_FOREIGN_HOLD_CHANGE_MONTH, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_FOREIGN_HOLD_CHANGE_WEEK, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_FOREIGN_HOLD_CHANGE_YEAR, "NUMERIC NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_DATE, "VARCHAR(10) NOT NULL"));
     return createTable(TABLE_SHARE_HISTORY_COUNTER, colist);
 }
 
@@ -947,15 +1017,14 @@ bool HQDBDataBase::queryHistoryInfoFromDate(ShareDataList& list, const QString& 
 //shareholders
 bool HQDBDataBase::createShareHoldersTable()
 {
-    if(isTableExist(TABLE_SHARE_HOLEDER)) return true;
     TableColList colist;
-    colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
-    colist.append({HQ_TABLE_COL_SHARE_CODE, "VARCHAR(6) NULL"});
-    colist.append({HQ_TABLE_COL_HOLDER_CODE, "VARCHAR(10) NULL"});
-    colist.append({HQ_TABLE_COL_HOLDER_NAME, "VARCHAR(100) NULL"});
-    colist.append({HQ_TABLE_COL_HOLDER_VOL, "DOUBLE NULL"});
-    colist.append({HQ_TABLE_COL_HOLDER_FUND_PERCENT, "DOUBLE NULL"});
-    colist.append({HQ_TABLE_COL_HOLDER_DATE, "INTEGER NULL"});
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_SHARE_CODE, "VARCHAR(6) NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_HOLDER_CODE, "VARCHAR(10) NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_HOLDER_NAME, "VARCHAR(100) NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_HOLDER_VOL, "DOUBLE NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_HOLDER_FUND_PERCENT, "DOUBLE NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_HOLDER_DATE, "INTEGER NULL"));
     return createTable(TABLE_SHARE_HOLEDER, colist);
 }
 
@@ -1045,15 +1114,14 @@ bool HQDBDataBase::delShareHolder(const QString& share_code, const QString& hold
 //财务信息等操作
 bool HQDBDataBase::createShareFinancialInfoTable()
 {
-    if(isTableExist(TABLE_SHARE_FINANCE)) return true;
     TableColList colist;
-    colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
-    colist.append({HQ_TABLE_COL_CODE, "VARCHAR(6) NULL"});
-    colist.append({HQ_TABLE_COL_FINANCE_MGSY, "DOUBLE NULL"});
-    colist.append({HQ_TABLE_COL_FINANCE_JZC, "DOUBLE NULL"});
-    colist.append({HQ_TABLE_COL_FINANCE_JZCSYL, "DOUBLE NULL"});
-    colist.append({HQ_TABLE_COL_TOTALMNT, "double NULL"});
-    colist.append({HQ_TABLE_COL_MUTAL, "double NULL"});
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_CODE, "VARCHAR(6) NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_FINANCE_MGSY, "DOUBLE NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_FINANCE_JZC, "DOUBLE NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_FINANCE_JZCSYL, "DOUBLE NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_TOTALMNT, "double NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_MUTAL, "double NULL"));
     return createTable(TABLE_SHARE_FINANCE, colist);
 }
 
@@ -1128,15 +1196,14 @@ bool HQDBDataBase::delShareFinance(const QString& code)
 //分红送配信息的操作
 bool HQDBDataBase::createShareBonusIbfoTable()
 {
-    if(isTableExist(TABLE_SHARE_BONUS)) return true;
     TableColList colist;
-    colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
-    colist.append({HQ_TABLE_COL_CODE, "VARCHAR(6) NULL"});
-    colist.append({HQ_TABLE_COL_BONUS_SHARE, "DOUBLE NULL"});
-    colist.append({HQ_TABLE_COL_BONUS_MONEY, "DOUBLE NULL"});
-    colist.append({HQ_TABLE_COL_BONUS_YAGGR, "VARCHAR(10) NULL"});
-    colist.append({HQ_TABLE_COL_BONUS_GQDJR, "VARCHAR(10) NULL"});
-    colist.append({HQ_TABLE_COL_BONUS_DATE, "VARCHAR(10) NOT NULL"});
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_CODE, "VARCHAR(6) NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_BONUS_SHARE, "DOUBLE NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_BONUS_MONEY, "DOUBLE NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_BONUS_YAGGR, "VARCHAR(10) NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_BONUS_GQDJR, "VARCHAR(10) NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_BONUS_DATE, "VARCHAR(10) NOT NULL"));
     return createTable(TABLE_SHARE_BONUS, colist);
 }
 
@@ -1221,15 +1288,14 @@ bool HQDBDataBase::delShareBonus(const QString& code, const QDate& date)
 //陆股通TOP10
 bool HQDBDataBase::createShareHsgTop10Table()
 {
-    if(isTableExist(TABLE_HSGT_TOP10)) return true;
     TableColList colist;
-    colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
-    colist.append({HQ_TABLE_COL_CODE, "VARCHAR(6) NULL"});
-    colist.append({HQ_TABLE_COL_NAME, "VARCHAR(100) NULL"});
-    colist.append({HQ_TABLE_COL_HSGT_TOP10_BUY, "DOUBLE NULL"});
-    colist.append({HQ_TABLE_COL_HSGT_TOP10_SELL, "DOUBLE NULL"});
-    colist.append({HQ_TABLE_COL_HSGT_TOP10_MONEY, "DOUBLE NULL"});
-    colist.append({HQ_TABLE_COL_DATE, "VARCHAR(10) NOT NULL"});
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_CODE, "VARCHAR(6) NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_NAME, "VARCHAR(100) NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_HSGT_TOP10_BUY, "DOUBLE NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_HSGT_TOP10_SELL, "DOUBLE NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_HSGT_TOP10_MONEY, "DOUBLE NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_DATE, "VARCHAR(10) NOT NULL"));
     return createTable(TABLE_HSGT_TOP10, colist);
 }
 
@@ -1316,11 +1382,10 @@ bool HQDBDataBase::delShareHsgtTop10(const QString& code, const QDate& date)
 //数据表更新日期的相关操作
 bool HQDBDataBase::createDBUpdateDateTable()
 {
-    if(isTableExist(TABLE_DB_UPDATE)) return true;
     TableColList colist;
-    colist.append({HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"});
-    colist.append({HQ_TABLE_COL_TABLE_NM, "VARCHAR(100) NULL"});
-    colist.append({HQ_TABLE_COL_DATE, "VARCHAR(10) NOT NULL"});
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_ID, "INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_TABLE_NM, "VARCHAR(100) NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_DATE, "VARCHAR(10) NOT NULL"));
     return createTable(TABLE_DB_UPDATE, colist);
 }
 
