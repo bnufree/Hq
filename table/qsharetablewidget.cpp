@@ -43,7 +43,6 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqMergeTableWidget(paren
     connect(HQTaskMagrCenter::instance()->hqCenter(), SIGNAL(sendStkDataList(ShareDataList,qint64)),
             this, SLOT(slotRecvAllShareDateList(ShareDataList,qint64)));
 
-
 }
 
 
@@ -58,7 +57,7 @@ void QShareTablewidget::slotRecvAllShareDateList(const ShareDataList& list,qint6
 void QShareTablewidget::updateTable()
 {
     QMutexLocker locker(&mDataMutex);
-    updateDisplayRange();
+    qDebug()<<"row start:"<<mDisplayRowStart<<" count:"<<mMaxDisRow;
     ShareDataList list = mShareDataList.mid(mDisplayRowStart, mMaxDisRow);
     prepareUpdateTable(list.size());
     int i = 0;

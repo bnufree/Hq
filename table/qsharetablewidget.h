@@ -12,7 +12,6 @@ class QShareTablewidget : public HqMergeTableWidget
     Q_OBJECT
 public:
     explicit QShareTablewidget(QWidget *parent = 0);
-    virtual void setSortType(int type);
 public slots:
     void    setSelfShareCodesList(const QStringList& list);
 private:
@@ -34,6 +33,7 @@ public slots:
     void    updateTable();
     void    setShareMarketType(int type);
     void    slotRecvAllShareDateList(const ShareDataList& list,qint64 time);
+    void    setSortType(int type);
 private:
     QMap<QString, double>   mShareMap;
     QList<QAction*>         mCodesActionList;

@@ -25,15 +25,7 @@ public:
     explicit HqSingleTableWidget(QWidget *parent = 0);
     bool isColVisible(int i) const {return !isColumnHidden(i);}
     bool isRowVisible(int i) const {return !isRowHidden(i);}
-    void setTotalCount(int count) {mTotalDisplayRowCount = count;}
-    void resetPageDisplay()
-    {
-        mDisplayRowEnd = mMaxDisRow-1;
-        mDisplayRowStart = 0;
-        updateTable();
-    }
-
-    void getDisplayRowRange(int& start, int& rows);
+    int  getRowHeight() const {return mRowHeight;}
 
     int  getTotalColWidth() const;
     int  getColWidth() const {return mColWidth;}
@@ -54,14 +46,10 @@ public slots:
     virtual void updateTable() {}
 private:
 protected:
-    void resizeEvent(QResizeEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
-    void keyPressEvent(QKeyEvent *event);
 private slots:
-    void checkRowDisplayStatus();
-    void checkDisplayStatus();
 
 signals:
     void signalDisplayPage(int val);
@@ -73,8 +61,6 @@ public slots:
     virtual void slotCellDoubleClicked(int row, int col);
     virtual void slotCellClicked(int row, int col);
     void slotHeaderClicked(int col);
-    void optMoveTable(OPT_MOVE_MODE mode, int step = 1);
-    int  adjusVal(int val, int step, int max, int min);
 
 private:
     TableColDataList        mColDataList;
@@ -82,10 +68,6 @@ private:
     int                     mRowHeight;
     QList<int>              mColWidthList;
 protected:
-    int                     mDisplayRowStart;
-    int                     mDisplayRowEnd;
-    int                     mTotalDisplayRowCount;
-    int                     mMaxDisRow;
 
 };
 
@@ -98,12 +80,12 @@ public:
     virtual void setHeaders(const TableColDataList &list, int move_count = 0);
     virtual void updateTable() {}
     void    resetDisplayRows();
-    void    updateDisplayRange();
 public:
-    void setFixTable(HqSingleTableWidget* fix);
-    void setMovTable(HqSingleTableWidget* mov);
     void prepareUpdateTable(int newRowCount);
     void removeRows(int start, int count);
+
+public slots:
+    virtual void setSortType(int type){}
 
 protected:
     void resizeEvent(QResizeEvent*);
@@ -111,8 +93,6 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void keyPressEvent(QKeyEvent *event);
-private:
-    void resetPos(int move_pos = 0, bool isValid = false);
 
 protected:
     HqSingleTableWidget*                mFixTable;
@@ -124,6 +104,8 @@ private:
     QPoint                              mPressPnt;
     QPoint                              mMovePnt;
     int                                 mMoveDir;
+    qint64                              mLastMoveTime;
+    int                                 mRowHeight;
 };
 
 #endif // HQMERGETABLEWIDGET_H

@@ -18,9 +18,7 @@
 #define     COL_SORT_ROLE               Qt::UserRole + 2
 
 HqSingleTableWidget::HqSingleTableWidget(QWidget *parent) :
-    QTableWidget(parent),
-    mDisplayRowStart(0),
-    mDisplayRowEnd(0)
+    QTableWidget(parent)
 {
     this->setItemDelegate(new RowDelegate);
     mColDataList.clear();
@@ -81,8 +79,6 @@ void HqSingleTableWidget::slotHeaderClicked(int col)
 {
     int type = this->horizontalHeaderItem(col)->data(COL_TYPE_ROLE).toInt();
     emit signalSetSortType(type);
-    setSortType(type);
-    resetPageDisplay();
 }
 
 void HqSingleTableWidget::appendRow()
@@ -217,55 +213,6 @@ void HqSingleTableWidget::slotCellClicked(int row, int col)
     this->horizontalHeader()->setHighlightSections(false);
 }
 
-void HqSingleTableWidget::keyPressEvent(QKeyEvent *event)
-{
-#ifdef Q_OS_WIN
-    if(event->key() == Qt::Key_Left)
-    {
-        optMoveTable(OPT_RIGHT);
-    } else if(event->key() == Qt::Key_Right)
-    {
-        optMoveTable(OPT_LEFT);
-    } else if(event->key() == Qt::Key_Up)
-    {
-        optMoveTable(OPT_UP);
-    } else if(event->key() == Qt::Key_Down)
-    {
-        optMoveTable(OPT_DOWN);
-    }
-#else
-    event->ignore();
-#endif
-}
-
-void HqSingleTableWidget::resizeEvent(QResizeEvent *event)
-{
-    QTableWidget::resizeEvent(event);
-
-    //开始重新设定
-    QTimer::singleShot(500, this, SLOT(checkDisplayStatus()));
-}
-
-void HqSingleTableWidget::checkRowDisplayStatus()
-{
-    int total_display_height = this->height();
-    int header_height = this->horizontalHeader()->height();
-    int table_height = total_display_height - header_height;
-    mMaxDisRow = table_height/ mRowHeight;
-    if(mMaxDisRow * mRowHeight < table_height)
-    {
-        mMaxDisRow++;
-    }
-    //开始重新设定行的显示
-    mDisplayRowEnd = mDisplayRowStart + mMaxDisRow - 1;
-    updateTable();
-}
-
-void HqSingleTableWidget::checkDisplayStatus()
-{
-    checkRowDisplayStatus();
-//    checkColDisplayStatus();
-}
 
 void HqSingleTableWidget::mousePressEvent(QMouseEvent *event)
 {
@@ -285,124 +232,6 @@ void HqSingleTableWidget::mouseReleaseEvent(QMouseEvent *event)
     return;
 }
 
-int  HqSingleTableWidget::adjusVal(int val, int step, int max, int min)
-{
-    qDebug()<<"adjust:"<<val<<step<<max<<min;
-    int res = val + step;
-    if(res > max) res = max;
-    if(res < min) res = min;
-    return res;
-}
-
-void HqSingleTableWidget::optMoveTable(OPT_MOVE_MODE mode, int step)
-{
-    qDebug()<<"now move table:"<<mode;
-    if(OPT_LEFT == mode)
-    {
-        //显示右边的列
-        int col_start = 0, col_end = 0;
-        for(int i=1; i<this->columnCount(); i++)
-        {
-            if(isColVisible(i))
-            {
-                if(col_start == 0)
-                {
-                    col_start = i;
-                }
-            } else
-            {
-                if(col_start == 0) continue;
-                if(col_end == 0)
-                {
-                    col_end = /*i-1*/i;
-                    break;
-                }
-            }
-        }
-        //设定新的显示的列
-        QString colText = "";
-        QTableWidgetItem* item = this->horizontalHeaderItem(col_end);
-        if(item) colText = item->text();
-        qDebug()<<"col hide:"<<col_start<<" col display:"<<col_end<<colText;
-        if(col_end == 0)
-        {
-            //已经到了最后，不操作
-        } else
-        {
-            //还存在未显示的咧
-            this->setColumnHidden(col_start, true);
-            if(col_end < this->columnCount())
-            {
-                this->setColumnHidden(col_end, false);
-                updateColumn(col_end);
-            }
-        }
-//       checkColDisplayStatus();
-
-    } else if(OPT_RIGHT == mode)
-    {
-        //显示左边的列
-        int col_start = 0, col_end = 0;
-        for(int i=this->columnCount()-1; i>=1; i--)
-        {
-            if(!this->isColumnHidden(i))
-            {
-                if(col_end == 0)
-                {
-                    col_end = i;
-                }
-            } else
-            {
-                if(col_end == 0) continue;
-                if(col_start == 0)
-                {
-                    col_start = i+1;
-                    break;
-                }
-            }
-        }
-        //qDebug()<<"start:"<<col_start<<" end:"<<col_end;
-        //设定新的显示的列
-        if(col_start == 0)
-        {
-            //已经到了最左，不操作
-        } else
-        {
-            //还存在未显示的咧
-            this->setColumnHidden(col_end, true);
-            this->setColumnHidden(col_start - 1, false);
-            updateColumn(col_start-1);
-        }
-//        checkColDisplayStatus();
-    } else if(mode == OPT_UP)
-    {
-        //向上滑动，显示下面的列
-        mDisplayRowStart--;
-        if(mDisplayRowStart < 0)
-        {
-            mDisplayRowStart = 0;
-        } else
-        {
-            mDisplayRowEnd--;
-        }
-        updateTable();
-
-    } else if(mode == OPT_DOWN)
-    {
-        mDisplayRowEnd++;
-        if(mDisplayRowEnd == mTotalDisplayRowCount)
-        {
-            mDisplayRowEnd--;
-        } else
-        {
-            mDisplayRowStart++;
-        }
-        updateTable();
-
-    }
-}
-
-
 int HqSingleTableWidget::getTotalColWidth() const
 {
     int sum = 0;
@@ -412,13 +241,6 @@ int HqSingleTableWidget::getTotalColWidth() const
 
     return sum;
 }
-
-void HqSingleTableWidget::getDisplayRowRange(int &start, int &rows)
-{
-    start = mDisplayRowStart;
-    rows = mMaxDisRow;
-}
-
 
 HqMergeTableWidget::HqMergeTableWidget(QWidget *parent) : QWidget(parent)
 {
@@ -432,6 +254,12 @@ HqMergeTableWidget::HqMergeTableWidget(QWidget *parent) : QWidget(parent)
     lay->setSpacing(0);
     lay->setMargin(0);
     mMovColCount = 0;
+    mLastMoveTime = 0;
+    mRowHeight = mMoveTable->getRowHeight();
+
+    connect(mFixTable, &HqSingleTableWidget::signalSetSortType, this, &HqMergeTableWidget::setSortType);
+    connect(mMoveTable, &HqSingleTableWidget::signalSetSortType, this, &HqMergeTableWidget::setSortType);
+
 }
 
 HqMergeTableWidget::~HqMergeTableWidget()
@@ -439,30 +267,21 @@ HqMergeTableWidget::~HqMergeTableWidget()
 
 }
 
-void HqMergeTableWidget::setFixTable(HqSingleTableWidget *fix)
-{
-    mFixTable = fix;
-    resetPos();
-}
-
-void HqMergeTableWidget::setMovTable(HqSingleTableWidget *mov)
-{
-    mMoveTable = mov;
-    resetPos();;
-}
-
 void HqMergeTableWidget::resizeEvent(QResizeEvent *e)
 {
     QWidget::resizeEvent(e);
-    resetPos();
-}
-
-void HqMergeTableWidget::resetPos(int move_pos, bool isok)
-{
     mMoveTable->resize(mMoveTable->getTotalColWidth(), height());
-    mMoveTable->move(move_pos, 0);
-}
+    mMoveTable->move(0, 0);
 
+    int total_display_height = height();
+    int header_height = mMoveTable->horizontalHeader()->height();
+    int table_height = total_display_height - header_height;
+    mMaxDisRow = table_height/ mRowHeight;
+    if(mMaxDisRow * mRowHeight < table_height)
+    {
+        mMaxDisRow++;
+    }
+}
 
 void HqMergeTableWidget::mousePressEvent(QMouseEvent *event)
 {
@@ -485,10 +304,10 @@ void HqMergeTableWidget::mouseMoveEvent(QMouseEvent *event)
     }
     int move_distance = (mMoveDir == 1? move_pnt.y() - mMovePnt.y() : move_pnt.x() - mMovePnt.x());
     if(move_distance == 0) return;
+    if(QDateTime::currentMSecsSinceEpoch() - mLastMoveTime < 500) return;
     if(mMoveDir == 0)
     {
         if(mFixTable->getTotalColWidth() + mMoveTable->getTotalColWidth() <= width()) return;
-        if(qAbs(move_distance) < 2) return;
         OPT_MOVE_MODE mode = move_distance < 0 ? OPT_LEFT : OPT_RIGHT;
         int step = 0.10*mMoveTable->getColWidth();
         if(mode == OPT_LEFT)
@@ -499,7 +318,7 @@ void HqMergeTableWidget::mouseMoveEvent(QMouseEvent *event)
             {
                 left = mMoveTable->parentWidget()->width() - mMoveTable->width();
             }
-            resetPos(left, true);
+            mMoveTable->move(left, 0);
         } else
         {
             if(mMoveTable->geometry().left() >= 0) return;
@@ -508,17 +327,31 @@ void HqMergeTableWidget::mouseMoveEvent(QMouseEvent *event)
             {
                 left = 0;
             }
-            resetPos(left, true);
+            mMoveTable->move(left, 0);
         }
 
     } else
     {
-        if(qAbs(move_distance) < 2) return;
         OPT_MOVE_MODE mode = move_distance < 0 ? OPT_DOWN : OPT_UP;
-        mFixTable->optMoveTable(mode);
-        mMoveTable->optMoveTable(mode);
+        if(mode == OPT_UP)
+        {
+            //向上滑动，显示下面的列
+            mDisplayRowStart--;
+            if(mDisplayRowStart < 0)
+            {
+                mDisplayRowStart = 0;
+            }
+            updateTable();
+
+        } else if(mode == OPT_DOWN)
+        {
+            mDisplayRowStart++;
+            updateTable();
+
+        }
     }
     mMovePnt = move_pnt;
+    mLastMoveTime = QDateTime::currentMSecsSinceEpoch();
     QWidget::mouseMoveEvent(event);
 }
 
@@ -571,8 +404,6 @@ void HqMergeTableWidget::setHeaders(const TableColDataList &list, int move_count
             mMoveTable->setFixedWidth(mMoveTable->getTotalColWidth());
         }
     }
-
-    resetPos();
 }
 
 void HqMergeTableWidget::prepareUpdateTable(int newRowCount)
@@ -590,14 +421,8 @@ void HqMergeTableWidget::removeRows(int start, int count)
 void HqMergeTableWidget::resetDisplayRows()
 {
     mDisplayRowStart = 0;
-    mFixTable->resetPageDisplay();
-    mMoveTable->resetPageDisplay();
 }
 
-void HqMergeTableWidget::updateDisplayRange()
-{
-    mFixTable->getDisplayRowRange(mDisplayRowStart, mMaxDisRow);
-}
 
 
 
