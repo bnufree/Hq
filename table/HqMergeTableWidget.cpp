@@ -81,11 +81,6 @@ void HqSingleTableWidget::slotHeaderClicked(int col)
     emit signalSetSortType(type);
 }
 
-void HqSingleTableWidget::appendRow()
-{
-    this->insertRow(this->rowCount());
-}
-
 void HqSingleTableWidget::setItemText(int row, int column, const QString &text, const QColor& color, Qt::AlignmentFlag flg)
 {
     QStkTableWidgetItem *item = static_cast<QStkTableWidgetItem*> (this->item(row, column));
@@ -269,11 +264,10 @@ HqMergeTableWidget::~HqMergeTableWidget()
 
 void HqMergeTableWidget::resizeEvent(QResizeEvent *e)
 {
-    QWidget::resizeEvent(e);
-    mMoveTable->resize(mMoveTable->getTotalColWidth(), height());
+    mMoveTable->resize(mMoveTable->getTotalColWidth(), e->size().height());
     mMoveTable->move(0, 0);
 
-    int total_display_height = height();
+    int total_display_height = e->size().height();
     int header_height = mMoveTable->horizontalHeader()->height();
     int table_height = total_display_height - header_height;
     mMaxDisRow = table_height/ mRowHeight;
@@ -281,6 +275,8 @@ void HqMergeTableWidget::resizeEvent(QResizeEvent *e)
     {
         mMaxDisRow++;
     }
+
+    QWidget::resizeEvent(e);
 }
 
 void HqMergeTableWidget::mousePressEvent(QMouseEvent *event)
@@ -290,25 +286,11 @@ void HqMergeTableWidget::mousePressEvent(QMouseEvent *event)
     mMoveDir = -1;
     QWidget::mousePressEvent(event);
 }
-
-void HqMergeTableWidget::mouseMoveEvent(QMouseEvent *event)
+void HqMergeTableWidget::moveTable(int mode)
 {
-    //窗口跟着鼠标移动
-    QPoint move_pnt = QCursor::pos();
-    //判断鼠标当前是水平移动还是数值运动
-    mMoveDir = 1; //0水平，1竖直
-    double rad = qAbs(atan2(move_pnt.y() - mPressPnt.y(), move_pnt.x() - mPressPnt.x()));
-    if( (0<=rad && rad<=0.25*3.1415926) || (rad >= 0.75 *3.1415926 && rad<=3.1415926))
-    {
-        mMoveDir = 0;
-    }
-    int move_distance = (mMoveDir == 1? move_pnt.y() - mMovePnt.y() : move_pnt.x() - mMovePnt.x());
-    if(move_distance == 0) return;
-    if(QDateTime::currentMSecsSinceEpoch() - mLastMoveTime < 500) return;
-    if(mMoveDir == 0)
+    if(mode == OPT_LEFT || mode == OPT_RIGHT)
     {
         if(mFixTable->getTotalColWidth() + mMoveTable->getTotalColWidth() <= width()) return;
-        OPT_MOVE_MODE mode = move_distance < 0 ? OPT_LEFT : OPT_RIGHT;
         int step = 0.10*mMoveTable->getColWidth();
         if(mode == OPT_LEFT)
         {
@@ -332,7 +314,6 @@ void HqMergeTableWidget::mouseMoveEvent(QMouseEvent *event)
 
     } else
     {
-        OPT_MOVE_MODE mode = move_distance < 0 ? OPT_DOWN : OPT_UP;
         if(mode == OPT_UP)
         {
             //向上滑动，显示下面的列
@@ -350,6 +331,33 @@ void HqMergeTableWidget::mouseMoveEvent(QMouseEvent *event)
 
         }
     }
+
+}
+
+void HqMergeTableWidget::mouseMoveEvent(QMouseEvent *event)
+{
+    //窗口跟着鼠标移动
+    QPoint move_pnt = QCursor::pos();
+    //判断鼠标当前是水平移动还是数值运动
+    mMoveDir = 1; //0水平，1竖直
+    double rad = qAbs(atan2(move_pnt.y() - mPressPnt.y(), move_pnt.x() - mPressPnt.x()));
+    if( (0<=rad && rad<=0.25*3.1415926) || (rad >= 0.75 *3.1415926 && rad<=3.1415926))
+    {
+        mMoveDir = 0;
+    }
+    int move_distance = (mMoveDir == 1? move_pnt.y() - mMovePnt.y() : move_pnt.x() - mMovePnt.x());
+    if(move_distance == 0) return;
+    if(QDateTime::currentMSecsSinceEpoch() - mLastMoveTime < 500) return;
+    OPT_MOVE_MODE mode = OPT_LEFT;
+    if(mMoveDir == 0)
+    {
+        mode = move_distance < 0 ? OPT_LEFT : OPT_RIGHT;
+    } else
+    {
+        mode = move_distance < 0 ? OPT_DOWN : OPT_UP;
+    }
+    moveTable(mode);
+
     mMovePnt = move_pnt;
     mLastMoveTime = QDateTime::currentMSecsSinceEpoch();
     QWidget::mouseMoveEvent(event);
@@ -364,19 +372,19 @@ void HqMergeTableWidget::mouseReleaseEvent(QMouseEvent *event)
 void HqMergeTableWidget::keyPressEvent(QKeyEvent *event)
 {
 #ifdef Q_OS_WIN
-//    if(event->key() == Qt::Key_Left)
-//    {
-//        optMoveTable(OPT_RIGHT);
-//    } else if(event->key() == Qt::Key_Right)
-//    {
-//        optMoveTable(OPT_LEFT);
-//    } else if(event->key() == Qt::Key_Up)
-//    {
-//        optMoveTable(OPT_UP);
-//    } else if(event->key() == Qt::Key_Down)
-//    {
-//        optMoveTable(OPT_DOWN);
-//    }
+    if(event->key() == Qt::Key_Left)
+    {
+        moveTable(OPT_RIGHT);
+    } else if(event->key() == Qt::Key_Right)
+    {
+        moveTable(OPT_LEFT);
+    } else if(event->key() == Qt::Key_Up)
+    {
+        moveTable(OPT_UP);
+    } else if(event->key() == Qt::Key_Down)
+    {
+        moveTable(OPT_DOWN);
+    }
 #else
     event->ignore();
 #endif

@@ -57,7 +57,6 @@ void QShareTablewidget::slotRecvAllShareDateList(const ShareDataList& list,qint6
 void QShareTablewidget::updateTable()
 {
     QMutexLocker locker(&mDataMutex);
-    qDebug()<<"row start:"<<mDisplayRowStart<<" count:"<<mMaxDisRow;
     ShareDataList list = mShareDataList.mid(mDisplayRowStart, mMaxDisRow);
     prepareUpdateTable(list.size());
     int i = 0;
@@ -125,6 +124,7 @@ void QShareTablewidget::setSelfShareCodesList(const QStringList &list)
 void QShareTablewidget::setSortType(int type)
 {
     HQTaskMagrCenter::instance()->hqCenter()->setSortType(type);
+    resetDisplayRows();
 }
 
 void QShareTablewidget::initMenu()

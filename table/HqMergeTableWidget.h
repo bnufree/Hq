@@ -23,28 +23,17 @@ class HqSingleTableWidget : public QTableWidget
     Q_OBJECT
 public:
     explicit HqSingleTableWidget(QWidget *parent = 0);
-    bool isColVisible(int i) const {return !isColumnHidden(i);}
-    bool isRowVisible(int i) const {return !isRowHidden(i);}
     int  getRowHeight() const {return mRowHeight;}
 
     int  getTotalColWidth() const;
     int  getColWidth() const {return mColWidth;}
     void setHeaders(const TableColDataList& list);
-    void appendRow();
     void setCodeName(int row, int column,const QString& code,const QString& name);
     void setItemText(int row, int column, const QString& text, const QColor& color = Qt::white, Qt::AlignmentFlag flg = Qt::AlignCenter);
     void updateFavShareIconOfRow(int row, bool isFav);
     void prepareUpdateTable(int newRowCount);
     void removeRows(int start, int count);
     void updateColumn(int col);
-    virtual void setSortType(int type) {}
-    virtual void displayNextPage() {}
-    virtual void displayPreviousPage() {}
-    virtual void displayFirstPage(){}
-    virtual void displayLastPage(){}
-public slots:
-    virtual void updateTable() {}
-private:
 protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
@@ -83,6 +72,10 @@ public:
 public:
     void prepareUpdateTable(int newRowCount);
     void removeRows(int start, int count);
+
+
+private:
+    void moveTable(int mode);
 
 public slots:
     virtual void setSortType(int type){}
