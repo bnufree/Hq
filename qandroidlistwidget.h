@@ -15,9 +15,11 @@ signals:
     void     signalItemClicked(const QString& text, int data);
 public slots:
     void    slotItemClicked();
+    void    slotFirstBtnClicked();
 private:
     int     mItemWidth;
     int     mItemHeight;
+    QList<QAndroidButton*>      mBtnList;
 };
 
 #endif // QANDROIDLISTWIDGET_H

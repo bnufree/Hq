@@ -652,6 +652,8 @@ void HqInfoService::slotUpdateHsgtTop10Keys(const QDate& date)
         foreach (ShareHsgt data, list2) {
             mHsgtTop10Kyes.append(data.mCode.right(6));
         }
+
+        emit signalSendShareHsgtTop10List(list2, "", date);
     }
     qDebug()<<"hstop10 keys:"<<mHsgtTop10Kyes;
 
@@ -667,7 +669,7 @@ void HqInfoService::slotQueryShareHsgtTop10List(const QString &code, const QDate
     }
 
 
-    emit signalSendShareHsgtTop10List(list);
+    emit signalSendShareHsgtTop10List(list, code, date);
 
 }
 

@@ -131,7 +131,7 @@ signals:
     void signalUpdateHsgtTop10Keys(const QDate& date);
     void signalSendLastHSGTUpdateDate(const QDate& date);
     void signalQueryShareHsgtTop10List(const QString& code, const QDate& date = QDate());
-    void signalSendShareHsgtTop10List(const ShareHsgtList& list);
+    void signalSendShareHsgtTop10List(const ShareHsgtList& list, const QString& code, const QDate& date);
 
     //实时数据查询信息获取
     void signalSearchCodesOfText(const QString& text);

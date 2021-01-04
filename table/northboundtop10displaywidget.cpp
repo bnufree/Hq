@@ -6,6 +6,7 @@
 #include "utils/qhttpget.h"
 #include <QVBoxLayout>
 #include "data_structure/hqutils.h"
+#include "dbservices/dbservices.h"
 
 QShareLgtTop10Thread::QShareLgtTop10Thread(QObject *parent) : QThread(parent)
 {
@@ -187,13 +188,14 @@ NorthBoundTop10DisplayWidget::NorthBoundTop10DisplayWidget(QWidget *parent) : QW
     mTable = new NorthBoundTop10DisplayTable(this);
     layout1->addWidget(mTimeLabel);
     layout1->addWidget(mTable);
-    QShareLgtTop10Thread *lgt_thread = new QShareLgtTop10Thread(this);
-    connect(lgt_thread, &QShareLgtTop10Thread::signalChinaAShareTop10Updated, this, &NorthBoundTop10DisplayWidget::slotSetDataList);
-    lgt_thread->start();
+
+    connect(DATA_SERVICE, SIGNAL(signalSendShareHsgtTop10List(ShareHsgtList, QString, QDate)),
+            this, SLOT(slotSetDataList(ShareHsgtList, QString, QDate)));
+
 }
 
-void NorthBoundTop10DisplayWidget::slotSetDataList(const ShareHsgtList &list, const QString& date)
+void NorthBoundTop10DisplayWidget::slotSetDataList(const ShareHsgtList &list, const QString& code, const QDate& date)
 {
-    mTimeLabel->setText(mCommonStr + date);
+    mTimeLabel->setText(mCommonStr + date.toString("yyyy-MM-dd"));
     mTable->slotSetDataList(list);
 }

@@ -31,6 +31,7 @@ void QAndroidListWidget::addItem(const QString &item, const QVariant& data)
     //btn->resize(item_width, );
     int count = this->layout()->count();
     this->resize(mItemWidth, mItemHeight * count);
+    mBtnList.append(btn);
 }
 
 void QAndroidListWidget::autoAdjustSize()
@@ -52,5 +53,11 @@ void QAndroidListWidget::slotItemClicked()
     int val = 0;
     if(btn) val = btn->property(ITEM_PROPERTY).toInt();
     emit signalItemClicked(btn->text(),  val);
+}
+
+void QAndroidListWidget::slotFirstBtnClicked()
+{
+    if(mBtnList.size() == 0) return;
+    emit mBtnList.first()->clicked();
 }
 

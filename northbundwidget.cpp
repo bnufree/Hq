@@ -1,27 +1,58 @@
-#include "northbundwidget.h"
+﻿#include "northbundwidget.h"
 #include "real/qnorthflowinfodisplaywidget.h"
 #include <QHeaderView>
 #include <QApplication>
 #include <QDesktopWidget>
 #include "data_structure/hqutils.h"
 #include "table/northboundtop10displaywidget.h"
+#include "qandroidbutton.h"
+#include "qandroidlistwidget.h"
+#include <QVBoxLayout>
+#include <QTimer>
 
-NorthBundWidget::NorthBundWidget(QWidget *parent) : QListWidget(parent)
+NorthBundWidget::NorthBundWidget(QWidget *parent) : QWidget(parent)
 {
-//    this->setSelectionBehavior(QAbstractItemView::SelectRows);
-    //添加实时外资流向数据
-    this->insertItem(0, QStringLiteral("北向资金实时数据"));
-    item(0)->setTextAlignment(Qt::AlignCenter);
-    item(0)->setSizeHint(QSize(width(), HqUtils::convertMM2Pixel(10)));
-    QFont font = item(0)->font();
-    font.setPixelSize(HqUtils::convertMM2Pixel(6));
-    item(0)->setFont(font);
-    this->insertItem(1, new QListWidgetItem);
-    this->setItemWidget(item(1), new QNorthFlowInfoDisplayWidget(this));
-    item(1)->setSizeHint(QSize(width(), QApplication::desktop()->availableGeometry().height() *0.50));
+    QVBoxLayout* vlay = new QVBoxLayout(this);
+    this->setLayout(vlay);
 
-    this->insertItem(2, new QListWidgetItem);
-    this->setItemWidget(item(2), new NorthBoundTop10DisplayWidget(this));
-    item(2)->setSizeHint(QSize(width(), QApplication::desktop()->availableGeometry().height() *0.60));
+    int frameHeight = HqUtils::convertMM2Pixel(10.0);
+    mCtrlBtn = new QAndroidButton(this);
+    mCtrlBtn->setAlignment(Qt::AlignCenter);
+    mCtrlBtn->setFixedHeight(frameHeight);
+    vlay->addWidget(mCtrlBtn);
+
+    mTypeList = new QAndroidListWidget(0, 0, this);
+    mTypeList->addItem(QStringLiteral("北向实时"), North_RealTime);
+    mTypeList->addItem(QStringLiteral("北向成交"), North_Top10);
+    mTypeList->addItem(QStringLiteral("北向持股"), North_Vol);
+
+    connect(mTypeList, SIGNAL(signalItemClicked(QString,int)), this, SLOT(slotMarketTypeChanged(QString, int)));
+    mTypeList->hide();
+
+    mWidgetList = new QStackedWidget(this);
+    vlay->addWidget(mWidgetList);
+    int index = mWidgetList->addWidget(new QNorthFlowInfoDisplayWidget(this));
+    mWidgetList->widget(index)->setFixedHeight(QApplication::desktop()->availableGeometry().height() *0.50);
+
+    index = mWidgetList->addWidget(new NorthBoundTop10DisplayWidget(this));
+
+    QTimer::singleShot(100, mTypeList, SLOT(slotFirstBtnClicked()));
+
+}
+
+void NorthBundWidget::slotMarketBtnClicked()
+{
+    if(mTypeList)
+    {
+        mTypeList->move(mCtrlBtn->geometry().bottomLeft());
+        mTypeList->setVisible(true);
+    }
+}
+
+void NorthBundWidget::slotMarketTypeChanged(const QString& text, int type)
+{
+    if(mTypeList) mTypeList->setVisible(false);
+    mCtrlBtn->setText(text);
+    mWidgetList->setCurrentIndex(type);
 }
 

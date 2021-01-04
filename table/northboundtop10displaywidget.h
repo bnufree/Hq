@@ -45,7 +45,7 @@ public:
 signals:
 
 public slots:
-    void slotSetDataList(const ShareHsgtList &list, const QString& date);
+    void slotSetDataList(const ShareHsgtList &list, const QString& code, const QDate& date);
 private:
     QLabel      *mTimeLabel;
     NorthBoundTop10DisplayTable * mTable;

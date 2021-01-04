@@ -25,46 +25,39 @@ void QShareHsgtTop10Work::run()
 {
     while (true) {
         QDate last_update_date = DATA_SERVICE->getLastUpdateDateOfHsgtTop10();
-        qDebug()<<"last date:"<<ShareTradeDateTime(last_update_date).toString()<<last_update_date.isNull();
-        //如果日期就是当前的工作日,证明更新完成,不再需要继续更新,结束线程
-        if(last_update_date == TradeDateMgr::instance()->currentTradeDay())
+        qDebug()<<"hsgt top10 last date:"<<ShareTradeDateTime(last_update_date).toString()<<last_update_date.isNull();
+        if(last_update_date.isNull())
         {
-
-            DATA_SERVICE->signalUpdateHsgtTop10Keys(last_update_date);
-            return;
+            last_update_date = QDate::currentDate().addYears(-1);
+        } else
+        {
+            last_update_date = last_update_date.addDays(1);
         }
-        QDate curDate = TradeDateMgr::instance()->currentTradeDay();
-        if(last_update_date.isNull()) last_update_date = curDate.addYears(-1);
 
         QDate final_date = last_update_date;
         ShareHsgtList list;
-        last_update_date = ShareTradeDateTime(last_update_date).nextTradeDay();
-        qDebug()<<"start get north top10 from date:"<<ShareTradeDateTime(last_update_date).toString();
-        while (last_update_date <= curDate) {
+        qDebug()<<"start get north top10 from date:"<<last_update_date.toString("yyyy-MM-dd");
+        while (last_update_date <= QDate::currentDate()) {
             int old_size = list.size();
-            if(TradeDateMgr::instance()->isTradeDay(last_update_date))
+            //从网络获取
+            if(!getDataFromEastMoney(list, last_update_date))
             {
-                //从网络获取
-                if(!getDataFromEastMoney(list, last_update_date))
-                {
-                    getDataFromHKEX(list, last_update_date);
-                }
-                int new_size = list.size();
-                if(new_size != old_size)
-                {
-                    final_date = last_update_date;
-                }
-                qDebug()<<"hstop10:"<<last_update_date<<(new_size - old_size)<<"final date:"<<final_date;
+                getDataFromHKEX(list, last_update_date);
             }
+            int new_size = list.size();
+            if(new_size != old_size)
+            {
+                final_date = last_update_date;
+            }
+            qDebug()<<"hstop10:"<<last_update_date<<(new_size - old_size)<<"final date:"<<final_date;
             last_update_date = last_update_date.addDays(1);
         }
 
         if(list.size() > 0)
         {
             DATA_SERVICE->signalUpdateShareHsgtTop10Info(list);
+            DATA_SERVICE->signalUpdateHsgtTop10Keys(final_date);
         }
-
-        DATA_SERVICE->signalUpdateHsgtTop10Keys(final_date);
 
         sleep(60);
     }

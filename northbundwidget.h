@@ -1,9 +1,18 @@
-#ifndef NORTHBUNDWIDGET_H
+﻿#ifndef NORTHBUNDWIDGET_H
 #define NORTHBUNDWIDGET_H
 
-#include <QListWidget>
+#include <QStackedWidget>
 
-class NorthBundWidget : public QListWidget
+class QAndroidButton;
+class QAndroidListWidget;
+
+enum NorthType{
+    North_RealTime = 0,
+    North_Top10,
+    North_Vol,
+};
+
+class NorthBundWidget : public QWidget
 {
     Q_OBJECT
 public:
@@ -12,6 +21,12 @@ public:
 signals:
 
 public slots:
+    void slotMarketBtnClicked();
+    void slotMarketTypeChanged(const QString& text, int type);
+private:
+    QAndroidButton*         mCtrlBtn;
+    QAndroidListWidget*     mTypeList;
+    QStackedWidget*         mWidgetList;
 };
 
 #endif // NORTHBUNDWIDGET_H
