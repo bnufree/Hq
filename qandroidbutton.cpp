@@ -21,6 +21,7 @@ QAndroidButton::QAndroidButton(const QString& label, QWidget *parent) :\
                             font-weight:normal;\
                         }\
                         ");
+    setSelected(false);
 }
 
 void QAndroidButton::mousePressEvent(QMouseEvent *ev)

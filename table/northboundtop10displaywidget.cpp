@@ -179,7 +179,7 @@ NorthBoundTop10DisplayWidget::NorthBoundTop10DisplayWidget(QWidget *parent) : QW
     mTimeLabel->setAlignment(Qt::AlignCenter);
     mTimeLabel->setFixedHeight(HqUtils::convertMM2Pixel(10));
     QFont font1 = mTimeLabel->font();
-    font1.setPixelSize(HqUtils::convertMM2Pixel(6));
+    font1.setPixelSize(HqUtils::convertMM2Pixel(4));
     mTimeLabel->setFont(font1);
     QVBoxLayout *layout1 = new QVBoxLayout;
     this->setLayout(layout1);
@@ -191,6 +191,8 @@ NorthBoundTop10DisplayWidget::NorthBoundTop10DisplayWidget(QWidget *parent) : QW
 
     connect(DATA_SERVICE, SIGNAL(signalSendShareHsgtTop10List(ShareHsgtList, QString, QDate)),
             this, SLOT(slotSetDataList(ShareHsgtList, QString, QDate)));
+
+    DATA_SERVICE->signalQueryLatestHsgtData();
 
 }
 

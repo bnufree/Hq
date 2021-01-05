@@ -132,6 +132,8 @@ void HqInfoService::initSignalSlot()
             this, SLOT(slotUpdateHsgtTop10Keys(QDate)));
     connect(this, SIGNAL(signalQueryShareHsgtTop10List(QString,QDate)),
             this, SLOT(slotQueryShareHsgtTop10List(QString,QDate)));
+    connect(this, SIGNAL(signalQueryLatestHsgtData()),
+            this, SLOT(slotQueryLatestHsgtData()));
 
     connect(this, SIGNAL(signalRecvShareHistoryInfos(ShareDataList, int)),
             this, SLOT(slotRecvShareHistoryInfos(ShareDataList, int)));
@@ -657,6 +659,12 @@ void HqInfoService::slotUpdateHsgtTop10Keys(const QDate& date)
     }
     qDebug()<<"hstop10 keys:"<<mHsgtTop10Kyes;
 
+}
+
+void HqInfoService::slotQueryLatestHsgtData()
+{
+    QDate date = getLastUpdateDateOfHsgtTop10();
+    slotQueryShareHsgtTop10List("", date);
 }
 
 void HqInfoService::slotQueryShareHsgtTop10List(const QString &code, const QDate &date)

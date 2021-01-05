@@ -20,6 +20,13 @@ NorthBundWidget::NorthBundWidget(QWidget *parent) : QWidget(parent)
     mCtrlBtn->setAlignment(Qt::AlignCenter);
     mCtrlBtn->setFixedHeight(frameHeight);
     vlay->addWidget(mCtrlBtn);
+    connect(mCtrlBtn, &QAndroidButton::clicked, this, &NorthBundWidget::slotMarketBtnClicked);
+
+    mWidgetList = new QStackedWidget(this);
+    vlay->addWidget(mWidgetList);
+    int index = mWidgetList->addWidget(new QNorthFlowInfoDisplayWidget(this));
+    mWidgetList->widget(index)->setFixedHeight(QApplication::desktop()->availableGeometry().height() *0.50);
+    index = mWidgetList->addWidget(new NorthBoundTop10DisplayWidget(this));
 
     mTypeList = new QAndroidListWidget(0, 0, this);
     mTypeList->addItem(QStringLiteral("北向实时"), North_RealTime);
@@ -29,13 +36,6 @@ NorthBundWidget::NorthBundWidget(QWidget *parent) : QWidget(parent)
     connect(mTypeList, SIGNAL(signalItemClicked(QString,int)), this, SLOT(slotMarketTypeChanged(QString, int)));
     mTypeList->hide();
 
-    mWidgetList = new QStackedWidget(this);
-    vlay->addWidget(mWidgetList);
-    int index = mWidgetList->addWidget(new QNorthFlowInfoDisplayWidget(this));
-    mWidgetList->widget(index)->setFixedHeight(QApplication::desktop()->availableGeometry().height() *0.50);
-
-    index = mWidgetList->addWidget(new NorthBoundTop10DisplayWidget(this));
-
     QTimer::singleShot(100, mTypeList, SLOT(slotFirstBtnClicked()));
 
 }
@@ -44,6 +44,7 @@ void NorthBundWidget::slotMarketBtnClicked()
 {
     if(mTypeList)
     {
+        mTypeList->setFixedWidth(this->width());
         mTypeList->move(mCtrlBtn->geometry().bottomLeft());
         mTypeList->setVisible(true);
     }

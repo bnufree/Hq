@@ -3,6 +3,8 @@
 #include <QApplication>
 #include <QDebug>
 #include <QVBoxLayout>
+#include "data_structure/hqutils.h"
+
 
 #define     ITEM_PROPERTY               "UserData"
 
@@ -27,7 +29,7 @@ void QAndroidListWidget::addItem(const QString &item, const QVariant& data)
 
     QSize screen = QApplication::desktop()->availableGeometry().size();
     if(mItemWidth == 0) mItemWidth = screen.width() * 1.0;
-    if(mItemHeight == 0) mItemHeight = screen.height() / 15.0;
+    if(mItemHeight == 0) mItemHeight = HqUtils::convertMM2Pixel(8);
     //btn->resize(item_width, );
     int count = this->layout()->count();
     this->resize(mItemWidth, mItemHeight * count);

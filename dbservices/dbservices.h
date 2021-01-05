@@ -132,6 +132,7 @@ signals:
     void signalSendLastHSGTUpdateDate(const QDate& date);
     void signalQueryShareHsgtTop10List(const QString& code, const QDate& date = QDate());
     void signalSendShareHsgtTop10List(const ShareHsgtList& list, const QString& code, const QDate& date);
+    void signalQueryLatestHsgtData();
 
     //实时数据查询信息获取
     void signalSearchCodesOfText(const QString& text);
@@ -197,6 +198,7 @@ public slots:
     void slotUpdateHsgtTop10Info(const ShareHsgtList& list);
     void slotUpdateShareFinanceInfo(const FinancialDataList& list);
     void slotUpdateHsgtTop10Keys(const QDate& date);
+    void slotQueryLatestHsgtData();
     //查询
     void slotQueryShareHsgtTop10List(const QString& code, const QDate& date);
     void slotQueryShareFinanceList(const QStringList& list = QStringList());

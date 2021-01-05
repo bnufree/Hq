@@ -196,6 +196,8 @@ void HqTableWidget::checkColDisplayStatus()
         qDebug()<<i<<colText<<"hide:"<<isColumnHidden(i);
     }
 
+
+
 }
 
 void HqTableWidget::slotHeaderClicked(int col)
