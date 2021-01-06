@@ -503,6 +503,32 @@ struct ShareExchangeData{
     QString     mSerialText;
 };
 
+struct ShareForeignVolChgCounter
+{
+    double      mShareHold_Change;
+    double      mShareSZ_Change;
+    double      mShareRate_Change;
+};
+
+struct ShareForeignVolCounter{
+    int             mCode;
+    qint64          mDate;
+    double          mPrice;                     //最新价
+    double          mChangePercent;             //涨跌幅
+    double          mShareHold;                 //持股数
+    double          mShareSZ;                   //持股市值
+    double          mLTZB;                      //流通占比
+    double          mZZB;                       //总占比
+    double          mLTSZ;                      //流通市值
+    double          mZSZ;                       //总市值
+    ShareForeignVolChgCounter  mChg1;
+    ShareForeignVolChgCounter  mChg3;
+    ShareForeignVolChgCounter  mChg5;
+    ShareForeignVolChgCounter  mChg10;
+    ShareForeignVolChgCounter  mChgM;
+};
+
+
 #if 0
 class ShareDataList : public QList<ShareData>
 {

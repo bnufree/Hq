@@ -42,6 +42,7 @@ SOURCES += main.cpp\
 #    webfile/webfile.cpp \
     exchange/qexchangerecordworker.cpp \
     exchange/qexchangefiledlg.cpp \
+    qshareforeignvolchangecounterthread.cpp \
     table/qstktablewidgetitem.cpp \
     table/HqTableWidget.cpp \
     table/qsharetablewidget.cpp \
@@ -125,6 +126,7 @@ HEADERS  += dialog.h \
 #    webfile/webfile.h \
     exchange/qexchangerecordworker.h \
     exchange/qexchangefiledlg.h \
+    qshareforeignvolchangecounterthread.h \
     table/qstktablewidgetitem.h \
     utils/comdatadefines.h \
     table/HqTableWidget.h \

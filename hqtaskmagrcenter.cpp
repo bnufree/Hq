@@ -172,11 +172,11 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     connect(fhsp, SIGNAL(finished()), fhsp, SLOT(deleteLater()));
     fhsp->start();
 
-//    //更新日线数据
-//    mHistoryInfoMgr = new QShareHistoryInfoMgr(codes);
-//    connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SIGNAL(signalUpdateHistoryMsg(QString)));
-//    connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryFinished()), this, SLOT(slotUpdateHistoryFinished()));
-//    mHistoryInfoMgr->signalStartGetHistory();
+    //更新日线数据
+    mHistoryInfoMgr = new QShareHistoryInfoMgr(codes);
+    connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SIGNAL(signalUpdateHistoryMsg(QString)));
+    connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryFinished()), this, SLOT(slotUpdateHistoryFinished()));
+    mHistoryInfoMgr->signalStartGetHistory();
 
 
 

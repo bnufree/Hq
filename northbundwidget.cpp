@@ -9,6 +9,7 @@
 #include "qandroidlistwidget.h"
 #include <QVBoxLayout>
 #include <QTimer>
+#include "table/qshareforeignvoltablewidget.h"
 
 NorthBundWidget::NorthBundWidget(QWidget *parent) : QWidget(parent)
 {
@@ -27,6 +28,7 @@ NorthBundWidget::NorthBundWidget(QWidget *parent) : QWidget(parent)
     int index = mWidgetList->addWidget(new QNorthFlowInfoDisplayWidget(this));
     mWidgetList->widget(index)->setFixedHeight(QApplication::desktop()->availableGeometry().height() *0.50);
     index = mWidgetList->addWidget(new NorthBoundTop10DisplayWidget(this));
+    index = mWidgetList->addWidget(new QShareForeignVolTableWidget(this));
 
     mTypeList = new QAndroidListWidget(0, 0, this);
     mTypeList->addItem(QStringLiteral("北向实时"), North_RealTime);

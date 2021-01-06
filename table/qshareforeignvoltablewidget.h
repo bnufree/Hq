@@ -1,11 +1,11 @@
 ﻿#ifndef QSHAREFOREIGNVOLTABLEWIDGET_H
 #define QSHAREFOREIGNVOLTABLEWIDGET_H
 
-#include "HqTableWidget.h"
+#include "HqMergeTableWidget.h"
 #include "data_structure/sharedata.h"
 #include <QThreadPool>
 
-class QShareForeignVolTableWidget : public HqTableWidget
+class QShareForeignVolTableWidget : public HqMergeTableWidget
 {
     Q_OBJECT
 public:
@@ -14,12 +14,12 @@ public:
 signals:
 
 public slots:
-    void slotFetchForeignData(const ShareForignVolFileDataList& list, const QDate& date);
-    void slotFetchBtnClicked();
-    void slotStartInit();
+    void slotRecvData(const QList<ShareForeignVolCounter>& list, const QString& date);
+    void updateTable();
 
 private:
     QThreadPool         mPool;
+    QList<ShareForeignVolCounter> mDataList;
 };
 
 #endif // QSHAREFOREIGNVOLTABLEWIDGET_H
