@@ -10,11 +10,13 @@ class QShareForeignVolChangeCounterThread : public QThread
     Q_OBJECT
 public:
     explicit QShareForeignVolChangeCounterThread(QObject *parent = nullptr);
+    void     setSortType(int type);
 
 protected:
     void run();
-    void read();
-    void write();
+    void read(QList<ShareForeignVolCounter>& list);
+    void write(const QList<ShareForeignVolCounter>& list);
+    void sendData(QList<ShareForeignVolCounter>& list);
 private:
     bool        getData(const QString& type, const QDate& date);
 

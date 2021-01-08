@@ -8,7 +8,51 @@
 #include <QJsonValue>
 #include <QFile>
 
+int global_foreign_sort_type = STK_DISPLAY_SORT_TYPE_PRICE;
+int global_foreign_sort_rule = 1;
+bool global_foreign_chg = false;
 
+bool cmp_foreign(const ShareForeignVolCounter& p1, const ShareForeignVolCounter& p2)
+{
+    int result = 0;
+    switch (global_foreign_sort_type)
+    {
+    case STK_DISPLAY_SORT_TYPE_PRICE:
+        result = (p1.mPrice > p2.mPrice ? 1 : -1);
+        break;
+    case STK_DISPLAY_SORT_TYPE_CHGPER:
+        result = (p1.mChangePercent > p2.mChangePercent ? 1 : -1);
+        break;
+    case STK_DISPLAY_SORT_TYPE_FOREIGN_CAP:
+        result = (p1.mShareSZ > p2.mShareSZ ? 1 : -1);
+        break;
+    case STK_DISPLAY_SORT_TYPE_TCAP:
+        result = (p1.mZSZ > p2.mZSZ ? 1 : -1);
+        break;
+    case STK_DISPLAY_SORT_TYPE_MCAP:
+        result = (p1.mLTSZ > p2.mLTSZ ? 1 : -1);
+        break;
+    case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL:
+        result = (p1.mShareHold > p2.mShareHold ? 1 : -1);
+        break;
+    case STK_DISPLAY_SORT_TYPE_LTZB:
+        result = (p1.mLTZB > p2.mLTZB ? 1 : -1);
+        break;
+    case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG:
+        result = (p1.mChg1.mShareSZ_Change > p2.mChg1.mShareSZ_Change ? 1 : -1);
+        break;
+    case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG5:
+        result = (p1.mChg5.mShareSZ_Change > p2.mChg5.mShareSZ_Change ? 1 : -1);
+        break;
+    case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG10:
+        result = (p1.mChg10.mShareSZ_Change > p2.mChg10.mShareSZ_Change ? 1 : -1);
+        break;
+    }
+
+    int sts =  result * global_foreign_sort_rule;
+
+    return sts > 0;
+}
 
 QShareForeignVolChangeCounterThread::QShareForeignVolChangeCounterThread(QObject *parent) : QThread(parent)
 {
@@ -85,9 +129,8 @@ bool QShareForeignVolChangeCounterThread::getData(const QString& type, const QDa
 }
 
 
-void QShareForeignVolChangeCounterThread::read()
+void QShareForeignVolChangeCounterThread::read(QList<ShareForeignVolCounter>& list)
 {
-    QList<ShareForeignVolCounter> list;
     if(!QFile::exists(mFileName))
     {
         qDebug()<<__FUNCTION__<<__LINE__<<mFileName<<" not exist";
@@ -108,32 +151,25 @@ void QShareForeignVolChangeCounterThread::read()
         while (!file.atEnd() ) {
             ShareForeignVolCounter data;
             file.read((char*)(&data), sizeof(ShareForeignVolCounter));
-            qDebug()<<data.mCode<<data.mChangePercent<<data.mChg1.mShareHold_Change;
             list.append(data);
         }
     }
     file.close();
-    if(list.size() > 0)
-    {
-        QDateTime date = QDateTime::fromTime_t(totalNum);
-        emit signalSendDataList(list, date.date().toString("yyyy-MM-dd"));
-    }
-
 
     return;
 }
 
-void QShareForeignVolChangeCounterThread::write()
+void QShareForeignVolChangeCounterThread::write(const QList<ShareForeignVolCounter>& list)
 {
-    if(mDataList.size() == 0) return;
+    if(list.size() == 0) return;
     FILE *fp = fopen(mFileName.toStdString().data(), "wb+");
     if(fp)
     {
         qint64 date = mDataList.first().mDate;
         fwrite(&date, sizeof(date), 1, fp);
-        foreach(int key, mDataList.keys())
+        for(int i=0; i<list.size(); i++)
         {
-            ShareForeignVolCounter &data = mDataList[key];
+            ShareForeignVolCounter data = list[i];
             fwrite(&data, sizeof(ShareForeignVolCounter), 1, fp);
         }
         fclose(fp);
@@ -141,36 +177,75 @@ void QShareForeignVolChangeCounterThread::write()
     }
 }
 
+void QShareForeignVolChangeCounterThread::setSortType(int type)
+{
+    if(global_foreign_sort_type == type)
+    {
+        global_foreign_sort_rule *= (-1);
+    } else
+    {
+        global_foreign_sort_type = type;
+        global_foreign_sort_rule = 1;
+    }
+    global_foreign_chg = true;
+}
+
+void QShareForeignVolChangeCounterThread::sendData(QList<ShareForeignVolCounter>& list)
+{
+    if(list.size() > 0)
+    {
+        QDateTime date = QDateTime::fromTime_t(list.first().mDate);
+        qStableSort(list.begin(), list.end(), cmp_foreign);
+
+        emit signalSendDataList(list, date.date().toString("yyyy-MM-dd"));
+    }
+}
+
 
 void QShareForeignVolChangeCounterThread::run()
 {
     //首先读取本地文件的信息
-    read();
+    QList<ShareForeignVolCounter> list;
+    read(list);
+    while (1) {
+        sendData(list);
+        QDate last_date = QDate::fromString(PROFILES_INS->value("Update", "Foreign_counter_update").toString(), "yyyy-MM-dd");
+        QDate dest_date = QDate::currentDate().addDays(-1);
+        if(last_date != dest_date)
+        {
+            mDataList.clear();
+            QStringList typeList;
+            typeList.append("1");
+            typeList.append("3");
+            typeList.append("5");
+            typeList.append("10");
+            typeList.append("m");
 
-    QString last_date = PROFILES_INS->value("Update", "Foreign_counter_update").toString();
-    if(QDate::fromString(last_date, "yyyy-MM-dd") != QDate::currentDate())
-    {
-        QStringList typeList;
-        typeList.append("1");
-        typeList.append("3");
-        typeList.append("5");
-        typeList.append("10");
-        typeList.append("m");
+            QDate date = dest_date;
 
-        QDate date = QDate::currentDate();
-
-        while (typeList.size() > 0) {
-            QString type = typeList.takeFirst();
-            while (!getData(type, date))
+            while (typeList.size() > 0) {
+                QString type = typeList.takeFirst();
+                while (!getData(type, date))
+                {
+                    date = date.addDays(-1);
+                    if(date == last_date) break;
+                }
+            }
+            if(mDataList.size() > 0)
             {
-                date = date.addDays(-1);
+                list = mDataList.values();
+                write(list);
+                sendData(list);
             }
         }
-        if(mDataList.size() > 0)
+        for(int i=0; i<60; i++)
         {
-            QDateTime date = QDateTime::fromTime_t(mDataList.first().mDate);
-            emit signalSendDataList(mDataList.values(), date.date().toString("yyyy-MM-dd"));
-            write();
+            if(global_foreign_chg)
+            {
+                global_foreign_chg = false;
+                break;
+            }
+            msleep(100);
         }
     }
 }
