@@ -34,6 +34,13 @@ signals:
 public slots:
     void slotSetDataList(const ShareHsgtList &list);
     void slotCellDoubleClicked(int row, int col);
+    void slotHeaderClicked(int col);
+
+private:
+
+    int         mSortCol;
+    int         mSortMode;
+    ShareHsgtList   mDataList;
 };
 
 class NorthBoundTop10DisplayWidget : public QWidget

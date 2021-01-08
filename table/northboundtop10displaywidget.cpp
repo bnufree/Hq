@@ -138,7 +138,6 @@ bool QShareLgtTop10Thread::getDataFromHKEX(ShareHsgtList &list, QDate &date)
 
 NorthBoundTop10DisplayTable::NorthBoundTop10DisplayTable(QWidget *parent) : HqTableWidget(parent)
 {
-
     //设定抬头
     TableColDataList datalist;
     datalist.append(TableColData(QStringLiteral("序号"), STK_DISPLAY_SORT_TYPE_NONE));
@@ -147,13 +146,32 @@ NorthBoundTop10DisplayTable::NorthBoundTop10DisplayTable(QWidget *parent) : HqTa
     datalist.append(TableColData(QStringLiteral("净额"), STK_DISPLAY_SORT_TYPE_MONEYR));
     datalist.append(TableColData(QStringLiteral("日期"), STK_DISPLAY_SORT_TYPE_NONE));
     setHeaders(datalist);
+    mSortCol = 3;
+    mSortMode = Qt::AscendingOrder;
+//    setSortingEnabled(true);
+}
+
+void NorthBoundTop10DisplayTable::slotHeaderClicked(int col)
+{
+    if(col != 3) return;
+    mSortMode = (mSortMode + 1) % 2;
+
+    slotSetDataList(ShareHsgtList());
 }
 
 void NorthBoundTop10DisplayTable::slotSetDataList(const ShareHsgtList &list)
 {
-    prepareUpdateTable(list.size());
+    if(list.size() > 0)  mDataList = list;
+    if(mSortMode == Qt::AscendingOrder)
+    {
+        qStableSort(mDataList.begin(), mDataList.end(), std::greater<ShareHsgt>());
+    } else
+    {
+        qStableSort(mDataList.begin(), mDataList.end(), std::less<ShareHsgt>());
+    }
+    prepareUpdateTable(mDataList.size());
     int i = 0;
-    foreach (ShareHsgt data, list) {
+    foreach (ShareHsgt data, mDataList) {
         int k =0;
         this->setItemText(i, k++, QString::number(i+1));
         this->setItemText(i, k++, data.mName);

@@ -80,7 +80,7 @@ public slots:
     virtual void slotCustomContextMenuRequested(const QPoint& pos);
     virtual void slotCellDoubleClicked(int row, int col);
     virtual void slotCellClicked(int row, int col);
-    void slotHeaderClicked(int col);
+    virtual void slotHeaderClicked(int col);
     void optMoveTable(OPT_MOVE_MODE mode, int step = 1);
     int  adjusVal(int val, int step, int max, int min);
 
