@@ -8,6 +8,7 @@
 #include <QGestureEvent>
 #include <QDebug>
 #include "HqTableWidget.h"
+#include <QTimer>
 
 //enum OPT_MOVE_MODE{
 //    OPT_LEFT = 0,
@@ -34,6 +35,7 @@ public:
     void prepareUpdateTable(int newRowCount);
     void removeRows(int start, int count);
     void updateColumn(int col);
+    bool doubleClickedCheck(const QPoint& global_pos);
 protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
@@ -69,6 +71,7 @@ public:
     virtual void setHeaders(const TableColDataList &list, int move_count = 0);
     virtual void updateTable() {}
     void    resetDisplayRows();
+    void    setTotalRowCount(int v) {mTotalRowCount = v;}
 public:
     void prepareUpdateTable(int newRowCount);
     void removeRows(int start, int count);
@@ -79,6 +82,7 @@ private:
 
 public slots:
     virtual void setSortType(int type){}
+    virtual void  slotCellDoubleClicked(int row, int col) {}
 
 protected:
     void resizeEvent(QResizeEvent*);
@@ -99,6 +103,8 @@ private:
     int                                 mMoveDir;
     qint64                              mLastMoveTime;
     int                                 mRowHeight;
+    int                                 mTotalRowCount;
+    QTimer*                             mDoubleClickTimer;
 };
 
 #endif // HQMERGETABLEWIDGET_H

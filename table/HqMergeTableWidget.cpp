@@ -13,6 +13,7 @@
 #include <QScroller>
 #include <QTimer>
 #include <QHBoxLayout>
+#include <Qtimer>
 
 #define     COL_TYPE_ROLE               Qt::UserRole + 1
 #define     COL_SORT_ROLE               Qt::UserRole + 2
@@ -32,7 +33,7 @@ HqSingleTableWidget::HqSingleTableWidget(QWidget *parent) :
     connect(this->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(slotHeaderClicked(int)));
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    mRowHeight = HqUtils::convertMM2Pixel(6);    //设定表格的字体
+    mRowHeight = HqUtils::convertMM2Pixel(7);    //设定表格的字体
     QFont font = this->font();
     font.setBold(false);
     HqUtils::setFontPixelSize(&font, mRowHeight * 0.5);
@@ -103,6 +104,19 @@ void HqSingleTableWidget::setItemText(int row, int column, const QString &text, 
         }
     }
     item->setFont(font);
+}
+
+bool HqSingleTableWidget::doubleClickedCheck(const QPoint &global_pos)
+{
+    QPoint table_pos = this->mapFromParent(global_pos);
+    QTableWidgetItem* item = itemAt(table_pos);
+    if(item)
+    {
+        emit cellDoubleClicked(item->row() - 1, item->column());
+        return true;
+    }
+
+    return false;
 }
 
 void HqSingleTableWidget::updateColumn(int col)
@@ -200,11 +214,13 @@ void HqSingleTableWidget::removeRows(int start, int count)
 
 void HqSingleTableWidget::slotCellDoubleClicked(int row, int col)
 {
+     qDebug()<<"$$$$$$$$$$$$$$$$$$$$$$$$"<<row<<col;
     return;
 }
 
 void HqSingleTableWidget::slotCellClicked(int row, int col)
 {
+    qDebug()<<"!!!!!!!!!!!!!!!1"<<row<<col;
     this->horizontalHeader()->setHighlightSections(false);
 }
 
@@ -239,6 +255,9 @@ int HqSingleTableWidget::getTotalColWidth() const
 
 HqMergeTableWidget::HqMergeTableWidget(QWidget *parent) : QWidget(parent)
 {
+    mDoubleClickTimer = NULL;
+    mDisplayRowStart = 0;
+    mTotalRowCount = 0;
     QHBoxLayout *lay = new QHBoxLayout(this);
     this->setLayout(lay);
     mFixTable = new HqSingleTableWidget(this);
@@ -254,6 +273,8 @@ HqMergeTableWidget::HqMergeTableWidget(QWidget *parent) : QWidget(parent)
 
     connect(mFixTable, &HqSingleTableWidget::signalSetSortType, this, &HqMergeTableWidget::setSortType);
     connect(mMoveTable, &HqSingleTableWidget::signalSetSortType, this, &HqMergeTableWidget::setSortType);
+    connect(mFixTable, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(slotCellDoubleClicked(int,int)));
+    connect(mMoveTable, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(slotCellDoubleClicked(int,int)));
 
 }
 
@@ -261,6 +282,8 @@ HqMergeTableWidget::~HqMergeTableWidget()
 {
 
 }
+
+
 
 void HqMergeTableWidget::resizeEvent(QResizeEvent *e)
 {
@@ -279,19 +302,45 @@ void HqMergeTableWidget::resizeEvent(QResizeEvent *e)
     QWidget::resizeEvent(e);
 }
 
-void HqMergeTableWidget::mousePressEvent(QMouseEvent *event)
+void HqMergeTableWidget::mousePressEvent(QMouseEvent *e)
 {
     mPressPnt = QCursor::pos();
     mMovePnt = mPressPnt;
     mMoveDir = -1;
-    QWidget::mousePressEvent(event);
+    QWidget::mousePressEvent(e);
+    if(!mDoubleClickTimer)
+    {
+        mDoubleClickTimer = new QTimer(this);
+        mDoubleClickTimer->setInterval(1000);
+        connect(mDoubleClickTimer, &QTimer::timeout, [=](){
+            mDoubleClickTimer->stop();
+            delete mDoubleClickTimer;
+            mDoubleClickTimer = 0;
+        });
+
+        mDoubleClickTimer->start();
+    } else
+    {
+        if(mDoubleClickTimer->isActive())
+        {
+            mDoubleClickTimer->stop();
+            delete mDoubleClickTimer;
+            mDoubleClickTimer = 0;
+            if(!mFixTable->doubleClickedCheck(e->pos()))
+            {
+                mMoveTable->doubleClickedCheck(e->pos());
+                return;
+            }
+
+        }
+    }
 }
 void HqMergeTableWidget::moveTable(int mode)
 {
     if(mode == OPT_LEFT || mode == OPT_RIGHT)
     {
         if(mFixTable->getTotalColWidth() + mMoveTable->getTotalColWidth() <= width()) return;
-        int step = 0.10*mMoveTable->getColWidth();
+        int step = 0.30*mMoveTable->getColWidth();
         if(mode == OPT_LEFT)
         {
             if(mMoveTable->geometry().right() <=  mMoveTable->parentWidget()->width()) return;
@@ -317,7 +366,7 @@ void HqMergeTableWidget::moveTable(int mode)
         if(mode == OPT_UP)
         {
             //向上滑动，显示下面的列
-            mDisplayRowStart--;
+            mDisplayRowStart --;
             if(mDisplayRowStart < 0)
             {
                 mDisplayRowStart = 0;
@@ -327,6 +376,10 @@ void HqMergeTableWidget::moveTable(int mode)
         } else if(mode == OPT_DOWN)
         {
             mDisplayRowStart++;
+            if(mDisplayRowStart > mTotalRowCount - 1)
+            {
+                mDisplayRowStart = mTotalRowCount - 1;
+            }
             updateTable();
 
         }
@@ -347,7 +400,7 @@ void HqMergeTableWidget::mouseMoveEvent(QMouseEvent *event)
     }
     int move_distance = (mMoveDir == 1? move_pnt.y() - mMovePnt.y() : move_pnt.x() - mMovePnt.x());
     if(move_distance == 0) return;
-    if(QDateTime::currentMSecsSinceEpoch() - mLastMoveTime < 500) return;
+    if(QDateTime::currentMSecsSinceEpoch() - mLastMoveTime < 100) return;
     OPT_MOVE_MODE mode = OPT_LEFT;
     if(mMoveDir == 0)
     {

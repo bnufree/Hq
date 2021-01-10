@@ -207,6 +207,7 @@ void QShareForeignVolChangeCounterThread::run()
     //首先读取本地文件的信息
     QList<ShareForeignVolCounter> list;
     read(list);
+    qDebug()<<"read data size:"<<list.size();
     while (1) {
         sendData(list);
         QDate last_date = QDate::fromString(PROFILES_INS->value("Update", "Foreign_counter_update").toString(), "yyyy-MM-dd");

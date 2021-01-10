@@ -51,6 +51,7 @@ void QShareTablewidget::slotRecvAllShareDateList(const ShareDataList& list,qint6
 //    qDebug()<<"recv time:"<<QDateTime::currentDateTime()<<QDateTime::fromMSecsSinceEpoch(time);
     QMutexLocker locker(&mDataMutex);
     mShareDataList = list;
+    setTotalRowCount(list.size());
     QTimer::singleShot(100, this, SLOT(updateTable()));
 }
 
@@ -67,6 +68,7 @@ void QShareTablewidget::updateTable()
         //固定列的显示
         mFixTable->setItemText(i, k++, data.mName);
         if(data.mIsFav) mFixTable->item(i, k-1)->setTextColor(QColor(255, 100, 100));
+        mFixTable->item(i, 0)->setData(Qt::UserRole, data.mCode);
         //移动列的显示
         k = 0;
         QColor dis_color = data.mChgPercent > 0 ? Qt::red : data.mChgPercent < 0 ? Qt::green : Qt::white;
@@ -188,21 +190,18 @@ void QShareTablewidget::initMenu()
 //    }
 //}
 
-//void QShareTablewidget::slotCellDoubleClicked(int row, int col)
-//{
-//    QTableWidgetItem *item = this->item(row, 0);
-//    if(!item) return;
-//    QString code = item->data(Qt::UserRole).toString();
-//    QRect rect = this->visualItemRect(item);
-//    qDebug()<<rect;
-//    QSahreOptWidget* widget = new QSahreOptWidget(code, this);
-//    QPoint pos = QCursor::pos();
-//    QPoint target = /*this->mapFromGlobal(pos)*/pos;
-//    widget->move(target);
-//    widget->show();
-
-////    emit signalDoubleClickCode(code);
-//}
+void QShareTablewidget::slotCellDoubleClicked(int row, int col)
+{
+    HqSingleTableWidget* w = qobject_cast<HqSingleTableWidget*>(sender());
+    if(!w) return;
+    QTableWidgetItem* item = w->item(row, 0);
+    if(!item) return;
+    QString code = item->data(Qt::UserRole).toString();
+    if(code.size() > 0)
+    {
+        DATA_SERVICE->signalSetFavCode(code);
+    }
+}
 
 //void QShareTablewidget::slotCellClicked(int row, int col)
 //{

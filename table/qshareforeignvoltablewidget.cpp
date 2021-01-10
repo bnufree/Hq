@@ -30,7 +30,9 @@ QShareForeignVolTableWidget::QShareForeignVolTableWidget(QWidget *parent) : HqMe
 
 void QShareForeignVolTableWidget::slotRecvData(const QList<ShareForeignVolCounter>& list, const QString& date)
 {
+    qDebug()<<"recv lgt vol:"<<list.size();
     mDataList = list;
+    setTotalRowCount(list.size());
     QTimer::singleShot(100, this, SLOT(updateTable()));
 }
 
@@ -42,6 +44,7 @@ void QShareForeignVolTableWidget::setSortType(int type)
 void QShareForeignVolTableWidget::updateTable()
 {
     QList<ShareForeignVolCounter> list = mDataList.mid(mDisplayRowStart, mMaxDisRow);
+//    qDebug()<<"row :"<<mDisplayRowStart<<mMaxDisRow<<list.size();
     prepareUpdateTable(list.size());
     int i = 0;
     foreach (ShareForeignVolCounter data, list) {
@@ -49,6 +52,7 @@ void QShareForeignVolTableWidget::updateTable()
         //固定列的显示
         QString code = QString("").sprintf("%06d", data.mCode);
         mFixTable->setItemText(i, k++, DATA_SERVICE->getShareData(code).mName);;
+//        qDebug()<<mFixTable->item(0, 0)->text();
         //移动列的显示
         k = 0;
         QColor dis_color = data.mChangePercent > 0 ? Qt::red : data.mChangePercent < 0 ? Qt::green : Qt::white;

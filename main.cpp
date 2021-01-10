@@ -17,6 +17,7 @@
 #include <QtAndroidExtras/QtAndroid>
 
 bool requestPermission() {
+#if QT_VERSION >= QT_VERSION_CHECK(5,12,0)
     QStringList list;
     list.append("android.permission.WRITE_EXTERNAL_STORAGE");
     list.append("android.permission.READ_EXTERNAL_STORAGE");
@@ -26,6 +27,7 @@ bool requestPermission() {
     {
         if(it.value() == QtAndroid::PermissionResult::Denied) return false;
     }
+#endif
    return true;
 }
 #endif

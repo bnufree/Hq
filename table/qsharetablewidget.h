@@ -34,6 +34,7 @@ public slots:
     void    setShareMarketType(int type);
     void    slotRecvAllShareDateList(const ShareDataList& list,qint64 time);
     void    setSortType(int type);
+    void    slotCellDoubleClicked(int row, int col);
 private:
     QMap<QString, double>   mShareMap;
     QList<QAction*>         mCodesActionList;
