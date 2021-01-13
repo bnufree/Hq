@@ -14,6 +14,7 @@
 #include "real/qhqindexthread.h"
 #include "real/qhqeastmoneyrealinfothread.h"
 #include "real/hqkuaixun.h"
+#include "qshareforeignvolchangecounterthread.h"
 
 HQTaskMagrCenter* HQTaskMagrCenter::m_pInstance = 0;
 HQTaskMagrCenter::CGarbo HQTaskMagrCenter::s_Garbo;
@@ -23,10 +24,12 @@ HQTaskMagrCenter::HQTaskMagrCenter(QObject *parent) : \
     mHistoryInfoMgr(0),
     mTimeMonitorThread(0),
     mInfoThread724(0),
-    mHqCenter(0)
+    mHqCenter(0),
+    mForeignVolThread(0)
 {
     //及时信息
     mInfoThread724 = new HqKuaixun(this);
+    mForeignVolThread = new QShareForeignVolChangeCounterThread(this);
     //行情中心
     mHqCenter = new QSinaStkResultMergeThread();
     mHqCenter->setActive(true);
@@ -160,8 +163,13 @@ void HQTaskMagrCenter::setCurBlockType(int type)
 
 void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
 {
+    if(mForeignVolThread && !mForeignVolThread->isRunning())
+    {
+        mForeignVolThread->start();
+    }
     //开始行情获取
     if(mHqCenter) mHqCenter->setShareCodes(codes);
+
 
     //获取财务信息
     QShareFinancialInfoWork* finance = new QShareFinancialInfoWork(codes, this);

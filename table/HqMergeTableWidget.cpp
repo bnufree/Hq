@@ -274,7 +274,7 @@ HqMergeTableWidget::HqMergeTableWidget(QWidget *parent) : QWidget(parent)
     connect(mFixTable, &HqSingleTableWidget::signalSetSortType, this, &HqMergeTableWidget::setSortType);
     connect(mMoveTable, &HqSingleTableWidget::signalSetSortType, this, &HqMergeTableWidget::setSortType);
     connect(mFixTable, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(slotCellDoubleClicked(int,int)));
-    connect(mMoveTable, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(slotCellDoubleClicked(int,int)));
+//    connect(mMoveTable, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(slotCellDoubleClicked(int,int)));
 
 }
 

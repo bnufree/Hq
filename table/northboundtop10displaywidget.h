@@ -58,13 +58,6 @@ private:
     NorthBoundTop10DisplayTable *mTable;
     QString     mCommonStr;
 
-
-
-
-
-
-
-
 };
 
 #endif // NORTHBOUNDTOP10DISPLAYWIDGET_H

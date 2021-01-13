@@ -14,6 +14,7 @@ class QShareHistoryInfoMgr;
 class QSinaStkInfoThread;
 class QShareActiveDateUpdateThread;
 class HqKuaixun;
+class QShareForeignVolChangeCounterThread;
 
 class HQTaskMagrCenter : public QObject
 {
@@ -22,6 +23,7 @@ protected:
     explicit HQTaskMagrCenter(QObject *parent = 0);
 public:
     static HQTaskMagrCenter* instance();
+    QShareForeignVolChangeCounterThread* getForeignVolThread() {return mForeignVolThread;}
 
 public:
     ~HQTaskMagrCenter();
@@ -81,6 +83,7 @@ private:
     QShareActiveDateUpdateThread*       mTimeMonitorThread;
     QSinaStkResultMergeThread*          mHqCenter;
     HqKuaixun*  mInfoThread724;
+    QShareForeignVolChangeCounterThread  *mForeignVolThread;
 
 };
 

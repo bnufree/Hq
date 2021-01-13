@@ -194,10 +194,10 @@ NorthBoundTop10DisplayWidget::NorthBoundTop10DisplayWidget(QWidget *parent) : QW
 {
     mCommonStr = QString::fromUtf8("北向成交榜数据更新：");
     mTimeLabel = new QLabel(this);
-    mTimeLabel->setAlignment(Qt::AlignCenter);
-    mTimeLabel->setFixedHeight(HqUtils::convertMM2Pixel(10));
+    mTimeLabel->setAlignment(Qt::AlignLeft);
+    mTimeLabel->setFixedHeight(HqUtils::convertMM2Pixel(8));
     QFont font1 = mTimeLabel->font();
-    font1.setPixelSize(HqUtils::convertMM2Pixel(4));
+    font1.setPixelSize(HqUtils::convertMM2Pixel(6));
     mTimeLabel->setFont(font1);
     QVBoxLayout *layout1 = new QVBoxLayout;
     this->setLayout(layout1);

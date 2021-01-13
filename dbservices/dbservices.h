@@ -133,7 +133,7 @@ signals:
     void signalQueryShareHsgtTop10List(const QString& code, const QDate& date = QDate());
     void signalSendShareHsgtTop10List(const ShareHsgtList& list, const QString& code, const QDate& date);
     void signalQueryLatestHsgtData();
-
+    void signalSendLGTVolDataList(const QList<ShareForeignVolCounter>& list, const QString& date );
     //实时数据查询信息获取
     void signalSearchCodesOfText(const QString& text);
     void signalSendSearchCodesOfText(const QStringList& codes);

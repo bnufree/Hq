@@ -4,6 +4,7 @@
 #include "HqMergeTableWidget.h"
 #include "data_structure/sharedata.h"
 #include <QThreadPool>
+#include <QLabel>
 
 class QShareForeignVolChangeCounterThread;
 
@@ -11,19 +12,34 @@ class QShareForeignVolTableWidget : public HqMergeTableWidget
 {
     Q_OBJECT
 public:
-    explicit QShareForeignVolTableWidget(QWidget *parent = 0);
+    explicit QShareForeignVolTableWidget(QShareForeignVolChangeCounterThread* thread, QWidget *parent = 0);
+
+signals:
+
+public slots:
+    void slotRecvData(const QList<ShareForeignVolCounter>& list);
+    void updateTable();
+    void    setSortType(int type);
+
+private:
+    QList<ShareForeignVolCounter> mDataList;
+};
+
+class LGTVolDisplayWidget : public QWidget
+{
+    Q_OBJECT
+public:
+    explicit LGTVolDisplayWidget(QWidget *parent = nullptr);
 
 signals:
 
 public slots:
     void slotRecvData(const QList<ShareForeignVolCounter>& list, const QString& date);
-    void updateTable();
-    void    setSortType(int type);
-
 private:
-    QThreadPool         mPool;
-    QList<ShareForeignVolCounter> mDataList;
-    QShareForeignVolChangeCounterThread*    mDataThread;
+    QLabel      *mTimeLabel;
+    QShareForeignVolTableWidget *mTable;
+    QString     mCommonStr;
+
 };
 
 #endif // QSHAREFOREIGNVOLTABLEWIDGET_H
