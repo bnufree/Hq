@@ -30,6 +30,7 @@ QEtfScaleThread::~QEtfScaleThread()
 
 void QEtfScaleThread::run()
 {
+    parseShEtfScaleChange("510050");
     QDate last_update = QDate::fromString(PROFILES_INS->value(PROFILES_SEC, PROFILES_KEY).toString(), "yyyy-MM-dd").addDays(1);
     while (last_update <= TradeDateMgr::instance()->currentTradeDay()) {
         mEtfVolMap.clear();
@@ -63,6 +64,37 @@ void QEtfScaleThread::run()
     }
 }
 
+
+//http://query.sse.com.cn/commonQuery.do?jsonCallBack=jsonpCallback85168&isPagination=true&sqlId=COMMON_SSE_ZQPZ_ETFZL_ETFJBXX_JJGM_MOREN_L&SEC_CODE=510050&pageHelp.pageSize=10&_=1611907602176
+//份数
+//http://query.sse.com.cn/commonQuery.do?jsonCallBack=jsonpCallback83460&isPagination=false&sqlId=COMMON_SSE_ZQPZ_ETFZL_ETFJBXX_JJGM_SEARCH_L&SEC_CODE=510050&STAT_DATE=2020-12-24&_=1611907342055
+//历史价格
+//http://query.sse.com.cn/security/fund/queryAllQuatAbelNew.do?jsonCallBack=jsonpCallback85079&FUNDID=510050&inMonth=202101&inYear=2021&searchDate=2021-01-04&_=1611910845073
+void QEtfScaleThread::parseShEtfScaleChange(const QString& code)
+{
+    QList<QNetworkCookie> list;
+    list.append(QNetworkCookie("Referer", "http://www.sse.com.cn/market/funddata/volumn/etfvolumn/"));
+    list.append(QNetworkCookie("Cookie", "yfx_c_g_u_id_10000042=_ck20072115125217721926968350309; yfx_f_l_v_t_10000042=f_t_1595315572764__r_t_1595579117057__v_t_1595579117057__r_c_1; VISITED_MENU=%5B%228864%22%2C%228528%22%2C%2210025%22%2C%228547%22%2C%228491%22%5D"));
+
+    QByteArray recv = QHttpGet::getContentOfURL(QString("http://query.sse.com.cn/security/fund/queryAllQuatAbelNew.do?jsonCallBack=jsonpCallback85079&FUNDID=%1&searchDate=2021-01-04&_=1611910845073")
+                                                .arg(code), list);
+
+    qDebug()<<"recv:"<<recv;
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(recv, &error);
+    if(!doc.isObject()) return;
+    QJsonArray dataArray = doc.object().value("pageHelp").toObject().value("data").toArray();
+    foreach (QJsonValue val, dataArray) {
+        QJsonObject obj = val.toObject();
+        EtfScaleData data;
+        data.mCode = obj.value("SEC_CODE").toString();
+        data.mName = obj.value("SEC_NAME").toString();
+        data.mScale = obj.value("TOT_VOL").toString().toDouble();
+        data.mDate = QDate::fromString(obj.value("STAT_DATE").toString(), "yyyy-MM-dd");
+        qDebug()<<data.mCode<<data.mName<<data.mScale<<data.mDate;
+    }
+}
+
 void QEtfScaleThread::parseShEtf(const QDate& date)
 {
     QList<QNetworkCookie> list;
@@ -85,6 +117,12 @@ void QEtfScaleThread::parseShEtf(const QDate& date)
         mEtfVolMap[data.mName] = data;
     }
 }
+
+//深圳历史价格
+//http://www.szse.cn/api/market/ssjjhq/getHistoryData?random=0.057310831370277926&cycleType=32&marketId=1&code=159949
+
+//整体获取价格(tab1:股票, tab2:基金)
+//http://www.szse.cn/api/report/ShowReport/data?SHOWTYPE=JSON&CATALOGID=1815_stock&TABKEY=tab1&txtBeginDate=2021-01-04&txtEndDate=2021-01-04&radioClass=00%2C20%2C30&txtSite=all&random=0.6864155093129163&tab1PAGENO=1&tab1PAGESIZE=10000
 
 void QEtfScaleThread::parseSzEtf(const QDate& date)
 {

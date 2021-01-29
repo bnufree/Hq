@@ -24,6 +24,7 @@ public:
 private:
     void parseShEtf(const QDate& date);
     void parseSzEtf(const QDate& date);
+    void parseShEtfScaleChange(const QString& code);
     QMap<QString, EtfScaleData>       mEtfVolMap;
 
 signals:
