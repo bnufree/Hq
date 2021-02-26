@@ -60,49 +60,32 @@ typedef    enum     share_data_type
     SHARE_SHARE_ONLY = SHARE_SH | SHARE_SZ,
 }SHARE_DATA_TYPE;
 
-struct ShareDailyInfo{
-    qint64              time;                       //时间
-    double             money;                      //成交额
-    double             vol;                        //成交量
-    double             lgt_money;                  //陆股通成交额
-    double             lgt_pure;                   //陆股通净买入额
-    double             lgt_mutable_percent;         //陆股通比例
-    double             lgt_vol;                     //陆股通持股数
-    double             close;                      //收盘价
-    double             subscription_price;          //复权价
-    double             last_close;                  //上一日收盘价
-    double             total_share_vol;             //总股本
-    double              mutal_share_vol;            //流通股本
-};
+//struct ShareDailyInfo{
+//    qint64              time;                       //时间
+//    double             money;                      //成交额
+//    double             vol;                        //成交量
+//    double             lgt_money;                  //陆股通成交额
+//    double             lgt_pure;                   //陆股通净买入额
+//    double             lgt_mutable_percent;         //陆股通比例
+//    double             lgt_vol;                     //陆股通持股数
+//    double             close;                      //收盘价
+//    double             subscription_price;          //复权价
+//    double             last_close;                  //上一日收盘价
+//    double             total_share_vol;             //总股本
+//    double              mutal_share_vol;            //流通股本
+//};
 
-struct HistoryInfo{
-    double                  mLastMoney;
-    qint64                  mLastVol;
-    double                  mLastChgPer;
-    double                  mLast3DaysChgPers;
-    double                  mLast5DaysChgPers;
-    double                  mLast10DaysChgPers;
-    //double                  mLastMonthChgPers;
-    double                  mChgPersFromYear;
-    double                  mChgPersFromWeek;
-    double                  mChgPersFromMonth;
-    double                  mChgPersFromYear_BAK;
-    double                  mChgPersFromWeek_BAK;
-    double                  mChgPersFromMonth_BAK;
-    double                  mLastClose;
-
-    double                  mYearDayPrice;
-    double                  mMonthDayPrice;
-    double                  mWeekDayPrice;
-    HistoryInfo()
-    {
-        mChgPersFromYear_BAK = 1.0;
-        mChgPersFromWeek_BAK = 1.0;
-        mChgPersFromMonth_BAK = 1.0;
-        mYearDayPrice = 0.0;
-        mMonthDayPrice = 0.0;
-        mWeekDayPrice = 0.0;
-    }
+struct ShareCounterInfo{
+    double                  mLastMoney = 0.0;           //前成交金额
+    double                  mYearDayPrice = 0.0;        //复权的年初价格
+    double                  mMonthDayPrice = 0.0;       //复权的月初价格
+    double                  mWeekDayPrice = 0.0;        //复权的周初价格
+    double                  mYearChgPer = 0.0;          //复权的年涨幅
+    double                  mMonthChgPer = 0.0;         //复权的月涨幅
+    double                  mWeekChgPer = 0.0;          //复权的周涨幅
+    QDate                   mWeekDay;
+    QDate                   mMonthDay;
+    QDate                   mYearDay;
 };
 
 enum Share_Basic_Update_Mode{
@@ -115,39 +98,50 @@ enum Share_Basic_Update_Mode{
 
 };
 
+struct ShareRealData{
+    double                  mHsl = 0.0;           //换手率
+    double                  mMoneyRatio = 0.0;    //资金比率
+    double                  mZJLX = 0.0;          //资金流向
+    double                  mTotalCap = 0.0;      //总市值
+    double                  mMutalbleCap = 0.0;   //流通市值
+    double                  mLastClose = 0.0;     //前收盘价
+    double                  mChg = 0.0;           //涨跌
+    double                  mChgPercent = 0.0;    //涨跌幅
+    double                  mHigh = 0.0;          //最高
+    double                  mLow = 0.0;           //最低
+    double                  mOpen = 0.0;          //开盘
+    double                  mClose = 0.0;         //收盘价
+    double                  mMoney = 0.0;         //成交金额
+    qint64                  mVol = 0.0;           //成交量
+    ShareTradeDateTime      mTime = 0.0;          //更新时间
+};
+
+struct ShareForeignHolder{
+    double                  mVol = 0.0;             //外资持股量
+    double                  mPercent = 0.0;         //外资持股占流通百分比
+    double                  mCap = 0.0;             //外资持股市值
+    double                  mJMR1 = 0.0;            //1日净买入额
+    double                  mJMR5 = 0.0;            //5日净买入额
+    double                  mJMR10 = 0.0;           //10日净买入额
+    double                  mJMRM = 0.0;            //月净买入额
+    double                  mJMRY = 0.0;            //年净买入额
+    double                  mMoney = 0.0;           //当日外资成交金额
+    bool                    mIsTop10 = false;       //当日是否外资成交榜
+
+};
+
 struct ShareData : public HqBaseData
 {
 public:
-    //基本信息
-    SHARE_DATA_TYPE         mShareType;
-    HistoryInfo             mHistory;
+    //实时信息
+    ShareRealData           mRealInfo;
+    //统计信息
+    ShareCounterInfo        mCounterInfo;
+    //外资持股信息
+    ShareForeignHolder      mForeignInfo;
+    //交易盈亏统计
     double                  mProfit;
-    double                  mHsl;
-    double                  mMoneyRatio;
-    double                  mZJLX;      //资金流向
-    double                  mGXL;   //股息率
-    double                  mTotalCap;
-    double                  mMutalbleCap;
-    qint64                  mForeignVolChg;
-    double                  mForeignCap;
-    double                  mForeignCapChg;
-    double                  mCur;
-    double                  mLastClose;
-    double                  mChg;
-    double                  mChgPercent;
-    double                  mHigh;
-    double                  mLow;
-    double                  mOpen;
-    double                  mClose;
-    double                  mMoney;
-    double                  mRZRQ;
-    qint64                  mVol;
-    ShareTradeDateTime           mTime;
-    QStringList             mBlockCodeList;
-    FinancialData           mFinanceData;
-    ShareBonus              mBonusData;
-    ShareHsgt               mHsgtData;
-    QString                 mListTime;
+
 public:
     ShareData();
     static int  stk_sort_type;
@@ -156,23 +150,23 @@ public:
 
     bool operator ==(const ShareData& data)
     {
-        return this->mCode == data.mCode && this->mTime == data.mTime && this->mShareType == data.mShareType;
+        return this->mCode == data.mCode && this->mListTime == data.mListTime && this->mType == data.mType;
     }
 
     bool appendBlock(const QString& code)
     {
-        if(!mBlockCodeList.contains(code)) return false;
-        mBlockCodeList.append(code);
+        if(!mReferCodeList.contains(code)) return false;
+        mReferCodeList.append(code);
         return true;
     }
 
     bool isContainsBlock(const QString& code)
     {
-        return mBlockCodeList.contains(code);
+        return mReferCodeList.contains(code);
     }
     QStringList getBlockCodesList() const
     {
-        return mBlockCodeList;
+        return mReferCodeList;
     }
 
 
@@ -257,7 +251,7 @@ public:
 
     QString keyOfCodeTime() const
     {
-        return QString("%1_%2").arg(mCode).arg(mTime.date().toString("yyyy-MM-dd"));
+        return QString("%1_%2").arg(mCode).arg(mRealInfo.mTime.date().toString("yyyy-MM-dd"));
     }
 
     bool    isUpdated(const ShareData& tar, int mode)
@@ -269,9 +263,9 @@ public:
             mPY = tar.mPY;
             change = true;
         }
-        if((Share_Basic_Update_Block & mode) && mBlockCodeList.join(",") != tar.mBlockCodeList.join(","))
+        if((Share_Basic_Update_Block & mode) && mReferCodeList.join(",") != tar.mReferCodeList.join(","))
         {
-            mBlockCodeList = tar.mBlockCodeList;
+            mReferCodeList = tar.mReferCodeList;
             change = true;
         }
         if((Share_Basic_Update_Fav & mode) && mIsFav != tar.mIsFav)
@@ -279,9 +273,9 @@ public:
             mIsFav = tar.mIsFav;
             change = true;
         }
-        if((Share_Basic_Update_Hsgt & mode) && mHsgtData.mIsTop10 != tar.mHsgtData.mIsTop10)
+        if((Share_Basic_Update_Hsgt & mode) && mForeignInfo.mIsTop10 != tar.mForeignInfo.mIsTop10)
         {
-            mHsgtData.mIsTop10 = tar.mHsgtData.mIsTop10;
+            mForeignInfo.mIsTop10 = tar.mForeignInfo.mIsTop10;
             change = true;
         }
 
@@ -301,31 +295,43 @@ Q_DECLARE_METATYPE(ShareData)
 Q_DECLARE_METATYPE(ShareDataList)
 Q_DECLARE_METATYPE(ShareDataMap)
 
-typedef struct hqShareHistoryFileData{
+typedef struct hqShareDailyData{
     unsigned int    mDate;
+    double          mOpen;
+    double          mHigh;
+    double          mLow;
     double          mClose;                 //最新
     double          mLastClose;             //昨日最后价格
     double          mCloseAdjust;           //复权  计算涨跌幅使用
-    double          mMoney;
-//    qint64          mForeignVol;
-//    double          mForeignMututablePercent;
+    double          mMoney;                 //总成交金额
+    double          mVol;                   //总成交量
+    double          mZGB;
+    double          mLTGB;
+    double          mForeignVol;
+    double          mForeignMututablePercent;
 
-    hqShareHistoryFileData()
+    hqShareDailyData()
     {
         mDate = 0;
         mClose = 0.0;
         mLastClose = 0.0;
         mCloseAdjust = 0.0;
         mMoney = 0.0;
-//        mForeignVol = 0;
-//        mForeignMututablePercent = 0.0;
+        mForeignVol = 0;
+        mForeignMututablePercent = 0.0;
+        mZGB = 0.0;
+        mLTGB = 0.0;
+        mOpen = 0.0;
+        mVol = 0.0;
+        mHigh = 0.0;
+        mLow = 0.0;
     }
-}ShareHistoryFileData;
+}ShareDailyData;
 
-typedef QList<ShareHistoryFileData>       ShareHistoryFileDataList;
+typedef QList<ShareDailyData>       ShareDailyDataList;
 
-Q_DECLARE_METATYPE(ShareHistoryFileData)
-Q_DECLARE_METATYPE(ShareHistoryFileDataList)
+Q_DECLARE_METATYPE(ShareDailyData)
+Q_DECLARE_METATYPE(ShareDailyDataList)
 
 typedef struct hqShareForeignVolFileData{
     unsigned int    mCode;
@@ -366,18 +372,7 @@ Q_DECLARE_METATYPE(ShareForignVolFileDataList)
 
 struct ShareHistoryCounter{
     QString     code;
-    QDate       weekDay;
-    QDate       monthDay;
-    QDate       yearDay;
-    double      weekP;
-    double      monthP;
-    double      yearP;
-    double      lastMoney;
-    qint64      foreign_vol;
-    double      foreign_percent;
-    double      foreign_ch1;
-    double      foreign_ch5;
-    double      foreign_ch10;
+    ShareCounterInfo  info;
 };
 
 struct  GRAPHIC_DATA{
@@ -405,12 +400,12 @@ public:
     {
         foreach (ShareData data, list) {
             GRAPHIC_DATA graph;
-            graph.mDate = data.mTime.date();
-            graph.mClose = data.mClose;
-            graph.mForVol = data.mHsgtData.mVolTotal;
-            graph.mMoney = data.mMoney;
-            graph.mRzye = data.mRZRQ;
-            graph.mZjlx = data.mZJLX;
+            graph.mDate = data.mRealInfo.mTime.date();
+            graph.mClose = data.mRealInfo.mClose;
+            graph.mForVol = data.mForeignInfo.mVol;
+            graph.mMoney = data.mRealInfo.mMoney;
+//            graph.mRzye = data.mRZRQ;
+            graph.mZjlx = data.mRealInfo.mZJLX;
             append(graph);
         }
         for(int i=1; i<size(); i++)
@@ -422,13 +417,13 @@ public:
         }
     }
 
-    inline GRAPHIC_DATA_LIST(const ShareHistoryFileDataList& list)
+    inline GRAPHIC_DATA_LIST(const ShareDailyDataList& list)
     {
-        foreach (ShareHistoryFileData data, list) {
+        foreach (ShareDailyData data, list) {
             GRAPHIC_DATA graph;
             graph.mDate = QDateTime::fromTime_t(data.mDate).date();
             graph.mClose = data.mClose;
-//            graph.mForVol = data.mForeignVol;
+            graph.mForVol = data.mForeignVol;
             graph.mMoney = data.mMoney;
 //            graph.mRzye = data.mRZRQ;
 //            graph.mZjlx = data.mZJLX;

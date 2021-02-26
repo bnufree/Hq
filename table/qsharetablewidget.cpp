@@ -21,21 +21,19 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqMergeTableWidget(paren
     datalist.append(TableColData(QStringLiteral("月变动"), STK_DISPLAY_SORT_TYPE_LAST_MONTH));
     datalist.append(TableColData(QStringLiteral("年变动"), STK_DISPLAY_SORT_TYPE_LAST_YEAR,true));
     datalist.append(TableColData(QStringLiteral("资金流(万)"), STK_DISPLAY_SORT_TYPE_ZJLX));
-    datalist.append(TableColData(QStringLiteral("股息率%"), STK_DISPLAY_SORT_TYPE_GXL, true));
-    datalist.append(TableColData(QStringLiteral("送转"), STK_DISPLAY_SORT_TYPE_SZZBL, true));
+//    datalist.append(TableColData(QStringLiteral("股息率%"), STK_DISPLAY_SORT_TYPE_GXL, true));
+//    datalist.append(TableColData(QStringLiteral("送转"), STK_DISPLAY_SORT_TYPE_SZZBL, true));
     datalist.append(TableColData(QStringLiteral("总市值(亿)"), STK_DISPLAY_SORT_TYPE_TCAP));
     datalist.append(TableColData(QStringLiteral("流通市值(亿)"), STK_DISPLAY_SORT_TYPE_MCAP, true));
-    datalist.append(TableColData(QStringLiteral("净资产收益率(%)"), STK_DISPLAY_SORT_TYPE_JZCSYL, true));
+//    datalist.append(TableColData(QStringLiteral("净资产收益率(%)"), STK_DISPLAY_SORT_TYPE_JZCSYL, true));
 //    datalist.append(TableColData(QStringLiteral("盈亏"), STK_DISPLAY_SORT_TYPE_PROFIT));
-    datalist.append(TableColData(QStringLiteral("外资持股(万)"), STK_DISPLAY_SORT_TYPE_FOREIGN_VOL));
-    datalist.append(TableColData(QStringLiteral("外资持股△1(万)"), STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG));
-    datalist.append(TableColData(QStringLiteral("外资持股△5(万)"), STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG5));
-    datalist.append(TableColData(QStringLiteral("外资持股△10(万)"), STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG10));
     datalist.append(TableColData(QStringLiteral("持股市值(亿)"), STK_DISPLAY_SORT_TYPE_FOREIGN_CAP));
-    datalist.append(TableColData(QStringLiteral("持股市值△(亿)"), STK_DISPLAY_SORT_TYPE_FOREIGN_CAP_CHG));
+    datalist.append(TableColData(QStringLiteral("净买入△1(万)"), STK_DISPLAY_SORT_TYPE_FOREIGN_JMR_CHG));
+    datalist.append(TableColData(QStringLiteral("净买入△5(万)"), STK_DISPLAY_SORT_TYPE_FOREIGN_JMR_CHG5));
+    datalist.append(TableColData(QStringLiteral("净买入△10(万)"), STK_DISPLAY_SORT_TYPE_FOREIGN_JMR_CHG10));
     datalist.append(TableColData(QStringLiteral("换手率(%)"), STK_DISPLAY_SORT_TYPE_HSL));
-    datalist.append(TableColData(QStringLiteral("登记日"), STK_DISPLAY_SORT_TYPE_GQDJR));
-    datalist.append(TableColData(QStringLiteral("公告日"), STK_DISPLAY_SORT_TYPE_YAGGR));
+//    datalist.append(TableColData(QStringLiteral("登记日"), STK_DISPLAY_SORT_TYPE_GQDJR));
+//    datalist.append(TableColData(QStringLiteral("公告日"), STK_DISPLAY_SORT_TYPE_YAGGR));
 
     setHeaders(datalist, datalist.size() - 1);
     initMenu();
@@ -48,17 +46,25 @@ QShareTablewidget::QShareTablewidget(QWidget *parent) : HqMergeTableWidget(paren
 
 void QShareTablewidget::slotRecvAllShareDateList(const ShareDataList& list,qint64 time)
 {
-//    qDebug()<<"recv time:"<<QDateTime::currentDateTime()<<QDateTime::fromMSecsSinceEpoch(time);
-    QMutexLocker locker(&mDataMutex);
+    qDebug()<<"recv time:"<<QDateTime::currentDateTime()<<QDateTime::fromMSecsSinceEpoch(time)<<QThread::currentThread();
+//    QMutexLocker locker(&mDataMutex);
     mShareDataList = list;
-    setTotalRowCount(list.size());
-    QTimer::singleShot(100, this, SLOT(updateTable()));
+//    QTimer::singleShot(100, this, SLOT(updateTable()));
+//    updateTable();
 }
 
-void QShareTablewidget::updateTable()
+void QShareTablewidget::updateTableInfo()
 {
-    QMutexLocker locker(&mDataMutex);
-    ShareDataList list = mShareDataList.mid(mDisplayRowStart, mMaxDisRow);
+    if(isHidden()) return;
+    QTime t;
+    t.start();
+    ShareDataList list;
+    if(1)
+    {
+//        QMutexLocker locker(&mDataMutex);
+        setTotalRowCount(mShareDataList.size());
+        list = mShareDataList.mid(mDisplayRowStart, mMaxDisRow);
+    }
     prepareUpdateTable(list.size());
     int i = 0;
     foreach (ShareData data, list) {
@@ -71,44 +77,44 @@ void QShareTablewidget::updateTable()
         mFixTable->item(i, 0)->setData(Qt::UserRole, data.mCode);
         //移动列的显示
         k = 0;
-        QColor dis_color = data.mChgPercent > 0 ? Qt::red : data.mChgPercent < 0 ? Qt::green : Qt::white;
-        mMoveTable->setItemText(i, k++, HqUtils::double2Str(data.mCur), dis_color);
+        QColor dis_color = data.mRealInfo.mChgPercent > 0 ? Qt::red : data.mRealInfo.mChgPercent < 0 ? Qt::green : Qt::white;
+        mMoveTable->setItemText(i, k++, HqUtils::double2Str(data.mRealInfo.mClose), dis_color);
         double val = mShareMap[data.mCode];
-        QString flag = val < data.mChgPercent ? QStringLiteral("↑") : val > data.mChgPercent ? QStringLiteral("↓") : "";
-        mMoveTable->setItemText(i, k++, QString("%1%2").arg(flag).arg(QString::number(data.mChgPercent, 'f', 2)));
-        mShareMap[data.mCode] = data.mChgPercent;
-        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f", data.mMoney / 100000000.0));
-        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f",data.mMoneyRatio));
+        QString flag = val < data.mRealInfo.mChgPercent ? QStringLiteral("↑") : val > data.mRealInfo.mChgPercent ? QStringLiteral("↓") : "";
+        mMoveTable->setItemText(i, k++, QString("%1%2").arg(flag).arg(QString::number(data.mRealInfo.mChgPercent, 'f', 2)));
+        mShareMap[data.mCode] = data.mRealInfo.mChgPercent;
+        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f", data.mRealInfo.mMoney / 100000000.0));
+        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f",data.mRealInfo.mMoneyRatio));
 //        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f",data.mHistory.mLast3DaysChgPers));
 //        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f",data.mHistory.mLast5DaysChgPers));
 //        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f",data.mHistory.mLast10DaysChgPers));
-        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f", data.mHistory.mChgPersFromWeek));
-        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f",data.mHistory.mChgPersFromMonth));
-        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f",data.mHistory.mChgPersFromYear));
-        mMoveTable->setItemText(i, k++, QString("").sprintf("%.0f", data.mZJLX));
-        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f",data.mGXL * 100));
-        mMoveTable->setItemText(i, k++, QString("").sprintf("%.0f",data.mBonusData.mSZZG));
-        mMoveTable->setItemText(i, k++, QString("").sprintf("%.0f",data.mTotalCap / 100000000.0 ));
-        mMoveTable->setItemText(i, k++, QString("").sprintf("%.0f",data.mMutalbleCap/ 100000000.0 ));
-        mMoveTable->setItemText(i, k++, QString("").sprintf("%.0f",data.mFinanceData.mROE));
+        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f", data.mCounterInfo.mWeekChgPer));
+        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f",data.mCounterInfo.mMonthChgPer));
+        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f",data.mCounterInfo.mYearChgPer));
+        mMoveTable->setItemText(i, k++, QString("").sprintf("%.0f", data.mRealInfo.mZJLX));
+//        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f",data.mGXL * 100));
+//        mMoveTable->setItemText(i, k++, QString("").sprintf("%.0f",data.mBonusData.mSZZG));
+        mMoveTable->setItemText(i, k++, QString("").sprintf("%.0f",data.mRealInfo.mTotalCap / 100000000.0 ));
+        mMoveTable->setItemText(i, k++, QString("").sprintf("%.0f",data.mRealInfo.mMutalbleCap/ 100000000.0 ));
+//        mMoveTable->setItemText(i, k++, QString("").sprintf("%.0f",data.mFinanceData.mROE));
 //        this->setItemText(i, k++, QString("").sprintf("%.0f",data.mProfit));
-        mMoveTable->setItemText(i, k++, QString("").sprintf("%.0f", data.mHsgtData.mVolTotal / 10000.0));
-        mMoveTable->setItemText(i, k++, QString("").sprintf("%.0f", data.mHsgtData.mCounterMap["1"].mVolChg / 10000.0));
-        mMoveTable->setItemText(i, k++, QString("").sprintf("%.0f", data.mHsgtData.mCounterMap["5"].mVolChg/ 10000.0));
-        mMoveTable->setItemText(i, k++, QString("").sprintf("%.0f", data.mHsgtData.mCounterMap["10"].mVolChg / 10000.0));
-        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f", data.mForeignCap / 100000000.0));
-        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f", data.mForeignCapChg / 100000000.0));
-        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f",data.mHsl * 100));
-        mMoveTable->setItemText(i, k++, data.mBonusData.mGQDJR.toString());
-        mMoveTable->setItemText(i, k++, data.mBonusData.mYAGGR.toString());
-        mMoveTable->setItemText(i, k++, data.mTime.toString(true));
+        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f", data.mForeignInfo.mCap / 100000000.0));
+        mMoveTable->setItemText(i, k++, QString("").sprintf("%.0f", data.mForeignInfo.mJMR1 / 10000.0));
+        mMoveTable->setItemText(i, k++, QString("").sprintf("%.0f", data.mForeignInfo.mJMR5/ 10000.0));
+        mMoveTable->setItemText(i, k++, QString("").sprintf("%.0f", data.mForeignInfo.mJMR10 / 10000.0));
+//        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f", data.mForeignCap / 100000000.0));
+//        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f", data.mForeignCapChg / 100000000.0));
+        mMoveTable->setItemText(i, k++, QString("").sprintf("%.2f",data.mRealInfo.mHsl * 100));
+//        mMoveTable->setItemText(i, k++, data.mBonusData.mGQDJR.toString());
+//        mMoveTable->setItemText(i, k++, data.mBonusData.mYAGGR.toString());
+        mMoveTable->setItemText(i, k++, data.mRealInfo.mTime.toString(true));
         mMoveTable->updateFavShareIconOfRow(i, data.mIsFav);
         mMoveTable->item(i, 0)->setData(Qt::UserRole, data.mCode);
 //        mMoveTable->item(i, 0)->setData(Qt::UserRole+1, QVariant::fromValue(data.mBlockList));
         mMoveTable->item(i, 0)->setData(Qt::UserRole+1, data.getBlockCodesList());
         i++;
-
     }
+    qDebug()<<"update share table cost me:"<<t.elapsed();
 }
 
 void QShareTablewidget::setShareMarketType(int type)

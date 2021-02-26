@@ -91,6 +91,7 @@ SOURCES += main.cpp\
     utils/hqinfoparseutil.cpp \
     qsahreoptwidget.cpp \
     real/qhqindexthread.cpp \
+    zchxdisplaywidget.cpp \
     zchxmainwindow.cpp \
     real/qhqeastmoneyrealinfothread.cpp \
     real/qhqsysteminfowidget.cpp \
@@ -137,7 +138,8 @@ HEADERS  += dialog.h \
     table/qblocktablewidget.h \
     dbservices/hqdbdatabase.h \
     dbservices/dbservices.h \
-    dbservices/hqdatadefines.h \    
+    dbservices/hqdatadefines.h \     \
+    zchxdisplaywidget.h \
     history/qsharehistorydialog.h \
     history/qsharegraphicwidget.h \
     history/qhkexchangevoldataprocess.h \

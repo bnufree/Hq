@@ -18,11 +18,11 @@ public:
 public:
     void run();
 private:
-    void                        adjustDataList(ShareHistoryFileDataList& list, double price, double ratio);
-    bool                        readFile(ShareHistoryFileDataList& list, bool& adjust);
+    void                        adjustDataList(ShareDailyDataList& list, double price, double ratio);
+    bool                        readFile(ShareDailyDataList& list, bool& adjust);
     QString                     getFileName();
     QString                     getPath();
-    void                        writeFile(const ShareHistoryFileDataList& list, const char* mode);
+    void                        writeFile(const ShareDailyDataList& list, const char* mode);
 private:
     QString         mCode;
     QObject         *mParent;

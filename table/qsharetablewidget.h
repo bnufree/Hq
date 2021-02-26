@@ -30,7 +30,7 @@ signals:
     void    signalDisplayDetailOfCode(const QString& code);
 
 public slots:
-    void    updateTable();
+    void    updateTableInfo();
     void    setShareMarketType(int type);
     void    slotRecvAllShareDateList(const ShareDataList& list,qint64 time);
     void    setSortType(int type);

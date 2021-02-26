@@ -96,18 +96,18 @@ void QSinaStkResultMergeThread::run()
         } else
         {
             foreach (ShareData data, total_list) {
-                bool sts = (mMktType == MKT_SH && (data.mShareType & SHARE_SH))||\
-                        (mMktType == MKT_SZ && (data.mShareType & SHARE_SZ)) ||\
-                        (mMktType == MKT_ZXB && (data.mShareType & SHARE_SZ_ZXB))||\
-                        (mMktType == MKT_CYB && (data.mShareType & SHARE_SZ_CYB))||\
+                bool sts = (mMktType == MKT_SH && (data.mType & SHARE_SH))||\
+                        (mMktType == MKT_SZ && (data.mType & SHARE_SZ)) ||\
+                        (mMktType == MKT_ZXB && (data.mType & SHARE_SZ_ZXB))||\
+                        (mMktType == MKT_CYB && (data.mType & SHARE_SZ_CYB))||\
                         (mMktType == MKT_ZXG && data.mIsFav)||\
-                        (mMktType == MKT_LGT_TOP10 && data.mHsgtData.mIsTop10) ||\
-                        (mMktType == MKT_JJ && (data.mShareType & SHARE_FUND))||\
-                        (mMktType == MKT_KCB && (data.mShareType & SHARE_SH_KCB)) ||\
-                        (mMktType == MKT_KZZ && (data.mShareType & SHARE_KZZ)) ||\
+                        (mMktType == MKT_LGT_TOP10 && data.mForeignInfo.mIsTop10) ||\
+                        (mMktType == MKT_JJ && (data.mType & SHARE_FUND))||\
+                        (mMktType == MKT_KCB && (data.mType & SHARE_SH_KCB)) ||\
+                        (mMktType == MKT_KZZ && (data.mType & SHARE_KZZ)) ||\
                         (mMktType == MKT_OTHER && mSelfCodesList.contains(data.mCode));
 
-                if(sts && data.mCur > 0.001)
+                if(sts && data.mRealInfo.mClose > 0.001)
                 {
                     wklist.append(data);
                 }

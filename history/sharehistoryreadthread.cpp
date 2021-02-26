@@ -24,7 +24,7 @@ void  ShareHistoryReadThread::run()
         qDebug()<<__FUNCTION__<<__LINE__<<fileName<<" not exist";
         return ;
     }
-    ShareHistoryFileDataList list;
+    ShareDailyDataList list;
 
     //读取文件
     QFile file(fileName);
@@ -34,8 +34,8 @@ void  ShareHistoryReadThread::run()
         return ;
     }
     while (!file.atEnd() ) {
-        ShareHistoryFileData data;
-        file.read((char*)(&data), sizeof(ShareHistoryFileData));
+        ShareDailyData data;
+        file.read((char*)(&data), sizeof(ShareDailyData));
         if(!mDate.isNull())
         {
             if(data.mDate < QDateTime(mDate).toTime_t()) continue;

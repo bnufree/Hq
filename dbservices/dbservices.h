@@ -35,6 +35,7 @@ public:
     friend class CGarbo;
     static HqInfoService* instance();
     ShareData& getShareData(const QString& code);
+    ShareDataList   getShareDataList(int type);
     ShareDataList getShareDataList();
     double getProfit(const QString& code);
     foreignHolder amountForeigner(const QString& code);
@@ -107,19 +108,9 @@ signals:
     void signalQueryAllShareBasicInfo();
     void signalAddShareBasicInfo(const ShareData& data);
     void signalAddShareBasicInfoList(const ShareDataList& list);
-    void signalUpdateShareinfoWithHistory(const QString& code,\
-                                          double lastMoney,\
-                                          double last3Change,\
-                                          double last5Change,\
-                                          double last10Change,\
-                                          double lastMonthChange,\
-                                          double lastYearChange,\
-                                          qint64 vol,\
-                                          qint64 vol_chnage,\
-                                          const ShareDataList& list);
     void signalUpdateStkProfitList(const ShareDataList& list);
     void signalInitShareRealInfos(const QStringList& codes);
-    void signalUpdateShareCounter(const ShareHistoryCounter& counter);
+    void signalUpdateShareCounter(const QList<ShareHistoryCounter>& counter);
     //自选股
     void signalSetFavCode(const QString& code);
     void signalSaveFavCode(const QString& code, bool fav);
@@ -156,6 +147,7 @@ signals:
     void signalDeleteShareExchangeRecordSucceed();
     void signalUpdateShareHsgtCounter(const ShareHsgtList& list);
 
+    void signalSendForeignDataList(const QList<ShareForeignVolCounter>&, const QString& );
 
 public slots:
     void slotSearchCodesOfText(const QString &text);
@@ -178,17 +170,7 @@ public slots:
     void initBlockData(int type = 0);
     void initShareData(bool send);
 //    void slotQueryShareHistoryLastDate(const QString& code);
-    void slotUpdateShareinfoWithHistory(const QString& code,\
-                                        double lastMoney,\
-                                        double last3Change,\
-                                        double last5Change,\
-                                        double last10Change,\
-                                        double lastMonthChange,\
-                                        double lastYearChange,\
-                                        qint64 vol,\
-                                        qint64 vol_chnage,\
-                                        const ShareDataList& list);
-    void slotUpdateShareCounter(const ShareHistoryCounter& counter);
+    void slotUpdateShareCounter(const QList<ShareHistoryCounter>& counter);
     void slotUpdateHistoryChange(const QString& code);
     void slotUpdateStkProfitList(const ShareDataList& list);
     void slotAddShareAmoutByForeigner(const ShareDataList& list);
@@ -208,6 +190,8 @@ public slots:
     void slotUpdateShareExchangeRecord(const QList<ShareExchangeData>& list);
     void slotQueryShareExchangeRecord(int cur_page, const QString& code, const QString& start_date,  const QString& end_date);
     void slotDeleteShareExchangeRecord(const QString& code, const QString& start_date,  const QString& end_date);
+    //
+    void slotRecvForeignCounterList(const QList<ShareForeignVolCounter>& list, const QString& date );
 
 private:
     void initSignalSlot();

@@ -49,8 +49,8 @@ int main(int argc, char *argv[])
     qDebug()<<"device size:"<<height<<width;
     zchxMainWindow w;
 #ifdef Q_OS_WIN
-    w.setFixedSize(0.4*height, height*0.9);
-    w.show();
+//    w.setFixedSize(0.4*height, height*0.9);
+    w.showMaximized();
 #else
     qDebug()<<"device size:"<<height<<width;
     if(requestPermission())

@@ -58,41 +58,55 @@ QShareCodesWork::~QShareCodesWork()
 {
 }
 
-void QShareCodesWork::parseKZZ()
+int QShareCodesWork::parseKZZ()
 {
-    qDebug()<<"parse kzz start";
     QString url = "http://dcfm.eastmoney.com/em_mutisvcexpandinterface/api/js/get?type=KZZ_LB&token=70f12f2f4f091e459a279469fe49eca5&st=STARTDATE&sr=-1&p=1&ps=10000&js=";
     QString result = QString::fromUtf8(QHttpGet::getContentOfURL(url));
+    int num = 0;
 
     int start_index = result.indexOf("[", 0);
-    if(start_index < 0) return;
-    result = result.mid(start_index);
-    QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson(result.toUtf8(), &error);
-    if(error.error != QJsonParseError::NoError) return;
-    if(!doc.isArray()) return;
-    QJsonArray array = doc.array();
-    for(int i=0; i<array.size(); i++)
+    if(start_index >= 0)
     {
-        QJsonObject obj = array.at(i).toObject();
-        if(obj.value("LISTDATE").toString() == "-") continue;
-        if(obj.value("DELISTDATE").toString() != "-") continue;
-        ShareData data;
-        data.mName = obj.value("SNAME").toString();
-        data.mCode = obj.value("BONDCODE").toString();
-        data.mVol = obj.value("AISSUEVOL").toDouble() * 1000000;
-        data.mPY = HqUtils::GetFirstLetter(QTextCodec::codecForLocale()->toUnicode(data.mName.toUtf8()));
-        data.mShareType = ShareData::shareType(data.mCode);
-        data.mListTime = obj.value("LISTDATE").toString().left(10);
-        mShareCodeMap[data.mCode] = data;
+        result = result.mid(start_index);
+        QJsonParseError error;
+        QJsonDocument doc = QJsonDocument::fromJson(result.toUtf8(), &error);
+        if(error.error == QJsonParseError::NoError && doc.isArray())
+        {
+            QJsonArray array = doc.array();
+            for(int i=0; i<array.size(); i++)
+            {
+                QJsonObject obj = array.at(i).toObject();
+                if(obj.value("LISTDATE").toString() == "-") continue;
+                if(obj.value("DELISTDATE").toString() != "-") continue;
+                ShareData data;
+                data.mName = obj.value("SNAME").toString();
+                data.mCode = obj.value("BONDCODE").toString();
+                data.mZGB = obj.value("AISSUEVOL").toDouble() * 1000000;
+                data.mLTGB = data.mZGB;
+                data.mPY = HqUtils::GetFirstLetter(QTextCodec::codecForLocale()->toUnicode(data.mName.toUtf8()));
+                data.mType = ShareData::shareType(data.mCode);
+                data.mListTime = obj.value("LISTDATE").toString().left(10);
+                mShareCodeMap[data.mCode] = data;
+                num++;
+            }
+        }
     }
-    qDebug()<<"parse kzz end";
+    if(num == 0)
+    {
+        ShareDataList list = DATA_SERVICE->getShareDataList(SHARE_KZZ);
+        foreach(ShareData data, list)
+        {
+            mShareCodeMap[data.mCode] = data;
+        }
+    }
+
+    return num;
 }
 
 void QShareCodesWork::run()
 {
     QDate update_date = DATA_SERVICE->getLastUpdateDateOfBasicInfo();
-    qDebug()<<"last code date:"<<update_date;
+    qDebug()<<"last code update date:"<<update_date;
     if(update_date.isNull() || update_date < QDate::currentDate())
     {
 //        QString stock_code_url = "http://18.push2.eastmoney.com/api/qt/clist/get?cb=&pn=1&pz=20000&po=0&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f6&fs=m:0+t:6,m:0+t:13,m:0+t:80,m:1+t:2,m:1+t:23&fields=f12,f14&_=";
@@ -105,9 +119,45 @@ void QShareCodesWork::run()
         parseShEtf();
         parseSzEtf();
     }
+    //检查是否获取了股本信息，否则开始获取股本
+    QStringList updateCodesList;
     foreach(ShareData data, mShareCodeMap)
     {
-        qDebug()<<data.mCode<<data.mName<<data.mListTime<<ShareData::shareTypeString(SHARE_DATA_TYPE(data.mShareType))<<data.mShareType;
+        if(data.mZGB == 0.0) updateCodesList.append(data.mCode);
+    }
+    if(updateCodesList.size() > 0)
+    {
+        int pos = 0;
+        int section = 200;
+        while(pos < updateCodesList.length())
+        {
+            QStringList sublist = updateCodesList.mid(pos, section);
+            pos += section;
+            QStringList wklist;
+            foreach (QString code, sublist)
+            {
+                code = code.right(6);
+                wklist.append(ShareData::prefixCode(code) + code+ "_i");
+            }
+            QString url = QString("http://hq.sinajs.cn/?list=%1").arg(wklist.join(","));
+            QString result = QString::fromUtf8(QHttpGet::getContentOfURL(url));
+            //按行进行分割
+            QStringList rows = result.split(QRegExp("[\\r\\n]"));
+            foreach (QString row, rows) {
+                QStringList list = row.split(QRegExp("[,\" ;]"));
+                if(list.length() > 20)
+                {
+                    QString code = list[1].mid(9,6);
+                    mShareCodeMap[code].mZGB = list[9].toDouble() * 10000;
+                    mShareCodeMap[code].mLTGB = list[10].toDouble() * 10000;
+                }
+            }
+        }
+    }
+
+    foreach(ShareData data, mShareCodeMap)
+    {
+        qDebug()<<data.mCode<<data.mName<<data.mListTime<<ShareData::shareTypeString(SHARE_DATA_TYPE(data.mType))<<data.mType<<QString::number(data.mZGB/100000000.0, 'f', 2);
     }
     DATA_SERVICE->signalUpdateShareBasicInfo(mShareCodeMap.values());
     return;
@@ -115,7 +165,7 @@ void QShareCodesWork::run()
 
 
 
-void QShareCodesWork::parseHttp(ShareDataList& list, const QString& url, int mode)
+void QShareCodesWork::parseHttp(const QString& url)
 {
 #if 0
     QTime t;
@@ -142,7 +192,7 @@ void QShareCodesWork::parseHttp(ShareDataList& list, const QString& url, int mod
             ShareData data;
             data.mCode = code;
             data.mName = name;
-            data.mShareType = ShareData::shareType(code);
+            data.mType = ShareData::shareType(code);
 //            qDebug()<<data.mCode<<data.mName<<name.toUtf8().toHex()<<name.toUtf8().size();
             data.mPY = HqUtils::GetFirstLetter(UTF8->toUnicode(name.toUtf8()));
             qDebug()<<data.mCode<<data.mName<<data.mPY;
@@ -159,19 +209,19 @@ void QShareCodesWork::parseHttp(ShareDataList& list, const QString& url, int mod
         ShareData data;
         data.mCode = val.toObject().value("f12").toString();
         data.mName = val.toObject().value("f14").toString();;
-        data.mShareType = ShareData::shareType(data.mCode);
+        data.mType = ShareData::shareType(data.mCode);
 //            qDebug()<<data.mCode<<data.mName<<name.toUtf8().toHex()<<name.toUtf8().size();
         data.mPY = HqUtils::GetFirstLetter(UTF8->toUnicode(data.mName.toUtf8()));
-        list.append(data);
+        mShareCodeMap[data.mCode] = data;
     }
 }
 
-void QShareCodesWork::parseShCode()
+int QShareCodesWork::parseShCode()
 {
-    qDebug()<<"parse sh start";
     QList<QNetworkCookie> list;
     list.append(QNetworkCookie("Referer", "http://www.sse.com.cn/market/funddata/volumn/etfvolumn/"));
     list.append(QNetworkCookie("Cookie", "yfx_c_g_u_id_10000042=_ck20072115125217721926968350309; yfx_f_l_v_t_10000042=f_t_1595315572764__r_t_1595579117057__v_t_1595579117057__r_c_1; VISITED_MENU=%5B%228864%22%2C%228528%22%2C%2210025%22%2C%228547%22%2C%228491%22%5D"));
+    int num = 0;
 
     QList<int> typeList;
     typeList<<1<<8;
@@ -179,31 +229,42 @@ void QShareCodesWork::parseShCode()
         QByteArray recv = QHttpGet::getContentOfURL(QString("http://query.sse.com.cn/security/stock/getStockListData.do?&jsonCallBack=&isPagination=true&stockCode=&csrcCode=&areaName=&stockType=%1&pageHelp.cacheSize=1&pageHelp.beginPage=1&pageHelp.pageSize=250000&pageHelp.pageNo=1&_=%2").arg(type).arg(QDateTime::currentMSecsSinceEpoch()), list);
         QJsonParseError error;
         QJsonDocument doc = QJsonDocument::fromJson(recv, &error);
-        if(!doc.isObject()) return;
+        if(!doc.isObject()) continue;
         QJsonArray dataArray = doc.object().value("pageHelp").toObject().value("data").toArray();
         foreach (QJsonValue val, dataArray) {
             QJsonObject obj = val.toObject();
             ShareData data;
             data.mCode = obj.value("COMPANY_CODE").toString();
             data.mName = obj.value("COMPANY_ABBR").toString();
-            data.mShareType = ShareData::shareType(data.mCode);
+            data.mType = ShareData::shareType(data.mCode);
             data.mPY = HqUtils::GetFirstLetter(QTextCodec::codecForLocale()->toUnicode(data.mName.toUtf8()));
             data.mListTime = obj.value("LISTING_DATE").toString().left(10);
             mShareCodeMap[data.mCode] = data;
+            num++;
 
         }
     }
-    qDebug()<<"parse sh end";
+
+    if(num == 0)
+    {
+        ShareDataList list = DATA_SERVICE->getShareDataList(SHARE_SH);
+        foreach(ShareData data, list)
+        {
+            mShareCodeMap[data.mCode] = data;
+        }
+    }
+
+    return num;
 }
 
 
-void QShareCodesWork::parseSzCode()
+int QShareCodesWork::parseSzCode()
 {
-    qDebug()<<"parse sz start";
     int page_num = 1;
     int page_size = 10000;
     int page_count = 1;
     int total_record_count = 0;
+    int num = 0;
     while (page_num <= page_count) {
         QString url = QString("http://www.szse.cn/api/report/ShowReport/data?SHOWTYPE=JSON&CATALOGID=1110&TABKEY=tab1&tab1PAGENO=%1&tab1PAGESIZE=%2&random=0.9825325365046125")
                 .arg(page_num)
@@ -211,7 +272,7 @@ void QShareCodesWork::parseSzCode()
         QByteArray recv = QHttpGet::getContentOfURL(url);
         QJsonParseError error;
         QJsonDocument doc = QJsonDocument::fromJson(recv, &error);
-        if(!doc.isArray()) return;
+        if(!doc.isArray()) continue;
         QJsonArray array = doc.array();
         QJsonObject metaObj = array[0].toObject().value("metadata").toObject();
         if(metaObj.isEmpty()) break;
@@ -236,28 +297,41 @@ void QShareCodesWork::parseSzCode()
             ShareData data;
             data.mCode = code;
             data.mName = name;
-            data.mShareType = ShareData::shareType(data.mCode);
+            data.mType = ShareData::shareType(data.mCode);
             data.mListTime = obj.value("agssrq").toString();
+            data.mZGB = obj.value("agzgb").toString().toDouble() * 100000000.0;
+            data.mLTGB = obj.value("agltgb").toString().toDouble() * 100000000.0;
             data.mPY = HqUtils::GetFirstLetter(QTextCodec::codecForLocale()->toUnicode(data.mName.toUtf8()));
             QRegExp py("[A-Z]{1,}");
             int index2 = py.indexIn(data.mPY);
             int length = py.matchedLength();
             data.mPY = data.mPY.mid(index2, length);
             mShareCodeMap[data.mCode] = data;
+            num++;
         }
         page_num++;
     }
-    qDebug()<<"parse sz end";
 
+    if(num == 0)
+    {
+        ShareDataList list = DATA_SERVICE->getShareDataList(SHARE_SZ);
+        foreach(ShareData data, list)
+        {
+            mShareCodeMap[data.mCode] = data;
+        }
+    }
+
+    return num;
 }
 
-void QShareCodesWork::parseSzEtf()
+int QShareCodesWork::parseSzEtf()
 {
-    qDebug()<<"start sz etf";
     int page_num = 1;
     int page_size = 10000;
     int page_count = 1;
     int total_record_count = 0;
+    int num = 0;
+
     while (page_num <= page_count) {
         QString url = QString("http://www.szse.cn/api/report/ShowReport/data?SHOWTYPE=JSON&CATALOGID=1105&TABKEY=tab1&selectJjlb=ETF&selectTzlb=股票基金&tab1PAGENO=%1&tab1PAGESIZE=%2&random=0.48925979447422674")
                 .arg(page_num)
@@ -265,7 +339,7 @@ void QShareCodesWork::parseSzEtf()
         QByteArray recv = QHttpGet::getContentOfURL(url);
         QJsonParseError error;
         QJsonDocument doc = QJsonDocument::fromJson(recv, &error);
-        if(!doc.isArray()) return;
+        if(!doc.isArray()) continue;
         QJsonArray array = doc.array();
         QJsonObject metaObj = array[0].toObject().value("metadata").toObject();
         if(metaObj.isEmpty()) break;
@@ -298,61 +372,88 @@ void QShareCodesWork::parseSzEtf()
             ShareData data;
             data.mCode = code;
             data.mName = name;
-            data.mShareType = ShareData::shareType(data.mCode);
+            data.mType = ShareData::shareType(data.mCode);
             data.mPY = HqUtils::GetFirstLetter(QTextCodec::codecForLocale()->toUnicode(data.mName.toUtf8()));
-            data.mFinanceData.mTotalShare = vol;
+            data.mZGB = vol * 10000.0;
+            data.mLTGB = data.mZGB;
             data.mListTime = obj.value("ssrq").toString();
             mShareCodeMap[data.mCode] = data;
+            num++;
         }
         page_num++;
     }
-    qDebug()<<"parse szetf end";
+
+    if(num == 0)
+    {
+        ShareDataList list = DATA_SERVICE->getShareDataList(SHARE_SZ_FUND);
+        foreach(ShareData data, list)
+        {
+            mShareCodeMap[data.mCode] = data;
+        }
+    }
+
+    return num;
 }
 
-void QShareCodesWork::parseShEtf()
+int QShareCodesWork::parseShEtf()
 {
-    qDebug()<<"parse shetf start";
     QList<QNetworkCookie> list;
     list.append(QNetworkCookie("Referer", "http://www.sse.com.cn/market/funddata/volumn/etfvolumn/"));
     list.append(QNetworkCookie("Cookie", "yfx_c_g_u_id_10000042=_ck20072115125217721926968350309; yfx_f_l_v_t_10000042=f_t_1595315572764__r_t_1595579117057__v_t_1595579117057__r_c_1; VISITED_MENU=%5B%228864%22%2C%228528%22%2C%2210025%22%2C%228547%22%2C%228491%22%5D"));
+    int num = 0;
 
     QByteArray recv = QHttpGet::getContentOfURL(QString("http://query.sse.com.cn/commonQuery.do?&jsonCallBack=&isPagination=true&sqlId=COMMON_SSE_ZQPZ_ETFZL_XXPL_ETFGM_SEARCH_L&pageHelp.pageSize=10000&STAT_DATE=%1&_=%2")
                                                 .arg(TradeDateMgr::instance()->lastTradeDay().toString("yyyy-MM-dd")).arg(QDateTime::currentDateTime().toMSecsSinceEpoch()), list);
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(recv, &error);
-    if(!doc.isObject()) return;
-    QJsonArray dataArray = doc.object().value("pageHelp").toObject().value("data").toArray();
-    QList<QString> need_update_list;
-    foreach (QJsonValue val, dataArray) {
-        QJsonObject obj = val.toObject();
-        QString code = obj.value("SEC_CODE").toString();
-        QString name = obj.value("SEC_NAME").toString();
-        double vol = obj.value("TOT_VOL").toString().toDouble();
-        ShareData data;
-        data.mCode = code;
-        data.mName = name;
-        data.mShareType = ShareData::shareType(data.mCode);
-        data.mPY = HqUtils::GetFirstLetter(QTextCodec::codecForLocale()->toUnicode(data.mName.toUtf8()));
-        data.mFinanceData.mTotalShare = vol;
-        QString list_time = DATA_SERVICE->getShareData(data.mCode).mListTime;
-        if(list_time.isEmpty())
-        {
-            need_update_list.append(code);
-        } else
-        {
-            data.mListTime = list_time;
+    if(doc.isObject())
+    {
+        QJsonArray dataArray = doc.object().value("pageHelp").toObject().value("data").toArray();
+        QList<QString> need_update_list;
+        foreach (QJsonValue val, dataArray) {
+            QJsonObject obj = val.toObject();
+            QString code = obj.value("SEC_CODE").toString();
+            QString name = obj.value("SEC_NAME").toString();
+            double vol = obj.value("TOT_VOL").toString().toDouble();
+            ShareData data;
+            data.mCode = code;
+            data.mName = name;
+            data.mType = ShareData::shareType(data.mCode);
+            data.mPY = HqUtils::GetFirstLetter(QTextCodec::codecForLocale()->toUnicode(data.mName.toUtf8()));
+            data.mZGB = vol * 10000.0;
+            data.mLTGB = data.mZGB;
+            QString list_time = DATA_SERVICE->getShareData(data.mCode).mListTime;
+            if(list_time.isEmpty())
+            {
+                need_update_list.append(code);
+            } else
+            {
+                data.mListTime = list_time;
+            }
+            mShareCodeMap[data.mCode] = data;
+            num++;
         }
-        mShareCodeMap[data.mCode] = data;
+        //重新获取上海ETF的上市时间
+        if(need_update_list.size() > 0)
+        {
+            QList<ShareCodeDate> res = QtConcurrent::blockingMapped(need_update_list, updateShetfDate);
+            foreach (ShareCodeDate now, res) {
+                mShareCodeMap[now.code].mListTime = now.date;
+            }
+        }
     }
 
-    //重新获取上海ETF的上市时间
-    if(need_update_list.size() > 0)
+    if(num == 0)
     {
-        QList<ShareCodeDate> res = QtConcurrent::blockingMapped(need_update_list, updateShetfDate);
-        foreach (ShareCodeDate now, res) {
-            mShareCodeMap[now.code].mListTime = now.date;
+        ShareDataList list = DATA_SERVICE->getShareDataList(SHARE_SH_FUND);
+        foreach(ShareData data, list)
+        {
+            mShareCodeMap[data.mCode] = data;
         }
     }
-    qDebug()<<"parse shetf end";
+
+
+
+    return num;
 }
 

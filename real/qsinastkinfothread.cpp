@@ -96,12 +96,12 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
         ShareData &data = DATA_SERVICE->getShareData(code);
         //qDebug()<<data->mCode<<data->mName<<data->mShareType;
         data.mName = detailList[1];
-        data.mCur = detailList[4].toDouble();
-        data.mLastClose = detailList[3].toDouble();
-        data.mChg = detailList[4].toDouble() - data.mLastClose;
-        data.mChgPercent = data.mChg * 100 / detailList[3].toDouble() ;
-        double high = detailList[5].toDouble();
-        double low = detailList[6].toDouble();
+        data.mRealInfo.mClose = detailList[4].toDouble();
+        data.mRealInfo.mLastClose = detailList[3].toDouble();
+        data.mRealInfo.mChg = detailList[4].toDouble() - data.mRealInfo.mLastClose;
+        data.mRealInfo.mChgPercent = data.mRealInfo.mChg * 100 / detailList[3].toDouble() ;
+        data.mRealInfo.mHigh = detailList[5].toDouble();
+        data.mRealInfo.mLow = detailList[6].toDouble();
         double buy = detailList[7].toDouble();
         double sell = detailList[8].toDouble();
         double buy1 = detailList[12].toDouble();
@@ -111,53 +111,53 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
         if(QTime::currentTime().toString("hhmmss") >= "091500" && QTime::currentTime().toString("hhmmss") <= "092500")
         {
             double temp = fmax(buy, buy1);
-            if(temp == 0) temp = data.mLastClose;
-            data.mCur = temp;
-            data.mChg = detailList[8].toDouble() - data.mLastClose;
-            data.mChgPercent = data.mChg * 100 / detailList[3].toDouble() ;
+            if(temp == 0) temp = data.mRealInfo.mLastClose;
+            data.mRealInfo.mClose = temp;
+            data.mRealInfo.mChg = detailList[8].toDouble() - data.mRealInfo.mLastClose;
+            data.mRealInfo.mChgPercent = data.mRealInfo.mChg * 100 / detailList[3].toDouble() ;
         }
-        data.mVol = detailList[9].toInt();
-        data.mMoney = detailList[10].toDouble();
-        data.mHsl = 0.0;
-        data.mMoneyRatio = 0.0;
-        if(data.mHistory.mLastMoney> 0){
-            data.mMoneyRatio = data.mMoney / data.mHistory.mLastMoney;
+        data.mRealInfo.mVol = detailList[9].toInt();
+        data.mRealInfo.mMoney = detailList[10].toDouble();
+        data.mRealInfo.mHsl = 0.0;
+        data.mRealInfo.mMoneyRatio = 0.0;
+        if(data.mCounterInfo.mLastMoney> 0){
+            data.mRealInfo.mMoneyRatio = data.mRealInfo.mMoney / data.mCounterInfo.mLastMoney;
         }
 
-        if(data.mCur != 0)
+        if(data.mRealInfo.mClose != 0)
         {
-            data.mGXL = data.mBonusData.mXJFH / data.mCur;
+//            data.mGXL = data.mBonusData.mXJFH / data.mRealInfo.mClose;
         }
-        data.mTotalCap = data.mCur * data.mFinanceData.mTotalShare;
-        data.mMutalbleCap = data.mCur * data.mFinanceData.mMutalShare;
-        if(data.mFinanceData.mMutalShare > 0)
+        data.mRealInfo.mTotalCap = data.mRealInfo.mClose * data.mZGB;
+        data.mRealInfo.mMutalbleCap = data.mRealInfo.mClose * data.mLTGB;
+        if(data.mLTGB > 0)
         {
-            data.mHsl = data.mVol / (double)(data.mFinanceData.mMutalShare);
+            data.mRealInfo.mHsl = data.mRealInfo.mVol / (double)(data.mLTGB);
         }
         if(data.mProfit == 0)
         {
             data.mProfit = DATA_SERVICE->getProfit(code);
         }
-        data.mForeignCap = data.mHsgtData.mVolTotal * data.mCur ;
-        data.mForeignCapChg = data.mHsgtData.volChg("1") * data.mCur ;
-        if(data.mHistory.mWeekDayPrice > 0)
+        data.mForeignInfo.mCap = data.mForeignInfo.mVol * data.mRealInfo.mClose ;
+//        data.mForeignCapChg = data.mHsgtData.volChg("1") * data.mRealInfo.mClose ;
+        if(data.mCounterInfo.mWeekDayPrice > 0)
         {
-            data.mHistory.mChgPersFromWeek = (data.mCur - data.mHistory.mWeekDayPrice) * 100.0 / data.mHistory.mWeekDayPrice;
+            data.mCounterInfo.mWeekChgPer = (data.mRealInfo.mClose - data.mCounterInfo.mWeekDayPrice) * 100.0 / data.mCounterInfo.mWeekDayPrice;
         } else
         {
 //            data.mHistory.mChgPersFromWeek = data.mChgPercent;
         }
-        if(data.mHistory.mMonthDayPrice> 0)
+        if(data.mCounterInfo.mMonthDayPrice> 0)
         {
-            data.mHistory.mChgPersFromMonth= (data.mCur - data.mHistory.mMonthDayPrice) * 100.0 / data.mHistory.mMonthDayPrice;
+            data.mCounterInfo.mMonthChgPer = (data.mRealInfo.mClose - data.mCounterInfo.mMonthDayPrice) * 100.0 / data.mCounterInfo.mMonthDayPrice;
         } else
         {
 //            data.mHistory.mChgPersFromMonth= data.mChgPercent;
         }
 
-        if(data.mHistory.mYearDayPrice > 0)
+        if(data.mCounterInfo.mYearDayPrice > 0)
         {
-            data.mHistory.mChgPersFromYear = (data.mCur - data.mHistory.mYearDayPrice) * 100.0 / data.mHistory.mYearDayPrice;
+            data.mCounterInfo.mYearChgPer = (data.mRealInfo.mClose - data.mCounterInfo.mYearDayPrice) * 100.0 / data.mCounterInfo.mYearDayPrice;
         } else
         {
 //            data.mHistory.mChgPersFromYear = data.mChgPercent;
@@ -165,10 +165,10 @@ void QSinaStkInfoThread::slotRecvHttpContent(const QByteArray &bytes)
 //        data.mUpdateTime = QDateTime::currentMSecsSinceEpoch();
         if(top10Keys.contains(data.mCode.right(6)))
         {
-            data.mHsgtData.mIsTop10 = true;
+            data.mForeignInfo.mIsTop10 = true;
         } else
         {
-            data.mHsgtData.mIsTop10 = false;
+            data.mForeignInfo.mIsTop10 = false;
         }
         if(mSendResFlag) datalist.append(data);
     }

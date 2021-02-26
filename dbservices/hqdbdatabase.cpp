@@ -266,8 +266,6 @@ bool HQDBDataBase::createTable(const QString &pTable, const TableColList& cols)
         if(!delete_table) return true;
         delDBUpdateDate(pTable);
         if(!deleteTable(pTable)) return false;
-        return true;
-
     }
     QStringList colist;
     foreach (TABLE_COL_DEF data, cols) {
@@ -329,9 +327,9 @@ bool HQDBDataBase::queryShareBlockInfo(ShareDataMap& share, BlockDataMap& block)
             foreach (QString code, share_codes) {
                 ShareData &data = share[code];
                 if(data.mCode.length() == 0) data.mCode = code;
-                if(!data.mBlockCodeList.contains(block_code))
+                if(!data.mReferCodeList.contains(block_code))
                 {
-                    data.mBlockCodeList.append(block_code);
+                    data.mReferCodeList.append(block_code);
                 }
             }
         }
@@ -634,6 +632,8 @@ bool HQDBDataBase::createShareBasicTable()
     colist.append(TABLE_COL_DEF(HQ_TABLE_COL_PY_ABBR, "VARCHAR(10) NULL"));
     colist.append(TABLE_COL_DEF(HQ_TABLE_COL_TYPE, "INTEGER NOT NULL"));
     colist.append(TABLE_COL_DEF(HQ_TABLE_COL_LISTTIME, "VARCHAR(10) NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_TOTALMNT, "NUMERIC NOT NULL"));
+    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_MUTAL, "NUMERIC NOT NULL"));
 //    colist.append(TABLE_COL_DEF(HQ_TABLE_COL_FAVORITE, "BOOL NULL"));
     return createTable(TABLE_SHARE_BASIC_INFO, colist);
 }
@@ -650,8 +650,10 @@ bool HQDBDataBase::updateShareBasicInfo(const ShareDataList& dataList)
         list.append(DBColVal(HQ_TABLE_COL_CODE, data.mCode, HQ_DATA_TEXT));
         list.append(DBColVal(HQ_TABLE_COL_NAME, data.mName, HQ_DATA_TEXT));
         list.append(DBColVal(HQ_TABLE_COL_PY_ABBR, data.mPY, HQ_DATA_TEXT));
-        list.append(DBColVal(HQ_TABLE_COL_TYPE, data.mShareType, HQ_DATA_INT));
+        list.append(DBColVal(HQ_TABLE_COL_TYPE, data.mType, HQ_DATA_INT));
         list.append(DBColVal(HQ_TABLE_COL_LISTTIME, data.mListTime, HQ_DATA_TEXT));
+        list.append(DBColVal(HQ_TABLE_COL_TOTALMNT, data.mZGB, HQ_DATA_DOUBLE));
+        list.append(DBColVal(HQ_TABLE_COL_MUTAL, data.mLTGB, HQ_DATA_DOUBLE));
         if(!updateTable(TABLE_SHARE_BASIC_INFO, list, list[0])){
             mDB.rollback();
             return false;
@@ -678,8 +680,10 @@ bool HQDBDataBase::queryShareBasicInfo(ShareDataMap& map, const QStringList& fav
         info.mCode = code;
         info.mName = mSQLQuery.value(HQ_TABLE_COL_NAME).toString();
         info.mPY = mSQLQuery.value(HQ_TABLE_COL_PY_ABBR).toString();
-        info.mShareType =  (SHARE_DATA_TYPE)(mSQLQuery.value(HQ_TABLE_COL_TYPE).toInt());
+        info.mType =  mSQLQuery.value(HQ_TABLE_COL_TYPE).toInt();
         info.mListTime = mSQLQuery.value(HQ_TABLE_COL_LISTTIME).toString();
+        info.mZGB = mSQLQuery.value(HQ_TABLE_COL_TOTALMNT).toDouble();
+        info.mLTGB = mSQLQuery.value(HQ_TABLE_COL_MUTAL).toDouble();
         info.mIsFav = favlist.contains(code);
 
     }

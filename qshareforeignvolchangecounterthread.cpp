@@ -7,8 +7,9 @@
 #include <QJsonArray>
 #include <QJsonValue>
 #include <QFile>
+#include "dbservices/dbservices.h"
 
-int global_foreign_sort_type = STK_DISPLAY_SORT_TYPE_PRICE;
+int global_foreign_sort_type = STK_DISPLAY_SORT_TYPE_FOREIGN_JMR_CHG;
 int global_foreign_sort_rule = 1;
 bool global_foreign_chg = false;
 
@@ -32,20 +33,23 @@ bool cmp_foreign(const ShareForeignVolCounter& p1, const ShareForeignVolCounter&
     case STK_DISPLAY_SORT_TYPE_MCAP:
         result = (p1.mLTSZ > p2.mLTSZ ? 1 : -1);
         break;
-    case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL:
-        result = (p1.mShareHold > p2.mShareHold ? 1 : -1);
-        break;
+//    case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL:
+//        result = (p1.mShareHold > p2.mShareHold ? 1 : -1);
+//        break;
     case STK_DISPLAY_SORT_TYPE_LTZB:
         result = (p1.mLTZB > p2.mLTZB ? 1 : -1);
         break;
-    case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG:
+    case STK_DISPLAY_SORT_TYPE_FOREIGN_JMR_CHG:
         result = (p1.mChg1.mShareSZ_Change > p2.mChg1.mShareSZ_Change ? 1 : -1);
         break;
-    case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG5:
+    case STK_DISPLAY_SORT_TYPE_FOREIGN_JMR_CHG5:
         result = (p1.mChg5.mShareSZ_Change > p2.mChg5.mShareSZ_Change ? 1 : -1);
         break;
-    case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG10:
+    case STK_DISPLAY_SORT_TYPE_FOREIGN_JMR_CHG10:
         result = (p1.mChg10.mShareSZ_Change > p2.mChg10.mShareSZ_Change ? 1 : -1);
+        break;
+    default:
+        result = (p1.mCode > p2.mCode ? 1 : -1);
         break;
     }
 
@@ -195,9 +199,12 @@ void QShareForeignVolChangeCounterThread::sendData(QList<ShareForeignVolCounter>
     if(list.size() > 0)
     {
         QDateTime date = QDateTime::fromTime_t(list.first().mDate);
-        qStableSort(list.begin(), list.end(), cmp_foreign);
+//        QTime t;
+//        t.start();
+//        qStableSort(list.begin(), list.end(), cmp_foreign);
+//        qDebug()<<"sort vol counter cost:"<<t.elapsed();
 
-        emit signalSendDataList(list, date.date().toString("yyyy-MM-dd"));
+        emit DATA_SERVICE->signalSendForeignDataList(list, date.date().toString("yyyy-MM-dd"));
     }
 }
 
@@ -207,9 +214,9 @@ void QShareForeignVolChangeCounterThread::run()
     //首先读取本地文件的信息
     QList<ShareForeignVolCounter> list;
     read(list);
-    qDebug()<<"read data size:"<<list.size();
+    qDebug()<<"read data size:"<<list.size();    
+    sendData(list);
     while (1) {
-        sendData(list);
         QDate last_date = QDate::fromString(PROFILES_INS->value("Update", "Foreign_counter_update").toString(), "yyyy-MM-dd");
         QDate dest_date = QDate::currentDate().addDays(-1);
         if(last_date != dest_date)

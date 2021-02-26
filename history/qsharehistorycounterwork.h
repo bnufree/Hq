@@ -38,13 +38,13 @@ private:
 class QShareHistoryCounterWork : public QRunnable
 {
 public:
-    QShareHistoryCounterWork(const QString& code, const ShareHistoryFileDataList& list = ShareHistoryFileDataList(), QObject* parent = 0);
+    QShareHistoryCounterWork(const QString& code, const ShareDailyDataList& list = ShareDailyDataList(), QObject* parent = 0);
     ~QShareHistoryCounterWork();
     void run();
     QString getFileName();
-    bool readFile(ShareHistoryFileDataList& list);
+    bool readFile(ShareDailyDataList& list);
 private:
-    ShareHistoryFileDataList mList;
+    ShareDailyDataList mList;
     QObject*    mParent;
     QString     mCode;
 };

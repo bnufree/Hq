@@ -6,27 +6,7 @@ int ShareData::stk_sort_rule = 1;
 ShareData::ShareData():HqBaseData()
 {
     qRegisterMetaType<ShareDataList>("const ShareDataList&");
-    mClose = 0.0;
-    mHsl = 0.0;
-    mMoneyRatio = 0;
-    mZJLX = 0;     //资金流向
-    mGXL = 0;   //股息率
-    mTotalCap = 0;
-    mMutalbleCap = 0;
-    mForeignVolChg = 0;
-    mForeignCap = 0;
-    mForeignCapChg = 0;
-    mCur = 0;
-    mChg = 0;
-    mChgPercent = 0;
-    mHigh = 0;
-    mLow = 0;
-    mOpen = 0;
-    mClose = 0;
-    mMoney = 0;
-    mRZRQ = 0;
-    mVol = 0;
-    mTime = 0;
+    mProfit = 0.0;
 }
 
 bool ShareData::ShareSort(const ShareData &d1, const ShareData &d2)
@@ -34,79 +14,79 @@ bool ShareData::ShareSort(const ShareData &d1, const ShareData &d2)
     bool sts = true;
     switch (stk_sort_type) {
     case STK_DISPLAY_SORT_TYPE_CHGPER:
-        sts = stk_sort_rule == 1? d1.mChgPercent > d2.mChgPercent : d1.mChgPercent < d2.mChgPercent;
+        sts = stk_sort_rule == 1? d1.mRealInfo.mChgPercent > d2.mRealInfo.mChgPercent : d1.mRealInfo.mChgPercent < d2.mRealInfo.mChgPercent;
         break;
     case STK_DISPLAY_SORT_TYPE_PRICE:
-        sts = stk_sort_rule == 1? d1.mCur > d2.mCur : d1.mCur < d2.mCur;
+        sts = stk_sort_rule == 1? d1.mRealInfo.mClose > d2.mRealInfo.mClose : d1.mRealInfo.mClose < d2.mRealInfo.mClose;
         break;
     case STK_DISPLAY_SORT_TYPE_CJE:
-        sts = stk_sort_rule == 1? d1.mMoney > d2.mMoney : d1.mMoney < d2.mMoney;
+        sts = stk_sort_rule == 1? d1.mRealInfo.mMoney > d2.mRealInfo.mMoney : d1.mRealInfo.mMoney < d2.mRealInfo.mMoney;
         break;
     case STK_DISPLAY_SORT_TYPE_HSL:
-        sts = stk_sort_rule == 1? d1.mHsl > d2.mHsl : d1.mHsl < d2.mHsl;
+        sts = stk_sort_rule == 1? d1.mRealInfo.mHsl > d2.mRealInfo.mHsl : d1.mRealInfo.mHsl < d2.mRealInfo.mHsl;
         break;
     case STK_DISPLAY_SORT_TYPE_MONEYR:
-        sts = stk_sort_rule == 1? d1.mMoneyRatio > d2.mMoneyRatio : d1.mMoneyRatio < d2.mMoneyRatio;
+        sts = stk_sort_rule == 1? d1.mRealInfo.mMoneyRatio > d2.mRealInfo.mMoneyRatio : d1.mRealInfo.mMoneyRatio < d2.mRealInfo.mMoneyRatio;
         break;
-    case STK_DISPLAY_SORT_TYPE_LAST3:
-        sts = stk_sort_rule == 1? d1.mHistory.mLast3DaysChgPers > d2.mHistory.mLast3DaysChgPers : d1.mHistory.mLast3DaysChgPers < d2.mHistory.mLast3DaysChgPers;
-        break;
+//    case STK_DISPLAY_SORT_TYPE_LAST3:
+//        sts = stk_sort_rule == 1? d1.mHistory.mLast3DaysChgPers > d2.mHistory.mLast3DaysChgPers : d1.mHistory.mLast3DaysChgPers < d2.mHistory.mLast3DaysChgPers;
+//        break;
     case STK_DISPLAY_SORT_TYPE_ZJLX:
-        sts = stk_sort_rule == 1? d1.mZJLX > d2.mZJLX : d1.mZJLX < d2.mZJLX;
+        sts = stk_sort_rule == 1? d1.mRealInfo.mZJLX > d2.mRealInfo.mZJLX : d1.mRealInfo.mZJLX < d2.mRealInfo.mZJLX;
         break;
     case STK_DISPLAY_SORT_TYPE_GXL:
-        sts = stk_sort_rule == 1? d1.mGXL > d2.mGXL : d1.mGXL < d2.mGXL;
+//        sts = stk_sort_rule == 1? d1.mGXL > d2.mGXL : d1.mGXL < d2.mGXL;
         break;
     case STK_DISPLAY_SORT_TYPE_SZZBL:
-        sts = stk_sort_rule == 1? d1.mBonusData.mSZZG > d2.mBonusData.mSZZG : d1.mBonusData.mSZZG < d2.mBonusData.mSZZG;
+//        sts = stk_sort_rule == 1? d1.mBonusData.mSZZG > d2.mBonusData.mSZZG : d1.mBonusData.mSZZG < d2.mBonusData.mSZZG;
         break;
     case STK_DISPLAY_SORT_TYPE_GQDJR:
-        sts = stk_sort_rule == 1? d1.mBonusData.mGQDJR > d2.mBonusData.mGQDJR : d1.mBonusData.mGQDJR < d2.mBonusData.mGQDJR;
+//        sts = stk_sort_rule == 1? d1.mBonusData.mGQDJR > d2.mBonusData.mGQDJR : d1.mBonusData.mGQDJR < d2.mBonusData.mGQDJR;
         break;
     case STK_DISPLAY_SORT_TYPE_TCAP:
-        sts = stk_sort_rule == 1? d1.mTotalCap > d2.mTotalCap : d1.mTotalCap < d2.mTotalCap;
+        sts = stk_sort_rule == 1? d1.mRealInfo.mTotalCap > d2.mRealInfo.mTotalCap : d1.mRealInfo.mTotalCap < d2.mRealInfo.mTotalCap;
         break;
     case STK_DISPLAY_SORT_TYPE_MCAP:
-        sts = stk_sort_rule == 1? d1.mMutalbleCap > d2.mMutalbleCap : d1.mMutalbleCap < d2.mMutalbleCap;
+        sts = stk_sort_rule == 1? d1.mRealInfo.mMutalbleCap > d2.mRealInfo.mMutalbleCap : d1.mRealInfo.mMutalbleCap < d2.mRealInfo.mMutalbleCap;
         break;
     case STK_DISPLAY_SORT_TYPE_PROFIT:
         sts = stk_sort_rule == 1? d1.mProfit > d2.mProfit : d1.mProfit < d2.mProfit;
         break;
-    case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL:
-        sts = stk_sort_rule == 1? d1.mHsgtData.mVolTotal > d2.mHsgtData.mVolTotal : d1.mHsgtData.mVolTotal < d2.mHsgtData.mVolTotal;
-        break;
+//    case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL:
+//        sts = stk_sort_rule == 1? d1.mHsgtData.mVolTotal > d2.mHsgtData.mVolTotal : d1.mHsgtData.mVolTotal < d2.mHsgtData.mVolTotal;
+//        break;
     case STK_DISPLAY_SORT_TYPE_FOREIGN_CAP:
-        sts = stk_sort_rule == 1? d1.mForeignCap > d2.mForeignCap : d1.mForeignCap < d2.mForeignCap;
+        sts = stk_sort_rule == 1? d1.mForeignInfo.mCap > d2.mForeignInfo.mCap : d1.mForeignInfo.mCap < d2.mForeignInfo.mCap;
         break;
-    case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG:
-        sts = stk_sort_rule == 1? d1.mHsgtData.volChg("1")> d2.mHsgtData.volChg("1") : d1.mHsgtData.volChg("1") < d2.mHsgtData.volChg("1");
+//    case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG:
+//        sts = stk_sort_rule == 1? d1.mHsgtData.volChg("1")> d2.mHsgtData.volChg("1") : d1.mHsgtData.volChg("1") < d2.mHsgtData.volChg("1");
+//        break;
+    case STK_DISPLAY_SORT_TYPE_FOREIGN_JMR_CHG:
+        sts = stk_sort_rule == 1? d1.mForeignInfo.mJMR1 > d2.mForeignInfo.mJMR1 :d1.mForeignInfo.mJMR1 < d2.mForeignInfo.mJMR1;
         break;
-    case STK_DISPLAY_SORT_TYPE_FOREIGN_CAP_CHG:
-        sts = stk_sort_rule == 1? d1.mForeignCapChg > d2.mForeignCapChg :d1.mForeignCapChg < d2.mForeignCapChg;
-        break;
-    case STK_DISPLAY_SORT_TYPE_LAST5:
-        sts = stk_sort_rule == 1? d1.mHistory.mLast5DaysChgPers > d2.mHistory.mLast5DaysChgPers : d1.mHistory.mLast5DaysChgPers < d2.mHistory.mLast5DaysChgPers;
-        break;
-    case STK_DISPLAY_SORT_TYPE_LAST10:
-        sts = stk_sort_rule == 1? d1.mHistory.mLast10DaysChgPers > d2.mHistory.mLast10DaysChgPers : d1.mHistory.mLast10DaysChgPers < d2.mHistory.mLast10DaysChgPers;
-        break;
+//    case STK_DISPLAY_SORT_TYPE_LAST5:
+//        sts = stk_sort_rule == 1? d1.mHistory.mLast5DaysChgPers > d2.mHistory.mLast5DaysChgPers : d1.mHistory.mLast5DaysChgPers < d2.mHistory.mLast5DaysChgPers;
+//        break;
+//    case STK_DISPLAY_SORT_TYPE_LAST10:
+//        sts = stk_sort_rule == 1? d1.mHistory.mLast10DaysChgPers > d2.mHistory.mLast10DaysChgPers : d1.mHistory.mLast10DaysChgPers < d2.mHistory.mLast10DaysChgPers;
+//        break;
     case STK_DISPLAY_SORT_TYPE_LAST_MONTH:
-        sts = stk_sort_rule == 1?  d1.mHistory.mChgPersFromMonth > d2.mHistory.mChgPersFromMonth : d1.mHistory.mChgPersFromMonth < d2.mHistory.mChgPersFromMonth;
+        sts = stk_sort_rule == 1?  d1.mCounterInfo.mMonthChgPer > d2.mCounterInfo.mMonthChgPer : d1.mCounterInfo.mMonthChgPer < d2.mCounterInfo.mMonthChgPer;
         break;
     case STK_DISPLAY_SORT_TYPE_LAST_WEEK:
-        sts = stk_sort_rule == 1?  d1.mHistory.mChgPersFromWeek > d2.mHistory.mChgPersFromWeek : d1.mHistory.mChgPersFromWeek < d2.mHistory.mChgPersFromWeek;
+        sts = stk_sort_rule == 1?  d1.mCounterInfo.mWeekChgPer > d2.mCounterInfo.mWeekChgPer : d1.mCounterInfo.mWeekChgPer < d2.mCounterInfo.mWeekChgPer;
         break;
     case STK_DISPLAY_SORT_TYPE_LAST_YEAR:
-        sts = stk_sort_rule == 1? d1.mHistory.mChgPersFromYear > d2.mHistory.mChgPersFromYear : d1.mHistory.mChgPersFromYear < d2.mHistory.mChgPersFromYear;
+        sts = stk_sort_rule == 1? d1.mCounterInfo.mYearChgPer > d2.mCounterInfo.mYearChgPer : d1.mCounterInfo.mYearChgPer < d2.mCounterInfo.mYearChgPer;
         break;
     case STK_DISPLAY_SORT_TYPE_JZCSYL:
-        sts = stk_sort_rule == 1? d1.mFinanceData.mROE > d2.mFinanceData.mROE : d1.mFinanceData.mROE < d2.mFinanceData.mROE;
+//        sts = stk_sort_rule == 1? d1.mFinanceData.mROE > d2.mFinanceData.mROE : d1.mFinanceData.mROE < d2.mFinanceData.mROE;
         break;
-    case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG5:
-        sts = stk_sort_rule == 1? d1.mHsgtData.volChg("5")> d2.mHsgtData.volChg("5") : d1.mHsgtData.volChg("5") < d2.mHsgtData.volChg("5");
+    case STK_DISPLAY_SORT_TYPE_FOREIGN_JMR_CHG5:
+        sts = stk_sort_rule == 1? d1.mForeignInfo.mJMR5> d2.mForeignInfo.mJMR5 : d1.mForeignInfo.mJMR5< d2.mForeignInfo.mJMR5;
         break;
-    case STK_DISPLAY_SORT_TYPE_FOREIGN_VOL_CHG10:
-        sts = stk_sort_rule == 1? d1.mHsgtData.volChg("10") > d2.mHsgtData.volChg("10") : d1.mHsgtData.volChg("10") < d2.mHsgtData.volChg("10");
+    case STK_DISPLAY_SORT_TYPE_FOREIGN_JMR_CHG10:
+        sts = stk_sort_rule == 1? d1.mForeignInfo.mJMR10 > d2.mForeignInfo.mJMR10 : d1.mForeignInfo.mJMR10 < d2.mForeignInfo.mJMR10;
         break;
     default:
         break;

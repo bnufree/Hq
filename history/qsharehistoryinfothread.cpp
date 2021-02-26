@@ -10,6 +10,7 @@
 #include "utils/profiles.h"
 
 #define     UPDATE_SEC              "CodeInfo"
+qint64      global_file_version = 20210224;
 
 QShareHistoryInfoThread::QShareHistoryInfoThread(const QString& code, const QMap<QDate, ShareForignVolFileData>& list, bool counter, QObject* parent) :
     mCode(code),
@@ -61,7 +62,7 @@ QString QShareHistoryInfoThread::getFileName()
     return QString("%1/%2").arg(getPath()).arg(mCode);
 }
 
-bool QShareHistoryInfoThread::readFile(ShareHistoryFileDataList& list, bool& adjust)
+bool QShareHistoryInfoThread::readFile(ShareDailyDataList& list, bool& adjust)
 {
     QString fileName = getFileName();
     if(!QFile::exists(fileName))
@@ -76,12 +77,33 @@ bool QShareHistoryInfoThread::readFile(ShareHistoryFileDataList& list, bool& adj
         qDebug()<<__FUNCTION__<<__LINE__<<fileName<<" open error";
         return false;
     }
+    bool version_flag = false;
     while (!file.atEnd() ) {
-        ShareHistoryFileData data;
-        file.read((char*)(&data), sizeof(ShareHistoryFileData));
-        list.append(data);
+        if(!version_flag)
+        {
+            qint64 file_version = 0;
+            file.read((char*)(&file_version), sizeof (qint64));
+//            qDebug()<<"file version:"<<mCode<<file_version;
+            if(file_version != global_file_version)
+            {
+                version_flag = false;
+                break;
+            } else
+            {
+                version_flag = true;
+            }
+        } else
+        {
+            ShareDailyData data;
+            file.read((char*)(&data), sizeof(ShareDailyData));
+            list.append(data);
+        }
     }
     file.close();
+    if(!version_flag)
+    {
+        file.remove();
+    }
 
     return true;
 }
@@ -97,7 +119,7 @@ void QShareHistoryInfoThread::run()
     //default is
     QDate start_update_date;
     bool adjust = false;
-    ShareHistoryFileDataList list;
+    ShareDailyDataList list;
     readFile(list, adjust);
     if(list.size() > 0)
     {
@@ -114,7 +136,7 @@ void QShareHistoryInfoThread::run()
     }
     //开始更新日线数据到今天
     int new_size = 0;
-    ShareHistoryFileDataList new_list;
+    ShareDailyDataList new_list;
     bool need_update = false;
     if(start_update_date <= TradeDateMgr::instance()->lastTradeDay())
     {
@@ -130,7 +152,7 @@ void QShareHistoryInfoThread::run()
     }
     for(int i=0; i<new_list.size(); i++)
     {
-        ShareHistoryFileData data = new_list[i];
+        ShareDailyData data = new_list[i];
         data.mCloseAdjust = data.mClose;
         //检查是否有除权处理,如果有就更新前面所有的除权价格
         if(list.size() > 0 && list.last().mClose != data.mLastClose)
@@ -186,7 +208,7 @@ void QShareHistoryInfoThread::run()
         QDate real_week, real_month, real_year;
         for(int i = size - 1; i >= 0; i--)
         {
-            ShareHistoryFileData data = list[i];
+            ShareDailyData data = list[i];
             QDate wkDate = QDateTime::fromTime_t(data.mDate).date();
             if(wkDate == last_day) last_money = data.mMoney;
             if((!week_found) && (wkDate <= week))
@@ -230,69 +252,33 @@ void QShareHistoryInfoThread::run()
         }
 
 
-        //获取当前陆股通持股信息的变化情况 1日 5日 10日
-        double foreign_now = 0;
-        double foreign_mutaul = 0;
-        double foreign_chg1 = 0.0, foreign_chg5 = 0.0, foreign_chg10 = 0.0;
-        int size2 = mForeignList.size();
-        if(size2 > 0)
-        {
-            foreign_now = mForeignList.last().mForeignVol;
-            foreign_mutaul = mForeignList.last().mMutuablePercent;
-            qDebug()<<mForeignList.firstKey()<<mForeignList.lastKey();
-            QMap<QDate, ShareForignVolFileData>::const_iterator end = mForeignList.constEnd();
-            if(size2 >= 2)
-            {
-                foreign_chg1 = (end-1).value().mForeignVol - (end-2).value().mForeignVol;
-            } else
-            {
-                foreign_chg1 = (end-1).value().mForeignVol - mForeignList.first().mForeignVol;
-            }
-            if(size2 >= 5)
-            {
-                foreign_chg5 = (end-1).value().mForeignVol - (end-5).value().mForeignVol;
-            } else
-            {
-                foreign_chg5 = (end-1).value().mForeignVol - mForeignList.first().mForeignVol;
-            }
-
-            if(size2 >= 10)
-            {
-                foreign_chg10 = (end-1).value().mForeignVol - (end-10).value().mForeignVol;
-            } else
-            {
-                foreign_chg10 = (end-1).value().mForeignVol - mForeignList.first().mForeignVol;
-            }
-        }
 
         ShareHistoryCounter counter;
         counter.code = mCode;
-        counter.foreign_percent = foreign_mutaul;
-        counter.foreign_ch1 = foreign_chg1;
-        counter.foreign_ch5 = foreign_chg5;
-        counter.foreign_ch10 = foreign_chg10;
-        counter.foreign_vol = foreign_now;
-        counter.lastMoney = last_money;
-        counter.monthDay = real_month;
-        counter.monthP = month_p;
-        counter.weekDay = real_week;
-        counter.weekP = week_p;
-        counter.yearDay = real_year;
-        counter.yearP = year_p;
-//        qDebug()<<mCode<<real_week.toString("yyyyMMdd")<<week_p<<real_month.toString("yyyyMMdd")<<month_p<<real_year.toString("yyyyMMdd")<<year_p<<foreign_chg1<<foreign_chg5<<foreign_chg10<<last_day.toString("yyyy-MM-dd")<<last_money;
+        counter.info.mLastMoney = last_money;
+        counter.info.mMonthDay = real_month;
+        counter.info.mMonthDayPrice = month_p;
+        counter.info.mWeekDay = real_week;
+        counter.info.mWeekDayPrice = week_p;
+        counter.info.mYearDay = real_year;
+        counter.info.mYearDayPrice = year_p;
+//        qDebug()<<mCode<<"week:"<<real_week.toString("yyyyMMdd")<<week_p
+//                <<"month:"<<real_month.toString("yyyyMMdd")<<month_p
+//                <<"year:"<<real_year.toString("yyyyMMdd")<<year_p
+//                <<"last_day:"<<last_day.toString("yyyy-MM-dd")<<QString::number(last_money/10000.0, 'f', 0);
 
-        emit DATA_SERVICE->signalUpdateShareCounter(counter);
+//        emit DATA_SERVICE->signalUpdateShareCounter(counter);
+        if(mParent)
+        {
+            QMetaObject::invokeMethod(mParent,\
+                                      "slotUpdateShareHistoryProcess",\
+                                      Qt::DirectConnection,
+                                      Q_ARG(ShareHistoryCounter, counter),
+                                      Q_ARG(QString, mCode)
+                                      );
+        }
     }
-FUNC_END:
-    if(mParent)
-    {
-        QMetaObject::invokeMethod(mParent,\
-                                  "slotUpdateShareHistoryProcess",\
-                                  Qt::DirectConnection,
-                                  Q_ARG(ShareHistoryFileDataList, list),
-                                  Q_ARG(QString, mCode)
-                                  );
-    }
+
 //    qDebug()<<"update history "<<mCode<< t.elapsed();
     return;
 }
@@ -304,25 +290,29 @@ QString QShareHistoryInfoThread::getCode()
 
 
 
-void QShareHistoryInfoThread::writeFile(const ShareHistoryFileDataList& list, const char* mode)
+void QShareHistoryInfoThread::writeFile(const ShareDailyDataList& list, const char* mode)
 {
     if(list.size() == 0) return;
     FILE *fp = fopen(getFileName().toStdString().data(), /*"ab+"*/mode);
     if(fp)
     {
-        foreach (ShareHistoryFileData data, list) {
-            fwrite(&data, sizeof(ShareHistoryFileData), 1, fp);
+        if(QString::fromLatin1(mode).contains("w"))
+        {
+            fwrite(&global_file_version, sizeof(qint64), 1, fp);
+        }
+        foreach (ShareDailyData data, list) {
+            fwrite(&data, sizeof(ShareDailyData), 1, fp);
 //            qDebug()<<QDateTime::fromTime_t(data.mDate).date()<<data.mClose<<data.mMoney / 10000.0;
         }
         fclose(fp);
     }
 }
 
-void QShareHistoryInfoThread::adjustDataList(ShareHistoryFileDataList &list, double price, double ratio)
+void QShareHistoryInfoThread::adjustDataList(ShareDailyDataList &list, double price, double ratio)
 {
     for(int i=0; i<list.size(); i++)
     {
-        ShareHistoryFileData &data = list[i];
+        ShareDailyData &data = list[i];
 #if 0
         data.mCloseAdjust += price;
         data.mLastClose += price;

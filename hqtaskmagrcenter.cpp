@@ -171,20 +171,20 @@ void HQTaskMagrCenter::slotShareCodesListFinished(const QStringList& codes)
     if(mHqCenter) mHqCenter->setShareCodes(codes);
 
 
-    //获取财务信息
-    QShareFinancialInfoWork* finance = new QShareFinancialInfoWork(codes, this);
-    connect(finance, SIGNAL(finished()), finance, SLOT(deleteLater()));
-    finance->start();
-    //获取分配信息
-    QShareFHSPWork* fhsp = new QShareFHSPWork(this);
-    connect(fhsp, SIGNAL(finished()), fhsp, SLOT(deleteLater()));
-    fhsp->start();
+//    //获取财务信息
+//    QShareFinancialInfoWork* finance = new QShareFinancialInfoWork(codes, this);
+//    connect(finance, SIGNAL(finished()), finance, SLOT(deleteLater()));
+//    finance->start();
+//    //获取分配信息
+//    QShareFHSPWork* fhsp = new QShareFHSPWork(this);
+//    connect(fhsp, SIGNAL(finished()), fhsp, SLOT(deleteLater()));
+//    fhsp->start();
 
-//    //更新日线数据
-//    mHistoryInfoMgr = new QShareHistoryInfoMgr(codes);
-//    connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SIGNAL(signalUpdateHistoryMsg(QString)));
-//    connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryFinished()), this, SLOT(slotUpdateHistoryFinished()));
-//    mHistoryInfoMgr->signalStartGetHistory();
+    //更新日线数据
+    mHistoryInfoMgr = new QShareHistoryInfoMgr(codes);
+    connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryMsg(QString)), this, SIGNAL(signalUpdateHistoryMsg(QString)));
+    connect(mHistoryInfoMgr, SIGNAL(signalUpdateHistoryFinished()), this, SLOT(slotUpdateHistoryFinished()));
+    mHistoryInfoMgr->signalStartGetHistory();
 
 
 

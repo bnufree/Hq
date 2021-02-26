@@ -44,7 +44,7 @@ void QShareHistoryFileWork::read()
             ShareData data;
             file.read((char*)(&data), sizeof(ShareData));
 
-            if(data.mClose < 0.000001) continue;
+            if(data.mRealInfo.mClose < 0.000001) continue;
 //            if(QString::fromStdString(data.mCode) == "600804")
 //            {
 //                qDebug()<<data.mCode<<data.mName<<data.mMoney<<data.mClose<<QDateTime::fromMSecsSinceEpoch(data.mTime).toString("yyyy-MM-dd");

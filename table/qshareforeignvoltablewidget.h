@@ -18,7 +18,7 @@ signals:
 
 public slots:
     void slotRecvData(const QList<ShareForeignVolCounter>& list);
-    void updateTable();
+    void updateTableInfo();
     void    setSortType(int type);
 
 private:

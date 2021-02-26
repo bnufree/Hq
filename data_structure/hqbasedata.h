@@ -34,12 +34,16 @@ public:
     }
 
 public:
-    bool        mIsFav;
-    int         mType;
-    QString     mCode;
-    QString     mName;
-    QString     mPY; //拼音简称
-    bool        mStatus;    //是否停牌
+    bool                    mIsFav; //是否自选
+    int                     mType;  //类型
+    QString                 mCode;  //编码
+    QString                 mName;  //名称
+    QString                 mPY;    //拼音简称
+    bool                    mStatus;    //是否停牌
+    QString                 mListTime;  //上市时间
+    double                  mZGB;       //总股本
+    double                  mLTGB;      //流通股本
+    QStringList             mReferCodeList;     //关联的其他代码
 
 };
 

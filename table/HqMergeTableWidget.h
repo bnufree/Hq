@@ -40,6 +40,7 @@ protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
+    void wheelEvent(QWheelEvent* event);
 private slots:
 
 signals:
@@ -69,12 +70,13 @@ public:
     explicit HqMergeTableWidget(QWidget *parent = 0);
     ~HqMergeTableWidget();
     virtual void setHeaders(const TableColDataList &list, int move_count = 0);
-    virtual void updateTable() {}
+
     void    resetDisplayRows();
     void    setTotalRowCount(int v) {mTotalRowCount = v;}
 public:
     void prepareUpdateTable(int newRowCount);
     void removeRows(int start, int count);
+    virtual void updateTableInfo(){}
 
 
 private:
@@ -105,6 +107,7 @@ private:
     int                                 mRowHeight;
     int                                 mTotalRowCount;
     QTimer*                             mDoubleClickTimer;
+    QTimer*                             mUpdateTimer;
 };
 
 #endif // HQMERGETABLEWIDGET_H

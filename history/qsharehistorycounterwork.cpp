@@ -10,7 +10,7 @@
 #include <QJsonValue>
 #include <QJsonParseError>
 
-QShareHistoryCounterWork::QShareHistoryCounterWork(const QString& code,const ShareHistoryFileDataList& list, QObject* parent)
+QShareHistoryCounterWork::QShareHistoryCounterWork(const QString& code,const ShareDailyDataList& list, QObject* parent)
     :mCode(code),mList(list),mParent(parent),QRunnable()
 {
 
@@ -27,7 +27,7 @@ QString QShareHistoryCounterWork::getFileName()
     return QString("%1/%2").arg(HQ_DAY_HISTORY_DIR).arg(mCode);
 }
 
-bool QShareHistoryCounterWork::readFile(ShareHistoryFileDataList& list)
+bool QShareHistoryCounterWork::readFile(ShareDailyDataList& list)
 {
     QString fileName = getFileName();
     if(!QFile::exists(fileName))
@@ -43,8 +43,8 @@ bool QShareHistoryCounterWork::readFile(ShareHistoryFileDataList& list)
         return false;
     }
     while (!file.atEnd() ) {
-        ShareHistoryFileData data;
-        file.read((char*)(&data), sizeof(ShareHistoryFileData));
+        ShareDailyData data;
+        file.read((char*)(&data), sizeof(ShareDailyData));
         list.append(data);
     }
     file.close();

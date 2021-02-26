@@ -33,13 +33,19 @@ HqSingleTableWidget::HqSingleTableWidget(QWidget *parent) :
     connect(this->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(slotHeaderClicked(int)));
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    mRowHeight = HqUtils::convertMM2Pixel(7);    //设定表格的字体
+    int row_height = 7;
+    int col_width = 14;
+#ifdef Q_OS_WIN
+    row_height = 10;
+    col_width = 25;
+#endif
+    mRowHeight = HqUtils::convertMM2Pixel(row_height);    //设定表格的字体
     QFont font = this->font();
     font.setBold(false);
     HqUtils::setFontPixelSize(&font, mRowHeight * 0.5);
     this->setFont(font);
     //设定表格每列的名称宽度和字体
-    mColWidth = HqUtils::convertMM2Pixel(14);
+    mColWidth = HqUtils::convertMM2Pixel(col_width);
     HqUtils::setFontPixelSize(&font, mRowHeight * 0.5);
     this->horizontalHeader()->setFont(font);
     this->horizontalHeader()->setMinimumHeight(QFontMetrics(font).height() / 0.5);
@@ -243,6 +249,12 @@ void HqSingleTableWidget::mouseReleaseEvent(QMouseEvent *event)
     return;
 }
 
+void HqSingleTableWidget::wheelEvent(QWheelEvent *event)
+{
+    event->ignore();
+    return;
+}
+
 int HqSingleTableWidget::getTotalColWidth() const
 {
     int sum = 0;
@@ -275,7 +287,10 @@ HqMergeTableWidget::HqMergeTableWidget(QWidget *parent) : QWidget(parent)
     connect(mMoveTable, &HqSingleTableWidget::signalSetSortType, this, &HqMergeTableWidget::setSortType);
     connect(mFixTable, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(slotCellDoubleClicked(int,int)));
 //    connect(mMoveTable, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(slotCellDoubleClicked(int,int)));
-
+    mUpdateTimer = new QTimer(this);
+    connect(mUpdateTimer, &QTimer::timeout, this, &HqMergeTableWidget::updateTableInfo);
+    mUpdateTimer->setInterval(1000);
+    mUpdateTimer->start();
 }
 
 HqMergeTableWidget::~HqMergeTableWidget()
@@ -371,7 +386,7 @@ void HqMergeTableWidget::moveTable(int mode)
             {
                 mDisplayRowStart = 0;
             }
-            updateTable();
+//            updateTable();
 
         } else if(mode == OPT_DOWN)
         {
@@ -380,7 +395,7 @@ void HqMergeTableWidget::moveTable(int mode)
             {
                 mDisplayRowStart = mTotalRowCount - 1;
             }
-            updateTable();
+//            updateTable();
 
         }
     }

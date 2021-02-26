@@ -35,9 +35,9 @@ HqInfoParseUtil::HqInfoParseUtil()
 
 }
 
-ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryData(const QDate& start, const QString& code)
+ShareDailyDataList HqInfoParseUtil::getShareHistoryData(const QDate& start, const QString& code)
 {
-    ShareHistoryFileDataList list;
+    ShareDailyDataList list;
 //    if(ShareData::shareType(code) & SHARE_FUND)
 //    {
 //        list = getShareHistoryDataFromXueqiu(start, code);
@@ -52,9 +52,9 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryData(const QDate& start
     return list;
 }
 
-ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromXueqiu(const QDate &start, const QString &code)
+ShareDailyDataList HqInfoParseUtil::getShareHistoryDataFromXueqiu(const QDate &start, const QString &code)
 {
-    ShareHistoryFileDataList list;
+    ShareDailyDataList list;
     //再次从雪球获取
     QStringList urlList;
     urlList.append("https://xueqiu.com/");
@@ -88,15 +88,21 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromXueqiu(const QD
                         QJsonArray subarray = array[i].toArray();
                         if(subarray.size() >= 10)
                         {
-                            ShareHistoryFileData data;
+// "timestamp",  "volume", "open", "high", "low", "close", "chg",  "percent",  "turnoverrate",  "amount","volume_post","amount_post"],
+// 1609689600000,154952285, 43.23,  43.78,  42.02, 43.17,  -0.78,    -1.77,        0.75,         6.608868849E9,null,null]
+                            ShareDailyData data;
                             data.mDate = QDateTime::fromMSecsSinceEpoch(subarray[0].toVariant().toLongLong()).toTime_t();
+                            data.mVol = subarray[1].toDouble();
+                            data.mOpen = subarray[2].toDouble();
+                            data.mHigh = subarray[3].toDouble();
+                            data.mLow = subarray[4].toDouble();
                             data.mClose = subarray[5].toDouble();
                             double chg = subarray[6].toDouble();
                             data.mLastClose = data.mClose - chg;
                             data.mMoney = subarray[9].toDouble();
                             list.append(data);
                             wkDate = QDateTime::fromTime_t(data.mDate).date().addDays(1);
-//                            qDebug()<<QDateTime::fromTime_t(data.mDate).date()<<code<<data.mClose<<data.mLastClose<<data.mMoney;
+//                            qDebug()<<QDateTime::fromTime_t(data.mDate).date()<<code<<data.mClose<<data.mRealInfo.mLastClose<<data.mMoney;
                         }
                     }
                 }
@@ -119,13 +125,13 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromXueqiu(const QD
     return list;
 }
 
-ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromHexun(const QDate& start, const QString& code)
+ShareDailyDataList HqInfoParseUtil::getShareHistoryDataFromHexun(const QDate& start, const QString& code)
 {
     QString wkCode = code.right(6);
     QString market = (ShareData::shareType(code) & SHARE_SH_TOTAL ? "sse" : "szse");
     wkCode.insert(0, market);
 
-    ShareHistoryFileDataList list;
+    ShareDailyDataList list;
     QDate last_update_date = start;
     while (1) {
         QString wkURL = QString("http://webstock.quote.hermes.hexun.com/a/kline?code=%1&start=%2&number=1000&type=5")
@@ -154,13 +160,18 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFromHexun(const QDa
             if(date < start) continue;
             if(date == QDate::currentDate()) break;
 
-            ShareHistoryFileData data;
+            ShareDailyData data;
             data.mDate = QDateTime(date).toTime_t();
             data.mClose = src_list[3].toDouble() / weight;
             data.mLastClose = src_list[1].toDouble() / weight;
             data.mMoney = src_list[7].toDouble();
+            data.mOpen = src_list[2].toDouble() / weight;
+            data.mHigh = src_list[3].toDouble() / weight;
+            data.mLow = src_list[4].toDouble() / weight;
+            data.mVol = src_list[5].toDouble();
+
             list.append(data);
-//            qDebug()<<date<<code<<data.mClose<<data.mLastClose<<data.mMoney;
+//            qDebug()<<date<<code<<data.mClose<<data.mRealInfo.mLastClose<<data.mMoney;
         }
         if(list.size() > 0)
         {
@@ -249,9 +260,9 @@ bool HqInfoParseUtil::getShareDateRange(const QString& code, QDate& start, QDate
     return found;
 }
 
-ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFrom163(const QDate &start, const QString &code)
+ShareDailyDataList HqInfoParseUtil::getShareHistoryDataFrom163(const QDate &start, const QString &code)
 {
-    ShareHistoryFileDataList list;
+    ShareDailyDataList list;
     if(start < QDate::currentDate())
     {
         QString wkCode = (ShareData::shareType(code) & SHARE_SH_TOTAL ? "0" : "1") + code.right(6);
@@ -268,15 +279,22 @@ ShareHistoryFileDataList HqInfoParseUtil::getShareHistoryDataFrom163(const QDate
             QStringList cols = lines[i].split(",");
             if(cols.length() >= 15)
             {
+//日期,       股票代码, 名称,  收盘价,  最高价, 最低价, 开盘价, 前收盘, 涨跌额, 涨跌幅,   换手率,  成交量,   成交金额,       总市值,   流通市值,   成交笔数
+//2021-02-23,'600036,招商银行,55.55,  56.73, 54.2,  54.29, 54.2,  1.35,  2.4908,  0.462,  95299102, 5306140313.0, 1.40096242314e+12,1.14593786303e+12,None
                 QDate curDate = QDate::fromString(cols[0], "yyyy-MM-dd");
                 if(curDate.dayOfWeek() == 6 || curDate.dayOfWeek() == 7) continue;
                 if(cols[3].toDouble() < 0.001) continue;
-                ShareHistoryFileData data;
+                ShareDailyData data;
                 data.mDate = QDateTime(curDate).toTime_t();
                 data.mClose = cols[3].toDouble();
+                data.mHigh = cols[4].toDouble();
+                data.mLow = cols[5].toDouble();
+                data.mOpen = cols[6].toDouble();
                 data.mLastClose = cols[7].toDouble();
                 data.mCloseAdjust = data.mClose;
                 data.mMoney = cols[12].toDouble();
+                data.mVol = cols[11].toDouble();
+
 //                data.mTotalShareCount = qint64(floor(cols[13].toDouble() / data.mClose));
 //                qDebug()<<curDate<<code<<data.mClose;
                 list.append(data);
@@ -327,28 +345,28 @@ bool HqInfoParseUtil::parseShareDataFromSinaA(ShareData& data, const QString& de
     if(detailList.length() < 23) return false;
     data.mCode = detailList[0];
     data.mName = detailList[1];
-    data.mCur = detailList[4].toDouble();
-    data.mLastClose = detailList[3].toDouble();
-    data.mChg = data.mCur - data.mLastClose;
-    data.mChgPercent = data.mChg* 100 / data.mLastClose ;
-    data.mHigh = detailList[5].toDouble();
-    data.mLow = detailList[6].toDouble();
+    data.mRealInfo.mClose = detailList[4].toDouble();
+    data.mRealInfo.mLastClose = detailList[3].toDouble();
+    data.mRealInfo.mChg = data.mRealInfo.mClose - data.mRealInfo.mLastClose;
+    data.mRealInfo.mChgPercent = data.mRealInfo.mChg* 100 / data.mRealInfo.mLastClose ;
+    data.mRealInfo.mHigh = detailList[5].toDouble();
+    data.mRealInfo.mLow = detailList[6].toDouble();
     double buy = detailList[7].toDouble();
     double sell = detailList[8].toDouble();
     double buy1 = detailList[12].toDouble();
     double sell1 = detailList[22].toDouble();
 
     //竞价时段的特殊处理
-    if(data.mCur == 0)
+    if(data.mRealInfo.mClose == 0)
     {
         double temp = fmax(buy, buy1);
-        if(temp == 0) temp = data.mLastClose;
-        data.mCur = temp;
-        data.mChg = temp - data.mLastClose;
-        data.mChgPercent = data.mChg * 100 / data.mLastClose ;
+        if(temp == 0) temp = data.mRealInfo.mLastClose;
+        data.mRealInfo.mClose = temp;
+        data.mRealInfo.mChg = temp - data.mRealInfo.mLastClose;
+        data.mRealInfo.mChgPercent = data.mRealInfo.mChg * 100 / data.mRealInfo.mLastClose ;
     }
-    data.mVol = detailList[9].toInt();
-    data.mMoney = detailList[10].toDouble();
+    data.mRealInfo.mVol = detailList[9].toInt();
+    data.mRealInfo.mMoney = detailList[10].toDouble();
     return true;
 }
 
@@ -358,13 +376,13 @@ bool HqInfoParseUtil::parseShareDataFromSinaHK(ShareData& data, const QString &d
     if(detailList.length() < 13) return false;
     data.mCode = detailList[1];
     data.mName = detailList[2];
-    data.mOpen = detailList[3].toDouble();
-    data.mLastClose = detailList[4].toDouble();
-    data.mHigh = detailList[5].toDouble();
-    data.mLow = detailList[6].toDouble();
-    data.mCur = detailList[7].toDouble();
-    data.mChg = detailList[8].toDouble();
-    data.mChgPercent = detailList[9].toDouble();
-    data.mMoney = detailList[12].toDouble() * 1000;
+    data.mRealInfo.mOpen = detailList[3].toDouble();
+    data.mRealInfo.mLastClose = detailList[4].toDouble();
+    data.mRealInfo.mHigh = detailList[5].toDouble();
+    data.mRealInfo.mLow = detailList[6].toDouble();
+    data.mRealInfo.mClose = detailList[7].toDouble();
+    data.mRealInfo.mChg = detailList[8].toDouble();
+    data.mRealInfo.mChgPercent = detailList[9].toDouble();
+    data.mRealInfo.mMoney = detailList[12].toDouble() * 1000;
     return true;
 }

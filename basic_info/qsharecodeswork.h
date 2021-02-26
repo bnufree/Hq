@@ -24,13 +24,13 @@ public:
     explicit QShareCodesWork(QObject *parent = 0);
     ~QShareCodesWork();
     void run();
-    void parseShCode();
-    void parseSzCode();
-    void parseKZZ();
-    void parseSzEtf();
-    void parseShEtf();
+    int parseShCode();
+    int parseSzCode();
+    int parseKZZ();
+    int parseSzEtf();
+    int parseShEtf();
 private:
-    void parseHttp(ShareDataList& list, const QString& url, int mode = 1); //1:stock 2:fund
+    void parseHttp(const QString& url); //1:stock 2:fund
     QMap<QString, ShareData>        mShareCodeMap;
 };
 #endif

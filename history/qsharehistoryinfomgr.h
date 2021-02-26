@@ -34,7 +34,7 @@ signals:
 
 public slots:
     void slotUpdateForignVolInfo(const ShareForignVolFileDataList& list, const QDate& date);
-    void slotUpdateShareHistoryProcess(const ShareHistoryFileDataList& list, const QString& code);
+    void slotUpdateShareHistoryProcess(const ShareHistoryCounter& list, const QString& code);
     void slotStartGetHistoryWithAllCodes();
     void slotStartStatics();
 private:
@@ -45,7 +45,7 @@ private:
     QMutex              mForeignHistoryMutex;
     QMutex              mShareHistoryMutex;
     QThreadPool         mPool;
-    QMap<QString,       ShareHistoryFileDataList>  mShareInfoHistoryMap;
+    QMap<QString,       ShareHistoryCounter>  mShareInfoHistoryMap;
     QMap<int,         QMap<QDate, ShareForignVolFileData> >         mShareForeignDataMap;
 };
 

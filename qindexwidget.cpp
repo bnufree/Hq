@@ -1,4 +1,4 @@
-#include "qindexwidget.h"
+﻿#include "qindexwidget.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QDebug>
@@ -234,11 +234,11 @@ void QIndexWidget::updateData(const ShareDataList &list, qint64 time)
     foreach (ShareData temp, list) {
         IndexFrameData data;
         data.mCode = temp.mCode;
-        data.mCur = temp.mCur;
-        data.mChg = temp.mChg;
-        data.mChgPer = temp.mChgPercent;
+        data.mCur = temp.mRealInfo.mClose;
+        data.mChg = temp.mRealInfo.mChg;
+        data.mChgPer = temp.mRealInfo.mChgPercent;
         data.mName = temp.mName;
-        data.mTotal = temp.mMoney;
+        data.mTotal = temp.mRealInfo.mMoney;
         data.mType = 1;
         resList.append(data);
     }
