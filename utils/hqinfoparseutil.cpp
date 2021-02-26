@@ -52,6 +52,9 @@ ShareDailyDataList HqInfoParseUtil::getShareHistoryData(const QDate& start, cons
     return list;
 }
 
+//雪球同步获取港股通和日线数据
+//https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol=SH600036&begin=1614417752550&period=day&type=normal&count=-284&indicator=kline,agt,ggt,balance
+
 ShareDailyDataList HqInfoParseUtil::getShareHistoryDataFromXueqiu(const QDate &start, const QString &code)
 {
     ShareDailyDataList list;
