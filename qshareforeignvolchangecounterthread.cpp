@@ -60,7 +60,7 @@ bool cmp_foreign(const ShareForeignVolCounter& p1, const ShareForeignVolCounter&
 
 QShareForeignVolChangeCounterThread::QShareForeignVolChangeCounterThread(QObject *parent) : QThread(parent)
 {
-    mFileName = QString("%1/hsgt_counter.dat").arg(HQ_LGT_HISTORY_DIR);
+    mFileName = QString("%1/agt_counter.dat").arg(HQ_LGT_HISTORY_DIR);
     qRegisterMetaType<QList<ShareForeignVolCounter>>("const QList<ShareForeignVolCounter>&");
 }
 
@@ -218,6 +218,7 @@ void QShareForeignVolChangeCounterThread::run()
     sendData(list);
     while (1) {
         QDate last_date = QDate::fromString(PROFILES_INS->value("Update", "Foreign_counter_update").toString(), "yyyy-MM-dd");
+        if(list.size() == 0) last_date = QDate::currentDate().addDays(-100);
         QDate dest_date = QDate::currentDate().addDays(-1);
         if(last_date != dest_date)
         {
